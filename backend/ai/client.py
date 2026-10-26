@@ -1,16 +1,19 @@
 """Meta AI model client: justification summaries, title simplification, and
 structured requirement extraction from tender specification text.
 
-Targets Meta's official Llama API in its OpenAI-compatible mode
-(https://api.llama.com/compat/v1 — override via META_API_BASE_URL /
-META_MODEL if the hackathon provides a different gateway/key).
+Targets api.meta.ai's Responses API (confirmed live 2026-10-26 — not the
+OpenAI-compatible chat/completions shape some other Meta/Llama endpoints
+use): POST {base_url}/responses with {model, instructions, input: [...],
+text: {format: {...}}}. The response's `output` list mixes a "reasoning"
+item with a "message" item; the actual text is in the message item's
+content[0].text.
 
 Every prompt instructs the model to justify rather than decide, and to say
 so rather than invent an answer when the source text doesn't say. Extraction
-is schema-constrained (response_format=json_object + Pydantic validation),
-with up to 3 attempts; if the model still won't produce valid JSON, the
-caller gets a result with extraction_confidence="failed" and the raw text
-attached for manual review, instead of an exception breaking the pipeline.
+is schema-constrained (text.format=json_object + Pydantic validation), with
+up to 3 attempts; if the model still won't produce valid JSON, the caller
+gets a result with extraction_confidence="failed" and the raw text attached
+for manual review, instead of an exception breaking the pipeline.
 """
 
 import json
@@ -83,18 +86,18 @@ class MetaAIClient:
     async def _chat(self, system_prompt: str, user_message: str, *, json_mode: bool = False) -> str:
         payload = {
             "model": self.model,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_message},
-            ],
+            "instructions": system_prompt,
+            "input": [{"role": "user", "content": [{"type": "input_text", "text": user_message}]}],
+            "reasoning": {"effort": "low"},  # these are short, well-defined tasks, not open-ended
+            "stream": False,
         }
         if json_mode:
-            payload["response_format"] = {"type": "json_object"}
+            payload["text"] = {"format": {"type": "json_object"}}
 
-        response = await self._client.post("/chat/completions", json=payload)
+        response = await self._client.post("/responses", json=payload)
         response.raise_for_status()
         data = response.json()
-        return data["choices"][0]["message"]["content"]
+        return _extract_output_text(data)
 
     async def summarize_justification(
         self, tender_summary: str, company_profile_summary: str, *, language: str = "en"
@@ -121,6 +124,15 @@ class MetaAIClient:
                 continue
 
         return ExtractedRequirements(extraction_confidence="failed", raw_model_output=last_raw)
+
+
+def _extract_output_text(data: dict) -> str:
+    for item in data.get("output", []):
+        if item.get("type") == "message":
+            for part in item.get("content", []):
+                if part.get("type") == "output_text":
+                    return part.get("text", "")
+    raise ValueError(f"No message/output_text found in response: {data}")
 
 
 def build_tender_summary(tender: Tender) -> str:

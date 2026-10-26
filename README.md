@@ -75,10 +75,15 @@ justify, don't silently decide.
 ## AI layer
 
 `ai/client.py` talks to Meta's official Llama API in its OpenAI-compatible
-mode (`https://api.llama.com/compat/v1`, override via `META_API_BASE_URL`/
-`META_MODEL` if the hackathon provides a different gateway). Three jobs,
-each told to justify rather than decide and to flag what it's unsure of
-rather than invent it:
+`ai/client.py` talks to `api.meta.ai`'s Responses API — confirmed live
+2026-10-26, and *not* the OpenAI-compatible chat/completions shape other
+Meta/Llama endpoints use: `POST {base_url}/responses` with `{model,
+instructions, input: [...], text: {format: {...}}}`; the reply text is
+nested in `output[].content[].text` on the item where `type == "message"`
+(there's also a `"reasoning"` item in there to skip past). Override via
+`META_API_BASE_URL`/`META_MODEL` if a different gateway is ever needed.
+Three jobs, each told to justify rather than decide and to flag what it's
+unsure of rather than invent it:
 
 - `summarize_justification` — 2-3 sentence fit explanation for one tender
   + one company profile.
@@ -122,10 +127,24 @@ currently-open tenders with correct titles/values/deadlines/links, and
 for one of them (including a real "4,000,000 RON cumulative similar
 experience" style requirement).
 
-**Not yet tested against the real Meta AI API** — `MetaAIClient` has only
-been exercised against a mocked HTTP transport so far (no `META_API_KEY`
-set). That real-data pass (quality, schema conformance, hallucination
-check) is still pending.
+**Tested against the real Meta AI API** (2026-10-26, `muse-wonder-1.0`),
+on 5 real synced tenders + 3 real SEAP Section III extractions:
+- Title simplification: correctly preserved every project/reference code
+  (`ATR 7010240912508`, `M-24-B278/M-23-B060`) and place name, translated
+  only the descriptive parts.
+- Justifications: grounded in the actual tender's CPV/value/deadline,
+  consistently flagged unstated things (experience threshold, turnover,
+  certifications) as "unclear, verify yourself" instead of guessing —
+  never made a go/no-go call itself.
+- Extraction: every number it returned was checked against the raw
+  Section III text and matched exactly (e.g. "cumulated value ≥
+  1,049,852.57 lei" — verified present verbatim in source). Correctly
+  told apart a cumulative-experience-value figure from an annual-turnover
+  figure (a real place a simpler extractor could conflate the two) in two
+  separate tenders, and correctly flagged a tender with two different
+  experience lookback windows (5y works / 3y services) as worth a second
+  look instead of silently picking one. No fabricated requirements found
+  in this sample.
 
 ## API
 

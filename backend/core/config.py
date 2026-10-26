@@ -6,10 +6,11 @@ class Settings(BaseSettings):
     log_level: str = "info"
 
     meta_api_key: str = ""
-    # Meta's official Llama API, OpenAI-compatible mode. Override via env if
-    # the hackathon provides a different gateway/key.
-    meta_api_base_url: str = "https://api.llama.com/compat/v1"
-    meta_model: str = "Llama-4-Maverick-17B-128E-Instruct-FP8"
+    # Confirmed live (2026-10-26): api.meta.ai's Responses API, not the
+    # OpenAI-compatible chat/completions shape — POST {base_url}/responses
+    # with {model, instructions, input: [...], text: {format: {...}}}.
+    meta_api_base_url: str = "https://api.meta.ai/v1"
+    meta_model: str = "muse-wonder-1.0"
 
     database_url: str = "sqlite:///./data/app.db"
 
