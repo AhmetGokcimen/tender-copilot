@@ -2,11 +2,18 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 
 from adapters.romania_seap.adapter import RomaniaSeapAdapter
-from ai.client import MetaAIClient, build_company_summary, build_tender_summary
+from ai.client import (
+    ExtractedRequirements,
+    MetaAIClient,
+    build_company_summary,
+    build_tender_summary,
+)
+from core.eligibility import run_numeric_checks
 from core.scoring import AI_SCORE_THRESHOLD, evaluate
 from db import (
     get_session,
     upsert_ai_justification,
+    upsert_eligibility,
     upsert_score,
     upsert_tender_extraction,
     upsert_tender_title,
@@ -174,3 +181,52 @@ async def extract_romania_tender_requirements(
         extraction_confidence=extracted.extraction_confidence,
     )
     return session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
+
+
+@router.post(
+    "/companies/{company_id}/tenders/romania/{external_id}/eligibility",
+    response_model=UserTenderState,
+)
+async def check_tender_eligibility(
+    company_id: int, external_id: str, session: Session = Depends(get_session)
+) -> UserTenderState:
+    """Compare one tender's extracted requirements against one company
+    profile. Turnover/similar-experience-value are checked deterministically
+    in core.eligibility first; the AI layer gets those results as given
+    facts and only has to reason about certification matching and the
+    final justification — not redo arithmetic."""
+    company = session.get(CompanyProfile, company_id)
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    tender = session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    if not tender.extracted_requirements:
+        raise HTTPException(
+            status_code=422, detail="Tender has no extracted requirements yet — call /extract first"
+        )
+
+    extracted = ExtractedRequirements.model_validate(tender.extracted_requirements)
+    numeric = run_numeric_checks(extracted, company)
+
+    ai = MetaAIClient()
+    verdict = await ai.compare_eligibility(extracted, numeric.as_text(), build_company_summary(company))
+
+    upsert_eligibility(
+        session,
+        tender_source_system=tender.source_system,
+        tender_external_id=tender.external_id,
+        company_id=company.id,
+        eligible=verdict.eligible,
+        matched_requirements=verdict.matched_requirements,
+        unmet_requirements=verdict.unmet_requirements,
+        eligibility_justification=verdict.justification,
+    )
+
+    return session.exec(
+        select(UserTenderState).where(
+            UserTenderState.tender_source_system == tender.source_system,
+            UserTenderState.tender_external_id == tender.external_id,
+            UserTenderState.company_id == company.id,
+        )
+    ).one()

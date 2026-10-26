@@ -171,3 +171,44 @@ def upsert_ai_justification(
     )
     session.execute(stmt)
     session.commit()
+
+
+def upsert_eligibility(
+    session: Session,
+    *,
+    tender_source_system: SourceSystem,
+    tender_external_id: str,
+    company_id: int,
+    eligible: bool | None,
+    matched_requirements: list[str],
+    unmet_requirements: list[str],
+    eligibility_justification: str,
+) -> None:
+    """Write the eligibility engine's verdict into UserTenderState. Only
+    ever touches the eligibility columns + updated_at — never score or
+    ai_summary, same no-clobber pattern as the other upserts here."""
+    table = UserTenderState.__table__
+    now = datetime.now(UTC)
+    values = {
+        "tender_source_system": tender_source_system,
+        "tender_external_id": tender_external_id,
+        "company_id": company_id,
+        "eligible": eligible,
+        "matched_requirements": matched_requirements,
+        "unmet_requirements": unmet_requirements,
+        "eligibility_justification": eligibility_justification,
+        "updated_at": now,
+    }
+    stmt = _insert_stmt(table).values(**values)
+    stmt = stmt.on_conflict_do_update(
+        index_elements=["tender_source_system", "tender_external_id", "company_id"],
+        set_={
+            "eligible": stmt.excluded.eligible,
+            "matched_requirements": stmt.excluded.matched_requirements,
+            "unmet_requirements": stmt.excluded.unmet_requirements,
+            "eligibility_justification": stmt.excluded.eligibility_justification,
+            "updated_at": stmt.excluded.updated_at,
+        },
+    )
+    session.execute(stmt)
+    session.commit()

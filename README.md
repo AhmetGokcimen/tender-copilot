@@ -74,7 +74,6 @@ justify, don't silently decide.
 
 ## AI layer
 
-`ai/client.py` talks to Meta's official Llama API in its OpenAI-compatible
 `ai/client.py` talks to `api.meta.ai`'s Responses API — confirmed live
 2026-10-26, and *not* the OpenAI-compatible chat/completions shape other
 Meta/Llama endpoints use: `POST {base_url}/responses` with `{model,
@@ -113,11 +112,36 @@ them — same no-clobber guarantee as the Tender/UserTenderState split,
 just applied within this one table too. Verified: synced → extracted →
 re-synced → extraction still there.
 
+## Eligibility-comparison engine
+
+`core/eligibility.py` + `ai.client.compare_eligibility` turn one tender's
+`extracted_requirements` into a concrete verdict against a `CompanyProfile`
+(`UserTenderState.eligible`: `True`/`False`/`None`). Split in two on
+purpose:
+
+- Turnover and similar-experience-value comparisons are plain arithmetic
+  in `core/eligibility.py`, not left to the model — removes an easy
+  source of LLM arithmetic error.
+- The AI layer takes those results as given facts and only reasons about
+  what genuinely needs judgment: matching free-text certification
+  requirements, and writing the justification. Told explicitly not to
+  default to `eligible=None` just to avoid committing, but also never to
+  invent a company capability it wasn't given.
+
+Caught and fixed one real bug this way: the extraction model was
+returning the source text's own currency word ("lei") instead of an ISO
+code, which silently broke the deterministic value comparison (treated
+as a currency mismatch instead of a match). Fixed by requiring ISO 4217
+codes in `EXTRACT_SYSTEM_PROMPT` and re-verified.
+
+`POST /api/companies/{id}/tenders/romania/{id}/eligibility` runs it for
+one tender/company pair (requires `/extract` to have run first).
+
 ## Status
 
 Done: storage layer, Romania SEAP adapter (verified live), the detail/
-eligibility-text fetch, scoring, the AI layer, and REST endpoints tying
-them together. Not started: the eligibility-comparison engine.
+eligibility-text fetch, scoring, the AI layer, and the eligibility-
+comparison engine, plus REST endpoints tying them all together.
 
 The SEAP adapter's endpoints, headers, and response field names are
 confirmed working, tested live against `e-licitatie.ro` (not guessed) —
@@ -145,6 +169,11 @@ on 5 real synced tenders + 3 real SEAP Section III extractions:
   experience lookback windows (5y works / 3y services) as worth a second
   look instead of silently picking one. No fabricated requirements found
   in this sample.
+- Eligibility verdicts (3 real tenders, 2 company profiles — one strong,
+  one weak): produced `True`, `False`, and `None` verdicts correctly,
+  including a `None` for a tender with a real second sub-requirement
+  (a photovoltaic-specific lot) the given company data genuinely couldn't
+  confirm either way — not a lazy default, a correct "can't tell."
 
 ## API
 
@@ -159,6 +188,9 @@ POST /api/companies/{id}/enrich          AI-justify the highest-scoring,
      ?limit=20&language=en               not-yet-enriched tenders for a company
 POST /api/tenders/romania/{id}/extract   fetch real SEAP eligibility text,
                                           run it through AI extraction
+POST /api/companies/{id}/tenders/romania/{id}/eligibility
+                                          compare extracted requirements
+                                          against the company profile
 ```
 
 ## Setup
