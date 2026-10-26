@@ -6,7 +6,7 @@ columns, so it is structurally impossible for a re-fetch to wipe the score,
 AI summary, or eligibility verdict computed here.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import JSON, Column, UniqueConstraint
 from sqlmodel import Field, SQLModel
@@ -15,7 +15,7 @@ from models.tender import SourceSystem
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class UserTenderState(SQLModel, table=True):

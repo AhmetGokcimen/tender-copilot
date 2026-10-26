@@ -8,12 +8,13 @@ in _insert_stmt below.
 """
 
 from collections.abc import Generator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlmodel import Session, SQLModel, create_engine
 
 from core.config import settings
-from models.tender import Tender
+from models.tender import SourceSystem, Tender
+from models.user_tender_state import UserTenderState
 
 _connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
 engine = create_engine(settings.database_url, connect_args=_connect_args)
@@ -43,7 +44,7 @@ def upsert_tenders(session: Session, tenders: list[Tender]) -> None:
         return
 
     table = Tender.__table__
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     values = []
     for t in tenders:
         row = t.model_dump()
@@ -59,6 +60,38 @@ def upsert_tenders(session: Session, tenders: list[Tender]) -> None:
     stmt = stmt.on_conflict_do_update(
         index_elements=["source_system", "external_id"],
         set_=update_cols,
+    )
+    session.execute(stmt)
+    session.commit()
+
+
+def upsert_score(
+    session: Session,
+    *,
+    tender_source_system: SourceSystem,
+    tender_external_id: str,
+    company_id: int,
+    score: int,
+    reasons: list[str],
+) -> None:
+    """Write core.scoring's output into UserTenderState. Only ever touches
+    score/score_reasons/updated_at — never ai_summary or the eligibility
+    fields, so a re-score can't wipe AI output written separately."""
+    table = UserTenderState.__table__
+    now = datetime.now(UTC)
+    values = {
+        "tender_source_system": tender_source_system,
+        "tender_external_id": tender_external_id,
+        "company_id": company_id,
+        "score": score,
+        "score_reasons": reasons,
+        "updated_at": now,
+    }
+    stmt = _insert_stmt(table).values(**values)
+    stmt = stmt.on_conflict_do_update(
+        index_elements=["tender_source_system", "tender_external_id", "company_id"],
+        set_={"score": stmt.excluded.score, "score_reasons": stmt.excluded.score_reasons,
+              "updated_at": stmt.excluded.updated_at},
     )
     session.execute(stmt)
     session.commit()

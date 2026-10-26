@@ -63,13 +63,37 @@ ever touches `Tender`'s own columns — it cannot reach `UserTenderState`,
 so that bug class is now structurally impossible, not just avoided by
 convention.
 
+## Scoring
+
+`core/scoring.py` ranks a tender against a `CompanyProfile` (CPV match tier
+-> value/capacity ratio bands -> deadline penalty -> AI-worth-it threshold),
+carried over from a validated single-company prototype's logic, rewritten
+from scratch against the normalized models. It never drops a tender —
+a 0 score with a reason is the signal, same principle as the AI layer:
+justify, don't silently decide.
+
 ## Status
 
-Scaffold + storage layer + SEAP adapter HTTP plumbing are in. The SEAP
-adapter's exact endpoint path and response field names are marked `TODO`
-in [backend/adapters/romania_seap/adapter.py](backend/adapters/romania_seap/adapter.py) —
-it's an undocumented API, so they need confirming against one real
-captured request (browser devtools) before it'll return real data.
+Done: storage layer, Romania SEAP adapter (verified against the live API —
+see below), scoring, and REST endpoints to sync tenders, create a company
+profile, and score stored tenders for it. Not started: the Meta AI
+summarization/extraction layer and the eligibility-comparison engine.
+
+The SEAP adapter's endpoint, headers, and response field names are
+confirmed working, tested live against `e-licitatie.ro` (not guessed) —
+e.g. `fetch_tenders(cpv_codes=["45310000"], days=30)` returned 119 real,
+currently-open tenders with correct titles/values/deadlines/links.
+
+## API
+
+```
+GET  /api/tenders                        list stored tenders
+POST /api/tenders/sync/romania           fetch from SEAP, upsert into storage
+     ?cpv_codes=45310000&days=30
+POST /api/companies                      create a company profile
+GET  /api/companies                      list company profiles
+POST /api/companies/{id}/score           score all stored tenders for a company
+```
 
 ## Setup
 

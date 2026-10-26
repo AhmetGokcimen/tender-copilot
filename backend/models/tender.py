@@ -8,7 +8,7 @@ the whole record on every re-fetch deleted fields the AI step had added
 after the fact.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 
 from sqlalchemy import JSON, Column
@@ -20,7 +20,7 @@ class SourceSystem(str, Enum):
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class Tender(SQLModel, table=True):
@@ -30,7 +30,11 @@ class Tender(SQLModel, table=True):
     external_id: str = Field(primary_key=True)
 
     country_code: str = Field(index=True)  # ISO 3166-1 alpha-2, e.g. "RO"
+    notice_no: str | None = None  # the source's own public reference number, for display
     title: str
+    contracting_authority: str | None = None
+    # cpv_codes[0] is the tender's main CPV; any further entries are
+    # lot/secondary CPVs, used by core.scoring to detect subcontracting fits.
     cpv_codes: list[str] = Field(default_factory=list, sa_column=Column(JSON))
     estimated_value: float | None = None
     currency: str | None = None
