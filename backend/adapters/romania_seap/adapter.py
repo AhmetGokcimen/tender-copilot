@@ -14,6 +14,16 @@ Quirks that matter (confirmed, not guessed):
     something else entirely. That's why fetch_tenders takes CPV codes to
     search by, but Tender.cpv_codes[0] always holds the tender's own main
     CPV (parsed from cpvCodeAndName), independent of which code found it.
+
+Detail/eligibility endpoint (confirmed live, not guessed):
+  GET /api-pub/NoticeCommon/GetSection3View/?initNoticeId={cNoticeId}&sysNoticeTypeId={sysNoticeTypeId}
+This is SEAP's equivalent of an EU notice's Section III (legal/economic/
+financial/technical conditions) — personalSituation (exclusion/
+registration criteria), efCriteria(Min) (economic/financial standing,
+e.g. turnover requirement), tpCriteriaQAStandard(Min) (technical/
+professional ability, e.g. similar-experience value threshold). This is
+the real specification/eligibility text extract_requirements needs — the
+list endpoint above only returns summary fields.
 """
 
 import asyncio
@@ -28,6 +38,7 @@ from models.tender import SourceSystem, Tender
 
 BASE_URL = "https://e-licitatie.ro"
 LIST_PATH = "/api-pub/NoticeCommon/GetCNoticeList/"
+SECTION3_PATH = "/api-pub/NoticeCommon/GetSection3View/"
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
@@ -133,6 +144,7 @@ class RomaniaSeapAdapter(TenderSourceAdapter):
             external_id=str(notice["cNoticeId"]),
             country_code=self.country_code,
             notice_no=notice.get("noticeNo"),
+            notice_type_id=notice.get("sysNoticeTypeId"),
             title=notice.get("contractTitle") or "",
             contracting_authority=notice.get("contractingAuthorityNameAndFN"),
             cpv_codes=[main_cpv] if main_cpv else [],
@@ -144,6 +156,36 @@ class RomaniaSeapAdapter(TenderSourceAdapter):
             ),
             source_url=_notice_url(notice),
         )
+
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, max=10))
+    async def fetch_eligibility_text(self, external_id: str, notice_type_id: int) -> str:
+        """The closest thing SEAP has to full specification text: Section
+        III's exclusion/registration criteria, economic/financial standing,
+        and technical/professional ability fields, concatenated with
+        labels. Empty/null fields (common — not every tender sets every
+        criterion) are skipped."""
+        response = await self._client.get(
+            SECTION3_PATH,
+            params={"initNoticeId": external_id, "sysNoticeTypeId": notice_type_id},
+        )
+        response.raise_for_status()
+        data = response.json()
+
+        sections = [
+            ("Exclusion / registration criteria", data.get("personalSituation")),
+            ("Economic and financial standing", _join(data.get("efCriteria"), data.get("efCriteriaMin"))),
+            (
+                "Technical and professional ability",
+                _join(data.get("tpCriteriaQAStandard"), data.get("tpCriteriaQAStandardMin")),
+            ),
+            ("Professional criteria", data.get("prCriteria")),
+            ("Deposits and guarantees", data.get("depositsAndWarranties")),
+        ]
+        return "\n\n".join(f"{label}:\n{text}" for label, text in sections if text)
+
+
+def _join(*parts: str | None) -> str:
+    return "\n".join(p for p in parts if p)
 
 
 def _parse_date(value: str | None) -> datetime | None:

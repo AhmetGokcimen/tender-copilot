@@ -91,22 +91,41 @@ rather than invent it:
   `extraction_confidence="failed"` with the raw output attached instead of
   raising — nothing crashes because the model misbehaved once.
 
-Not yet wired to real specification text: the SEAP list endpoint doesn't
-return the full caiet de sarcini, only summary fields — that needs a
-detail-endpoint fetch, which isn't implemented. `extract_requirements` is
-ready and tested (mocked), just has no real input source yet.
+Now wired to real text: `RomaniaSeapAdapter.fetch_eligibility_text` calls
+SEAP's `GetSection3View` detail endpoint (confirmed live, see below) and
+concatenates the exclusion/registration, economic/financial, and
+technical/professional criteria fields — SEAP's equivalent of an EU
+notice's Section III, and the closest thing to real specification text
+the list endpoint doesn't carry. `POST /api/tenders/romania/{id}/extract`
+fetches it and runs it through `extract_requirements`.
+
+`extracted_requirements` and `ai_title_simplified` live on `Tender` itself,
+not `UserTenderState` — they don't depend on which company is looking, so
+keeping them per-company would mean redoing the same AI call for every
+company that scores the tender. `db.upsert_tenders`'s `ON CONFLICT DO
+UPDATE` explicitly excludes both columns, so a re-fetch still can't wipe
+them — same no-clobber guarantee as the Tender/UserTenderState split,
+just applied within this one table too. Verified: synced → extracted →
+re-synced → extraction still there.
 
 ## Status
 
-Done: storage layer, Romania SEAP adapter (verified against the live API),
-scoring, the AI layer (verified against a mocked API), and REST endpoints
-tying them together. Not started: the eligibility-comparison engine, and
-the SEAP detail-endpoint fetch `extract_requirements` needs.
+Done: storage layer, Romania SEAP adapter (verified live), the detail/
+eligibility-text fetch, scoring, the AI layer, and REST endpoints tying
+them together. Not started: the eligibility-comparison engine.
 
-The SEAP adapter's endpoint, headers, and response field names are
+The SEAP adapter's endpoints, headers, and response field names are
 confirmed working, tested live against `e-licitatie.ro` (not guessed) —
 e.g. `fetch_tenders(cpv_codes=["45310000"], days=30)` returned 119 real,
-currently-open tenders with correct titles/values/deadlines/links.
+currently-open tenders with correct titles/values/deadlines/links, and
+`fetch_eligibility_text` pulled ~19KB of real Section III criteria text
+for one of them (including a real "4,000,000 RON cumulative similar
+experience" style requirement).
+
+**Not yet tested against the real Meta AI API** — `MetaAIClient` has only
+been exercised against a mocked HTTP transport so far (no `META_API_KEY`
+set). That real-data pass (quality, schema conformance, hallucination
+check) is still pending.
 
 ## API
 
@@ -119,6 +138,8 @@ GET  /api/companies                      list company profiles
 POST /api/companies/{id}/score           score all stored tenders for a company
 POST /api/companies/{id}/enrich          AI-justify the highest-scoring,
      ?limit=20&language=en               not-yet-enriched tenders for a company
+POST /api/tenders/romania/{id}/extract   fetch real SEAP eligibility text,
+                                          run it through AI extraction
 ```
 
 ## Setup

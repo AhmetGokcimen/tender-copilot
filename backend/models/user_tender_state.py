@@ -1,9 +1,12 @@
-"""AI-derived and per-company state for a tender.
+"""Per-company state for a tender: scoring and eligibility output that
+depends on which company is looking. AI output that doesn't depend on the
+company (simplified title, extracted requirements) lives on Tender itself
+instead — see models.tender's docstring.
 
 Deliberately a separate table from Tender: re-fetching/upserting a tender
-(see models.tender and db.upsert_tenders) only ever touches Tender's own
-columns, so it is structurally impossible for a re-fetch to wipe the score,
-AI summary, or eligibility verdict computed here.
+(see db.upsert_tenders) only ever touches Tender's own raw columns, so it
+is structurally impossible for a re-fetch to wipe the score or eligibility
+verdict computed here.
 """
 
 from datetime import UTC, datetime
@@ -36,10 +39,10 @@ class UserTenderState(SQLModel, table=True):
     score: int | None = None
     score_reasons: list[str] = Field(default_factory=list, sa_column=Column(JSON))
 
-    # AI layer output
+    # AI layer output: this one tender/company pair's justification. (A
+    # simplified title and extracted requirements are tender-intrinsic —
+    # they live on Tender instead, see that model's docstring.)
     ai_summary: str | None = None
-    ai_title_simplified: str | None = None
-    extracted_requirements: dict | None = Field(default=None, sa_column=Column(JSON))
 
     # Eligibility comparison output
     eligible: bool | None = None  # None = uncertain, never guessed

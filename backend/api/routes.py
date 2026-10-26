@@ -4,9 +4,16 @@ from sqlmodel import Session, select
 from adapters.romania_seap.adapter import RomaniaSeapAdapter
 from ai.client import MetaAIClient, build_company_summary, build_tender_summary
 from core.scoring import AI_SCORE_THRESHOLD, evaluate
-from db import get_session, upsert_ai_enrichment, upsert_score, upsert_tenders
+from db import (
+    get_session,
+    upsert_ai_justification,
+    upsert_score,
+    upsert_tender_extraction,
+    upsert_tender_title,
+    upsert_tenders,
+)
 from models.company import CompanyProfile
-from models.tender import Tender
+from models.tender import SourceSystem, Tender
 from models.user_tender_state import UserTenderState
 
 router = APIRouter()
@@ -113,15 +120,21 @@ async def enrich_tenders_for_company(
             summary = await ai.summarize_justification(
                 tender_summary, company_summary, language=language
             )
-            simplified_title = await ai.simplify_title(tender.title, language=language)
-            upsert_ai_enrichment(
+            upsert_ai_justification(
                 session,
                 tender_source_system=tender.source_system,
                 tender_external_id=tender.external_id,
                 company_id=company.id,
                 ai_summary=summary,
-                ai_title_simplified=simplified_title,
             )
+            if not tender.ai_title_simplified:
+                simplified_title = await ai.simplify_title(tender.title, language=language)
+                upsert_tender_title(
+                    session,
+                    source_system=tender.source_system,
+                    external_id=tender.external_id,
+                    ai_title_simplified=simplified_title,
+                )
 
     return list(
         session.exec(
@@ -130,3 +143,34 @@ async def enrich_tenders_for_company(
             .order_by(UserTenderState.score.desc())
         )
     )
+
+
+@router.post("/tenders/romania/{external_id}/extract", response_model=Tender)
+async def extract_romania_tender_requirements(
+    external_id: str, session: Session = Depends(get_session)
+) -> Tender:
+    """Fetch the real eligibility/qualification text from SEAP's detail
+    endpoint and run it through the AI extraction layer. Idempotent: safe
+    to re-run, it only ever touches extracted_requirements/
+    extraction_confidence on this one tender."""
+    tender = session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found — sync it first")
+    if tender.notice_type_id is None:
+        raise HTTPException(status_code=422, detail="Tender has no notice_type_id, can't fetch detail")
+
+    adapter = RomaniaSeapAdapter()
+    eligibility_text = await adapter.fetch_eligibility_text(external_id, tender.notice_type_id)
+    if not eligibility_text:
+        raise HTTPException(status_code=422, detail="SEAP returned no eligibility text for this tender")
+
+    ai = MetaAIClient()
+    extracted = await ai.extract_requirements(eligibility_text)
+    upsert_tender_extraction(
+        session,
+        source_system=tender.source_system,
+        external_id=tender.external_id,
+        extracted_requirements=extracted.model_dump(exclude={"extraction_confidence"}),
+        extraction_confidence=extracted.extraction_confidence,
+    )
+    return session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
