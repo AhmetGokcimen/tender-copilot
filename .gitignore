@@ -14,9 +14,9 @@ build/
 .idea/
 
 # Data / storage (local dev artifacts, never commit real tender data dumps)
-/data/*.db
-/data/*.sqlite3
-/data/raw/
+backend/data/*.db
+backend/data/*.sqlite3
+backend/data/raw/
 *.log
 
 # OS

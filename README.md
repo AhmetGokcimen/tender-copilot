@@ -4,54 +4,82 @@ AI copilot that monitors public procurement systems and helps SMEs find and
 respond to tenders they're actually eligible for. Built for the Meta Global
 AI Developer Hackathon (submission deadline: 2026-11-04, 21:00 ET).
 
-This repo is the **backend only**. The frontend is being built separately
-and consumes the REST API under `/api`.
+## Who owns what
+
+```
+tender-copilot/
+├── backend/    ← this is the backend's: FastAPI, adapters, DB, AI layer
+├── frontend/   ← owned by the frontend agent (Muse Code); not touched from here
+└── README.md
+```
+
+The backend talks to the frontend only through the REST API under `/api`.
+Nothing in `backend/` assumes anything about how the frontend is built.
 
 ## Architecture: multi-country from day one
 
 Only Romania's SEAP/SICAP (`e-licitatie.ro`) is implemented for the
 hackathon, but nothing in the core logic is Romania-specific:
 
-- Every `Tender` record carries `country_code` and `source_system`
-  ([app/core/models.py](app/core/models.py)).
+- Every `Tender` row carries `country_code` and `source_system`
+  ([backend/models/tender.py](backend/models/tender.py)).
 - Each country/source is a separate **adapter** implementing
-  `TenderSourceAdapter` ([app/adapters/base.py](app/adapters/base.py)).
+  `TenderSourceAdapter` ([backend/adapters/base.py](backend/adapters/base.py)).
   Source-specific auth and request format are isolated inside the
   adapter — the first implementation is
-  [app/adapters/romania_seap/adapter.py](app/adapters/romania_seap/adapter.py).
+  [backend/adapters/romania_seap/adapter.py](backend/adapters/romania_seap/adapter.py).
 - Pre-filter/scoring, the AI layer, and eligibility matching operate only on
   the normalized `Tender`/`CompanyProfile` models, so they stay
   country-agnostic. CPV codes are EU-wide standard and used as the universal
   categorization key.
 - Adding a new country = writing one new adapter module. Nothing in
-  `core/` or `api/` needs to change.
+  `core/`, `models/`, or `api/` needs to change.
 
 ```
-app/
+backend/
   adapters/          # one module per country/source
     base.py          # TenderSourceAdapter interface
     romania_seap/     # first implementation (e-licitatie.ro)
-  core/              # country-agnostic domain models + pre-filter/scoring
+  core/              # config + country-agnostic pre-filter/scoring
+  models/            # SQLModel tables: Tender, CompanyProfile, UserTenderState
   ai/                # Meta AI model client (summarization, extraction)
-  storage/           # persistence layer
+  db.py              # engine/session + the upsert that keeps AI fields safe
   api/               # REST endpoints consumed by the frontend
 ```
 
+## Storage
+
+SQLite to start (zero setup, file-based — no separate service to stand up
+during a 9-day hackathon), via SQLModel so moving to Postgres later is just
+changing `DATABASE_URL`.
+
+`Tender` (raw, adapter-written) and `UserTenderState` (AI output: score,
+summary, eligibility verdict, per company) are **separate tables on
+purpose**. The previous JSON-file system had a real bug where re-seeing a
+tender wiped its AI fields, because the whole record got overwritten on
+every re-fetch. Here, `db.upsert_tenders` does a SQL
+`INSERT ... ON CONFLICT (source_system, external_id) DO UPDATE` that only
+ever touches `Tender`'s own columns — it cannot reach `UserTenderState`,
+so that bug class is now structurally impossible, not just avoided by
+convention.
+
 ## Status
 
-Scaffold only — interfaces and models are defined, logic is not yet
-implemented. See open items below; big architecture calls (storage choice,
-multi-country schema details, API design) get confirmed before each is
-built.
+Scaffold + storage layer + SEAP adapter HTTP plumbing are in. The SEAP
+adapter's exact endpoint path and response field names are marked `TODO`
+in [backend/adapters/romania_seap/adapter.py](backend/adapters/romania_seap/adapter.py) —
+it's an undocumented API, so they need confirming against one real
+captured request (browser devtools) before it'll return real data.
 
 ## Setup
 
 ```bash
+cd backend
 python -m venv .venv
 .venv\Scripts\activate   # Windows
 pip install -r requirements.txt
 cp .env.example .env     # fill in META_API_KEY etc.
-uvicorn app.main:app --reload
+uvicorn main:app --reload
 ```
 
 ## Research note: website-to-API tooling

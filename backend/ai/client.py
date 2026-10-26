@@ -7,7 +7,7 @@ constraint with retry + fallback (implementation follows architecture
 confirmation).
 """
 
-from app.core.config import settings
+from core.config import settings
 
 
 class MetaAIClient:
