@@ -111,6 +111,25 @@ def upsert_tender_extraction(
     session.commit()
 
 
+# Whichever of the three upserts below runs first for a given
+# (tender, company) pair INSERTs the row — so each supplies this full set
+# of defaults, not just its own columns, or the other columns would come
+# back as SQL NULL (not these fields' real Python/Pydantic defaults) until
+# their own upsert runs. The ON CONFLICT `set_=` below stays scoped to each
+# function's own columns either way — this only affects the INSERT branch.
+_USER_TENDER_STATE_DEFAULTS = {
+    "score": None,
+    "score_reasons": [],
+    "ai_summary": None,
+    "eligible": None,
+    "matched_requirements": [],
+    "unmet_requirements": [],
+    "eligibility_justification": None,
+    "status": "new",
+    "note": None,
+}
+
+
 def upsert_score(
     session: Session,
     *,
@@ -126,6 +145,7 @@ def upsert_score(
     table = UserTenderState.__table__
     now = datetime.now(UTC)
     values = {
+        **_USER_TENDER_STATE_DEFAULTS,
         "tender_source_system": tender_source_system,
         "tender_external_id": tender_external_id,
         "company_id": company_id,
@@ -158,6 +178,7 @@ def upsert_ai_justification(
     table = UserTenderState.__table__
     now = datetime.now(UTC)
     values = {
+        **_USER_TENDER_STATE_DEFAULTS,
         "tender_source_system": tender_source_system,
         "tender_external_id": tender_external_id,
         "company_id": company_id,
@@ -190,6 +211,7 @@ def upsert_eligibility(
     table = UserTenderState.__table__
     now = datetime.now(UTC)
     values = {
+        **_USER_TENDER_STATE_DEFAULTS,
         "tender_source_system": tender_source_system,
         "tender_external_id": tender_external_id,
         "company_id": company_id,

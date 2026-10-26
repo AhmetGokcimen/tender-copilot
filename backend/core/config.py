@@ -14,6 +14,16 @@ class Settings(BaseSettings):
 
     database_url: str = "sqlite:///./data/app.db"
 
+    # Demo-friendly by default: empty = no auth enforced, so the frontend
+    # can integrate with zero setup. Set this to require an X-API-Key
+    # header on every /api/* request — recommended only once this is
+    # deployed somewhere public, to stop random traffic from burning
+    # through the Meta API key's quota.
+    api_key: str = ""
+    # Comma-separated list of allowed origins, or "*" for any (the
+    # hackathon-demo default — tighten before a real deployment).
+    allowed_origins: str = "*"
+
     class Config:
         env_file = ".env"
 

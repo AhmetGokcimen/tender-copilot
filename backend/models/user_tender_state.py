@@ -50,5 +50,9 @@ class UserTenderState(SQLModel, table=True):
     unmet_requirements: list[str] = Field(default_factory=list, sa_column=Column(JSON))
     eligibility_justification: str | None = None
 
+    # User-editable, set only via PATCH /companies/{id}/tenders/{id} — no
+    # automated step writes these.
     status: str = "new"  # new -> reviewing -> applied / rejected / ignored
+    note: str | None = None
+
     updated_at: datetime = Field(default_factory=_utcnow)

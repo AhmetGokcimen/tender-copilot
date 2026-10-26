@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlmodel import Session, select
+from sqlmodel import Session, func, select
 
 from adapters.romania_seap.adapter import RomaniaSeapAdapter
 from ai.client import (
@@ -8,8 +8,16 @@ from ai.client import (
     build_company_summary,
     build_tender_summary,
 )
+from api.schemas import (
+    CompanyPage,
+    TenderPage,
+    TenderStatePatch,
+    TenderWithState,
+    TenderWithStatePage,
+)
 from core.eligibility import run_numeric_checks
 from core.scoring import AI_SCORE_THRESHOLD, evaluate
+from core.security import verify_api_key
 from db import (
     get_session,
     upsert_ai_justification,
@@ -23,15 +31,39 @@ from models.company import CompanyProfile
 from models.tender import SourceSystem, Tender
 from models.user_tender_state import UserTenderState
 
-router = APIRouter()
+VALID_STATUSES = {"new", "reviewing", "applied", "rejected", "ignored"}
+
+router = APIRouter(dependencies=[Depends(verify_api_key)])
 
 
-@router.get("/tenders", response_model=list[Tender])
-def list_tenders(session: Session = Depends(get_session)) -> list[Tender]:
-    return list(session.exec(select(Tender)))
+@router.get("/tenders", response_model=TenderPage, tags=["tenders"])
+def list_tenders(
+    country_code: str | None = None,
+    cpv_code: str | None = None,
+    limit: int = Query(default=50, le=200),
+    offset: int = 0,
+    session: Session = Depends(get_session),
+) -> TenderPage:
+    """Raw tender listing, filterable and paginated. For a feed that
+    includes score/AI/eligibility output for a specific company, use
+    GET /companies/{id}/tenders instead."""
+    query = select(Tender)
+    if country_code:
+        query = query.where(Tender.country_code == country_code)
+    if cpv_code:
+        # cpv_codes is a JSON array column; this matches it as the main CPV
+        # (index 0) via a LIKE on its JSON text — a real CPV index would be
+        # cleaner, but this covers the common case without one.
+        query = query.where(Tender.cpv_codes.like(f'["{cpv_code}"%'))
+
+    total = session.exec(select(func.count()).select_from(query.subquery())).one()
+    items = session.exec(
+        query.order_by(Tender.publication_date.desc()).offset(offset).limit(limit)
+    ).all()
+    return TenderPage(items=list(items), total=total, limit=limit, offset=offset)
 
 
-@router.post("/tenders/sync/romania", response_model=list[Tender])
+@router.post("/tenders/sync/romania", response_model=list[Tender], tags=["tenders"])
 async def sync_romania_tenders(
     cpv_codes: list[str] | None = Query(default=None),
     keywords: list[str] | None = Query(default=None),
@@ -44,7 +76,7 @@ async def sync_romania_tenders(
     return tenders
 
 
-@router.post("/companies", response_model=CompanyProfile)
+@router.post("/companies", response_model=CompanyProfile, tags=["companies"])
 def create_company(company: CompanyProfile, session: Session = Depends(get_session)) -> CompanyProfile:
     company.id = None
     session.add(company)
@@ -53,12 +85,122 @@ def create_company(company: CompanyProfile, session: Session = Depends(get_sessi
     return company
 
 
-@router.get("/companies", response_model=list[CompanyProfile])
-def list_companies(session: Session = Depends(get_session)) -> list[CompanyProfile]:
-    return list(session.exec(select(CompanyProfile)))
+@router.get("/companies", response_model=CompanyPage, tags=["companies"])
+def list_companies(session: Session = Depends(get_session)) -> CompanyPage:
+    items = list(session.exec(select(CompanyProfile)))
+    return CompanyPage(items=items, total=len(items))
 
 
-@router.post("/companies/{company_id}/score", response_model=list[UserTenderState])
+@router.get("/companies/{company_id}", response_model=CompanyProfile, tags=["companies"])
+def get_company(company_id: int, session: Session = Depends(get_session)) -> CompanyProfile:
+    company = session.get(CompanyProfile, company_id)
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    return company
+
+
+@router.patch("/companies/{company_id}", response_model=CompanyProfile, tags=["companies"])
+def update_company(
+    company_id: int, patch: CompanyProfile, session: Session = Depends(get_session)
+) -> CompanyProfile:
+    """Full-profile update (send the complete object, like PUT) — simplest
+    option for a hackathon demo's edit-profile form. id is taken from the
+    URL, not the body."""
+    company = session.get(CompanyProfile, company_id)
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    data = patch.model_dump(exclude={"id"})
+    for key, value in data.items():
+        setattr(company, key, value)
+    session.add(company)
+    session.commit()
+    session.refresh(company)
+    return company
+
+
+@router.get("/companies/{company_id}/tenders", response_model=TenderWithStatePage, tags=["companies"])
+def list_company_tenders(
+    company_id: int,
+    status: str | None = None,
+    eligible: bool | None = None,
+    min_score: int | None = None,
+    limit: int = Query(default=50, le=200),
+    offset: int = 0,
+    session: Session = Depends(get_session),
+) -> TenderWithStatePage:
+    """The frontend's main feed: every tender this company has been scored
+    against, with its score/AI/eligibility output and user status/note
+    flattened in. Run /score (and /enrich, /extract + eligibility) first —
+    a tender never scored for this company won't show up here."""
+    company = session.get(CompanyProfile, company_id)
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+
+    query = select(UserTenderState).where(UserTenderState.company_id == company_id)
+    if status:
+        query = query.where(UserTenderState.status == status)
+    if eligible is not None:
+        query = query.where(UserTenderState.eligible == eligible)
+    if min_score is not None:
+        query = query.where(UserTenderState.score >= min_score)
+
+    total = session.exec(select(func.count()).select_from(query.subquery())).one()
+    states = session.exec(
+        query.order_by(UserTenderState.score.desc()).offset(offset).limit(limit)
+    ).all()
+
+    items = []
+    for state in states:
+        tender = session.get(Tender, (state.tender_source_system, state.tender_external_id))
+        if tender:
+            items.append(TenderWithState.from_pair(tender, state))
+
+    return TenderWithStatePage(items=items, total=total, limit=limit, offset=offset)
+
+
+@router.patch(
+    "/companies/{company_id}/tenders/romania/{external_id}",
+    response_model=TenderWithState,
+    tags=["companies"],
+)
+def update_tender_status(
+    company_id: int,
+    external_id: str,
+    patch: TenderStatePatch,
+    session: Session = Depends(get_session),
+) -> TenderWithState:
+    """User-driven status/note update — the only writer of these two
+    fields; no automated step touches them."""
+    if patch.status is not None and patch.status not in VALID_STATUSES:
+        raise HTTPException(
+            status_code=422, detail=f"status must be one of {sorted(VALID_STATUSES)}"
+        )
+
+    state = session.exec(
+        select(UserTenderState).where(
+            UserTenderState.company_id == company_id,
+            UserTenderState.tender_source_system == SourceSystem.ROMANIA_SEAP,
+            UserTenderState.tender_external_id == external_id,
+        )
+    ).first()
+    if not state:
+        raise HTTPException(
+            status_code=404, detail="No state for this tender/company — call /score first"
+        )
+
+    if patch.status is not None:
+        state.status = patch.status
+    if patch.note is not None:
+        state.note = patch.note
+    session.add(state)
+    session.commit()
+    session.refresh(state)
+
+    tender = session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
+    return TenderWithState.from_pair(tender, state)
+
+
+@router.post("/companies/{company_id}/score", response_model=list[UserTenderState], tags=["companies"])
 def score_tenders_for_company(
     company_id: int, session: Session = Depends(get_session)
 ) -> list[UserTenderState]:
@@ -90,7 +232,9 @@ def score_tenders_for_company(
     )
 
 
-@router.post("/companies/{company_id}/enrich", response_model=list[UserTenderState])
+@router.post(
+    "/companies/{company_id}/enrich", response_model=list[UserTenderState], tags=["companies"]
+)
 async def enrich_tenders_for_company(
     company_id: int,
     limit: int = 20,
@@ -152,7 +296,7 @@ async def enrich_tenders_for_company(
     )
 
 
-@router.post("/tenders/romania/{external_id}/extract", response_model=Tender)
+@router.post("/tenders/romania/{external_id}/extract", response_model=Tender, tags=["tenders"])
 async def extract_romania_tender_requirements(
     external_id: str, session: Session = Depends(get_session)
 ) -> Tender:
@@ -186,6 +330,7 @@ async def extract_romania_tender_requirements(
 @router.post(
     "/companies/{company_id}/tenders/romania/{external_id}/eligibility",
     response_model=UserTenderState,
+    tags=["companies"],
 )
 async def check_tender_eligibility(
     company_id: int, external_id: str, session: Session = Depends(get_session)

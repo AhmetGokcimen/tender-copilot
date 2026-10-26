@@ -177,21 +177,60 @@ on 5 real synced tenders + 3 real SEAP Section III extractions:
 
 ## API
 
+Full schema: [backend/openapi.json](backend/openapi.json) (static snapshot —
+regenerate with the command below after changing any route) or the live,
+always-current `GET /openapi.json` / interactive `GET /docs` once the
+server is running.
+
 ```
-GET  /api/tenders                        list stored tenders
-POST /api/tenders/sync/romania           fetch from SEAP, upsert into storage
-     ?cpv_codes=45310000&days=30
-POST /api/companies                      create a company profile
-GET  /api/companies                      list company profiles
-POST /api/companies/{id}/score           score all stored tenders for a company
-POST /api/companies/{id}/enrich          AI-justify the highest-scoring,
-     ?limit=20&language=en               not-yet-enriched tenders for a company
-POST /api/tenders/romania/{id}/extract   fetch real SEAP eligibility text,
-                                          run it through AI extraction
-POST /api/companies/{id}/tenders/romania/{id}/eligibility
-                                          compare extracted requirements
-                                          against the company profile
+GET   /api/tenders                        list stored tenders, paginated
+      ?country_code=&cpv_code=&limit=&offset=
+POST  /api/tenders/sync/romania           fetch from SEAP, upsert into storage
+      ?cpv_codes=45310000&days=30
+POST  /api/tenders/romania/{id}/extract   fetch real SEAP eligibility text,
+                                           run it through AI extraction
+
+POST  /api/companies                      create a company profile
+GET   /api/companies                      list company profiles
+GET   /api/companies/{id}                 get one company profile
+PATCH /api/companies/{id}                 update a company profile (full object)
+
+GET   /api/companies/{id}/tenders         the frontend's main feed: every
+      ?status=&eligible=&min_score=       tender scored for this company,
+      &limit=&offset=                     with score/AI/eligibility + user
+                                           status/note flattened in, paginated
+PATCH /api/companies/{id}/tenders/romania/{id}
+                                           set status (new/reviewing/applied/
+                                           rejected/ignored) and/or a note —
+                                           the only writer of those two fields
+
+POST  /api/companies/{id}/score           score all stored tenders for a company
+POST  /api/companies/{id}/enrich          AI-justify the highest-scoring,
+      ?limit=20&language=en               not-yet-enriched tenders for a company
+POST  /api/companies/{id}/tenders/romania/{id}/eligibility
+                                           compare extracted requirements
+                                           against the company profile
 ```
+
+Typical frontend flow for one company: create company -> sync tenders ->
+score -> poll `GET /{id}/tenders` for the feed -> `/enrich` and, per
+tender, `/extract` + `/eligibility` to fill in the AI columns -> user
+edits status/note via the `PATCH .../tenders/romania/{id}` call.
+
+## Auth and CORS
+
+No auth by default — the whole point for this hackathon is the frontend
+integrating with zero friction. Set `API_KEY` in the backend's own `.env`
+to require an `X-API-Key` header on every `/api/*` call (every route
+already wired to check it via `core/security.py`); leave it unset for the
+demo. A real login/signup/JWT system would be real work for no demo
+value — skip it unless a judge-facing requirement says otherwise.
+
+CORS is wide open (`ALLOWED_ORIGINS=*`) by default so the Next.js
+frontend can call this from any port/origin without configuration.
+Narrow it to specific origins (comma-separated) before any real deploy —
+`*` can't be combined with credentialed requests, which this setup
+doesn't need since there's no cookie-based auth.
 
 ## Setup
 
@@ -202,6 +241,13 @@ python -m venv .venv
 pip install -r requirements.txt
 cp .env.example .env     # fill in META_API_KEY etc.
 uvicorn main:app --reload
+```
+
+Then open `http://localhost:8000/docs` for interactive docs, or regenerate
+the static snapshot after changing a route:
+
+```bash
+python -c "import json, main; json.dump(main.app.openapi(), open('openapi.json', 'w', encoding='utf-8'), indent=2, ensure_ascii=False)"
 ```
 
 ## Research note: website-to-API tooling
