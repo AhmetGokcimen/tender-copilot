@@ -72,12 +72,36 @@ from scratch against the normalized models. It never drops a tender —
 a 0 score with a reason is the signal, same principle as the AI layer:
 justify, don't silently decide.
 
+## AI layer
+
+`ai/client.py` talks to Meta's official Llama API in its OpenAI-compatible
+mode (`https://api.llama.com/compat/v1`, override via `META_API_BASE_URL`/
+`META_MODEL` if the hackathon provides a different gateway). Three jobs,
+each told to justify rather than decide and to flag what it's unsure of
+rather than invent it:
+
+- `summarize_justification` — 2-3 sentence fit explanation for one tender
+  + one company profile.
+- `simplify_title` — rewrites a tender title in plain language, preserving
+  project codes and place names (never translated/dropped).
+- `extract_requirements` — pulls turnover/experience/certification/
+  guarantee requirements out of specification text into a typed schema
+  (`ExtractedRequirements`). JSON-schema-constrained, retried up to 3
+  times on invalid JSON; if it still fails, returns
+  `extraction_confidence="failed"` with the raw output attached instead of
+  raising — nothing crashes because the model misbehaved once.
+
+Not yet wired to real specification text: the SEAP list endpoint doesn't
+return the full caiet de sarcini, only summary fields — that needs a
+detail-endpoint fetch, which isn't implemented. `extract_requirements` is
+ready and tested (mocked), just has no real input source yet.
+
 ## Status
 
-Done: storage layer, Romania SEAP adapter (verified against the live API —
-see below), scoring, and REST endpoints to sync tenders, create a company
-profile, and score stored tenders for it. Not started: the Meta AI
-summarization/extraction layer and the eligibility-comparison engine.
+Done: storage layer, Romania SEAP adapter (verified against the live API),
+scoring, the AI layer (verified against a mocked API), and REST endpoints
+tying them together. Not started: the eligibility-comparison engine, and
+the SEAP detail-endpoint fetch `extract_requirements` needs.
 
 The SEAP adapter's endpoint, headers, and response field names are
 confirmed working, tested live against `e-licitatie.ro` (not guessed) —
@@ -93,6 +117,8 @@ POST /api/tenders/sync/romania           fetch from SEAP, upsert into storage
 POST /api/companies                      create a company profile
 GET  /api/companies                      list company profiles
 POST /api/companies/{id}/score           score all stored tenders for a company
+POST /api/companies/{id}/enrich          AI-justify the highest-scoring,
+     ?limit=20&language=en               not-yet-enriched tenders for a company
 ```
 
 ## Setup

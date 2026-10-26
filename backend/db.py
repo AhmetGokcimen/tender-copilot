@@ -95,3 +95,36 @@ def upsert_score(
     )
     session.execute(stmt)
     session.commit()
+
+
+def upsert_ai_enrichment(
+    session: Session,
+    *,
+    tender_source_system: SourceSystem,
+    tender_external_id: str,
+    company_id: int,
+    ai_summary: str,
+    ai_title_simplified: str,
+) -> None:
+    """Write the AI layer's output into UserTenderState. Only ever touches
+    the AI columns + updated_at — never score or the eligibility fields,
+    same no-clobber pattern as upsert_score."""
+    table = UserTenderState.__table__
+    now = datetime.now(UTC)
+    values = {
+        "tender_source_system": tender_source_system,
+        "tender_external_id": tender_external_id,
+        "company_id": company_id,
+        "ai_summary": ai_summary,
+        "ai_title_simplified": ai_title_simplified,
+        "updated_at": now,
+    }
+    stmt = _insert_stmt(table).values(**values)
+    stmt = stmt.on_conflict_do_update(
+        index_elements=["tender_source_system", "tender_external_id", "company_id"],
+        set_={"ai_summary": stmt.excluded.ai_summary,
+              "ai_title_simplified": stmt.excluded.ai_title_simplified,
+              "updated_at": stmt.excluded.updated_at},
+    )
+    session.execute(stmt)
+    session.commit()
