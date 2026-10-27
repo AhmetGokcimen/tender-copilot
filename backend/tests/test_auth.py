@@ -7,18 +7,6 @@ from fastapi.testclient import TestClient
 from core.config import settings
 
 
-@pytest.fixture()
-def api():
-    from sqlmodel import SQLModel
-
-    from db import engine, init_db
-    from main import app
-
-    init_db()
-    yield TestClient(app, follow_redirects=False)
-    SQLModel.metadata.drop_all(engine)
-
-
 def _token(**overrides) -> str:
     from core.auth import create_access_token
 

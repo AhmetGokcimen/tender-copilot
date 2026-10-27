@@ -1,3 +1,5 @@
+from typing import Literal
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, func, select
 
@@ -10,7 +12,9 @@ from ai.client import (
 )
 from api.schemas import (
     CompanyPage,
-    TenderPage,
+    CompanyResponse,
+    EvidenceItem,
+    TenderFeedItem,
     TenderStatePatch,
     TenderWithState,
     TenderWithStatePage,
@@ -36,31 +40,171 @@ VALID_STATUSES = {"new", "reviewing", "applied", "rejected", "ignored"}
 router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
-@router.get("/tenders", response_model=TenderPage, tags=["tenders"])
+def _resolve_company(session: Session, company_id: int | None) -> CompanyProfile | None:
+    """Explicit company, else the first one (the demo is single-company).
+    None when no company exists yet — callers degrade to default state."""
+    if company_id is not None:
+        company = session.get(CompanyProfile, company_id)
+        if not company:
+            raise HTTPException(status_code=404, detail="Company not found")
+        return company
+    return session.exec(select(CompanyProfile).order_by(CompanyProfile.id)).first()
+
+
+def _sort_key(sort: str, item: TenderFeedItem) -> tuple:
+    if sort == "deadline":
+        return (item.submission_deadline is None, item.submission_deadline or "", item.external_id)
+    if sort == "value":
+        return (item.estimated_value is None, -(item.estimated_value or 0), item.external_id)
+    return (item.state.score is None, -(item.state.score or 0), item.external_id)
+
+
+@router.get("/tenders", response_model=list[TenderFeedItem], tags=["tenders"])
 def list_tenders(
-    country_code: str | None = None,
+    company_id: int | None = None,
+    county: str | None = None,
     cpv_code: str | None = None,
+    min_value: float | None = None,
+    min_score: int | None = None,
+    procedure_type: str | None = None,
+    eligible: bool | None = None,
+    search: str | None = None,
+    sort: Literal["match", "deadline", "value"] = "match",
     limit: int = Query(default=50, le=200),
     offset: int = 0,
     session: Session = Depends(get_session),
-) -> TenderPage:
-    """Raw tender listing, filterable and paginated. For a feed that
-    includes score/AI/eligibility output for a specific company, use
-    GET /companies/{id}/tenders instead."""
+) -> list[TenderFeedItem]:
+    """The frontend feed (Opportunities + Kanban source): every stored
+    tender with its per-company state nested in, filterable and sortable.
+    Bare array — matches lib/types.ts TenderWithState[] one to one."""
+    company = _resolve_company(session, company_id)
+
     query = select(Tender)
-    if country_code:
-        query = query.where(Tender.country_code == country_code)
+    if county:
+        query = query.where(Tender.county == county)
     if cpv_code:
         # cpv_codes is a JSON array column; this matches it as the main CPV
         # (index 0) via a LIKE on its JSON text — a real CPV index would be
         # cleaner, but this covers the common case without one.
         query = query.where(Tender.cpv_codes.like(f'["{cpv_code}"%'))
+    if min_value is not None:
+        query = query.where(Tender.estimated_value >= min_value)
+    if procedure_type:
+        query = query.where(Tender.procedure_type == procedure_type)
+    if search:
+        query = query.where(Tender.title.ilike(f"%{search}%"))
 
-    total = session.exec(select(func.count()).select_from(query.subquery())).one()
-    items = session.exec(
-        query.order_by(Tender.publication_date.desc()).offset(offset).limit(limit)
-    ).all()
-    return TenderPage(items=list(items), total=total, limit=limit, offset=offset)
+    tenders = session.exec(query).all()
+    states: dict[tuple, UserTenderState] = {}
+    if company is not None:
+        for state in session.exec(
+            select(UserTenderState).where(UserTenderState.company_id == company.id)
+        ).all():
+            states[(state.tender_source_system, state.tender_external_id)] = state
+
+    items = [
+        TenderFeedItem.from_triple(
+            tender, states.get((tender.source_system, tender.external_id)), company
+        )
+        for tender in tenders
+    ]
+    if min_score is not None:
+        items = [i for i in items if i.state.score is not None and i.state.score >= min_score]
+    if eligible is not None:
+        items = [i for i in items if i.state.eligible == eligible]
+    items.sort(key=lambda i: _sort_key(sort, i))
+    return items[offset : offset + limit]
+
+
+@router.get("/tenders/{external_id}", response_model=TenderFeedItem, tags=["tenders"])
+def get_tender(
+    external_id: str,
+    company_id: int | None = None,
+    session: Session = Depends(get_session),
+) -> TenderFeedItem:
+    """One tender + nested state, for the Tender Analysis screen. Romania
+    only for now — external_id is unique within that one source."""
+    tender = session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    company = _resolve_company(session, company_id)
+    state = None
+    if company is not None:
+        state = session.exec(
+            select(UserTenderState).where(
+                UserTenderState.company_id == company.id,
+                UserTenderState.tender_source_system == tender.source_system,
+                UserTenderState.tender_external_id == tender.external_id,
+            )
+        ).first()
+    return TenderFeedItem.from_triple(tender, state, company)
+
+
+@router.patch(
+    "/tenders/{external_id}/status", response_model=TenderFeedItem, tags=["tenders"]
+)
+def update_tender_status_simple(
+    external_id: str,
+    patch: TenderStatePatch,
+    company_id: int | None = None,
+    session: Session = Depends(get_session),
+) -> TenderFeedItem:
+    """Kanban write path: same semantics as the company-scoped PATCH below
+    (status/note only, 404 when the tender was never scored for this
+    company), without the company id in the URL."""
+    if patch.status is not None and patch.status not in VALID_STATUSES:
+        raise HTTPException(
+            status_code=422, detail=f"status must be one of {sorted(VALID_STATUSES)}"
+        )
+    company = _resolve_company(session, company_id)
+    if company is None:
+        raise HTTPException(status_code=404, detail="No company yet")
+    tender = session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    state = session.exec(
+        select(UserTenderState).where(
+            UserTenderState.company_id == company.id,
+            UserTenderState.tender_source_system == tender.source_system,
+            UserTenderState.tender_external_id == tender.external_id,
+        )
+    ).first()
+    if not state:
+        raise HTTPException(
+            status_code=404, detail="No state for this tender/company — call /score first"
+        )
+    if patch.status is not None:
+        state.status = patch.status
+    if patch.note is not None:
+        state.note = patch.note
+    session.add(state)
+    session.commit()
+    session.refresh(state)
+    return TenderFeedItem.from_triple(tender, state, company)
+
+
+@router.get("/company", response_model=CompanyResponse, tags=["companies"])
+def get_company_single(session: Session = Depends(get_session)) -> CompanyResponse:
+    """The demo's single company profile. 404 until one is created via
+    POST /companies."""
+    company = session.exec(select(CompanyProfile).order_by(CompanyProfile.id)).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="No company yet — create one via POST /companies")
+    return CompanyResponse.from_profile(company)
+
+
+@router.get("/company/evidence", response_model=list[EvidenceItem], tags=["companies"])
+def get_company_evidence(session: Session = Depends(get_session)) -> list[EvidenceItem]:
+    """Qualification evidence derived from the company profile's own
+    certification list (a real document vault with expiry tracking is
+    future work — see API_CHANGES.md)."""
+    company = session.exec(select(CompanyProfile).order_by(CompanyProfile.id)).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="No company yet — create one via POST /companies")
+    return [
+        EvidenceItem(id=f"cert-{i}", name=name, type="Certification", valid_until=None)
+        for i, name in enumerate(company.certifications, start=1)
+    ]
 
 
 @router.post("/tenders/sync/romania", response_model=list[Tender], tags=["tenders"])
