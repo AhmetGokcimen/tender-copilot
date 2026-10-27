@@ -11,11 +11,14 @@ from ai.client import (
     build_tender_summary,
 )
 from api.schemas import (
+    AuthorizationPatch,
     CompanyDetail,
     CompanyOptions,
     CompanyPage,
     CompanyPatch,
+    CountryAuthorizationItem,
     CountryOption,
+    CountryRequirements,
     EvidenceItem,
     IndustryOption,
     KeywordOption,
@@ -26,7 +29,14 @@ from api.schemas import (
     TenderWithState,
     TenderWithStatePage,
 )
+from core.authorizations import (
+    ensure_authorization_rows,
+    list_authorizations,
+    normalize_country_code,
+    upsert_authorization,
+)
 from core.caiet_jobs import create_job, get_active_job, get_latest_job, run_caiet_job
+from core.country_requirements import get_country_requirements
 from core.eligibility import run_numeric_checks
 from core.lookups import (
     COUNTRIES,
@@ -249,6 +259,7 @@ def create_own_company(
     session.commit()
     session.refresh(company)
     link_user_company(session, user.id, company.id)
+    ensure_authorization_rows(session, company.id, company.target_countries or [])
     session.refresh(company)  # link commit expires attrs; reload before serializing
     return CompanyDetail.from_profile(company)
 
@@ -276,7 +287,83 @@ def patch_own_company(
     session.add(company)
     session.commit()
     session.refresh(company)
+    if "target_countries" in data:
+        ensure_authorization_rows(session, company.id, data["target_countries"] or [])
     return CompanyDetail.from_profile(company)
+
+
+@router.get(
+    "/company/authorizations",
+    response_model=list[CountryAuthorizationItem],
+    tags=["companies"],
+)
+def list_own_authorizations(
+    company_id: int | None = None,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> list[CountryAuthorizationItem]:
+    """The caller's per-country bidding-readiness rows (self-declared —
+    never system-verified). Rows exist for picked target countries plus
+    any country opened proactively via the PATCH below."""
+    company = _resolve_company(session, user, company_id)
+    if company is None:
+        raise HTTPException(status_code=404, detail="No company yet — create one via POST /company")
+    return [
+        CountryAuthorizationItem(
+            country_code=row.country_code,
+            status=row.status,
+            requirement_notes=row.requirement_notes,
+            updated_at=row.updated_at,
+        )
+        for row in list_authorizations(session, company.id)
+    ]
+
+
+@router.patch(
+    "/company/authorizations/{country_code}",
+    response_model=CountryAuthorizationItem,
+    tags=["companies"],
+)
+def upsert_own_authorization(
+    country_code: str,
+    patch: AuthorizationPatch,
+    company_id: int | None = None,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> CountryAuthorizationItem:
+    """Create-or-update one country row: status and/or notes. Only
+    provided fields change. Works for target and non-target countries."""
+    company = _resolve_company(session, user, company_id)
+    if company is None:
+        raise HTTPException(status_code=404, detail="No company yet — create one via POST /company")
+    try:
+        row = upsert_authorization(
+            session, company.id, country_code, patch.status, patch.requirement_notes
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from None
+    return CountryAuthorizationItem(
+        country_code=row.country_code,
+        status=row.status,
+        requirement_notes=row.requirement_notes,
+        updated_at=row.updated_at,
+    )
+
+
+@router.get(
+    "/countries/{country_code}/requirements",
+    response_model=CountryRequirements,
+    tags=["countries"],
+)
+def get_country_requirements_route(country_code: str) -> CountryRequirements:
+    """Static bidding-requirements reference per country. Romania carries
+    a real write-up; everything else is an honest placeholder until its
+    adapter extension lands. General information, never legal advice."""
+    try:
+        code = normalize_country_code(country_code)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from None
+    return CountryRequirements(**get_country_requirements(code))
 
 
 @router.get("/company/onboarding-status", response_model=OnboardingStatus, tags=["companies"])
@@ -376,6 +463,7 @@ def create_company(
     session.commit()
     session.refresh(company)
     link_user_company(session, user.id, company.id)
+    ensure_authorization_rows(session, company.id, company.target_countries or [])
     session.refresh(company)  # link commit expires attrs; reload before serializing
     return company
 
@@ -416,6 +504,7 @@ def update_company(
     session.add(company)
     session.commit()
     session.refresh(company)
+    ensure_authorization_rows(session, company.id, company.target_countries or [])
     return company
 
 

@@ -324,6 +324,25 @@ class CountryOption(BaseModel):
     source_systems: list[str]
 
 
+class CountryAuthorizationItem(BaseModel):
+    country_code: str
+    status: str  # not_started | in_progress | obtained (self-declared)
+    requirement_notes: str | None
+    updated_at: datetime
+
+
+class AuthorizationPatch(BaseModel):
+    status: str | None = None
+    requirement_notes: str | None = None
+
+
+class CountryRequirements(BaseModel):
+    country_code: str
+    name: str | None
+    guide_available: bool
+    guidance: str
+
+
 class CompanyOptions(BaseModel):
     industries: list[IndustryOption]
     keywords: list[KeywordOption]

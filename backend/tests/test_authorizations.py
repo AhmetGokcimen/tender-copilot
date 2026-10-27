@@ -76,6 +76,113 @@ def test_romania_guide_is_informational_not_advice() -> None:
     assert "not legal advice" in ro["guidance"].lower()
 
 
+def _auth(sub: str) -> dict:
+    from core.auth import create_access_token
+
+    token = create_access_token(
+        sub=sub, email=f"{sub}@x.ro", name=sub.upper(), provider="google"
+    )
+    return {"Authorization": f"Bearer {token}"}
+
+
+def _owned_company(api, sub: str, name: str = "Co") -> int:
+    return api.post("/api/company", json={"name": name}, headers=_auth(sub)).json()["id"]
+
+
+def test_list_and_upsert_authorizations(api) -> None:
+    _owned_company(api, "u")
+    assert api.get("/api/company/authorizations", headers=_auth("u")).json() == []
+
+    created = api.patch(
+        "/api/company/authorizations/ro",
+        json={"status": "in_progress", "requirement_notes": "Filed ONRC forms"},
+        headers=_auth("u"),
+    )
+    assert created.status_code == 200
+    assert created.json()["country_code"] == "RO"
+    assert created.json()["status"] == "in_progress"
+
+    updated = api.patch(
+        "/api/company/authorizations/RO",
+        json={"status": "obtained"},
+        headers=_auth("u"),
+    ).json()
+    assert updated["status"] == "obtained"
+    assert updated["requirement_notes"] == "Filed ONRC forms"
+
+    listed = api.get("/api/company/authorizations", headers=_auth("u")).json()
+    assert [(a["country_code"], a["status"]) for a in listed] == [("RO", "obtained")]
+
+
+def test_authorization_endpoints_validate(api) -> None:
+    _owned_company(api, "u")
+    bad_status = api.patch(
+        "/api/company/authorizations/RO", json={"status": "maybe"}, headers=_auth("u")
+    )
+    assert bad_status.status_code == 422
+    bad_code = api.patch(
+        "/api/company/authorizations/ROM", json={"status": "obtained"}, headers=_auth("u")
+    )
+    assert bad_code.status_code == 422
+    assert api.get("/api/company/authorizations", headers=_auth("u")).json() == []
+
+
+def test_authorizations_are_tenant_isolated(api) -> None:
+    company_a = _owned_company(api, "a", "Company A")
+    _owned_company(api, "b", "Company B")
+    api.patch(
+        "/api/company/authorizations/RO",
+        json={"status": "obtained"},
+        headers=_auth("a"),
+    )
+
+    assert (
+        api.get(
+            f"/api/company/authorizations?company_id={company_a}", headers=_auth("b")
+        ).status_code
+        == 403
+    )
+    assert (
+        api.patch(
+            f"/api/company/authorizations/RO?company_id={company_a}",
+            json={"status": "not_started"},
+            headers=_auth("b"),
+        ).status_code
+        == 403
+    )
+    # B's own list is untouched, A's row survived the attempt.
+    assert api.get("/api/company/authorizations", headers=_auth("b")).json() == []
+    kept = api.get("/api/company/authorizations", headers=_auth("a")).json()
+    assert kept[0]["status"] == "obtained"
+
+
+def test_target_countries_seed_not_started_rows(api) -> None:
+    _owned_company(api, "u")
+    api.patch("/api/company", json={"target_countries": ["RO"]}, headers=_auth("u"))
+    seeded = api.get("/api/company/authorizations", headers=_auth("u")).json()
+    assert [(a["country_code"], a["status"]) for a in seeded] == [("RO", "not_started")]
+
+    api.patch(
+        "/api/company/authorizations/RO", json={"status": "obtained"}, headers=_auth("u")
+    )
+    api.patch("/api/company", json={"target_countries": ["RO"]}, headers=_auth("u"))
+    kept = api.get("/api/company/authorizations", headers=_auth("u")).json()
+    assert kept[0]["status"] == "obtained"  # re-picking never resets progress
+
+
+def test_country_requirements_endpoint(api) -> None:
+    ro = api.get("/api/countries/RO/requirements", headers=_auth("u")).json()
+    assert ro["guide_available"] is True
+    assert ro["name"] == "Romania"
+
+    pl = api.get("/api/countries/pl/requirements", headers=_auth("u")).json()
+    assert pl["guide_available"] is False
+    assert pl["name"] == "Poland"
+
+    assert api.get("/api/countries/ROM/requirements", headers=_auth("u")).status_code == 422
+    assert api.get("/api/countries/RO/requirements").status_code == 401
+
+
 def test_planned_countries_return_placeholders() -> None:
     from core.country_requirements import get_country_requirements
 

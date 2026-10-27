@@ -15,7 +15,7 @@ STATUSES = ("not_started", "in_progress", "obtained")
 _CODE_RE = re.compile(r"^[A-Z]{2}$")
 
 
-def _normalize_code(country_code: str) -> str:
+def normalize_country_code(country_code: str) -> str:
     code = (country_code or "").strip().upper()
     if not _CODE_RE.match(code):
         raise ValueError(f"country_code must be ISO alpha-2, got {country_code!r}")
@@ -43,7 +43,7 @@ def upsert_authorization(
 ) -> CountryAuthorization:
     """Create-or-update one (company, country) row. Only provided fields
     change; unknown statuses and malformed codes raise ValueError."""
-    code = _normalize_code(country_code)
+    code = normalize_country_code(country_code)
     if status is not None and status not in STATUSES:
         raise ValueError(f"Unknown status: {status!r} — expected one of {STATUSES}")
     row = session.exec(
@@ -75,7 +75,7 @@ def ensure_authorization_rows(
     Removing a country from target_countries does NOT delete its row:
     history is kept even when the target list shrinks."""
     for raw in country_codes:
-        code = _normalize_code(raw)
+        code = normalize_country_code(raw)
         exists = session.exec(
             select(CountryAuthorization).where(
                 CountryAuthorization.company_id == company_id,
