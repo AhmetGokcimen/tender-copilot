@@ -38,3 +38,25 @@ Consumed contract: **backend v0.3.0** (`backend/API_CHANGES.md` 0.3.0 section,
 3. **No other backend gaps found.** Industry/keyword/country selects,
    validation (422 details surface inline), and the status endpoint all
    behaved as documented.
+
+## Session: country authorizations UI (backend v0.4.0)
+
+Consumed: `GET /company/authorizations`, `PATCH
+/company/authorizations/{code}`, `GET /countries/{code}/requirements`, and
+`state.country_authorization_status` on feed/detail responses. Built:
+
+- Wizard step 7 is now a real form (was "coming soon"): rows for the union
+  of picked targets + opened rows, status select + notes + lazy "More
+  info" guidance per country. Skippable, never blocks completion.
+- Tender detail shows a neutral, standalone readiness notice below the
+  eligibility verdict (silent for `obtained`/null). Feed cards show a
+  subtle `RO · In progress` style meta hint, never a verdict-colored chip.
+- Company Settings gained a "Country authorizations" management section
+  (edit status/notes per row, save changed only).
+- Mock parity: `useAuthorizationStore` (+ persisted), feed/detail mock
+  responses derive the status from it exactly like the backend does.
+
+Backend needs: none. The proactive "add another country" affordance was
+deliberately left out of scope — no backend change required for it later
+(`PATCH .../authorizations/{code}` already upserts any code); it is purely
+a future UI addition (country picker + row).

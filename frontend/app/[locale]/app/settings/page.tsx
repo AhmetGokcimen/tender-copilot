@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { useCompanyStore } from '@/stores/useCompanyStore';
+import { useAuthorizationStore } from '@/stores/useAuthorizationStore';
 import { useOnboardingStatus } from '@/lib/queries';
+import { AuthorizationsSection } from '@/components/AuthorizationsSection';
 import { Icon } from '@/components/Icon';
 
 const INPUT =
@@ -16,6 +18,7 @@ export default function SettingsPage() {
   const profile = useCompanyStore((s) => s.profile);
   const update = useCompanyStore((s) => s.update);
   const reset = useCompanyStore((s) => s.reset);
+  const resetAuthorizations = useAuthorizationStore((s) => s.reset);
   const { data: obStatus } = useOnboardingStatus();
 
   const [draft, setDraft] = useState(() => ({
@@ -102,6 +105,8 @@ export default function SettingsPage() {
         </label>
       </section>
 
+      <AuthorizationsSection />
+
       <div className="flex items-center gap-space-md">
         <button
           type="button"
@@ -118,7 +123,7 @@ export default function SettingsPage() {
             {t('saved')}
           </span>
         )}
-        <button type="button" onClick={() => { reset(); window.location.reload(); }} className="ml-auto font-body-md text-body-md text-on-surface-variant hover:underline">
+        <button type="button" onClick={() => { reset(); resetAuthorizations(); window.location.reload(); }} className="ml-auto font-body-md text-body-md text-on-surface-variant hover:underline">
           Reset demo data
         </button>
       </div>

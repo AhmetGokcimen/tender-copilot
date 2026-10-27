@@ -324,7 +324,13 @@
     "lessInfo": "Less info",
     "intro": "For each country, note whether your bidding registration is sorted. This is your own reminder: nothing here is verified, and it never hides tenders from you.",
     "empty": "Pick target countries in the previous step first. Readiness rows will appear here.",
-    "selfDeclared": "Self-declared, not verified"
+    "selfDeclared": "Self-declared, not verified",
+    "boxTitle": "Bidding readiness",
+    "boxBody": "Marked as {status} for {country}. You can review this tender freely, but confirm your registration before applying.",
+    "reviewLink": "Review in setup",
+    "settingsTitle": "Country authorizations",
+    "settingsBody": "Track bidding readiness per country. Your own notes, nothing verified, and it never hides tenders.",
+    "saving": "Saving…"
   },
   "settings": {
     "onboardingTitle": "Finish company setup",
