@@ -152,6 +152,10 @@ class TenderFeedState(BaseModel):
     ai_title_simplified: str | None
     extracted_requirements: list[str]
     eligible: bool | None
+    # Separate dimension from `eligible`: the company's self-declared
+    # bidding readiness for THIS tender's country. None = no row opened
+    # yet. The two are never folded into a combined boolean.
+    country_authorization_status: str | None
     matched_requirements: list[str]
     unmet_requirements: list[str]
     missing_documents: list[str]
@@ -187,6 +191,7 @@ class TenderFeedItem(BaseModel):
         tender: Tender,
         state: UserTenderState | None,
         company: CompanyProfile | None,
+        authorization_status: str | None = None,
     ) -> "TenderFeedItem":
         return cls(
             source_system=tender.source_system,
@@ -213,6 +218,7 @@ class TenderFeedItem(BaseModel):
                     tender.extracted_requirements
                 ),
                 eligible=state.eligible if state else None,
+                country_authorization_status=authorization_status,
                 matched_requirements=state.matched_requirements if state else [],
                 unmet_requirements=state.unmet_requirements if state else [],
                 missing_documents=missing_documents_for(

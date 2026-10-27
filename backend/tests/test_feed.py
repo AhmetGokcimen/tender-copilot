@@ -18,8 +18,9 @@ TENDER_KEYS = {
 }
 STATE_KEYS = {
     "score", "score_reasons", "ai_summary", "ai_title_simplified",
-    "extracted_requirements", "eligible", "matched_requirements",
-    "unmet_requirements", "missing_documents", "eligibility_justification", "status",
+    "extracted_requirements", "eligible", "country_authorization_status",
+    "matched_requirements", "unmet_requirements", "missing_documents",
+    "eligibility_justification", "status",
 }
 COMPANY_KEYS = {
     "id", "name", "cui", "industry", "founded_year", "team_size",

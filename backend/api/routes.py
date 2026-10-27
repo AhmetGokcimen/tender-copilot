@@ -30,6 +30,7 @@ from api.schemas import (
     TenderWithStatePage,
 )
 from core.authorizations import (
+    authorization_status_map,
     ensure_authorization_rows,
     list_authorizations,
     normalize_country_code,
@@ -108,6 +109,7 @@ def list_tenders(
     min_score: int | None = None,
     procedure_type: str | None = None,
     eligible: bool | None = None,
+    authorization_status: str | None = None,
     search: str | None = None,
     sort: Literal["match", "deadline", "value"] = "match",
     limit: int = Query(default=50, le=200),
@@ -118,7 +120,9 @@ def list_tenders(
     """The frontend feed (Opportunities + Kanban source): every stored
     tender with its per-company state nested in, filterable and sortable.
     Bare array — matches lib/types.ts TenderWithState[] one to one. State
-    is always the caller's own company — strangers' scores never leak."""
+    is always the caller's own company — strangers' scores never leak.
+    Country authorization rides along as pure information: the feed never
+    hides tenders for it unless the caller opts in via authorization_status."""
     company = _resolve_company(session, user, company_id)
 
     query = select(Tender)
@@ -138,15 +142,20 @@ def list_tenders(
 
     tenders = session.exec(query).all()
     states: dict[tuple, UserTenderState] = {}
+    auth_map: dict[str, str] = {}
     if company is not None:
         for state in session.exec(
             select(UserTenderState).where(UserTenderState.company_id == company.id)
         ).all():
             states[(state.tender_source_system, state.tender_external_id)] = state
+        auth_map = authorization_status_map(session, company.id)
 
     items = [
         TenderFeedItem.from_triple(
-            tender, states.get((tender.source_system, tender.external_id)), company
+            tender,
+            states.get((tender.source_system, tender.external_id)),
+            company,
+            auth_map.get(tender.country_code),
         )
         for tender in tenders
     ]
@@ -154,6 +163,8 @@ def list_tenders(
         items = [i for i in items if i.state.score is not None and i.state.score >= min_score]
     if eligible is not None:
         items = [i for i in items if i.state.eligible == eligible]
+    if authorization_status is not None:
+        items = [i for i in items if i.state.country_authorization_status == authorization_status]
     items.sort(key=lambda i: _sort_key(sort, i))
     return items[offset : offset + limit]
 
@@ -172,6 +183,7 @@ def get_tender(
         raise HTTPException(status_code=404, detail="Tender not found")
     company = _resolve_company(session, user, company_id)
     state = None
+    auth_map: dict[str, str] = {}
     if company is not None:
         state = session.exec(
             select(UserTenderState).where(
@@ -180,7 +192,10 @@ def get_tender(
                 UserTenderState.tender_external_id == tender.external_id,
             )
         ).first()
-    return TenderFeedItem.from_triple(tender, state, company)
+        auth_map = authorization_status_map(session, company.id)
+    return TenderFeedItem.from_triple(
+        tender, state, company, auth_map.get(tender.country_code)
+    )
 
 
 @router.patch(
@@ -224,7 +239,10 @@ def update_tender_status_simple(
     session.add(state)
     session.commit()
     session.refresh(state)
-    return TenderFeedItem.from_triple(tender, state, company)
+    auth_map = authorization_status_map(session, company.id)
+    return TenderFeedItem.from_triple(
+        tender, state, company, auth_map.get(tender.country_code)
+    )
 
 
 @router.get("/company", response_model=CompanyDetail, tags=["companies"])

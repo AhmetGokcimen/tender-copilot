@@ -170,6 +170,88 @@ def test_target_countries_seed_not_started_rows(api) -> None:
     assert kept[0]["status"] == "obtained"  # re-picking never resets progress
 
 
+def _seed_multicountry_feed(api) -> None:
+    from sqlmodel import Session
+
+    from core.membership import get_or_create_user, link_user_company
+    from db import engine
+    from models.tender import SourceSystem, Tender
+    from models.user_tender_state import UserTenderState
+
+    with Session(engine) as session:
+        session.add(CompanyProfile(name="Co"))
+        for external_id, country in [("RO-1", "RO"), ("BG-1", "BG"), ("PL-1", "PL")]:
+            session.add(
+                Tender(
+                    source_system=SourceSystem.ROMANIA_SEAP,
+                    external_id=external_id,
+                    country_code=country,
+                    title=f"Tender {external_id}",
+                )
+            )
+        session.commit()
+        user = get_or_create_user(
+            session, subject="u", email="u@x.ro", name="U", provider="google"
+        )
+        link_user_company(session, user.id, 1)
+        session.add(
+            UserTenderState(
+                tender_source_system=SourceSystem.ROMANIA_SEAP,
+                tender_external_id="RO-1",
+                company_id=1,
+                eligible=True,
+            )
+        )
+        session.add(
+            UserTenderState(
+                tender_source_system=SourceSystem.ROMANIA_SEAP,
+                tender_external_id="BG-1",
+                company_id=1,
+                eligible=False,
+            )
+        )
+        session.commit()
+    api.patch(
+        "/api/company/authorizations/RO", json={"status": "not_started"},
+        headers=_auth("u"),
+    )
+    api.patch(
+        "/api/company/authorizations/BG", json={"status": "obtained"},
+        headers=_auth("u"),
+    )
+
+
+def test_feed_reports_authorization_without_filtering(api) -> None:
+    _seed_multicountry_feed(api)
+    items = api.get("/api/tenders", headers=_auth("u")).json()
+    by_id = {t["external_id"]: t["state"]["country_authorization_status"] for t in items}
+    assert by_id == {"RO-1": "not_started", "BG-1": "obtained", "PL-1": None}
+
+
+def test_eligible_and_authorization_stay_independent(api) -> None:
+    _seed_multicountry_feed(api)
+    items = api.get("/api/tenders", headers=_auth("u")).json()
+    by_id = {
+        t["external_id"]: (t["state"]["eligible"], t["state"]["country_authorization_status"])
+        for t in items
+    }
+    # eligible tender, unauthorized country — and the exact reverse.
+    assert by_id["RO-1"] == (True, "not_started")
+    assert by_id["BG-1"] == (False, "obtained")
+    # The eligible filter keeps working on its own dimension.
+    filtered = api.get("/api/tenders?eligible=true", headers=_auth("u")).json()
+    assert [t["external_id"] for t in filtered] == ["RO-1"]
+
+
+def test_authorization_status_filter_is_opt_in(api) -> None:
+    _seed_multicountry_feed(api)
+    assert len(api.get("/api/tenders", headers=_auth("u")).json()) == 3
+    filtered = api.get(
+        "/api/tenders?authorization_status=obtained", headers=_auth("u")
+    ).json()
+    assert [t["external_id"] for t in filtered] == ["BG-1"]
+
+
 def test_country_requirements_endpoint(api) -> None:
     ro = api.get("/api/countries/RO/requirements", headers=_auth("u")).json()
     assert ro["guide_available"] is True
