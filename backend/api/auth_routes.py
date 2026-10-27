@@ -4,8 +4,10 @@ this router without it): these are the routes that hand out tokens."""
 import jwt
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
+from sqlmodel import Session
 
 from core.auth import (
+    DEMO_USER,
     CurrentUser,
     build_google_authorize_url,
     create_access_token,
@@ -17,7 +19,9 @@ from core.auth import (
     verify_oauth_state,
 )
 from core.config import settings
+from core.membership import get_or_create_user, user_companies
 from core.security import get_current_user
+from db import get_session
 
 router = APIRouter(tags=["auth"])
 
@@ -33,7 +37,10 @@ def google_login() -> RedirectResponse:
 
 @router.get("/auth/google/callback")
 async def google_callback(
-    code: str | None = None, state: str | None = None, error: str | None = None
+    code: str | None = None,
+    state: str | None = None,
+    error: str | None = None,
+    session: Session = Depends(get_session),
 ) -> RedirectResponse:
     if error:
         raise HTTPException(status_code=401, detail=f"Google login failed: {error}")
@@ -45,22 +52,43 @@ async def google_callback(
         raise HTTPException(status_code=400, detail="Invalid or expired state — restart login") from None
     tokens = await exchange_code_for_tokens(code)
     info = await fetch_google_userinfo(tokens["access_token"])
+    email = info["email"]
+    get_or_create_user(
+        session,
+        subject=f"google:{email}",
+        email=email,
+        name=info.get("name", email),
+        provider="google",
+    )
     token = create_access_token(
-        sub=f"google:{info['email']}",
-        email=info["email"],
-        name=info.get("name", info["email"]),
+        sub=f"google:{email}",
+        email=email,
+        name=info.get("name", email),
         provider="google",
     )
     return RedirectResponse(frontend_token_redirect(token))
 
 
 @router.get("/auth/demo")
-def demo_login() -> RedirectResponse:
+def demo_login(session: Session = Depends(get_session)) -> RedirectResponse:
     """Zero-friction demo entry: mints the fixed demo user's long-lived
     token and hands it to the frontend — no Google account needed."""
+    get_or_create_user(session, subject=DEMO_USER["sub"], email=DEMO_USER["email"], name=DEMO_USER["name"], provider="demo")
     return RedirectResponse(frontend_token_redirect(create_demo_token()))
 
 
 @router.get("/auth/me")
-def me(user: CurrentUser = Depends(get_current_user)) -> dict:
-    return {"sub": user.sub, "email": user.email, "name": user.name, "provider": user.provider}
+def me(
+    session: Session = Depends(get_session),
+    user: CurrentUser = Depends(get_current_user),
+) -> dict:
+    db_user = get_or_create_user(
+        session, subject=user.sub, email=user.email, name=user.name, provider=user.provider
+    )
+    return {
+        "sub": user.sub,
+        "email": user.email,
+        "name": user.name,
+        "provider": user.provider,
+        "company_ids": [c.id for c in user_companies(session, db_user.id)],
+    }

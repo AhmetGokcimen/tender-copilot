@@ -51,7 +51,40 @@ def test_me_returns_current_user(api: TestClient) -> None:
     res = api.get("/api/auth/me", headers={"Authorization": f"Bearer {_token()}"})
     assert res.status_code == 200
     assert res.json()["email"] == "u@x.ro"
+    assert res.json()["company_ids"] == []
     assert api.get("/api/auth/me").status_code == 401
+
+
+def test_demo_login_provisions_user_row(api: TestClient) -> None:
+    from sqlmodel import Session, select
+
+    from db import engine
+    from models.user import User
+
+    api.get("/api/auth/demo")
+    api.get("/api/auth/demo")
+    with Session(engine) as session:
+        users = session.exec(select(User)).all()
+        assert [(u.subject, u.provider) for u in users] == [("demo", "demo")]
+
+
+def test_me_lists_user_company_ids(api: TestClient) -> None:
+    from sqlmodel import Session
+
+    from core.membership import get_or_create_user, link_user_company
+    from db import engine
+    from models.company import CompanyProfile
+
+    with Session(engine) as session:
+        session.add(CompanyProfile(name="Mine"))
+        session.commit()
+        user = get_or_create_user(
+            session, subject="u1", email="u@x.ro", name="U", provider="google"
+        )
+        link_user_company(session, user.id, 1)
+
+    res = api.get("/api/auth/me", headers={"Authorization": f"Bearer {_token()}"})
+    assert res.json()["company_ids"] == [1]
 
 
 @pytest.mark.asyncio
