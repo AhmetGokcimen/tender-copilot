@@ -1,5 +1,6 @@
-"""Meta AI model client: justification summaries, title simplification, and
-structured requirement extraction from tender specification text.
+"""Meta AI model client: justification summaries, title simplification,
+structured requirement extraction from tender specification text, and
+vision transcription of scanned pages.
 
 Targets api.meta.ai's Responses API (confirmed live 2026-10-26 — not the
 OpenAI-compatible chat/completions shape some other Meta/Llama endpoints
@@ -16,6 +17,7 @@ gets a result with extraction_confidence="failed" and the raw text attached
 for manual review, instead of an exception breaking the pipeline.
 """
 
+import base64
 import json
 
 import httpx
@@ -72,6 +74,12 @@ named RON, so output "RON", not "lei".
 Respond with ONLY a JSON object matching this schema, no other text:
 
 {schema}"""
+
+OCR_SYSTEM_PROMPT = """\
+Transcribe the text visible in the image exactly, preserving the \
+original language (usually Romanian), line breaks, numbers, and units. \
+Do not translate, summarize, or add anything that isn't there. If the \
+page contains no readable text, output nothing."""
 
 COMPARE_ELIGIBILITY_SYSTEM_PROMPT = """\
 You are a public-procurement eligibility checker for an SME. You are \
@@ -131,11 +139,22 @@ class MetaAIClient:
         )
 
     @retry(stop=stop_after_attempt(3), retry=retry_if_exception_type(httpx.HTTPError))
-    async def _chat(self, system_prompt: str, user_message: str, *, json_mode: bool = False) -> str:
+    async def _chat(
+        self,
+        system_prompt: str,
+        user_message: str,
+        *,
+        json_mode: bool = False,
+        images: list[bytes] | None = None,
+    ) -> str:
+        content: list[dict] = [{"type": "input_text", "text": user_message}]
+        for png in images or []:
+            b64 = base64.b64encode(png).decode()
+            content.append({"type": "input_image", "image_url": f"data:image/png;base64,{b64}"})
         payload = {
             "model": self.model,
             "instructions": system_prompt,
-            "input": [{"role": "user", "content": [{"type": "input_text", "text": user_message}]}],
+            "input": [{"role": "user", "content": content}],
             "reasoning": {"effort": "low"},  # these are short, well-defined tasks, not open-ended
             "stream": False,
         }
@@ -157,6 +176,12 @@ class MetaAIClient:
     async def simplify_title(self, title: str, *, language: str = "en") -> str:
         system_prompt = SIMPLIFY_TITLE_SYSTEM_PROMPT.format(language=language)
         return (await self._chat(system_prompt, title)).strip()
+
+    async def ocr_image(self, png_bytes: bytes, *, hint: str = "Transcribe this page:") -> str:
+        """Transcribe one rendered page image via the model's vision input.
+        Same Responses API contract and retry policy as the text steps —
+        no extra provider or API key."""
+        return (await self._chat(OCR_SYSTEM_PROMPT, hint, images=[png_bytes])).strip()
 
     async def extract_requirements(self, specification_text: str) -> ExtractedRequirements:
         schema = json.dumps(ExtractedRequirements.model_json_schema())
