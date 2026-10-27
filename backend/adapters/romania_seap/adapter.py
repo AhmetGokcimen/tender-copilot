@@ -24,21 +24,32 @@ e.g. turnover requirement), tpCriteriaQAStandard(Min) (technical/
 professional ability, e.g. similar-experience value threshold). This is
 the real specification/eligibility text extract_requirements needs — the
 list endpoint above only returns summary fields.
+
+Tender-dossier files (confirmed live 2026-10-27):
+  GET /api-pub/NoticeCommon/GetDfNoticeSectionFiles/?initNoticeId={id}&sysNoticeTypeId={type}
+returns dfNoticeDocs [{noticeDocumentName, noticeDocumentUrl}]; each URL
+downloads from GET /{noticeDocumentUrl}. The download GUID is
+session-bound — listing and download MUST share one httpx client (this
+adapter's self._client does), or the download 500s. Caiet de sarcini
+files come either as plain .pdf or CMS-signed .pdf.p7s (see ai.ocr).
 """
 
 import asyncio
 import re
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from adapters.base import TenderSourceAdapter
+from ai.ocr import unwrap_p7s
 from models.tender import SourceSystem, Tender
 
 BASE_URL = "https://e-licitatie.ro"
 LIST_PATH = "/api-pub/NoticeCommon/GetCNoticeList/"
 SECTION3_PATH = "/api-pub/NoticeCommon/GetSection3View/"
+SECTION_FILES_PATH = "/api-pub/NoticeCommon/GetDfNoticeSectionFiles/"
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
@@ -53,6 +64,18 @@ MAX_PAGES = 25
 REQUEST_DELAY_SECONDS = 0.3
 
 _CPV_RE = re.compile(r"\s*(\d{8})")
+
+
+@dataclass
+class NoticeDocument:
+    name: str
+    url: str  # relative "api-pub/files/noticedoc/<session-bound-guid>"
+
+
+@dataclass
+class CaietDocument:
+    name: str
+    pdf_bytes: bytes
 
 
 class RomaniaSeapAdapter(TenderSourceAdapter):
@@ -182,6 +205,50 @@ class RomaniaSeapAdapter(TenderSourceAdapter):
             ("Deposits and guarantees", data.get("depositsAndWarranties")),
         ]
         return "\n\n".join(f"{label}:\n{text}" for label, text in sections if text)
+
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, max=10))
+    async def fetch_notice_documents(
+        self, external_id: str, notice_type_id: int
+    ) -> list[NoticeDocument]:
+        """List a tender's dossier files (caiet de sarcini, fisa de date,
+        contracts, forms). Uses self._client so a later download_document
+        reuses the same session — required, the GUIDs are session-bound."""
+        response = await self._client.get(
+            SECTION_FILES_PATH,
+            params={"initNoticeId": external_id, "sysNoticeTypeId": notice_type_id},
+        )
+        response.raise_for_status()
+        docs = response.json().get("dfNoticeDocs") or []
+        return [
+            NoticeDocument(name=d.get("noticeDocumentName") or "", url=d.get("noticeDocumentUrl") or "")
+            for d in docs
+            if d.get("noticeDocumentUrl")
+        ]
+
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, max=10))
+    async def download_document(self, doc: NoticeDocument) -> bytes:
+        """Download one dossier file. MUST run on the same adapter instance
+        (same session) as the fetch_notice_documents call that listed it."""
+        response = await self._client.get("/" + doc.url.lstrip("/"))
+        response.raise_for_status()
+        return response.content
+
+    async def fetch_caiet_pdf(
+        self, external_id: str, notice_type_id: int
+    ) -> CaietDocument | None:
+        """Find, download, and (if CMS-signed) unwrap the tender's caiet de
+        sarcini PDF. Prefers a plain .pdf over a .pdf.p7s when both are
+        listed. Returns None when the dossier has no caiet file."""
+        docs = await self.fetch_notice_documents(external_id, notice_type_id)
+        caiets = [d for d in docs if "caiet" in d.name.lower()]
+        if not caiets:
+            return None
+        caiets.sort(key=lambda d: 0 if d.name.lower().endswith(".pdf") else 1)
+        chosen = caiets[0]
+        pdf_bytes = unwrap_p7s(await self.download_document(chosen))
+        if not pdf_bytes.startswith(b"%PDF"):
+            raise ValueError(f"{chosen.name}: expected a PDF inside, got {pdf_bytes[:8]!r}")
+        return CaietDocument(name=chosen.name, pdf_bytes=pdf_bytes)
 
 
 def _join(*parts: str | None) -> str:
