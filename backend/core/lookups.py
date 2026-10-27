@@ -108,6 +108,14 @@ def validate_company_data(data: dict) -> None:
         raise ValueError(f"annual_turnover must be >= 0: {turnover!r}")
 
 
+def apply_industry_preseed(company: CompanyProfile) -> None:
+    """Fill empty cpv_codes from the industry's suggestions — an explicit
+    CPV choice always wins, this only covers 'picked an industry and moved
+    on' wizard users."""
+    if company.industry in INDUSTRIES and not company.cpv_codes:
+        company.cpv_codes = list(INDUSTRIES[company.industry].suggested_cpv_codes)
+
+
 def profile_completeness(company: CompanyProfile) -> dict:
     """Onboarding status: which minimum-viable and nice-to-have fields are
     still empty. An empty list/str/None all count as missing."""

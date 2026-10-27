@@ -22,6 +22,14 @@ from api.schemas import (
 )
 from core.caiet_jobs import create_job, get_active_job, get_latest_job, run_caiet_job
 from core.eligibility import run_numeric_checks
+from core.lookups import apply_industry_preseed, validate_company_data
+from core.membership import (
+    get_request_user,
+    link_user_company,
+    require_company,
+    resolve_user_company,
+    user_companies,
+)
 from core.scoring import AI_SCORE_THRESHOLD, evaluate
 from core.security import get_current_user
 from db import (
@@ -35,6 +43,7 @@ from db import (
 )
 from models.company import CompanyProfile
 from models.tender import SourceSystem, Tender
+from models.user import User
 from models.user_tender_state import UserTenderState
 
 VALID_STATUSES = {"new", "reviewing", "applied", "rejected", "ignored"}
@@ -42,15 +51,19 @@ VALID_STATUSES = {"new", "reviewing", "applied", "rejected", "ignored"}
 router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
-def _resolve_company(session: Session, company_id: int | None) -> CompanyProfile | None:
-    """Explicit company, else the first one (the demo is single-company).
-    None when no company exists yet — callers degrade to default state."""
-    if company_id is not None:
-        company = session.get(CompanyProfile, company_id)
-        if not company:
-            raise HTTPException(status_code=404, detail="Company not found")
-        return company
-    return session.exec(select(CompanyProfile).order_by(CompanyProfile.id)).first()
+def _resolve_company(
+    session: Session, user: User, company_id: int | None
+) -> CompanyProfile | None:
+    """Explicit company (membership-checked, 403 for strangers) or the
+    user's first one. None only when the user has no company yet."""
+    return resolve_user_company(session, user, company_id)
+
+
+def _validated_company_data(data: dict) -> None:
+    try:
+        validate_company_data(data)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from None
 
 
 def _sort_key(sort: str, item: TenderFeedItem) -> tuple:
@@ -75,11 +88,13 @@ def list_tenders(
     limit: int = Query(default=50, le=200),
     offset: int = 0,
     session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
 ) -> list[TenderFeedItem]:
     """The frontend feed (Opportunities + Kanban source): every stored
     tender with its per-company state nested in, filterable and sortable.
-    Bare array — matches lib/types.ts TenderWithState[] one to one."""
-    company = _resolve_company(session, company_id)
+    Bare array — matches lib/types.ts TenderWithState[] one to one. State
+    is always the caller's own company — strangers' scores never leak."""
+    company = _resolve_company(session, user, company_id)
 
     query = select(Tender)
     if county:
@@ -123,13 +138,14 @@ def get_tender(
     external_id: str,
     company_id: int | None = None,
     session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
 ) -> TenderFeedItem:
     """One tender + nested state, for the Tender Analysis screen. Romania
     only for now — external_id is unique within that one source."""
     tender = session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
     if not tender:
         raise HTTPException(status_code=404, detail="Tender not found")
-    company = _resolve_company(session, company_id)
+    company = _resolve_company(session, user, company_id)
     state = None
     if company is not None:
         state = session.exec(
@@ -150,6 +166,7 @@ def update_tender_status_simple(
     patch: TenderStatePatch,
     company_id: int | None = None,
     session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
 ) -> TenderFeedItem:
     """Kanban write path: same semantics as the company-scoped PATCH below
     (status/note only, 404 when the tender was never scored for this
@@ -158,7 +175,7 @@ def update_tender_status_simple(
         raise HTTPException(
             status_code=422, detail=f"status must be one of {sorted(VALID_STATUSES)}"
         )
-    company = _resolve_company(session, company_id)
+    company = _resolve_company(session, user, company_id)
     if company is None:
         raise HTTPException(status_code=404, detail="No company yet")
     tender = session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
@@ -186,23 +203,31 @@ def update_tender_status_simple(
 
 
 @router.get("/company", response_model=CompanyResponse, tags=["companies"])
-def get_company_single(session: Session = Depends(get_session)) -> CompanyResponse:
-    """The demo's single company profile. 404 until one is created via
-    POST /companies."""
-    company = session.exec(select(CompanyProfile).order_by(CompanyProfile.id)).first()
+def get_company_single(
+    company_id: int | None = None,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> CompanyResponse:
+    """The caller's company profile (first one, or the requested one).
+    404 until the onboarding wizard creates one via POST /company."""
+    company = _resolve_company(session, user, company_id)
     if not company:
-        raise HTTPException(status_code=404, detail="No company yet — create one via POST /companies")
+        raise HTTPException(status_code=404, detail="No company yet — complete onboarding via POST /company")
     return CompanyResponse.from_profile(company)
 
 
 @router.get("/company/evidence", response_model=list[EvidenceItem], tags=["companies"])
-def get_company_evidence(session: Session = Depends(get_session)) -> list[EvidenceItem]:
+def get_company_evidence(
+    company_id: int | None = None,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> list[EvidenceItem]:
     """Qualification evidence derived from the company profile's own
     certification list (a real document vault with expiry tracking is
     future work — see API_CHANGES.md)."""
-    company = session.exec(select(CompanyProfile).order_by(CompanyProfile.id)).first()
+    company = _resolve_company(session, user, company_id)
     if not company:
-        raise HTTPException(status_code=404, detail="No company yet — create one via POST /companies")
+        raise HTTPException(status_code=404, detail="No company yet — complete onboarding via POST /company")
     return [
         EvidenceItem(id=f"cert-{i}", name=name, type="Certification", valid_until=None)
         for i, name in enumerate(company.certifications, start=1)
@@ -223,39 +248,53 @@ async def sync_romania_tenders(
 
 
 @router.post("/companies", response_model=CompanyProfile, tags=["companies"])
-def create_company(company: CompanyProfile, session: Session = Depends(get_session)) -> CompanyProfile:
+def create_company(
+    company: CompanyProfile,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> CompanyProfile:
+    _validated_company_data(company.model_dump())
+    apply_industry_preseed(company)
     company.id = None
     session.add(company)
     session.commit()
     session.refresh(company)
+    link_user_company(session, user.id, company.id)
+    session.refresh(company)  # link commit expires attrs; reload before serializing
     return company
 
 
 @router.get("/companies", response_model=CompanyPage, tags=["companies"])
-def list_companies(session: Session = Depends(get_session)) -> CompanyPage:
-    items = list(session.exec(select(CompanyProfile)))
+def list_companies(
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> CompanyPage:
+    items = user_companies(session, user.id)
     return CompanyPage(items=items, total=len(items))
 
 
 @router.get("/companies/{company_id}", response_model=CompanyProfile, tags=["companies"])
-def get_company(company_id: int, session: Session = Depends(get_session)) -> CompanyProfile:
-    company = session.get(CompanyProfile, company_id)
-    if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
-    return company
+def get_company(
+    company_id: int,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> CompanyProfile:
+    return require_company(session, user, company_id)
 
 
 @router.patch("/companies/{company_id}", response_model=CompanyProfile, tags=["companies"])
 def update_company(
-    company_id: int, patch: CompanyProfile, session: Session = Depends(get_session)
+    company_id: int,
+    patch: CompanyProfile,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
 ) -> CompanyProfile:
     """Full-profile update (send the complete object, like PUT) — simplest
     option for a hackathon demo's edit-profile form. id is taken from the
     URL, not the body."""
-    company = session.get(CompanyProfile, company_id)
-    if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
+    company = require_company(session, user, company_id)
     data = patch.model_dump(exclude={"id"})
+    _validated_company_data(data)
     for key, value in data.items():
         setattr(company, key, value)
     session.add(company)
@@ -273,14 +312,13 @@ def list_company_tenders(
     limit: int = Query(default=50, le=200),
     offset: int = 0,
     session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
 ) -> TenderWithStatePage:
     """The frontend's main feed: every tender this company has been scored
     against, with its score/AI/eligibility output and user status/note
     flattened in. Run /score (and /enrich, /extract + eligibility) first —
     a tender never scored for this company won't show up here."""
-    company = session.get(CompanyProfile, company_id)
-    if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
+    require_company(session, user, company_id)
 
     query = select(UserTenderState).where(UserTenderState.company_id == company_id)
     if status:
@@ -314,6 +352,7 @@ def update_tender_status(
     external_id: str,
     patch: TenderStatePatch,
     session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
 ) -> TenderWithState:
     """User-driven status/note update — the only writer of these two
     fields; no automated step touches them."""
@@ -321,6 +360,7 @@ def update_tender_status(
         raise HTTPException(
             status_code=422, detail=f"status must be one of {sorted(VALID_STATUSES)}"
         )
+    require_company(session, user, company_id)
 
     state = session.exec(
         select(UserTenderState).where(
@@ -348,14 +388,14 @@ def update_tender_status(
 
 @router.post("/companies/{company_id}/score", response_model=list[UserTenderState], tags=["companies"])
 def score_tenders_for_company(
-    company_id: int, session: Session = Depends(get_session)
+    company_id: int,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
 ) -> list[UserTenderState]:
     """Score every stored tender against one company profile and persist
     the result. Safe to re-run: upsert_score only ever touches score
     fields, never the AI/eligibility fields other steps will fill in."""
-    company = session.get(CompanyProfile, company_id)
-    if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
+    company = require_company(session, user, company_id)
 
     tenders = session.exec(select(Tender)).all()
     for tender in tenders:
@@ -386,14 +426,13 @@ async def enrich_tenders_for_company(
     limit: int = 20,
     language: str = "en",
     session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
 ) -> list[UserTenderState]:
     """Call the AI layer for tenders that scored high enough to be worth it
     and don't have a summary yet (cost control, same spirit as the scoring
     threshold: don't spend an AI call on something already filtered out).
     `limit` caps how many calls this request makes."""
-    company = session.get(CompanyProfile, company_id)
-    if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
+    company = require_company(session, user, company_id)
 
     candidates = session.exec(
         select(UserTenderState)
@@ -527,16 +566,18 @@ def get_caiet_job(
     tags=["companies"],
 )
 async def check_tender_eligibility(
-    company_id: int, external_id: str, session: Session = Depends(get_session)
+    company_id: int,
+    external_id: str,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
 ) -> UserTenderState:
     """Compare one tender's extracted requirements against one company
     profile. Turnover/similar-experience-value are checked deterministically
     in core.eligibility first; the AI layer gets those results as given
     facts and only has to reason about certification matching and the
-    final justification — not redo arithmetic."""
-    company = session.get(CompanyProfile, company_id)
-    if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
+    final justification — not redo arithmetic. The company is always the
+    caller's own — membership-checked, never a global singleton."""
+    company = require_company(session, user, company_id)
     tender = session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
     if not tender:
         raise HTTPException(status_code=404, detail="Tender not found")

@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from models.company import CompanyProfile
 from models.tender import SourceSystem, Tender
@@ -92,6 +92,12 @@ def seed(api: TestClient):
         session.commit()
         company = session.get(CompanyProfile, 1)
         assert company is not None
+        from core.membership import get_or_create_user, link_user_company
+
+        user = get_or_create_user(
+            session, subject="u", email="u@x.ro", name="U", provider="demo"
+        )
+        link_user_company(session, user.id, company.id)
         session.add(
             UserTenderState(
                 tender_source_system=SourceSystem.ROMANIA_SEAP,
@@ -169,11 +175,15 @@ def test_feed_detail_and_company_scope(seed: TestClient) -> None:
     assert item["state"]["status"] == "reviewing"
     assert seed.get("/api/tenders/nope", headers=_auth()).status_code == 404
 
+    from core.membership import link_user_company
     from db import engine
+    from models.user import User
 
     with Session(engine) as session:
         session.add(CompanyProfile(name="Second Co"))
         session.commit()
+        me = session.exec(select(User).where(User.subject == "u")).one()
+        link_user_company(session, me.id, 2)
     scoped = seed.get("/api/tenders/1001?company_id=2", headers=_auth()).json()
     assert scoped["state"]["score"] is None  # second company never scored it
 

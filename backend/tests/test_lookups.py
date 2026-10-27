@@ -51,6 +51,23 @@ def test_validate_company_data_rejects_unknown_values() -> None:
         validate_company_data({"team_size": -3})
 
 
+def test_apply_industry_preseed_seeds_empty_cpv_only() -> None:
+    from core.lookups import apply_industry_preseed
+    from models.company import CompanyProfile
+
+    fresh = CompanyProfile(name="X", industry="software")
+    apply_industry_preseed(fresh)
+    assert fresh.cpv_codes == ["48000000", "72200000"]
+
+    explicit = CompanyProfile(name="Y", industry="software", cpv_codes=["12345678"])
+    apply_industry_preseed(explicit)
+    assert explicit.cpv_codes == ["12345678"]
+
+    no_industry = CompanyProfile(name="Z")
+    apply_industry_preseed(no_industry)
+    assert no_industry.cpv_codes == []
+
+
 def test_profile_completeness_tracks_minimum_viable_profile() -> None:
     from core.lookups import (
         OPTIONAL_PROFILE_FIELDS,
