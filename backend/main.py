@@ -10,13 +10,14 @@ from db import engine, init_db
 
 app = FastAPI(
     title="Tender Copilot API",
-    version="0.2.0",
+    version="0.3.0",
     description=(
         "Multi-country public-procurement copilot backend. Only Romania/SEAP "
         "is implemented so far — see the repo README for the adapter "
         "architecture. Every /api/* call except /api/auth/* needs an "
         "`Authorization: Bearer <JWT>` header; mint one via /api/auth/demo "
-        "(one click) or /api/auth/google/login. Breaking changes vs 0.1.0 "
+        "(one click) or /api/auth/google/login. Data is multi-tenant: every "
+        "login owns its companies via onboarding. Breaking changes vs 0.2.0 "
         "are listed in backend/API_CHANGES.md."
     ),
 )

@@ -1,3 +1,77 @@
+# API Changes — backend 0.2.0 → 0.3.0 (2026-10-27)
+
+Multi-tenant companies + onboarding wizard backend. The versioned contract
+is [openapi.json](./openapi.json) (regenerated from `main.app`).
+
+## Breaking changes (0.3.0)
+
+1. **No more singleton company.** `GET /company` now returns the *caller's*
+   company (404 until they onboard) instead of the globally-first one, and
+   returns the full `CompanyDetail` shape (a superset of the old
+   `CompanyResponse` — extra keys are ignored by TS, so existing components
+   keep working). Same scoping for `GET /company/evidence`.
+2. **Company routes are membership-checked.** `GET /companies` lists only
+   the caller's companies; `GET/PATCH /companies/{id}` and every
+   `/companies/{id}/*` route (score, enrich, eligibility, tenders, status
+   PATCH) return **403** for a company the caller doesn't belong to (404
+   when the id doesn't exist at all). Feed `?company_id=` behaves the same.
+3. **`/auth/me` grew a field**: `{…, "company_ids": [...]}` (additive).
+   Empty array = show the onboarding wizard.
+4. **New DB tables/columns need a fresh database** (same drill as 0.2.0):
+   new `app_user` + `user_company` tables; `CompanyProfile` gained
+   `industry`, `founded_year`, `team_size`, `target_countries`, `keywords`.
+   Run `python -m scripts.migrate_demo` from `backend/` (timestamped backup
+   first, then delete), re-sync, and onboard the demo company again.
+5. **Eligibility/score input is request-scoped, not global.**
+   `core/eligibility.py` needed no signature change (it already takes the
+   profile as an argument) — the change is that routes now pass the
+   membership-verified company from the JWT identity. Same numbers, honest
+   ownership.
+
+## New endpoints (0.3.0)
+
+| Method & path | Purpose |
+|---|---|
+| `POST /api/company` → **201** | Wizard step 1: create with just `{"name"}` (rest via PATCH). Auto-links caller as owner; industry pre-seeds CPVs when none given. 422 on blank name / bad enum values. |
+| `PATCH /api/company` | Wizard steps 2..N: partial update, only provided keys applied (`exclude_unset`), so steps never clobber each other. Optional `?company_id=` for multi-company users (403 for strangers). 404 with no company. |
+| `GET /api/company/onboarding-status` | `{company_id, complete, required, optional, missing_required, missing_optional}`. No company → `company_id: null`, everything missing. Poll after each step. |
+| `GET /api/company/options` | Dropdown contents: `industries[]` (`key/label/suggested_cpv_codes`), `keywords[]` (`key/label/related_cpv_codes`), `countries[]` (`code/name/source_systems`, currently RO only). Never hardcode these client-side. |
+
+Unchanged: feed/detail/status-PATCH shapes, `/extract`, async `/extract-caiet`
+jobs (tender-global, no company involved), sync, enrich/score/eligibility
+request/response shapes (now just membership-checked).
+
+## Field notes for the wizard (other session)
+
+- Minimum viable profile = `name` + `industry` + `annual_turnover`
+  (`onboarding-status.complete` flips when these are filled). Everything
+  else is optional and can be completed later.
+- `annual_turnover` vs `similar_experience_value` stay **separate fields**
+  (yearly revenue vs cumulative past-contracts value — the eligibility
+  engine compares each against its own threshold; don't merge them in the
+  UI into one "turnover" input).
+- `industry`, `keywords`, `target_countries` are validated server-side
+  against `/company/options` (422 otherwise) — render them as selects from
+  that endpoint, not free text.
+- `certifications` stays a plain string list on the profile (the Archive &
+  Certificates screen keeps reading `GET /company/evidence`, which derives
+  from it). No separate certificate table exists yet.
+- `target_countries` uses ISO codes matching `Tender.country_code`
+  (`["RO"]` for now; the adapter registry grows here).
+- Demo login still works one-click, but the demo identity is now a real
+  `User` row: onboard it once via the wizard and its company persists.
+  Separate Google accounts get fully isolated companies/states.
+- Migration: `python -m scripts.migrate_demo` (backup-first reset; prints
+  next steps). Table `app_user` is explicitly named (PostgreSQL reserves
+  `user`) to keep the SQLite-now-Postgres-later story.
+
+## No new dependencies (0.3.0)
+
+Multi-tenancy, onboarding, and validation are pure SQLModel/Pydantic —
+nothing was added to `requirements.txt`.
+
+---
+
 # API Changes — backend 0.1.0 → 0.2.0 (2026-10-27)
 
 Handoff notes for the frontend session. The versioned contract itself is

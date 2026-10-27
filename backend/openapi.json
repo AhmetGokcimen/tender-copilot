@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Tender Copilot API",
-    "description": "Multi-country public-procurement copilot backend. Only Romania/SEAP is implemented so far — see the repo README for the adapter architecture. Every /api/* call except /api/auth/* needs an `Authorization: Bearer <JWT>` header; mint one via /api/auth/demo (one click) or /api/auth/google/login. Breaking changes vs 0.1.0 are listed in backend/API_CHANGES.md.",
-    "version": "0.2.0"
+    "description": "Multi-country public-procurement copilot backend. Only Romania/SEAP is implemented so far — see the repo README for the adapter architecture. Every /api/* call except /api/auth/* needs an `Authorization: Bearer <JWT>` header; mint one via /api/auth/demo (one click) or /api/auth/google/login. Data is multi-tenant: every login owns its companies via onboarding. Breaking changes vs 0.2.0 are listed in backend/API_CHANGES.md.",
+    "version": "0.3.0"
   },
   "paths": {
     "/api/auth/google/login": {
@@ -158,7 +158,7 @@
           "tenders"
         ],
         "summary": "List Tenders",
-        "description": "The frontend feed (Opportunities + Kanban source): every stored\ntender with its per-company state nested in, filterable and sortable.\nBare array — matches lib/types.ts TenderWithState[] one to one.",
+        "description": "The frontend feed (Opportunities + Kanban source): every stored\ntender with its per-company state nested in, filterable and sortable.\nBare array — matches lib/types.ts TenderWithState[] one to one. State\nis always the caller's own company — strangers' scores never leak.",
         "operationId": "list_tenders_api_tenders_get",
         "security": [
           {
@@ -503,15 +503,233 @@
           "companies"
         ],
         "summary": "Get Company Single",
-        "description": "The demo's single company profile. 404 until one is created via\nPOST /companies.",
+        "description": "The caller's company profile (first one, or the requested one).\n404 until the onboarding wizard creates one via POST /company.",
         "operationId": "get_company_single_api_company_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Company Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CompanyResponse"
+                  "$ref": "#/components/schemas/CompanyDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "companies"
+        ],
+        "summary": "Create Own Company",
+        "description": "Onboarding step 1: create the caller's company with just a name\n(everything else arrives via PATCH /company step by step) and link it\nas owner. An industry given here pre-seeds CPV codes when none are.",
+        "operationId": "create_own_company_api_company_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyProfile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "companies"
+        ],
+        "summary": "Patch Own Company",
+        "description": "Onboarding steps 2..N: partial update — only provided keys are\napplied, so wizard steps never clobber each other.",
+        "operationId": "patch_own_company_api_company_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Company Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/company/onboarding-status": {
+      "get": {
+        "tags": [
+          "companies"
+        ],
+        "summary": "Get Onboarding Status",
+        "description": "Where the wizard stands: which minimum-viable fields (name,\nindustry, annual_turnover — the eligibility engine can't run without\nthem) and which optional fields are still missing.",
+        "operationId": "get_onboarding_status_api_company_onboarding_status_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Company Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/company/options": {
+      "get": {
+        "tags": [
+          "companies"
+        ],
+        "summary": "Get Company Options",
+        "description": "Wizard dropdown contents from the backend (never hardcoded in the\nfrontend): industries with CPV pre-mapping, tender keywords with their\nCPV groups, and the adapter-backed country list.",
+        "operationId": "get_company_options_api_company_options_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyOptions"
                 }
               }
             }
@@ -532,27 +750,55 @@
         "summary": "Get Company Evidence",
         "description": "Qualification evidence derived from the company profile's own\ncertification list (a real document vault with expiry tracking is\nfuture work — see API_CHANGES.md).",
         "operationId": "get_company_evidence_api_company_evidence_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Company Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/EvidenceItem"
                   },
-                  "type": "array",
                   "title": "Response Get Company Evidence Api Company Evidence Get"
                 }
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
           }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        }
       }
     },
     "/api/tenders/sync/romania": {
@@ -1274,7 +1520,7 @@
           "companies"
         ],
         "summary": "Check Tender Eligibility",
-        "description": "Compare one tender's extracted requirements against one company\nprofile. Turnover/similar-experience-value are checked deterministically\nin core.eligibility first; the AI layer gets those results as given\nfacts and only has to reason about certification matching and the\nfinal justification — not redo arithmetic.",
+        "description": "Compare one tender's extracted requirements against one company\nprofile. Turnover/similar-experience-value are checked deterministically\nin core.eligibility first; the AI layer gets those results as given\nfacts and only has to reason about certification matching and the\nfinal justification — not redo arithmetic. The company is always the\ncaller's own — membership-checked, never a global singleton.",
         "operationId": "check_tender_eligibility_api_companies__company_id__tenders_romania__external_id__eligibility_post",
         "security": [
           {
@@ -1348,6 +1594,218 @@
   },
   "components": {
     "schemas": {
+      "CompanyDetail": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "cui": {
+            "type": "string",
+            "title": "Cui"
+          },
+          "industry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Industry"
+          },
+          "founded_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Founded Year"
+          },
+          "team_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Size"
+          },
+          "cpv_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cpv Codes"
+          },
+          "secondary_cpv_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Secondary Cpv Codes"
+          },
+          "annual_capacity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Annual Capacity"
+          },
+          "certifications": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Certifications"
+          },
+          "blacklist_keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Blacklist Keywords"
+          },
+          "annual_turnover": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Annual Turnover"
+          },
+          "annual_turnover_currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Annual Turnover Currency"
+          },
+          "similar_experience_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Similar Experience Value"
+          },
+          "similar_experience_currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Similar Experience Currency"
+          },
+          "similar_experience_contract_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Similar Experience Contract Count"
+          },
+          "target_countries": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Target Countries"
+          },
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Keywords"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "cui",
+          "industry",
+          "founded_year",
+          "team_size",
+          "cpv_codes",
+          "secondary_cpv_codes",
+          "annual_capacity",
+          "certifications",
+          "blacklist_keywords",
+          "annual_turnover",
+          "annual_turnover_currency",
+          "similar_experience_value",
+          "similar_experience_currency",
+          "similar_experience_contract_count",
+          "target_countries",
+          "keywords"
+        ],
+        "title": "CompanyDetail",
+        "description": "Full company profile for the onboarding wizard and profile screens.\nA superset of the frontend's CompanyProfile — extra keys are ignored\nby TS structural typing, so this stays contract-compatible."
+      },
+      "CompanyOptions": {
+        "properties": {
+          "industries": {
+            "items": {
+              "$ref": "#/components/schemas/IndustryOption"
+            },
+            "type": "array",
+            "title": "Industries"
+          },
+          "keywords": {
+            "items": {
+              "$ref": "#/components/schemas/KeywordOption"
+            },
+            "type": "array",
+            "title": "Keywords"
+          },
+          "countries": {
+            "items": {
+              "$ref": "#/components/schemas/CountryOption"
+            },
+            "type": "array",
+            "title": "Countries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "industries",
+          "keywords",
+          "countries"
+        ],
+        "title": "CompanyOptions"
+      },
       "CompanyPage": {
         "properties": {
           "items": {
@@ -1368,6 +1826,218 @@
           "total"
         ],
         "title": "CompanyPage"
+      },
+      "CompanyPatch": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "cui": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cui"
+          },
+          "industry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Industry"
+          },
+          "founded_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Founded Year"
+          },
+          "team_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Size"
+          },
+          "cpv_codes": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cpv Codes"
+          },
+          "secondary_cpv_codes": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Secondary Cpv Codes"
+          },
+          "annual_capacity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Annual Capacity"
+          },
+          "certifications": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Certifications"
+          },
+          "blacklist_keywords": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blacklist Keywords"
+          },
+          "annual_turnover": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Annual Turnover"
+          },
+          "annual_turnover_currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Annual Turnover Currency"
+          },
+          "similar_experience_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Similar Experience Value"
+          },
+          "similar_experience_currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Similar Experience Currency"
+          },
+          "similar_experience_contract_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Similar Experience Contract Count"
+          },
+          "target_countries": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Countries"
+          },
+          "keywords": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Keywords"
+          }
+        },
+        "type": "object",
+        "title": "CompanyPatch",
+        "description": "One wizard step: every field optional, only provided keys are\napplied (exclude_unset) — untouched steps never clobber each other."
       },
       "CompanyProfile": {
         "properties": {
@@ -1396,6 +2066,53 @@
               }
             ],
             "title": "Cui"
+          },
+          "industry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Industry"
+          },
+          "founded_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Founded Year"
+          },
+          "team_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Size"
+          },
+          "target_countries": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Target Countries"
+          },
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Keywords"
           },
           "cpv_codes": {
             "items": {
@@ -1498,65 +2215,31 @@
         ],
         "title": "CompanyProfile"
       },
-      "CompanyResponse": {
+      "CountryOption": {
         "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
+          "code": {
+            "type": "string",
+            "title": "Code"
           },
           "name": {
             "type": "string",
             "title": "Name"
           },
-          "cui": {
-            "type": "string",
-            "title": "Cui"
-          },
-          "cpv_codes": {
+          "source_systems": {
             "items": {
               "type": "string"
             },
             "type": "array",
-            "title": "Cpv Codes"
-          },
-          "annual_capacity": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Annual Capacity"
-          },
-          "certifications": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Certifications"
-          },
-          "blacklist_keywords": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Blacklist Keywords"
+            "title": "Source Systems"
           }
         },
         "type": "object",
         "required": [
-          "id",
+          "code",
           "name",
-          "cui",
-          "cpv_codes",
-          "annual_capacity",
-          "certifications",
-          "blacklist_keywords"
+          "source_systems"
         ],
-        "title": "CompanyResponse",
-        "description": "Single-company view matching the frontend's CompanyProfile."
+        "title": "CountryOption"
       },
       "EvidenceItem": {
         "properties": {
@@ -1604,6 +2287,58 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "IndustryOption": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "suggested_cpv_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Suggested Cpv Codes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "suggested_cpv_codes"
+        ],
+        "title": "IndustryOption"
+      },
+      "KeywordOption": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "related_cpv_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Related Cpv Codes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "related_cpv_codes"
+        ],
+        "title": "KeywordOption"
       },
       "OcrJobResponse": {
         "properties": {
@@ -1668,6 +2403,63 @@
           "updated_at"
         ],
         "title": "OcrJobResponse"
+      },
+      "OnboardingStatus": {
+        "properties": {
+          "company_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Id"
+          },
+          "complete": {
+            "type": "boolean",
+            "title": "Complete"
+          },
+          "required": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Required"
+          },
+          "optional": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Optional"
+          },
+          "missing_required": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Required"
+          },
+          "missing_optional": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Optional"
+          }
+        },
+        "type": "object",
+        "required": [
+          "company_id",
+          "complete",
+          "required",
+          "optional",
+          "missing_required",
+          "missing_optional"
+        ],
+        "title": "OnboardingStatus"
       },
       "SourceSystem": {
         "type": "string",
