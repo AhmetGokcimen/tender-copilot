@@ -58,6 +58,22 @@ def get_latest_job(
     ).first()
 
 
+def reap_stale_jobs(session: Session) -> int:
+    """Fail jobs left running/pending by a previous process lifetime —
+    BackgroundTasks are in-process, so a restart orphans them. Called on
+    startup so a stale 'running' row can never block a re-POST forever."""
+    stale = session.exec(
+        select(OcrJob).where(OcrJob.status.in_(ACTIVE_JOB_STATUSES))
+    ).all()
+    for job in stale:
+        job.status = "failed"
+        job.error = "Server restarted while this job was unfinished — retry."
+        job.updated_at = datetime.now(UTC)
+        session.add(job)
+    session.commit()
+    return len(stale)
+
+
 async def run_caiet_job(job_id: int, *, adapter: RomaniaSeapAdapter | None = None) -> None:
     """Background worker. Own DB session (never the request's). Every
     outcome lands on the job row — nothing raises past this point."""

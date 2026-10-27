@@ -2,21 +2,39 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Tender Copilot API",
-    "description": "Multi-country public-procurement copilot backend. Only Romania/SEAP is implemented so far â€” see the repo README for the adapter architecture. Open (no auth) unless API_KEY is set in the backend's environment, in which case every /api/* call needs an X-API-Key header.",
-    "version": "0.1.0"
+    "description": "Multi-country public-procurement copilot backend. Only Romania/SEAP is implemented so far — see the repo README for the adapter architecture. Every /api/* call except /api/auth/* needs an `Authorization: Bearer <JWT>` header; mint one via /api/auth/demo (one click) or /api/auth/google/login. Breaking changes vs 0.1.0 are listed in backend/API_CHANGES.md.",
+    "version": "0.2.0"
   },
   "paths": {
-    "/api/tenders": {
+    "/api/auth/google/login": {
       "get": {
         "tags": [
-          "tenders"
+          "auth"
         ],
-        "summary": "List Tenders",
-        "description": "Raw tender listing, filterable and paginated. For a feed that\nincludes score/AI/eligibility output for a specific company, use\nGET /companies/{id}/tenders instead.",
-        "operationId": "list_tenders_api_tenders_get",
+        "summary": "Google Login",
+        "operationId": "google_login_api_auth_google_login_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/google/callback": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Google Callback",
+        "operationId": "google_callback_api_auth_google_callback_get",
         "parameters": [
           {
-            "name": "country_code",
+            "name": "code",
             "in": "query",
             "required": false,
             "schema": {
@@ -28,7 +46,156 @@
                   "type": "null"
                 }
               ],
-              "title": "Country Code"
+              "title": "Code"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State"
+            }
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Error"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/demo": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Demo Login",
+        "description": "Zero-friction demo entry: mints the fixed demo user's long-lived\ntoken and hands it to the frontend — no Google account needed.",
+        "operationId": "demo_login_api_auth_demo_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Me",
+        "operationId": "me_api_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Me Api Auth Me Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/tenders": {
+      "get": {
+        "tags": [
+          "tenders"
+        ],
+        "summary": "List Tenders",
+        "description": "The frontend feed (Opportunities + Kanban source): every stored\ntender with its per-company state nested in, filterable and sortable.\nBare array — matches lib/types.ts TenderWithState[] one to one.",
+        "operationId": "list_tenders_api_tenders_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Company Id"
+            }
+          },
+          {
+            "name": "county",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "County"
             }
           },
           {
@@ -45,6 +212,101 @@
                 }
               ],
               "title": "Cpv Code"
+            }
+          },
+          {
+            "name": "min_value",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Value"
+            }
+          },
+          {
+            "name": "min_score",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Score"
+            }
+          },
+          {
+            "name": "procedure_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Procedure Type"
+            }
+          },
+          {
+            "name": "eligible",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Eligible"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "match",
+                "deadline",
+                "value"
+              ],
+              "type": "string",
+              "default": "match",
+              "title": "Sort"
             }
           },
           {
@@ -67,22 +329,6 @@
               "default": 0,
               "title": "Offset"
             }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
-            }
           }
         ],
         "responses": {
@@ -91,7 +337,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TenderPage"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TenderFeedItem"
+                  },
+                  "title": "Response List Tenders Api Tenders Get"
                 }
               }
             }
@@ -109,6 +359,202 @@
         }
       }
     },
+    "/api/tenders/{external_id}": {
+      "get": {
+        "tags": [
+          "tenders"
+        ],
+        "summary": "Get Tender",
+        "description": "One tender + nested state, for the Tender Analysis screen. Romania\nonly for now — external_id is unique within that one source.",
+        "operationId": "get_tender_api_tenders__external_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "external_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "External Id"
+            }
+          },
+          {
+            "name": "company_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Company Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenderFeedItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tenders/{external_id}/status": {
+      "patch": {
+        "tags": [
+          "tenders"
+        ],
+        "summary": "Update Tender Status Simple",
+        "description": "Kanban write path: same semantics as the company-scoped PATCH below\n(status/note only, 404 when the tender was never scored for this\ncompany), without the company id in the URL.",
+        "operationId": "update_tender_status_simple_api_tenders__external_id__status_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "external_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "External Id"
+            }
+          },
+          {
+            "name": "company_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Company Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenderStatePatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenderFeedItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/company": {
+      "get": {
+        "tags": [
+          "companies"
+        ],
+        "summary": "Get Company Single",
+        "description": "The demo's single company profile. 404 until one is created via\nPOST /companies.",
+        "operationId": "get_company_single_api_company_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/company/evidence": {
+      "get": {
+        "tags": [
+          "companies"
+        ],
+        "summary": "Get Company Evidence",
+        "description": "Qualification evidence derived from the company profile's own\ncertification list (a real document vault with expiry tracking is\nfuture work — see API_CHANGES.md).",
+        "operationId": "get_company_evidence_api_company_evidence_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EvidenceItem"
+                  },
+                  "type": "array",
+                  "title": "Response Get Company Evidence Api Company Evidence Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/tenders/sync/romania": {
       "post": {
         "tags": [
@@ -116,6 +562,11 @@
         ],
         "summary": "Sync Romania Tenders",
         "operationId": "sync_romania_tenders_api_tenders_sync_romania_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "cpv_codes",
@@ -164,22 +615,6 @@
               "default": 30,
               "title": "Days"
             }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
-            }
           }
         ],
         "responses": {
@@ -211,39 +646,45 @@
       }
     },
     "/api/companies": {
+      "get": {
+        "tags": [
+          "companies"
+        ],
+        "summary": "List Companies",
+        "operationId": "list_companies_api_companies_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
       "post": {
         "tags": [
           "companies"
         ],
         "summary": "Create Company",
         "operationId": "create_company_api_companies_post",
-        "parameters": [
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
-            }
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CompanyProfile"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -266,54 +707,12 @@
               }
             }
           }
-        }
-      },
-      "get": {
-        "tags": [
-          "companies"
-        ],
-        "summary": "List Companies",
-        "operationId": "list_companies_api_companies_get",
-        "parameters": [
+        },
+        "security": [
           {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
-            }
+            "HTTPBearer": []
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompanyPage"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
+        ]
       }
     },
     "/api/companies/{company_id}": {
@@ -323,6 +722,11 @@
         ],
         "summary": "Get Company",
         "operationId": "get_company_api_companies__company_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "company_id",
@@ -331,22 +735,6 @@
             "schema": {
               "type": "integer",
               "title": "Company Id"
-            }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
             }
           }
         ],
@@ -378,8 +766,13 @@
           "companies"
         ],
         "summary": "Update Company",
-        "description": "Full-profile update (send the complete object, like PUT) â€” simplest\noption for a hackathon demo's edit-profile form. id is taken from the\nURL, not the body.",
+        "description": "Full-profile update (send the complete object, like PUT) — simplest\noption for a hackathon demo's edit-profile form. id is taken from the\nURL, not the body.",
         "operationId": "update_company_api_companies__company_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "company_id",
@@ -388,22 +781,6 @@
             "schema": {
               "type": "integer",
               "title": "Company Id"
-            }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
             }
           }
         ],
@@ -447,8 +824,13 @@
           "companies"
         ],
         "summary": "List Company Tenders",
-        "description": "The frontend's main feed: every tender this company has been scored\nagainst, with its score/AI/eligibility output and user status/note\nflattened in. Run /score (and /enrich, /extract + eligibility) first â€”\na tender never scored for this company won't show up here.",
+        "description": "The frontend's main feed: every tender this company has been scored\nagainst, with its score/AI/eligibility output and user status/note\nflattened in. Run /score (and /enrich, /extract + eligibility) first —\na tender never scored for this company won't show up here.",
         "operationId": "list_company_tenders_api_companies__company_id__tenders_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "company_id",
@@ -527,22 +909,6 @@
               "default": 0,
               "title": "Offset"
             }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
-            }
           }
         ],
         "responses": {
@@ -575,8 +941,13 @@
           "companies"
         ],
         "summary": "Update Tender Status",
-        "description": "User-driven status/note update â€” the only writer of these two\nfields; no automated step touches them.",
+        "description": "User-driven status/note update — the only writer of these two\nfields; no automated step touches them.",
         "operationId": "update_tender_status_api_companies__company_id__tenders_romania__external_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "company_id",
@@ -594,22 +965,6 @@
             "schema": {
               "type": "string",
               "title": "External Id"
-            }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
             }
           }
         ],
@@ -655,6 +1010,11 @@
         "summary": "Score Tenders For Company",
         "description": "Score every stored tender against one company profile and persist\nthe result. Safe to re-run: upsert_score only ever touches score\nfields, never the AI/eligibility fields other steps will fill in.",
         "operationId": "score_tenders_for_company_api_companies__company_id__score_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "company_id",
@@ -663,22 +1023,6 @@
             "schema": {
               "type": "integer",
               "title": "Company Id"
-            }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
             }
           }
         ],
@@ -718,6 +1062,11 @@
         "summary": "Enrich Tenders For Company",
         "description": "Call the AI layer for tenders that scored high enough to be worth it\nand don't have a summary yet (cost control, same spirit as the scoring\nthreshold: don't spend an AI call on something already filtered out).\n`limit` caps how many calls this request makes.",
         "operationId": "enrich_tenders_for_company_api_companies__company_id__enrich_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "company_id",
@@ -746,22 +1095,6 @@
               "type": "string",
               "default": "en",
               "title": "Language"
-            }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
             }
           }
         ],
@@ -801,6 +1134,11 @@
         "summary": "Extract Romania Tender Requirements",
         "description": "Fetch the real eligibility/qualification text from SEAP's detail\nendpoint and run it through the AI extraction layer. Idempotent: safe\nto re-run, it only ever touches extracted_requirements/\nextraction_confidence on this one tender.",
         "operationId": "extract_romania_tender_requirements_api_tenders_romania__external_id__extract_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "external_id",
@@ -809,22 +1147,6 @@
             "schema": {
               "type": "string",
               "title": "External Id"
-            }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
             }
           }
         ],
@@ -852,14 +1174,113 @@
         }
       }
     },
+    "/api/tenders/romania/{external_id}/extract-caiet": {
+      "post": {
+        "tags": [
+          "tenders"
+        ],
+        "summary": "Extract Caiet Async",
+        "description": "Start async caiet extraction (download -> OCR -> requirements).\nReturns 202 with a pending job; poll the GET below. A fully-scanned\ncaiet takes minutes, so this never blocks. Re-POSTing while a job is\nstill active returns that job (200) instead of double-spending.",
+        "operationId": "extract_caiet_async_api_tenders_romania__external_id__extract_caiet_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "external_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "External Id"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OcrJobResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "tenders"
+        ],
+        "summary": "Get Caiet Job",
+        "description": "Latest caiet-extraction job for this tender: pending/running/done\n(+ result) /failed (+ error). 404 when never started.",
+        "operationId": "get_caiet_job_api_tenders_romania__external_id__extract_caiet_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "external_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "External Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OcrJobResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/companies/{company_id}/tenders/romania/{external_id}/eligibility": {
       "post": {
         "tags": [
           "companies"
         ],
         "summary": "Check Tender Eligibility",
-        "description": "Compare one tender's extracted requirements against one company\nprofile. Turnover/similar-experience-value are checked deterministically\nin core.eligibility first; the AI layer gets those results as given\nfacts and only has to reason about certification matching and the\nfinal justification â€” not redo arithmetic.",
+        "description": "Compare one tender's extracted requirements against one company\nprofile. Turnover/similar-experience-value are checked deterministically\nin core.eligibility first; the AI layer gets those results as given\nfacts and only has to reason about certification matching and the\nfinal justification — not redo arithmetic.",
         "operationId": "check_tender_eligibility_api_companies__company_id__tenders_romania__external_id__eligibility_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "company_id",
@@ -877,22 +1298,6 @@
             "schema": {
               "type": "string",
               "title": "External Id"
-            }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
             }
           }
         ],
@@ -980,6 +1385,17 @@
           "name": {
             "type": "string",
             "title": "Name"
+          },
+          "cui": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cui"
           },
           "cpv_codes": {
             "items": {
@@ -1082,6 +1498,100 @@
         ],
         "title": "CompanyProfile"
       },
+      "CompanyResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "cui": {
+            "type": "string",
+            "title": "Cui"
+          },
+          "cpv_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cpv Codes"
+          },
+          "annual_capacity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Annual Capacity"
+          },
+          "certifications": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Certifications"
+          },
+          "blacklist_keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Blacklist Keywords"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "cui",
+          "cpv_codes",
+          "annual_capacity",
+          "certifications",
+          "blacklist_keywords"
+        ],
+        "title": "CompanyResponse",
+        "description": "Single-company view matching the frontend's CompanyProfile."
+      },
+      "EvidenceItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "valid_until": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid Until"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "type"
+        ],
+        "title": "EvidenceItem"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1094,6 +1604,70 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "OcrJobResponse": {
+        "properties": {
+          "job_id": {
+            "type": "integer",
+            "title": "Job Id"
+          },
+          "tender_source_system": {
+            "$ref": "#/components/schemas/SourceSystem"
+          },
+          "tender_external_id": {
+            "type": "string",
+            "title": "Tender External Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "job_id",
+          "tender_source_system",
+          "tender_external_id",
+          "status",
+          "result",
+          "error",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "OcrJobResponse"
       },
       "SourceSystem": {
         "type": "string",
@@ -1227,6 +1801,40 @@
             ],
             "title": "Source Url"
           },
+          "county": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "County"
+          },
+          "procedure_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Procedure Type"
+          },
+          "clarification_deadline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clarification Deadline"
+          },
           "ai_title_simplified": {
             "anyOf": [
               {
@@ -1281,36 +1889,261 @@
         ],
         "title": "Tender"
       },
-      "TenderPage": {
+      "TenderFeedItem": {
         "properties": {
-          "items": {
+          "source_system": {
+            "$ref": "#/components/schemas/SourceSystem"
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id"
+          },
+          "country_code": {
+            "type": "string",
+            "title": "Country Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "cpv_codes": {
             "items": {
-              "$ref": "#/components/schemas/Tender"
+              "type": "string"
             },
             "type": "array",
-            "title": "Items"
+            "title": "Cpv Codes"
           },
-          "total": {
-            "type": "integer",
-            "title": "Total"
+          "estimated_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Value"
           },
-          "limit": {
-            "type": "integer",
-            "title": "Limit"
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
           },
-          "offset": {
-            "type": "integer",
-            "title": "Offset"
+          "publication_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publication Date"
+          },
+          "submission_deadline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submission Deadline"
+          },
+          "raw_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw Description"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "authority": {
+            "type": "string",
+            "title": "Authority"
+          },
+          "county": {
+            "type": "string",
+            "title": "County"
+          },
+          "procedure_type": {
+            "type": "string",
+            "title": "Procedure Type"
+          },
+          "clarification_deadline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clarification Deadline"
+          },
+          "state": {
+            "$ref": "#/components/schemas/TenderFeedState"
           }
         },
         "type": "object",
         "required": [
-          "items",
-          "total",
-          "limit",
-          "offset"
+          "source_system",
+          "external_id",
+          "country_code",
+          "title",
+          "cpv_codes",
+          "estimated_value",
+          "currency",
+          "publication_date",
+          "submission_deadline",
+          "raw_description",
+          "source_url",
+          "authority",
+          "county",
+          "procedure_type",
+          "clarification_deadline",
+          "state"
         ],
-        "title": "TenderPage"
+        "title": "TenderFeedItem",
+        "description": "The frontend feed shape: tender display fields + nested per-company\nstate. Unknown display values degrade to \"\" (county/authority) or the\ndocumented \"open\" default (procedure_type) so the contract never breaks."
+      },
+      "TenderFeedState": {
+        "properties": {
+          "score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "score_reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Score Reasons"
+          },
+          "ai_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ai Summary"
+          },
+          "ai_title_simplified": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ai Title Simplified"
+          },
+          "extracted_requirements": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Extracted Requirements"
+          },
+          "eligible": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eligible"
+          },
+          "matched_requirements": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Matched Requirements"
+          },
+          "unmet_requirements": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Unmet Requirements"
+          },
+          "missing_documents": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Documents"
+          },
+          "eligibility_justification": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eligibility Justification"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "score",
+          "score_reasons",
+          "ai_summary",
+          "ai_title_simplified",
+          "extracted_requirements",
+          "eligible",
+          "matched_requirements",
+          "unmet_requirements",
+          "missing_documents",
+          "eligibility_justification",
+          "status"
+        ],
+        "title": "TenderFeedState",
+        "description": "Nested `state` of the frontend's TenderWithState (lib/types.ts)."
       },
       "TenderStatePatch": {
         "properties": {
@@ -1782,6 +2615,12 @@
           "type"
         ],
         "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }

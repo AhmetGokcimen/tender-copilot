@@ -86,6 +86,22 @@ def test_get_latest_job(api: TestClient, monkeypatch) -> None:
     assert latest["status"] == "pending"
 
 
+def test_reap_stale_jobs_fails_orphans(api: TestClient) -> None:
+    from db import engine
+    from models.ocr_job import OcrJob
+
+    _seed_tender()
+    with Session(engine) as session:
+        from core.caiet_jobs import create_job, reap_stale_jobs
+
+        orphan_id = create_job(session, SourceSystem.ROMANIA_SEAP, "1001").id
+        assert reap_stale_jobs(session) == 1
+        orphan = session.get(OcrJob, orphan_id)
+        assert orphan.status == "failed"
+        assert "restart" in orphan.error
+        assert reap_stale_jobs(session) == 0  # done/failed rows untouched
+
+
 def test_jobs_need_auth(api: TestClient) -> None:
     assert api.post("/api/tenders/romania/1001/extract-caiet").status_code == 401
     assert api.get("/api/tenders/romania/1001/extract-caiet").status_code == 401
