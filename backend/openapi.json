@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Tender Copilot API",
-    "description": "Multi-country public-procurement copilot backend. Only Romania/SEAP is implemented so far — see the repo README for the adapter architecture. Every /api/* call except /api/auth/* needs an `Authorization: Bearer <JWT>` header; mint one via /api/auth/demo (one click) or /api/auth/google/login. Data is multi-tenant: every login owns its companies via onboarding. Breaking changes vs 0.2.0 are listed in backend/API_CHANGES.md.",
-    "version": "0.3.0"
+    "description": "Multi-country public-procurement copilot backend. Only Romania/SEAP is implemented so far — see the repo README for the adapter architecture. Every /api/* call except /api/auth/* needs an `Authorization: Bearer <JWT>` header; mint one via /api/auth/demo (one click) or /api/auth/google/login. Data is multi-tenant: every login owns its companies via onboarding. Breaking changes vs 0.3.0 are listed in backend/API_CHANGES.md.",
+    "version": "0.4.0"
   },
   "paths": {
     "/api/auth/google/login": {
@@ -158,7 +158,7 @@
           "tenders"
         ],
         "summary": "List Tenders",
-        "description": "The frontend feed (Opportunities + Kanban source): every stored\ntender with its per-company state nested in, filterable and sortable.\nBare array — matches lib/types.ts TenderWithState[] one to one. State\nis always the caller's own company — strangers' scores never leak.",
+        "description": "The frontend feed (Opportunities + Kanban source): every stored\ntender with its per-company state nested in, filterable and sortable.\nBare array — matches lib/types.ts TenderWithState[] one to one. State\nis always the caller's own company — strangers' scores never leak.\nCountry authorization rides along as pure information: the feed never\nhides tenders for it unless the caller opts in via authorization_status.",
         "operationId": "list_tenders_api_tenders_get",
         "security": [
           {
@@ -276,6 +276,22 @@
                 }
               ],
               "title": "Eligible"
+            }
+          },
+          {
+            "name": "authorization_status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization Status"
             }
           },
           {
@@ -643,6 +659,187 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CompanyDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/company/authorizations": {
+      "get": {
+        "tags": [
+          "companies"
+        ],
+        "summary": "List Own Authorizations",
+        "description": "The caller's per-country bidding-readiness rows (self-declared —\nnever system-verified). Rows exist for picked target countries plus\nany country opened proactively via the PATCH below.",
+        "operationId": "list_own_authorizations_api_company_authorizations_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Company Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CountryAuthorizationItem"
+                  },
+                  "title": "Response List Own Authorizations Api Company Authorizations Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/company/authorizations/{country_code}": {
+      "patch": {
+        "tags": [
+          "companies"
+        ],
+        "summary": "Upsert Own Authorization",
+        "description": "Create-or-update one country row: status and/or notes. Only\nprovided fields change. Works for target and non-target countries.",
+        "operationId": "upsert_own_authorization_api_company_authorizations__country_code__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "country_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Country Code"
+            }
+          },
+          {
+            "name": "company_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Company Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorizationPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountryAuthorizationItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/countries/{country_code}/requirements": {
+      "get": {
+        "tags": [
+          "countries"
+        ],
+        "summary": "Get Country Requirements Route",
+        "description": "Static bidding-requirements reference per country. Romania carries\na real write-up; everything else is an honest placeholder until its\nadapter extension lands. General information, never legal advice.",
+        "operationId": "get_country_requirements_route_api_countries__country_code__requirements_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "country_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Country Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountryRequirements"
                 }
               }
             }
@@ -1594,6 +1791,34 @@
   },
   "components": {
     "schemas": {
+      "AuthorizationPatch": {
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "requirement_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requirement Notes"
+          }
+        },
+        "type": "object",
+        "title": "AuthorizationPatch"
+      },
       "CompanyDetail": {
         "properties": {
           "id": {
@@ -2215,6 +2440,42 @@
         ],
         "title": "CompanyProfile"
       },
+      "CountryAuthorizationItem": {
+        "properties": {
+          "country_code": {
+            "type": "string",
+            "title": "Country Code"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "requirement_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requirement Notes"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "country_code",
+          "status",
+          "requirement_notes",
+          "updated_at"
+        ],
+        "title": "CountryAuthorizationItem"
+      },
       "CountryOption": {
         "properties": {
           "code": {
@@ -2240,6 +2501,41 @@
           "source_systems"
         ],
         "title": "CountryOption"
+      },
+      "CountryRequirements": {
+        "properties": {
+          "country_code": {
+            "type": "string",
+            "title": "Country Code"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "guide_available": {
+            "type": "boolean",
+            "title": "Guide Available"
+          },
+          "guidance": {
+            "type": "string",
+            "title": "Guidance"
+          }
+        },
+        "type": "object",
+        "required": [
+          "country_code",
+          "name",
+          "guide_available",
+          "guidance"
+        ],
+        "title": "CountryRequirements"
       },
       "EvidenceItem": {
         "properties": {
@@ -2883,6 +3179,17 @@
             ],
             "title": "Eligible"
           },
+          "country_authorization_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country Authorization Status"
+          },
           "matched_requirements": {
             "items": {
               "type": "string"
@@ -2928,6 +3235,7 @@
           "ai_title_simplified",
           "extracted_requirements",
           "eligible",
+          "country_authorization_status",
           "matched_requirements",
           "unmet_requirements",
           "missing_documents",

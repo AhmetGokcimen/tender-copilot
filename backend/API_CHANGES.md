@@ -1,3 +1,73 @@
+# API Changes — backend 0.3.0 → 0.4.0 (2026-10-27)
+
+Country bidding-readiness tracking (the onboarding wizard's step 7 +
+eligibility-screen warning box backend). The versioned contract is
+[openapi.json](./openapi.json) (regenerated from `main.app`).
+
+## What this is (read first)
+
+NOT a visa form and NOT a legal verification system: a self-declared
+tracking/reminder mechanism. Each company keeps one row per country —
+`not_started` / `in_progress` / `obtained` plus free-text notes — stating
+whether it believes it holds that country's bidding prerequisites (e.g.
+Romania's ONRC registration). The system never verifies anything; the
+status is the user's own word. No document checks, no registry APIs —
+deliberately out of scope.
+
+## New endpoints (0.4.0, all additive — nothing breaking)
+
+| Method & path | Purpose |
+|---|---|
+| `GET /api/company/authorizations` | Caller's rows (`country_code`, `status`, `requirement_notes`, `updated_at`), ordered by code. Optional `?company_id=` (membership-checked, 403 for strangers). 404 with no company. |
+| `PATCH /api/company/authorizations/{country_code}` | Upsert one row: `{status?, requirement_notes?}`, only provided keys change. Works for target and non-target countries (proactive rows allowed). 422 on bad status / malformed code. |
+| `GET /api/countries/{country_code}/requirements` | Static reference: `{country_code, name, guide_available, guidance}`. Romania carries a real informational write-up (with a not-legal-advice disclaimer); Poland/Bulgaria/others return honest placeholders. 422 on malformed codes. |
+
+## Changed behavior (0.4.0)
+
+1. **Feed `state` gained `country_authorization_status`** (`"not_started" |
+   "in_progress" | "obtained" | null`, null = no row opened). It sits next
+   to `eligible` but is a strictly separate dimension — criterion fit vs
+   country readiness are never merged into one boolean. Additive key: old
+   frontend builds ignore it.
+2. **The feed never filters on it by default.** `GET /api/tenders` returns
+   every tender regardless of authorization; an unauthorized country only
+   shows up as data. Opt-in filter `?authorization_status=` exists for callers
+   that explicitly want it.
+3. **Target countries auto-seed rows.** Setting `target_countries` via any
+   company write path (`POST`/`PATCH /company`, `POST`/`PATCH
+   /companies[/{id}]`) creates `not_started` rows for newly picked countries.
+   Additive only: existing statuses are never reset, and removing a country
+   from targets does not delete its row.
+4. **`core/eligibility.py` untouched.** The True/False/None verdict still
+   answers only "do you meet this tender's criteria".
+5. **Fresh database needed** (same drill as before): new
+   `countryauthorization` table. Run `python -m scripts.migrate_demo` from
+   `backend/`, re-sync, re-onboard.
+
+## Frontend wiring (other session)
+
+- **Wizard step 7**: replace the "coming soon" placeholder with a country
+  list from the company's `target_countries` (plus an "add another country"
+  affordance): each row shows `GET /countries/{code}/requirements`
+  guidance, a 3-state status control + notes field bound to `PATCH
+  /company/authorizations/{code}`. The step stays skippable and never
+  blocks `onboarding-status.complete` (required fields unchanged).
+- **Eligibility screen**: render a separate warning box next to (not merged
+  with) the eligible/maybe/not verdict, driven by
+  `state.country_authorization_status`: `obtained`/null show nothing (null
+  = user hasn't tracked this country yet — not an accusation),
+  `not_started`/`in_progress` show "bidding readiness for {country}:
+  {status}" with a link to the wizard step. Never hide or disable the
+  tender over it.
+- **Feed**: no filtering changes needed; the optional
+  `?authorization_status=` param exists if a future filter UI wants it.
+
+## No new dependencies (0.4.0)
+
+Pure SQLModel/Pydantic — nothing added to `requirements.txt`.
+
+---
+
 # API Changes — backend 0.2.0 → 0.3.0 (2026-10-27)
 
 Multi-tenant companies + onboarding wizard backend. The versioned contract
