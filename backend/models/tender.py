@@ -51,6 +51,12 @@ class Tender(SQLModel, table=True):
     raw_description: str | None = None
     source_url: str | None = None
 
+    # Feed display fields (nullable: enriched at sync time, may be missing
+    # for tenders synced before enrichment or when SEAP omits them).
+    county: str | None = None  # from section-1 NUTS code ("RO421 Arad" -> "Arad")
+    procedure_type: str | None = None  # open|restricted|negotiated|direct|framework
+    clarification_deadline: datetime | None = None  # deadline minus section-1 noDays
+
     # AI output intrinsic to the tender (see module docstring) — never
     # overwritten by a re-fetch.
     ai_title_simplified: str | None = None

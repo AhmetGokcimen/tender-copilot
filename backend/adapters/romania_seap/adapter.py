@@ -40,7 +40,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
 import httpx
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import RetryError, retry, stop_after_attempt, wait_exponential
 
 from adapters.base import TenderSourceAdapter
 from ai.ocr import unwrap_p7s
@@ -48,6 +48,7 @@ from models.tender import SourceSystem, Tender
 
 BASE_URL = "https://e-licitatie.ro"
 LIST_PATH = "/api-pub/NoticeCommon/GetCNoticeList/"
+SECTION1_PATH = "/api-pub/NoticeCommon/GetSection1View/"
 SECTION3_PATH = "/api-pub/NoticeCommon/GetSection3View/"
 SECTION_FILES_PATH = "/api-pub/NoticeCommon/GetDfNoticeSectionFiles/"
 
@@ -76,6 +77,36 @@ class NoticeDocument:
 class CaietDocument:
     name: str
     pdf_bytes: bytes
+
+
+# SEAP procedure vocabulary (sysProcedureType.text + sysContractAssigmentType.text,
+# confirmed against live list responses) -> frontend ProcedureType union.
+# "Procedura simplificata" is a below-threshold open competition (no shortlist),
+# so it maps to "open". Anything unrecognized also defaults to "open" — the
+# frontend union has no "unknown" member (see backend/API_CHANGES.md).
+def map_procedure_type(
+    sys_procedure: dict | None, sys_assignment: dict | None
+) -> str:
+    assignment = ((sys_assignment or {}).get("text") or "").lower()
+    if "acord-cadru" in assignment or "acord cadru" in assignment:
+        return "framework"
+    text = ((sys_procedure or {}).get("text") or "").lower()
+    if "restransa" in text:
+        return "restricted"
+    if "negociere" in text or "dialog competitiv" in text:
+        return "negotiated"
+    if "directa" in text:
+        return "direct"
+    return "open"
+
+
+def _parse_county(section1: dict) -> str | None:
+    """County from the buyer address NUTS code ("RO421 Arad" -> "Arad").
+    The dedicated `county` field is null in practice; NUTS-3 is the county."""
+    nuts = ((section1.get("noticeEntityAddress") or {}).get("nutsCode") or {}).get("text")
+    if not nuts or " " not in nuts:
+        return None
+    return nuts.split(" ", 1)[1].strip() or None
 
 
 class RomaniaSeapAdapter(TenderSourceAdapter):
@@ -116,7 +147,45 @@ class RomaniaSeapAdapter(TenderSourceAdapter):
                 by_id.setdefault(str(item["cNoticeId"]), item)
             await asyncio.sleep(REQUEST_DELAY_SECONDS)
 
-        return [self._map_notice(item) for item in by_id.values()]
+        tenders = [self._map_notice(item) for item in by_id.values()]
+        await self._enrich_display_fields(tenders)
+        return tenders
+
+    async def _enrich_display_fields(self, tenders: list[Tender]) -> None:
+        """Fill county + clarification_deadline from each tender's Section I
+        view (buyer NUTS code, clarification noDays). Bounded-concurrency so
+        a large sync stays fast; a tender whose Section I fails keeps nulls
+        rather than failing the whole sync."""
+        semaphore = asyncio.Semaphore(6)
+
+        async def enrich_one(tender: Tender) -> None:
+            if tender.notice_type_id is None:
+                return
+            async with semaphore:
+                try:
+                    section1 = await self.fetch_section1(
+                        tender.external_id, tender.notice_type_id
+                    )
+                except (httpx.HTTPError, RetryError, ValueError, KeyError):
+                    return
+            tender.county = _parse_county(section1)
+            no_days = section1.get("noDays")
+            if isinstance(no_days, int) and tender.submission_deadline is not None:
+                tender.clarification_deadline = tender.submission_deadline - timedelta(
+                    days=no_days
+                )
+
+        await asyncio.gather(*(enrich_one(t) for t in tenders))
+
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, max=10))
+    async def fetch_section1(self, external_id: str, notice_type_id: int) -> dict:
+        """Section I (buyer identity/address + procedure parameters)."""
+        response = await self._client.get(
+            SECTION1_PATH,
+            params={"initNoticeId": external_id, "sysNoticeTypeId": notice_type_id},
+        )
+        response.raise_for_status()
+        return response.json()
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, max=10))
     async def _search(
@@ -178,6 +247,9 @@ class RomaniaSeapAdapter(TenderSourceAdapter):
                 notice.get("maxTenderReceiptDeadline") or notice.get("minTenderReceiptDeadline")
             ),
             source_url=_notice_url(notice),
+            procedure_type=map_procedure_type(
+                notice.get("sysProcedureType"), notice.get("sysContractAssigmentType")
+            ),
         )
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, max=10))

@@ -5,6 +5,7 @@ from sqlmodel import Field, SQLModel
 class CompanyProfile(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str
+    cui: str | None = None  # Romanian fiscal ID, e.g. "RO18402933"
 
     # CPV codes the company bids as main/sole contractor on.
     cpv_codes: list[str] = Field(default_factory=list, sa_column=Column(JSON))
