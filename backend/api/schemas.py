@@ -226,28 +226,108 @@ class TenderFeedItem(BaseModel):
         )
 
 
-class CompanyResponse(BaseModel):
-    """Single-company view matching the frontend's CompanyProfile."""
+class CompanyDetail(BaseModel):
+    """Full company profile for the onboarding wizard and profile screens.
+    A superset of the frontend's CompanyProfile — extra keys are ignored
+    by TS structural typing, so this stays contract-compatible."""
 
     id: int
     name: str
     cui: str
+    industry: str | None
+    founded_year: int | None
+    team_size: int | None
     cpv_codes: list[str]
+    secondary_cpv_codes: list[str]
     annual_capacity: float | None
     certifications: list[str]
     blacklist_keywords: list[str]
+    annual_turnover: float | None
+    annual_turnover_currency: str | None
+    similar_experience_value: float | None
+    similar_experience_currency: str | None
+    similar_experience_contract_count: int | None
+    target_countries: list[str]
+    keywords: list[str]
 
     @classmethod
-    def from_profile(cls, profile: CompanyProfile) -> "CompanyResponse":
+    def from_profile(cls, profile: CompanyProfile) -> "CompanyDetail":
         return cls(
             id=profile.id,
             name=profile.name,
             cui=profile.cui or "",
+            industry=profile.industry,
+            founded_year=profile.founded_year,
+            team_size=profile.team_size,
             cpv_codes=profile.cpv_codes,
+            secondary_cpv_codes=profile.secondary_cpv_codes,
             annual_capacity=profile.annual_capacity,
             certifications=profile.certifications,
             blacklist_keywords=profile.blacklist_keywords,
+            annual_turnover=profile.annual_turnover,
+            annual_turnover_currency=profile.annual_turnover_currency,
+            similar_experience_value=profile.similar_experience_value,
+            similar_experience_currency=profile.similar_experience_currency,
+            similar_experience_contract_count=profile.similar_experience_contract_count,
+            target_countries=profile.target_countries,
+            keywords=profile.keywords,
         )
+
+
+class CompanyPatch(BaseModel):
+    """One wizard step: every field optional, only provided keys are
+    applied (exclude_unset) — untouched steps never clobber each other."""
+
+    name: str | None = None
+    cui: str | None = None
+    industry: str | None = None
+    founded_year: int | None = None
+    team_size: int | None = None
+    cpv_codes: list[str] | None = None
+    secondary_cpv_codes: list[str] | None = None
+    annual_capacity: float | None = None
+    certifications: list[str] | None = None
+    blacklist_keywords: list[str] | None = None
+    annual_turnover: float | None = None
+    annual_turnover_currency: str | None = None
+    similar_experience_value: float | None = None
+    similar_experience_currency: str | None = None
+    similar_experience_contract_count: int | None = None
+    target_countries: list[str] | None = None
+    keywords: list[str] | None = None
+
+
+class OnboardingStatus(BaseModel):
+    company_id: int | None
+    complete: bool
+    required: list[str]
+    optional: list[str]
+    missing_required: list[str]
+    missing_optional: list[str]
+
+
+class IndustryOption(BaseModel):
+    key: str
+    label: str
+    suggested_cpv_codes: list[str]
+
+
+class KeywordOption(BaseModel):
+    key: str
+    label: str
+    related_cpv_codes: list[str]
+
+
+class CountryOption(BaseModel):
+    code: str
+    name: str
+    source_systems: list[str]
+
+
+class CompanyOptions(BaseModel):
+    industries: list[IndustryOption]
+    keywords: list[KeywordOption]
+    countries: list[CountryOption]
 
 
 class EvidenceItem(BaseModel):

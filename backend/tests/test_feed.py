@@ -22,8 +22,11 @@ STATE_KEYS = {
     "unmet_requirements", "missing_documents", "eligibility_justification", "status",
 }
 COMPANY_KEYS = {
-    "id", "name", "cui", "cpv_codes", "annual_capacity", "certifications",
-    "blacklist_keywords",
+    "id", "name", "cui", "industry", "founded_year", "team_size",
+    "cpv_codes", "secondary_cpv_codes", "annual_capacity", "certifications",
+    "blacklist_keywords", "annual_turnover", "annual_turnover_currency",
+    "similar_experience_value", "similar_experience_currency",
+    "similar_experience_contract_count", "target_countries", "keywords",
 }
 
 EXTRACTION = {

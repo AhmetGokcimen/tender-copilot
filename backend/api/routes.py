@@ -11,10 +11,16 @@ from ai.client import (
     build_tender_summary,
 )
 from api.schemas import (
+    CompanyDetail,
+    CompanyOptions,
     CompanyPage,
-    CompanyResponse,
+    CompanyPatch,
+    CountryOption,
     EvidenceItem,
+    IndustryOption,
+    KeywordOption,
     OcrJobResponse,
+    OnboardingStatus,
     TenderFeedItem,
     TenderStatePatch,
     TenderWithState,
@@ -22,7 +28,16 @@ from api.schemas import (
 )
 from core.caiet_jobs import create_job, get_active_job, get_latest_job, run_caiet_job
 from core.eligibility import run_numeric_checks
-from core.lookups import apply_industry_preseed, validate_company_data
+from core.lookups import (
+    COUNTRIES,
+    INDUSTRIES,
+    KEYWORDS,
+    OPTIONAL_PROFILE_FIELDS,
+    REQUIRED_PROFILE_FIELDS,
+    apply_industry_preseed,
+    profile_completeness,
+    validate_company_data,
+)
 from core.membership import (
     get_request_user,
     link_user_company,
@@ -202,18 +217,119 @@ def update_tender_status_simple(
     return TenderFeedItem.from_triple(tender, state, company)
 
 
-@router.get("/company", response_model=CompanyResponse, tags=["companies"])
+@router.get("/company", response_model=CompanyDetail, tags=["companies"])
 def get_company_single(
     company_id: int | None = None,
     session: Session = Depends(get_session),
     user: User = Depends(get_request_user),
-) -> CompanyResponse:
+) -> CompanyDetail:
     """The caller's company profile (first one, or the requested one).
     404 until the onboarding wizard creates one via POST /company."""
     company = _resolve_company(session, user, company_id)
     if not company:
         raise HTTPException(status_code=404, detail="No company yet — complete onboarding via POST /company")
-    return CompanyResponse.from_profile(company)
+    return CompanyDetail.from_profile(company)
+
+
+@router.post("/company", response_model=CompanyDetail, status_code=201, tags=["companies"])
+def create_own_company(
+    company: CompanyProfile,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> CompanyDetail:
+    """Onboarding step 1: create the caller's company with just a name
+    (everything else arrives via PATCH /company step by step) and link it
+    as owner. An industry given here pre-seeds CPV codes when none are."""
+    if not company.name.strip():
+        raise HTTPException(status_code=422, detail="Company name must not be blank")
+    _validated_company_data(company.model_dump())
+    apply_industry_preseed(company)
+    company.id = None
+    session.add(company)
+    session.commit()
+    session.refresh(company)
+    link_user_company(session, user.id, company.id)
+    session.refresh(company)  # link commit expires attrs; reload before serializing
+    return CompanyDetail.from_profile(company)
+
+
+@router.patch("/company", response_model=CompanyDetail, tags=["companies"])
+def patch_own_company(
+    patch: CompanyPatch,
+    company_id: int | None = None,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> CompanyDetail:
+    """Onboarding steps 2..N: partial update — only provided keys are
+    applied, so wizard steps never clobber each other."""
+    company = _resolve_company(session, user, company_id)
+    if company is None:
+        raise HTTPException(status_code=404, detail="No company yet — create one via POST /company")
+    data = patch.model_dump(exclude_unset=True)
+    _validated_company_data(data)
+    if "name" in data and not (data["name"] or "").strip():
+        raise HTTPException(status_code=422, detail="Company name must not be blank")
+    for key, value in data.items():
+        setattr(company, key, value)
+    if "industry" in data and "cpv_codes" not in data:
+        apply_industry_preseed(company)
+    session.add(company)
+    session.commit()
+    session.refresh(company)
+    return CompanyDetail.from_profile(company)
+
+
+@router.get("/company/onboarding-status", response_model=OnboardingStatus, tags=["companies"])
+def get_onboarding_status(
+    company_id: int | None = None,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> OnboardingStatus:
+    """Where the wizard stands: which minimum-viable fields (name,
+    industry, annual_turnover — the eligibility engine can't run without
+    them) and which optional fields are still missing."""
+    company = _resolve_company(session, user, company_id)
+    if company is None:
+        return OnboardingStatus(
+            company_id=None,
+            complete=False,
+            required=REQUIRED_PROFILE_FIELDS,
+            optional=OPTIONAL_PROFILE_FIELDS,
+            missing_required=REQUIRED_PROFILE_FIELDS,
+            missing_optional=OPTIONAL_PROFILE_FIELDS,
+        )
+    status = profile_completeness(company)
+    return OnboardingStatus(
+        company_id=company.id,
+        complete=status["complete"],
+        required=REQUIRED_PROFILE_FIELDS,
+        optional=OPTIONAL_PROFILE_FIELDS,
+        missing_required=status["missing_required"],
+        missing_optional=status["missing_optional"],
+    )
+
+
+@router.get("/company/options", response_model=CompanyOptions, tags=["companies"])
+def get_company_options() -> CompanyOptions:
+    """Wizard dropdown contents from the backend (never hardcoded in the
+    frontend): industries with CPV pre-mapping, tender keywords with their
+    CPV groups, and the adapter-backed country list."""
+    return CompanyOptions(
+        industries=[
+            IndustryOption(
+                key=i.key, label=i.label, suggested_cpv_codes=i.suggested_cpv_codes
+            )
+            for i in INDUSTRIES.values()
+        ],
+        keywords=[
+            KeywordOption(key=k.key, label=k.label, related_cpv_codes=k.related_cpv_codes)
+            for k in KEYWORDS.values()
+        ],
+        countries=[
+            CountryOption(code=c.code, name=c.name, source_systems=c.source_systems)
+            for c in COUNTRIES
+        ],
+    )
 
 
 @router.get("/company/evidence", response_model=list[EvidenceItem], tags=["companies"])
