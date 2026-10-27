@@ -103,6 +103,28 @@ export interface AuthMe {
 /** Backend per-company tender status (models/user_tender_state.py). */
 export type PipelineStatus = 'new' | 'reviewing' | 'applied' | 'rejected' | 'ignored';
 
+/** Self-declared bidding readiness per country — never system-verified. */
+export type AuthorizationStatus = 'not_started' | 'in_progress' | 'obtained';
+
+export interface CountryAuthorization {
+  country_code: string;
+  status: AuthorizationStatus;
+  requirement_notes: string | null;
+  updated_at: string; // ISO datetime
+}
+
+export interface AuthorizationPatch {
+  status?: AuthorizationStatus | null;
+  requirement_notes?: string | null;
+}
+
+export interface CountryRequirements {
+  country_code: string;
+  name: string | null;
+  guide_available: boolean;
+  guidance: string;
+}
+
 export interface TenderState {
   score: number | null; // 0-100 AI match score
   score_reasons: string[];
@@ -110,6 +132,12 @@ export interface TenderState {
   ai_title_simplified: string | null;
   extracted_requirements: string[];
   eligible: boolean | null; // null = uncertain, never guessed
+  /**
+   * Separate dimension from `eligible`: the company's self-declared
+   * readiness for this tender's country. Null = no row opened yet.
+   * The two must never be merged into one verdict in the UI.
+   */
+  country_authorization_status: AuthorizationStatus | null;
   matched_requirements: string[];
   unmet_requirements: string[];
   /** Qualification documents the company still needs to provide. */

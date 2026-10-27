@@ -6,6 +6,8 @@ import type {
   AuthMe,
   CompanyOptions,
   CompanyProfile,
+  CountryAuthorization,
+  CountryRequirements,
   EvidenceDocument,
   TenderWithState,
 } from './types';
@@ -47,6 +49,7 @@ export const MOCK_TENDERS: TenderWithState[] = [
         'Delivery in 3 lots within 60 days of signing',
       ],
       eligible: true,
+      country_authorization_status: null,
       matched_requirements: [
         'Minimum 3 similar contracts in the last 3 years',
         'ISO 9001:2015 certified quality management',
@@ -92,6 +95,7 @@ export const MOCK_TENDERS: TenderWithState[] = [
         'At least 2 certified network engineers on staff',
       ],
       eligible: true,
+      country_authorization_status: null,
       matched_requirements: [
         '4-hour response SLA, 8x5 helpdesk in Romanian',
         'Local support point in Cluj county',
@@ -137,6 +141,7 @@ export const MOCK_TENDERS: TenderWithState[] = [
         'Turnover ≥ RON 25M in construction works',
       ],
       eligible: false,
+      country_authorization_status: null,
       matched_requirements: [],
       unmet_requirements: [
         'ANRE-authorized construction crews',
@@ -182,6 +187,7 @@ export const MOCK_TENDERS: TenderWithState[] = [
         'Installation + staff training included',
       ],
       eligible: null,
+      country_authorization_status: null,
       matched_requirements: ['Installation + staff training included'],
       unmet_requirements: [
         'ANMDM medical-device distribution authorization',
@@ -226,6 +232,7 @@ export const MOCK_TENDERS: TenderWithState[] = [
         'Romanian-language deliverables, on-site workshops in Bucharest',
       ],
       eligible: true,
+      country_authorization_status: null,
       matched_requirements: [
         'At least 2 digitalization strategies delivered for public bodies',
         'Team: 1 PMP project manager + 2 senior consultants',
@@ -271,6 +278,7 @@ export const MOCK_TENDERS: TenderWithState[] = [
         'Assembly in 60 classrooms across Iași county',
       ],
       eligible: false,
+      country_authorization_status: null,
       matched_requirements: [],
       unmet_requirements: [
         'Furniture manufacturing or authorized distribution references',
@@ -316,6 +324,7 @@ export const MOCK_TENDERS: TenderWithState[] = [
         'On-premise deployment with source-code escrow',
       ],
       eligible: true,
+      country_authorization_status: null,
       matched_requirements: [
         'ISO/IEC 27001:2022 information security certification',
         'At least 1 e-signature integration delivered for a public body',
@@ -361,6 +370,7 @@ export const MOCK_TENDERS: TenderWithState[] = [
         'Daily delivery fleet with temperature control',
       ],
       eligible: false,
+      country_authorization_status: null,
       matched_requirements: [],
       unmet_requirements: [
         'Sanitary-veterinary operating authorization',
@@ -406,6 +416,7 @@ export const MOCK_TENDERS: TenderWithState[] = [
         'Online ordering portal for subsequent contracts',
       ],
       eligible: true,
+      country_authorization_status: null,
       matched_requirements: [
         'Distributor authorization from at least 2 hardware vendors',
         '48h delivery SLA to Cluj-Napoca',
@@ -483,6 +494,44 @@ export const MOCK_OPTIONS: CompanyOptions = {
   ],
   countries: [{ code: 'RO', name: 'Romania', source_systems: ['romania_seap'] }],
 };
+
+/**
+ * Mock seed: mirrors the backend auto-seed (target RO picked → not_started
+ * row). The mock auth store persists user edits on top of this.
+ */
+export const MOCK_AUTHORIZATIONS: CountryAuthorization[] = [
+  {
+    country_code: 'RO',
+    status: 'not_started',
+    requirement_notes: null,
+    updated_at: '2026-10-27T10:00:00Z',
+  },
+];
+
+/**
+ * Mock copy of GET /countries/{code}/requirements. Real mode always
+ * fetches from the backend — never import outside mock branches.
+ */
+const MOCK_REQUIREMENT_GUIDES: Record<string, CountryRequirements> = {
+  RO: {
+    country_code: 'RO',
+    name: 'Romania',
+    guide_available: true,
+    guidance:
+      'Companies bidding in Romania typically need to be registered with the Trade Registry (ONRC) or act through a locally registered branch, subsidiary, or authorized representative; some procedures additionally require ANAF fiscal registration. Exact requirements vary by procedure — confirm with the contracting authority or a local advisor. General information only, not legal advice.',
+  },
+};
+
+export function mockRequirementsFor(code: string): CountryRequirements {
+  return (
+    MOCK_REQUIREMENT_GUIDES[code] ?? {
+      country_code: code,
+      name: null,
+      guide_available: false,
+      guidance: `Country-specific guidance for ${code} is coming soon. Confirm requirements with the contracting authority or a local advisor. General information only, not legal advice.`,
+    }
+  );
+}
 
 export const MOCK_ME: AuthMe = {
   sub: 'demo',

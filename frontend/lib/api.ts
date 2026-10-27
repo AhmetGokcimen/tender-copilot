@@ -9,16 +9,27 @@
  */
 import type {
   AuthMe,
+  AuthorizationPatch,
   CompanyOptions,
   CompanyPatch,
   CompanyProfile,
+  CountryAuthorization,
+  CountryRequirements,
   EvidenceDocument,
   OnboardingStatus,
   TenderWithState,
 } from './types';
-import { MOCK_COMPANY, MOCK_EVIDENCE, MOCK_ME, MOCK_OPTIONS, MOCK_TENDERS } from './mock-data';
+import {
+  MOCK_COMPANY,
+  MOCK_EVIDENCE,
+  MOCK_ME,
+  MOCK_OPTIONS,
+  MOCK_TENDERS,
+  mockRequirementsFor,
+} from './mock-data';
 import { authHeaders } from './auth';
 import { deriveOnboardingStatus } from './onboarding';
+import { useAuthorizationStore } from '@/stores/useAuthorizationStore';
 import { useCompanyStore } from '@/stores/useCompanyStore';
 
 export const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== 'false';
@@ -68,10 +79,25 @@ async function patch<T>(path: string, body: unknown): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+/**
+ * Mock derivation mirroring the backend feed: each tender's
+ * country_authorization_status comes from the auth store row for that
+ * tender's country (null when no row exists).
+ */
+function overlayAuthorization(tenders: TenderWithState[]): TenderWithState[] {
+  const byCountry = new Map(
+    useAuthorizationStore.getState().rows.map((r) => [r.country_code, r.status]),
+  );
+  return tenders.map((t) => ({
+    ...t,
+    state: { ...t.state, country_authorization_status: byCountry.get(t.country_code) ?? null },
+  }));
+}
+
 export async function fetchTenders(): Promise<TenderWithState[]> {
   if (USE_MOCK) {
     await delay(350);
-    return structuredClone(MOCK_TENDERS);
+    return overlayAuthorization(structuredClone(MOCK_TENDERS));
   }
   return get<TenderWithState[]>('/tenders');
 }
@@ -81,7 +107,7 @@ export async function fetchTender(externalId: string): Promise<TenderWithState> 
     await delay(250);
     const tender = MOCK_TENDERS.find((t) => t.external_id === externalId);
     if (!tender) throw new Error(`tender-not-found:${externalId}`);
-    return structuredClone(tender);
+    return overlayAuthorization(structuredClone([tender]))[0];
   }
   return get<TenderWithState>(`/tenders/${encodeURIComponent(externalId)}`);
 }
@@ -143,4 +169,38 @@ export async function patchCompany(body: CompanyPatch): Promise<CompanyProfile> 
     return structuredClone(useCompanyStore.getState().profile);
   }
   return patch<CompanyProfile>('/company', body);
+}
+
+export async function fetchAuthorizations(): Promise<CountryAuthorization[]> {
+  if (USE_MOCK) {
+    await delay(100);
+    return structuredClone(useAuthorizationStore.getState().rows);
+  }
+  return get<CountryAuthorization[]>('/company/authorizations');
+}
+
+export async function patchAuthorization(
+  countryCode: string,
+  body: AuthorizationPatch,
+): Promise<CountryAuthorization> {
+  if (USE_MOCK) {
+    await delay(200);
+    const store = useAuthorizationStore.getState();
+    store.upsert(countryCode, body);
+    const row = useAuthorizationStore.getState().rows.find((r) => r.country_code === countryCode);
+    if (!row) throw new Error(`authorization-not-found:${countryCode}`);
+    return structuredClone(row);
+  }
+  return patch<CountryAuthorization>(
+    `/company/authorizations/${encodeURIComponent(countryCode)}`,
+    body,
+  );
+}
+
+export async function fetchCountryRequirements(countryCode: string): Promise<CountryRequirements> {
+  if (USE_MOCK) {
+    await delay(100);
+    return structuredClone(mockRequirementsFor(countryCode));
+  }
+  return get<CountryRequirements>(`/countries/${encodeURIComponent(countryCode)}/requirements`);
 }

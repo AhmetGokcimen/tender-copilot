@@ -4,17 +4,20 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   USE_MOCK,
   createCompany,
+  fetchAuthorizations,
   fetchCompany,
   fetchCompanyOptions,
+  fetchCountryRequirements,
   fetchEvidence,
   fetchMe,
   fetchOnboardingStatus,
   fetchTender,
   fetchTenders,
+  patchAuthorization,
   patchCompany,
 } from './api';
 import { useAuthToken } from './auth';
-import type { CompanyPatch, CompanyProfile } from './types';
+import type { AuthorizationPatch, CompanyPatch, CompanyProfile } from './types';
 
 export const qk = {
   tenders: ['tenders'] as const,
@@ -24,6 +27,8 @@ export const qk = {
   me: ['me'] as const,
   companyOptions: ['company-options'] as const,
   onboardingStatus: ['onboarding-status'] as const,
+  authorizations: ['authorizations'] as const,
+  countryRequirements: (code: string) => ['country-requirements', code] as const,
 };
 
 export function useTenders() {
@@ -103,6 +108,32 @@ export function usePatchCompany() {
     onSuccess: (profile: CompanyProfile) => {
       client.setQueryData(qk.company, profile);
       void invalidate();
+    },
+  });
+}
+
+export function useAuthorizations() {
+  return useQuery({ queryKey: qk.authorizations, queryFn: fetchAuthorizations });
+}
+
+export function useCountryRequirements(code: string | null, enabled = true) {
+  return useQuery({
+    queryKey: qk.countryRequirements(code ?? ''),
+    queryFn: () => fetchCountryRequirements(code as string),
+    enabled: enabled && code !== null,
+    staleTime: 30 * 60_000,
+  });
+}
+
+export function usePatchAuthorization() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ code, patch }: { code: string; patch: AuthorizationPatch }) =>
+      patchAuthorization(code, patch),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: qk.authorizations });
+      void client.invalidateQueries({ queryKey: qk.tenders });
+      void client.invalidateQueries({ queryKey: ['tender'] });
     },
   });
 }
