@@ -4,22 +4,25 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/routing';
 import {
+  useAuthorizations,
   useCompany,
   useCompanyOptions,
   useCreateCompany,
   useOnboardingStatus,
+  usePatchAuthorization,
   usePatchCompany,
 } from '@/lib/queries';
 import { Icon } from '@/components/Icon';
 import type { CompanyPatch, CompanyProfile } from '@/lib/types';
 import {
+  AuthorizationsStep,
   BasicsStep,
   ExperienceStep,
   MarketsStep,
   MoneyStep,
   NameStep,
-  PermitsStep,
   TeamStep,
+  type ReadinessDraft,
 } from '@/components/onboarding/steps';
 
 interface Draft {
@@ -83,7 +86,7 @@ const STEP_TITLES = [
   'stepExperience',
   'stepTeam',
   'stepMarkets',
-  'stepPermits',
+  'stepReadiness',
 ] as const;
 
 const STEP_REQUIRED = [true, true, true, false, false, false, false];
@@ -136,24 +139,52 @@ export default function OnboardingPage() {
   const companyQuery = useCompany();
   const { data: options } = useCompanyOptions();
   const { data: status } = useOnboardingStatus();
+  const authQuery = useAuthorizations();
   const createMut = useCreateCompany();
   const patchMut = usePatchCompany();
+  const authMut = usePatchAuthorization();
 
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<Draft | null>(null);
+  const [authDraft, setAuthDraft] = useState<Record<string, ReadinessDraft>>({});
 
   useEffect(() => {
     if (draft || !(companyQuery.isFetched || status)) return;
     setDraft(fromCompany(companyQuery.data));
   }, [draft, companyQuery.isFetched, companyQuery.data, status]);
 
+  // Step-7 rows: union of picked targets and already-opened rows. Merges
+  // additively so going back to edit markets never wipes typed notes.
+  const codes = [
+    ...new Set([
+      ...(companyQuery.data?.target_countries ?? []),
+      ...(authQuery.data ?? []).map((r) => r.country_code),
+    ]),
+  ].sort();
+  useEffect(() => {
+    setAuthDraft((prev) => {
+      const nextDraft = { ...prev };
+      let changed = false;
+      for (const code of codes) {
+        if (!nextDraft[code]) {
+          const row = (authQuery.data ?? []).find((r) => r.country_code === code);
+          nextDraft[code] = { status: row?.status ?? 'not_started', notes: row?.requirement_notes ?? '' };
+          changed = true;
+        }
+      }
+      return changed ? nextDraft : prev;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companyQuery.data, authQuery.data]);
+
   useEffect(() => {
     createMut.reset();
     patchMut.reset();
+    authMut.reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
-  if (!draft || !options) {
+  if (!draft || !options || !authQuery.isFetched) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-surface px-margin">
         <p className="font-body-md text-body-md text-on-surface-variant">{tc('loading')}</p>
@@ -162,12 +193,33 @@ export default function OnboardingPage() {
   }
 
   const hasCompany = (status?.company_id ?? companyQuery.data?.id) != null;
-  const saving = createMut.isPending || patchMut.isPending;
-  const saveError = createMut.error ?? patchMut.error;
+  const saving = createMut.isPending || patchMut.isPending || authMut.isPending;
+  const saveError = createMut.error ?? patchMut.error ?? authMut.error;
   const last = step === STEP_TITLES.length - 1;
   const set = (slice: Partial<Draft>) => setDraft({ ...draft, ...slice });
 
   const next = () => {
+    if (step === STEP_TITLES.length - 1) {
+      const changed = codes.filter((code) => {
+        const row = (authQuery.data ?? []).find((r) => r.country_code === code);
+        const slice = authDraft[code] ?? { status: 'not_started', notes: '' };
+        return (
+          row?.status !== slice.status || (row?.requirement_notes ?? '') !== slice.notes
+        );
+      });
+      Promise.all(
+        changed.map((code) => {
+          const slice = authDraft[code] ?? { status: 'not_started' as const, notes: '' };
+          return authMut.mutateAsync({
+            code,
+            patch: { status: slice.status, requirement_notes: slice.notes || null },
+          });
+        }),
+      )
+        .then(() => router.push('/app'))
+        .catch(() => undefined);
+      return;
+    }
     const patch = patchFor(step, draft);
     if (patch === null) {
       router.push('/app');
@@ -258,7 +310,19 @@ export default function OnboardingPage() {
               options={options}
             />
           )}
-          {step === 6 && <PermitsStep />}
+          {step === 6 && (
+            <AuthorizationsStep
+              codes={codes}
+              drafts={authDraft}
+              onChange={(code, slice) =>
+                setAuthDraft((prev) => {
+                  const existing = prev[code] ?? { status: 'not_started' as const, notes: '' };
+                  return { ...prev, [code]: { ...existing, ...slice } };
+                })
+              }
+              countryName={(code) => options.countries.find((c) => c.code === code)?.name ?? code}
+            />
+          )}
 
           {saveError && (
             <p className="flex items-start gap-space-xs font-body-md text-body-md text-error">

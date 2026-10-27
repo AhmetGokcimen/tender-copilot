@@ -1,9 +1,9 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import type { CompanyOptions } from '@/lib/types';
+import type { AuthorizationStatus, CompanyOptions } from '@/lib/types';
 import { CheckboxRow } from '@/components/CheckboxRow';
-import { Icon } from '@/components/Icon';
+import { AuthorizationRow } from '@/components/AuthorizationRow';
 
 export const INPUT =
   'h-10 w-full rounded border border-outline-variant bg-surface-container-lowest px-space-sm font-body-md text-body-md text-on-surface outline-none focus:border-navy focus:shadow-[0_0_0_3px_rgba(11,19,43,0.12)]';
@@ -234,15 +234,43 @@ export function MarketsStep({
   );
 }
 
-export function PermitsStep() {
-  const t = useTranslations('onboarding');
+export interface ReadinessDraft {
+  status: AuthorizationStatus;
+  notes: string;
+}
+
+export function AuthorizationsStep({
+  codes,
+  drafts,
+  onChange,
+  countryName,
+}: {
+  codes: string[];
+  drafts: Record<string, ReadinessDraft>;
+  onChange: (code: string, slice: Partial<ReadinessDraft>) => void;
+  countryName: (code: string) => string;
+}) {
+  const t = useTranslations('authorization');
   return (
-    <div className="flex items-start gap-space-sm rounded border border-outline-variant bg-surface-container-low p-space-md">
-      <Icon name="schedule" size="sm" className="mt-0.5 text-on-surface-variant" />
-      <div className="flex flex-col gap-1">
-        <p className="font-label-md text-label-md font-semibold text-on-surface">{t('permitsTitle')}</p>
-        <p className="font-body-md text-body-md text-on-surface-variant">{t('permitsBody')}</p>
-      </div>
+    <div className="flex flex-col gap-space-md">
+      <p className="font-body-md text-body-md text-on-surface-variant">{t('intro')}</p>
+      {codes.length === 0 && (
+        <p className="font-body-md text-body-md text-on-surface-variant">{t('empty')}</p>
+      )}
+      {codes.map((code) => {
+        const draft = drafts[code] ?? { status: 'not_started' as const, notes: '' };
+        return (
+          <AuthorizationRow
+            key={code}
+            code={code}
+            label={`${countryName(code)} (${code})`}
+            status={draft.status}
+            notes={draft.notes}
+            onStatus={(status) => onChange(code, { status })}
+            onNotes={(notes) => onChange(code, { notes })}
+          />
+        );
+      })}
     </div>
   );
 }
