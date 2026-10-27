@@ -17,7 +17,7 @@ from api.schemas import (
 )
 from core.eligibility import run_numeric_checks
 from core.scoring import AI_SCORE_THRESHOLD, evaluate
-from core.security import verify_api_key
+from core.security import get_current_user
 from db import (
     get_session,
     upsert_ai_justification,
@@ -33,7 +33,7 @@ from models.user_tender_state import UserTenderState
 
 VALID_STATUSES = {"new", "reviewing", "applied", "rejected", "ignored"}
 
-router = APIRouter(dependencies=[Depends(verify_api_key)])
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @router.get("/tenders", response_model=TenderPage, tags=["tenders"])

@@ -9,6 +9,7 @@ tenacity>=9.0
 pymupdf>=1.24
 pillow>=10.0
 asn1crypto>=1.5
+pyjwt>=2.8
 
 # dev
 pytest>=8.3

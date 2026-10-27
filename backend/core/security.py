@@ -1,14 +1,25 @@
-"""Optional shared-secret API key. Disabled by default (settings.api_key
-empty) so local frontend integration needs zero setup; set API_KEY in the
-environment to require it once this is deployed somewhere public."""
+"""Bearer-token guard for every /api/* route (except /api/auth/*, which is
+wired without it). Tokens are minted by core.auth via Google OAuth or the
+demo login — there is no anonymous access anymore (see API_CHANGES.md)."""
 
-from fastapi import Header, HTTPException
+import jwt
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from core.config import settings
+from core.auth import CurrentUser, decode_access_token
+
+_bearer = HTTPBearer(auto_error=False)
 
 
-def verify_api_key(x_api_key: str | None = Header(default=None)) -> None:
-    if not settings.api_key:
-        return
-    if x_api_key != settings.api_key:
-        raise HTTPException(status_code=401, detail="Missing or invalid X-API-Key header")
+def get_current_user(
+    creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
+) -> CurrentUser:
+    if creds is None or creds.scheme.lower() != "bearer":
+        raise HTTPException(
+            status_code=401,
+            detail="Missing bearer token — log in via /api/auth/demo or /api/auth/google/login",
+        )
+    try:
+        return decode_access_token(creds.credentials)
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token") from None

@@ -1,7 +1,8 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env")
     app_env: str = "development"
     log_level: str = "info"
 
@@ -14,18 +15,21 @@ class Settings(BaseSettings):
 
     database_url: str = "sqlite:///./data/app.db"
 
-    # Demo-friendly by default: empty = no auth enforced, so the frontend
-    # can integrate with zero setup. Set this to require an X-API-Key
-    # header on every /api/* request — recommended only once this is
-    # deployed somewhere public, to stop random traffic from burning
-    # through the Meta API key's quota.
-    api_key: str = ""
-    # Comma-separated list of allowed origins, or "*" for any (the
-    # hackathon-demo default — tighten before a real deployment).
-    allowed_origins: str = "*"
-
-    class Config:
-        env_file = ".env"
+    # JWT secret for session/OAuth-state tokens. The default keeps local
+    # demo setup frictionless but is NOT safe for anything public — set a
+    # long random JWT_SECRET there (see .env.example).
+    jwt_secret: str = "dev-only-insecure-change-me"
+    # Google OAuth 2.0 (authorization code flow). Empty = Google login
+    # disabled (the /auth/demo login still works).
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    # Where the frontend runs (OAuth/demo redirects land here) and where
+    # this API runs (the Google redirect URI is {backend_url}/api/auth/...).
+    frontend_url: str = "http://localhost:3000"
+    backend_url: str = "http://localhost:8000"
+    # Comma-separated CORS allow-list. No "*" default: dev (localhost:3000)
+    # plus whatever prod origin is deployed, nothing else.
+    allowed_origins: str = "http://localhost:3000"
 
 
 settings = Settings()
