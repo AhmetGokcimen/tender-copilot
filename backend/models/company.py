@@ -7,6 +7,15 @@ class CompanyProfile(SQLModel, table=True):
     name: str
     cui: str | None = None  # Romanian fiscal ID, e.g. "RO18402933"
 
+    # Onboarding profile fields (all nullable: the wizard fills them in
+    # steps — see core/lookups.py for the required/optional split and the
+    # enums backing industry/keywords/target_countries).
+    industry: str | None = None  # key into core.lookups.INDUSTRIES
+    founded_year: int | None = None
+    team_size: int | None = None
+    target_countries: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    keywords: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+
     # CPV codes the company bids as main/sole contractor on.
     cpv_codes: list[str] = Field(default_factory=list, sa_column=Column(JSON))
     # Related CPV codes the company only wants as a subcontracting lead
