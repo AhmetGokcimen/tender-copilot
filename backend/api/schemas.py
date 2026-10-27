@@ -10,6 +10,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from models.company import CompanyProfile
+from models.ocr_job import OcrJob
 from models.tender import SourceSystem, Tender
 from models.user_tender_state import UserTenderState
 
@@ -254,3 +255,27 @@ class EvidenceItem(BaseModel):
     name: str
     type: str
     valid_until: str | None = None
+
+
+class OcrJobResponse(BaseModel):
+    job_id: int
+    tender_source_system: SourceSystem
+    tender_external_id: str
+    status: str  # pending | running | done | failed
+    result: dict | None
+    error: str | None
+    created_at: datetime
+    updated_at: datetime
+
+    @classmethod
+    def from_job(cls, job: OcrJob) -> "OcrJobResponse":
+        return cls(
+            job_id=job.id,
+            tender_source_system=job.tender_source_system,
+            tender_external_id=job.tender_external_id,
+            status=job.status,
+            result=job.result,
+            error=job.error,
+            created_at=job.created_at,
+            updated_at=job.updated_at,
+        )

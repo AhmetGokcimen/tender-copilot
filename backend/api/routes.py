@@ -1,6 +1,6 @@
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Response
 from sqlmodel import Session, func, select
 
 from adapters.romania_seap.adapter import RomaniaSeapAdapter
@@ -14,11 +14,13 @@ from api.schemas import (
     CompanyPage,
     CompanyResponse,
     EvidenceItem,
+    OcrJobResponse,
     TenderFeedItem,
     TenderStatePatch,
     TenderWithState,
     TenderWithStatePage,
 )
+from core.caiet_jobs import create_job, get_active_job, get_latest_job, run_caiet_job
 from core.eligibility import run_numeric_checks
 from core.scoring import AI_SCORE_THRESHOLD, evaluate
 from core.security import get_current_user
@@ -469,6 +471,54 @@ async def extract_romania_tender_requirements(
         extraction_confidence=extracted.extraction_confidence,
     )
     return session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
+
+
+@router.post(
+    "/tenders/romania/{external_id}/extract-caiet",
+    response_model=OcrJobResponse,
+    status_code=202,
+    tags=["tenders"],
+)
+async def extract_caiet_async(
+    external_id: str,
+    background_tasks: BackgroundTasks,
+    response: Response,
+    session: Session = Depends(get_session),
+) -> OcrJobResponse:
+    """Start async caiet extraction (download -> OCR -> requirements).
+    Returns 202 with a pending job; poll the GET below. A fully-scanned
+    caiet takes minutes, so this never blocks. Re-POSTing while a job is
+    still active returns that job (200) instead of double-spending."""
+    tender = session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found — sync it first")
+    if tender.notice_type_id is None:
+        raise HTTPException(status_code=422, detail="Tender has no notice_type_id, can't fetch files")
+
+    active = get_active_job(session, tender.source_system, tender.external_id)
+    if active is not None:
+        response.status_code = 200
+        return OcrJobResponse.from_job(active)
+
+    job = create_job(session, tender.source_system, tender.external_id)
+    background_tasks.add_task(run_caiet_job, job.id)
+    return OcrJobResponse.from_job(job)
+
+
+@router.get(
+    "/tenders/romania/{external_id}/extract-caiet",
+    response_model=OcrJobResponse,
+    tags=["tenders"],
+)
+def get_caiet_job(
+    external_id: str, session: Session = Depends(get_session)
+) -> OcrJobResponse:
+    """Latest caiet-extraction job for this tender: pending/running/done
+    (+ result) /failed (+ error). 404 when never started."""
+    job = get_latest_job(session, SourceSystem.ROMANIA_SEAP, external_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="No extraction job for this tender yet")
+    return OcrJobResponse.from_job(job)
 
 
 @router.post(
