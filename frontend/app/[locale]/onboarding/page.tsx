@@ -184,7 +184,11 @@ export default function OnboardingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
-  if (!draft || !options || !authQuery.isFetched) {
+  // Authorizations are NOT part of this gate: step 7 is optional, and a slow
+  // or failing readiness fetch must never lock the whole wizard. Step 7
+  // renders rows from target countries immediately and merges saved states
+  // in when (and if) they arrive.
+  if (!draft || !options) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-surface px-margin">
         <p className="font-body-md text-body-md text-on-surface-variant">{tc('loading')}</p>
@@ -311,17 +315,32 @@ export default function OnboardingPage() {
             />
           )}
           {step === 6 && (
-            <AuthorizationsStep
-              codes={codes}
-              drafts={authDraft}
-              onChange={(code, slice) =>
-                setAuthDraft((prev) => {
-                  const existing = prev[code] ?? { status: 'not_started' as const, notes: '' };
-                  return { ...prev, [code]: { ...existing, ...slice } };
-                })
-              }
-              countryName={(code) => options.countries.find((c) => c.code === code)?.name ?? code}
-            />
+            <>
+              {authQuery.isError && (
+                <div className="flex items-start gap-space-sm rounded border border-outline-variant bg-surface-container-low p-space-md">
+                  <Icon name="info" size="sm" className="mt-0.5 shrink-0 text-navy" />
+                  <p className="font-body-md text-body-md text-on-surface-variant">
+                    {t('authLoadError')}
+                  </p>
+                </div>
+              )}
+              {authQuery.isPending && (
+                <p className="font-body-md text-body-md text-on-surface-variant">
+                  {t('authLoading')}
+                </p>
+              )}
+              <AuthorizationsStep
+                codes={codes}
+                drafts={authDraft}
+                onChange={(code, slice) =>
+                  setAuthDraft((prev) => {
+                    const existing = prev[code] ?? { status: 'not_started' as const, notes: '' };
+                    return { ...prev, [code]: { ...existing, ...slice } };
+                  })
+                }
+                countryName={(code) => options.countries.find((c) => c.code === code)?.name ?? code}
+              />
+            </>
           )}
 
           {saveError && (
@@ -350,7 +369,7 @@ export default function OnboardingPage() {
             >
               {saving ? t('saving') : last ? t('finish') : t('next')}
             </button>
-            {status?.complete && (
+            {(status?.complete || last) && (
               <Link
                 href="/app"
                 className="ml-auto font-body-md text-body-md text-on-surface-variant hover:underline"

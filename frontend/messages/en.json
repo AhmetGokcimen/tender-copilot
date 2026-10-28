@@ -311,7 +311,9 @@
     "countriesLabel": "Which countries do you want tenders from?",
     "keywordsLabel": "Which keywords describe the work you bid on?",
     "keywordsHint": "Used to match tender notices. Pick from the list — free text is not accepted.",
-    "errorTitle": "Could not save this step."
+    "errorTitle": "Could not save this step.",
+    "authLoading": "Loading your saved readiness…",
+    "authLoadError": "Saved readiness could not be loaded. You can keep going — this step is optional, and anything you enter will be saved as a new entry."
   },
   "authorization": {
     "statusNotStarted": "Not started",
