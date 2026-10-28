@@ -257,6 +257,38 @@ def test_backfill_resumes_from_checkpoint(api: TestClient, monkeypatch) -> None:
     assert calls[1][0] >= calls[0][1]  # second run starts where first ended
 
 
+def test_explicit_window_uses_exact_bounds() -> None:
+    """Checkpoint slices are [exact, exact): midnight truncation would
+    refetch ~11h of overlap at every boundary on every resume."""
+    import json as jsonlib
+
+    import httpx
+
+    from adapters.romania_seap.adapter import RomaniaSeapAdapter
+
+    seen: list[dict] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if "GetCNoticeList" in str(request.url) or "GetCANoticeList" in str(request.url):
+            seen.append(jsonlib.loads(request.content))
+            return httpx.Response(200, json={"items": [], "total": 0})
+        raise AssertionError(f"unexpected {request.url}")
+
+    adapter = RomaniaSeapAdapter(
+        httpx.AsyncClient(
+            transport=httpx.MockTransport(handler), base_url="https://e-licitatie.ro"
+        )
+    )
+    start = datetime(2026, 9, 4, 11, 11, 32, tzinfo=UTC)
+    end = datetime(2026, 9, 11, 11, 11, 32, tzinfo=UTC)
+    asyncio.run(adapter.fetch_tenders(cpv_codes=["45"], start=start, end=end, enrich=False))
+    asyncio.run(adapter.fetch_awards(cpv_codes=["45"], start=start, end=end))
+    assert len(seen) == 2
+    for payload in seen:
+        assert payload["startPublicationDate"] == "2026-09-04T11:11:32"
+        assert payload["endPublicationDate"] == "2026-09-11T11:11:31"
+
+
 def test_award_upsert_keeps_winner_on_empty_refetch(api: TestClient) -> None:
     from db import engine, upsert_awards
 

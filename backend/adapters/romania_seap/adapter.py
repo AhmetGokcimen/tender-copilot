@@ -173,7 +173,10 @@ class RomaniaSeapAdapter(TenderSourceAdapter):
         [start, end) window (checkpoint slices) overrides `days`;
         enrich=False skips the per-tender Section I pass."""
         if start is not None and end is not None:
-            start_s = start.strftime("%Y-%m-%dT00:00:00")
+            # Exact bounds (NOT midnight-truncated): slice N ends where
+            # slice N+1 starts, and truncation would refetch ~11h of
+            # overlap at every boundary on every resume.
+            start_s = start.strftime("%Y-%m-%dT%H:%M:%S")
             end_s = (end - timedelta(seconds=1)).strftime("%Y-%m-%dT%H:%M:%S")
         else:
             end_dt = datetime.now()
@@ -210,7 +213,9 @@ class RomaniaSeapAdapter(TenderSourceAdapter):
         prefix-filtered by CPV. List-level fields only — winners come from
         fetch_award_detail per award. De-duplicates by caNoticeId."""
         if start is not None and end is not None:
-            start_s = start.strftime("%Y-%m-%dT00:00:00")
+            # Exact bounds — see fetch_tenders for why midnight truncation
+            # is wrong for checkpoint slices.
+            start_s = start.strftime("%Y-%m-%dT%H:%M:%S")
             end_s = (end - timedelta(seconds=1)).strftime("%Y-%m-%dT%H:%M:%S")
         else:
             end_dt = datetime.now()
