@@ -12,7 +12,7 @@ from db import engine, init_db
 
 app = FastAPI(
     title="Tender Copilot API",
-    version="0.5.0",
+    version="0.6.0",
     description=(
         "Multi-country public-procurement copilot backend. Only Romania/SEAP "
         "is implemented so far — see the repo README for the adapter "
@@ -21,7 +21,7 @@ app = FastAPI(
         "(one click) or /api/auth/google/login. Data is multi-tenant: every "
         "login owns its companies via onboarding. POST /internal/sync-tenders "
         "is the cron-triggered incremental sync (X-Sync-Token, not JWT). "
-        "Breaking changes vs 0.4.0 are listed in backend/API_CHANGES.md."
+        "Breaking changes vs 0.5.0 are listed in backend/API_CHANGES.md."
     ),
 )
 

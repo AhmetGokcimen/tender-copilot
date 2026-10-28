@@ -1,3 +1,79 @@
+# API Changes — backend 0.5.0 → 0.6.0 (2026-10-28)
+
+Status-check follow-ups: async scoring (serverless-safe), the
+`/companies/{id}` PATCH data-loss fix, enrich pagination. The versioned
+contract is [openapi.json](./openapi.json) (regenerated from `main.app`,
+27 paths — the new GET shares the score path).
+
+## /company vs /companies — verdict: both stay, different jobs
+
+Git history confirms two intentional APIs, not dead code: `/companies`
+is the original explicit-ID CRUD + heavy pipelines (score / enrich /
+eligibility / company-tenders); `/company` (singular) is the later
+wizard self-service API (JWT auto-resolves the company, partial PATCH,
+onboarding status/options). Nothing removed.
+
+## BREAKING — POST /companies/{id}/score is async now
+
+It used to score every stored tender inline (15+ min at 3.7k rows —
+incompatible with short-lived serverless functions and a frozen UI on
+onboarding). Now it mirrors the caiet job pattern:
+
+- `POST /api/companies/{id}/score` → **202** `ScoreJobResponse`
+  `{job_id, company_id, status, total, processed, error, ...}`.
+  Re-POSTing while a job is active returns that job (**200**), no
+  duplicate rescore. Was: 200 with the full state list — frontend
+  MUST switch to poll-then-read (below).
+- `GET /api/companies/{id}/score` → latest job (404 when never started).
+  Poll `processed/total` until `done`, then read scores via
+  `GET /api/companies/{id}/tenders` or `GET /api/tenders` as before.
+- Same scoring math, same no-clobber upserts (score fields only),
+  in batches of 100 with per-batch progress commits; idempotent replays
+  after a restart (stale jobs reaped as failed on boot, re-POST to
+  resume).
+- Considered and rejected: lazy request-time scoring — feed sort/filter
+  (`sort=match`, `min_score`) reads persisted scores, so lazy would
+  have rewritten every feed path. The job keeps the architecture.
+
+## BREAKING (behavior) — PATCH /companies/{id} is truly partial now
+
+Two live-verified bugs fixed: the response was always `{}` (a commit
+expired attrs without the reload `create_company` does), and unset
+fields were reset to defaults (PUT-style — real data-loss risk: a
+`{"team_size": 50}` call wiped industry/turnover). Now:
+
+- Request body is `CompanyPatch` with `exclude_unset=True` — omitted
+  keys are untouched, explicit nulls still clear (same contract as
+  `PATCH /company`, including industry preseed + blank-name 422).
+- Returns the full updated `CompanyProfile` (was `{}`).
+- Migration: anyone relying on the reset side effect must send explicit
+  nulls instead. Full-body callers see no difference except a correct
+  response.
+
+## Additive — enrich pagination
+
+`POST /api/companies/{id}/enrich` gained `?offset=0` /
+`?response_limit=` (None = all, the historical default) slicing the
+returned state list — the 1.3 MB unpaged dump stays available but is
+no longer mandatory. AI-call `limit` unchanged.
+
+## Frontend wiring (other session)
+
+- **Score**: replace "POST score, use response list" with "POST → 202
+  job → poll GET until done → GET tenders". Show `processed/total` as
+  progress; on `failed`, show `error` + retry (re-POST).
+- **Company edit form**: the plural PATCH is now safe for partial
+  saves (same as the wizard's singular PATCH); the response is usable —
+  no more refetch-after-save workaround needed.
+- **Enrich**: pass `response_limit` (e.g. 50) unless you really need all
+  states.
+
+## No new dependencies (0.6.0)
+
+Nothing added to `requirements.txt`.
+
+---
+
 # API Changes — backend 0.4.0 → 0.5.0 (2026-10-28)
 
 Incremental SEAP sync (cron-triggered, serverless-safe) + contract-award

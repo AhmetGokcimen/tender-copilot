@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Tender Copilot API",
-    "description": "Multi-country public-procurement copilot backend. Only Romania/SEAP is implemented so far \u2014 see the repo README for the adapter architecture. Every /api/* call except /api/auth/* needs an `Authorization: Bearer <JWT>` header; mint one via /api/auth/demo (one click) or /api/auth/google/login. Data is multi-tenant: every login owns its companies via onboarding. POST /internal/sync-tenders is the cron-triggered incremental sync (X-Sync-Token, not JWT). Breaking changes vs 0.4.0 are listed in backend/API_CHANGES.md.",
-    "version": "0.5.0"
+    "description": "Multi-country public-procurement copilot backend. Only Romania/SEAP is implemented so far \u2014 see the repo README for the adapter architecture. Every /api/* call except /api/auth/* needs an `Authorization: Bearer <JWT>` header; mint one via /api/auth/demo (one click) or /api/auth/google/login. Data is multi-tenant: every login owns its companies via onboarding. POST /internal/sync-tenders is the cron-triggered incremental sync (X-Sync-Token, not JWT). Breaking changes vs 0.5.0 are listed in backend/API_CHANGES.md.",
+    "version": "0.6.0"
   },
   "paths": {
     "/api/auth/google/login": {
@@ -1257,7 +1257,7 @@
           "companies"
         ],
         "summary": "Update Company",
-        "description": "Full-profile update (send the complete object, like PUT) \u2014 simplest\noption for a hackathon demo's edit-profile form. id is taken from the\nURL, not the body.",
+        "description": "Partial update \u2014 only provided keys are applied (exclude_unset),\nsame contract as PATCH /company. Explicit nulls still clear their\nfield; omitted keys are left alone (never reset to defaults).",
         "operationId": "update_company_api_companies__company_id__patch",
         "security": [
           {
@@ -1280,7 +1280,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CompanyProfile"
+                "$ref": "#/components/schemas/CompanyPatch"
               }
             }
           }
@@ -1499,8 +1499,54 @@
           "companies"
         ],
         "summary": "Score Tenders For Company",
-        "description": "Score every stored tender against one company profile and persist\nthe result. Safe to re-run: upsert_score only ever touches score\nfields, never the AI/eligibility fields other steps will fill in.",
+        "description": "Score every stored tender against one company profile. Returns 202\nwith a pending job (minutes at real volumes \u2014 never blocks); poll the\nGET below for processed/total. Re-POSTing while a job is still active\nreturns that job (200) instead of double-scoring. Safe to re-run:\nscore upserts only ever touch score fields, never the AI/eligibility\nfields other steps fill in.",
         "operationId": "score_tenders_for_company_api_companies__company_id__score_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Company Id"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoreJobResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "companies"
+        ],
+        "summary": "Get Score Job",
+        "description": "Latest scoring job for this company: pending/running (+\nprocessed/total progress) /done/failed (+ error). 404 when never\nstarted \u2014 POST above first.",
+        "operationId": "get_score_job_api_companies__company_id__score_get",
         "security": [
           {
             "HTTPBearer": []
@@ -1523,11 +1569,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserTenderState"
-                  },
-                  "title": "Response Score Tenders For Company Api Companies  Company Id  Score Post"
+                  "$ref": "#/components/schemas/ScoreJobResponse"
                 }
               }
             }
@@ -1551,7 +1593,7 @@
           "companies"
         ],
         "summary": "Enrich Tenders For Company",
-        "description": "Call the AI layer for tenders that scored high enough to be worth it\nand don't have a summary yet (cost control, same spirit as the scoring\nthreshold: don't spend an AI call on something already filtered out).\n`limit` caps how many calls this request makes.",
+        "description": "Call the AI layer for tenders that scored high enough to be worth it\nand don't have a summary yet (cost control, same spirit as the scoring\nthreshold: don't spend an AI call on something already filtered out).\n`limit` caps how many calls this request makes; `offset` /\n`response_limit` paginate the returned state list (None = all, the\nhistorical default).",
         "operationId": "enrich_tenders_for_company_api_companies__company_id__enrich_post",
         "security": [
           {
@@ -1586,6 +1628,32 @@
               "type": "string",
               "default": "en",
               "title": "Language"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "response_limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Response Limit"
             }
           }
         ],
@@ -3127,6 +3195,63 @@
         ],
         "title": "RenewalPattern",
         "description": "Recurrence guess for one tender (detail only \u2014 the feed leaves it\nnull to avoid N+1 sibling queries). next_expected_date is an explicitly\nlabeled estimate (see `note`), never a promise."
+      },
+      "ScoreJobResponse": {
+        "properties": {
+          "job_id": {
+            "type": "integer",
+            "title": "Job Id"
+          },
+          "company_id": {
+            "type": "integer",
+            "title": "Company Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "processed": {
+            "type": "integer",
+            "title": "Processed"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "job_id",
+          "company_id",
+          "status",
+          "total",
+          "processed",
+          "error",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ScoreJobResponse"
       },
       "SourceSystem": {
         "type": "string",
