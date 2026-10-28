@@ -384,3 +384,22 @@ class OcrJobResponse(BaseModel):
             created_at=job.created_at,
             updated_at=job.updated_at,
         )
+
+
+class SyncReport(BaseModel):
+    """Outcome of one POST /internal/sync-tenders run. capped/timed_out
+    are normal (the next scheduled run continues from the checkpoint),
+    not errors — the HTTP status stays 200 whenever the run itself worked."""
+
+    window_start: datetime
+    window_end: datetime
+    tenders_synced: int
+    tenders_capped: bool
+    tenders_timed_out: bool
+    tenders_checkpoint: datetime | None
+    awards_synced: int
+    awards_capped: bool
+    awards_timed_out: bool
+    awards_pdf_errors: int
+    awards_checkpoint: datetime | None
+    duration_seconds: float

@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     # Comma-separated CORS allow-list. No "*" default: dev (localhost:3000)
     # plus whatever prod origin is deployed, nothing else.
     allowed_origins: str = "http://localhost:3000"
+    # Shared secret for POST /internal/sync-tenders (X-Sync-Token header),
+    # separate from user JWT auth. Empty = the endpoint refuses with 503.
+    sync_secret: str = ""
 
 
 settings = Settings()
