@@ -1,6 +1,7 @@
 from models.award import Award
 from models.company import CompanyProfile
 from models.country_authorization import CountryAuthorization
+from models.score_job import ScoreJob
 from models.sync_state import SyncCheckpoint
 from models.tender import SourceSystem, Tender
 from models.user import User
@@ -11,6 +12,7 @@ __all__ = [
     "Award",
     "CompanyProfile",
     "CountryAuthorization",
+    "ScoreJob",
     "SourceSystem",
     "SyncCheckpoint",
     "Tender",

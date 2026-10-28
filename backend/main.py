@@ -7,6 +7,7 @@ from api.internal_routes import router as internal_router
 from api.routes import router as api_router
 from core.caiet_jobs import reap_stale_jobs
 from core.config import settings
+from core.score_jobs import reap_stale_jobs as reap_stale_score_jobs
 from db import engine, init_db
 
 app = FastAPI(
@@ -43,6 +44,7 @@ def on_startup() -> None:
     init_db()
     with Session(engine) as session:
         reap_stale_jobs(session)
+        reap_stale_score_jobs(session)
 
 
 @app.get("/health")

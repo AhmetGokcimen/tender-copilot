@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from models.company import CompanyProfile
 from models.ocr_job import OcrJob
+from models.score_job import ScoreJob
 from models.tender import SourceSystem, Tender
 from models.user_tender_state import UserTenderState
 
@@ -396,6 +397,30 @@ class OcrJobResponse(BaseModel):
             tender_external_id=job.tender_external_id,
             status=job.status,
             result=job.result,
+            error=job.error,
+            created_at=job.created_at,
+            updated_at=job.updated_at,
+        )
+
+
+class ScoreJobResponse(BaseModel):
+    job_id: int
+    company_id: int
+    status: str  # pending | running | done | failed
+    total: int
+    processed: int
+    error: str | None
+    created_at: datetime
+    updated_at: datetime
+
+    @classmethod
+    def from_job(cls, job: ScoreJob) -> "ScoreJobResponse":
+        return cls(
+            job_id=job.id,
+            company_id=job.company_id,
+            status=job.status,
+            total=job.total,
+            processed=job.processed,
             error=job.error,
             created_at=job.created_at,
             updated_at=job.updated_at,

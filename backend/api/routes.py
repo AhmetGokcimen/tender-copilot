@@ -26,11 +26,13 @@ from api.schemas import (
     OcrJobResponse,
     OnboardingStatus,
     RenewalPattern,
+    ScoreJobResponse,
     TenderFeedItem,
     TenderStatePatch,
     TenderWithState,
     TenderWithStatePage,
 )
+from core import score_jobs
 from core.authorizations import (
     authorization_status_map,
     ensure_authorization_rows,
@@ -59,13 +61,12 @@ from core.membership import (
     resolve_user_company,
     user_companies,
 )
-from core.scoring import AI_SCORE_THRESHOLD, evaluate
+from core.scoring import AI_SCORE_THRESHOLD
 from core.security import get_current_user
 from db import (
     get_session,
     upsert_ai_justification,
     upsert_eligibility,
-    upsert_score,
     upsert_tender_extraction,
     upsert_tender_title,
     upsert_tenders,
@@ -534,22 +535,28 @@ def get_company(
 @router.patch("/companies/{company_id}", response_model=CompanyProfile, tags=["companies"])
 def update_company(
     company_id: int,
-    patch: CompanyProfile,
+    patch: CompanyPatch,
     session: Session = Depends(get_session),
     user: User = Depends(get_request_user),
 ) -> CompanyProfile:
-    """Full-profile update (send the complete object, like PUT) — simplest
-    option for a hackathon demo's edit-profile form. id is taken from the
-    URL, not the body."""
+    """Partial update — only provided keys are applied (exclude_unset),
+    same contract as PATCH /company. Explicit nulls still clear their
+    field; omitted keys are left alone (never reset to defaults)."""
     company = require_company(session, user, company_id)
-    data = patch.model_dump(exclude={"id"})
+    data = patch.model_dump(exclude_unset=True)
     _validated_company_data(data)
+    if "name" in data and not (data["name"] or "").strip():
+        raise HTTPException(status_code=422, detail="Company name must not be blank")
     for key, value in data.items():
         setattr(company, key, value)
+    if "industry" in data and "cpv_codes" not in data:
+        apply_industry_preseed(company)
     session.add(company)
     session.commit()
     session.refresh(company)
-    ensure_authorization_rows(session, company.id, company.target_countries or [])
+    if "target_countries" in data:
+        ensure_authorization_rows(session, company.id, data["target_countries"] or [])
+        session.refresh(company)  # seed commit expires attrs; reload before serializing
     return company
 
 
@@ -636,36 +643,55 @@ def update_tender_status(
     return TenderWithState.from_pair(tender, state)
 
 
-@router.post("/companies/{company_id}/score", response_model=list[UserTenderState], tags=["companies"])
-def score_tenders_for_company(
+@router.post(
+    "/companies/{company_id}/score",
+    response_model=ScoreJobResponse,
+    status_code=202,
+    tags=["companies"],
+)
+async def score_tenders_for_company(
+    company_id: int,
+    background_tasks: BackgroundTasks,
+    response: Response,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> ScoreJobResponse:
+    """Score every stored tender against one company profile. Returns 202
+    with a pending job (minutes at real volumes — never blocks); poll the
+    GET below for processed/total. Re-POSTing while a job is still active
+    returns that job (200) instead of double-scoring. Safe to re-run:
+    score upserts only ever touch score fields, never the AI/eligibility
+    fields other steps fill in."""
+    company = require_company(session, user, company_id)
+
+    active = score_jobs.get_active_job(session, company.id)
+    if active is not None:
+        response.status_code = 200
+        return ScoreJobResponse.from_job(active)
+
+    job = score_jobs.create_job(session, company.id)
+    background_tasks.add_task(score_jobs.run_score_job, job.id)
+    return ScoreJobResponse.from_job(job)
+
+
+@router.get(
+    "/companies/{company_id}/score",
+    response_model=ScoreJobResponse,
+    tags=["companies"],
+)
+def get_score_job(
     company_id: int,
     session: Session = Depends(get_session),
     user: User = Depends(get_request_user),
-) -> list[UserTenderState]:
-    """Score every stored tender against one company profile and persist
-    the result. Safe to re-run: upsert_score only ever touches score
-    fields, never the AI/eligibility fields other steps will fill in."""
+) -> ScoreJobResponse:
+    """Latest scoring job for this company: pending/running (+
+    processed/total progress) /done/failed (+ error). 404 when never
+    started — POST above first."""
     company = require_company(session, user, company_id)
-
-    tenders = session.exec(select(Tender)).all()
-    for tender in tenders:
-        result = evaluate(tender, company)
-        upsert_score(
-            session,
-            tender_source_system=tender.source_system,
-            tender_external_id=tender.external_id,
-            company_id=company.id,
-            score=result.score,
-            reasons=result.reasons,
-        )
-
-    return list(
-        session.exec(
-            select(UserTenderState)
-            .where(UserTenderState.company_id == company_id)
-            .order_by(UserTenderState.score.desc())
-        )
-    )
+    job = score_jobs.get_latest_job(session, company.id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="No scoring job yet — POST to start one")
+    return ScoreJobResponse.from_job(job)
 
 
 @router.post(
@@ -675,13 +701,17 @@ async def enrich_tenders_for_company(
     company_id: int,
     limit: int = 20,
     language: str = "en",
+    offset: int = 0,
+    response_limit: int | None = None,
     session: Session = Depends(get_session),
     user: User = Depends(get_request_user),
 ) -> list[UserTenderState]:
     """Call the AI layer for tenders that scored high enough to be worth it
     and don't have a summary yet (cost control, same spirit as the scoring
     threshold: don't spend an AI call on something already filtered out).
-    `limit` caps how many calls this request makes."""
+    `limit` caps how many calls this request makes; `offset` /
+    `response_limit` paginate the returned state list (None = all, the
+    historical default)."""
     company = require_company(session, user, company_id)
 
     candidates = session.exec(
@@ -722,13 +752,18 @@ async def enrich_tenders_for_company(
                     ai_title_simplified=simplified_title,
                 )
 
-    return list(
+    states = list(
         session.exec(
             select(UserTenderState)
             .where(UserTenderState.company_id == company_id)
             .order_by(UserTenderState.score.desc())
         )
     )
+    if offset:
+        states = states[offset:]
+    if response_limit is not None:
+        states = states[:response_limit]
+    return states
 
 
 @router.post("/tenders/romania/{external_id}/extract", response_model=Tender, tags=["tenders"])
