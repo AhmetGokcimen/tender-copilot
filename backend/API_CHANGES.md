@@ -1,3 +1,110 @@
+# API Changes — backend 0.4.0 → 0.5.0 (2026-10-28)
+
+Incremental SEAP sync (cron-triggered, serverless-safe) + contract-award
+ingestion with parsed winners + incumbent/renewal analytics. The versioned
+contract is [openapi.json](./openapi.json) (regenerated from `main.app`,
+27 paths).
+
+## Deployment target: still open (read first)
+
+The repo has no `vercel.json` / `Dockerfile` / `Procfile` / `.github`,
+so the backend's host is UNDETERMINED — nothing below guesses it. The
+sync is therefore built "short-lived + externally triggered" (a cron
+POST per run, checkpointed, idempotent), which is correct on
+Vercel/Render/Railway/Fly alike: no daemon, no in-process scheduler,
+nothing that needs a long-lived process. USER ACTION after picking a
+host: set the two repo secrets below and confirm the function timeout
+covers one sync run (~1-3 min typical, bounded by `max_seconds`).
+
+## New endpoints (0.5.0, all additive — nothing breaking)
+
+| Method & path | Purpose |
+|---|---|
+| `POST /internal/sync-tenders` | Cron tick: pulls tenders (+ optionally awards) published since the last run. Auth is `X-Sync-Token: <SYNC_SECRET>` (shared secret, NOT a user JWT; JWTs are rejected here). Params: `?lookback_hours=48` (fresh checkpoint only), `?max_tenders=500`, `?include_awards=true`, `?max_awards=100`, `?max_seconds=240`. Returns a `SyncReport` (`tenders_synced`, `awards_synced`, `awards_pdf_errors`, per-feed `capped`/`timed_out` + checkpoints, `duration_seconds`). `capped`/`timed_out` are NORMAL — the next tick continues from the checkpoint (HTTP stays 200). 403 on bad token, 503 when `SYNC_SECRET` is unset. |
+| `GET /api/tenders/{external_id}/authority-history` | Incumbent lens: `(contracting_authority, CPV-division)` aggregation — notice count/date-range/value + award count/value + top-5 winners by wins. `insufficient_data: true` + `sample_size: N` until 3+ awards back the table (no "usual winner" off noise). Auth-gated like the rest of `/api/*`; data itself is global (no company scoping). 404 on unknown tender. |
+
+## Changed behavior (0.5.0)
+
+1. **`TenderFeedItem` gained `renewal_pattern`** (additive key, old builds
+   ignore it): `{detected, confidence, prior_count, avg_interval_days,
+   next_expected_date, note}`. Computed on the DETAIL route only
+   (`GET /api/tenders/{id}`) — the feed leaves it `null` to avoid N+1
+   sibling queries. `null` also means "fewer than 3 dated points, no
+   basis"; `detected: false` means "looked, gaps aren't periodic".
+   `next_expected_date` is an explicitly labeled ESTIMATE (see `note`),
+   never a promise. Heuristic, not ML: same authority + same CPV
+   division + max/min gap ratio ≤ 1.8.
+2. **No-clobber extended to sync**: `upsert_tenders`/`upsert_awards` only
+   ever write their own tables' columns — `UserTenderState` (scores,
+   notes, pipeline status) and the tender's AI columns are untouched by
+   re-syncs, and award winner fields are never wiped by a later
+   list-only re-fetch (`COALESCE(excluded, current)`).
+3. **Fresh database needed** (same drill): new `award` and
+   `synccheckpoint` tables. From `backend/`: delete `data/app.db`, start
+   the API (tables auto-create), then `python -m scripts.backfill_initial`
+   (or POST the internal endpoint with a big lookback).
+4. **`fetch_tenders` honors explicit windows** (`start=`/`end=` override
+   `days=`) and takes `enrich=` — existing callers unchanged.
+
+## Sync design (for the operator)
+
+- **Slices are atomic.** Work is split into 7-day slices, oldest first;
+  the checkpoint advances only over fully completed slices (empty weeks
+  included). Caps/timeouts are checked BETWEEN slices: a run may
+  overshoot `max_*` by one slice rather than silently drop a tail.
+- **Idempotent.** Re-running a window re-upserts identical rows (tender +
+  award PKs are the conflict targets). Two overlapping runs converge
+  instead of corrupting.
+- **Bounded politeness.** Same 0.3s inter-request delay as before,
+  sequential slices, no new parallelism. Six CPV divisions
+  (`45,30,33,50,72,60` — the busiest, measured) keep volumes sane.
+- **Awards.** `GetCANoticeList` (type 3, windowed, CPV-prefixed) for the
+  list + one print-PDF download per award, parsed deterministically
+  (V.2.1 contract, V.2.2 offers, V.2.3 winner+CIF, V.2.4 values — no AI).
+  Failed PDFs keep the list-level row with null winner and count into
+  `awards_pdf_errors`; parsed winners are never re-downloaded.
+  Limitation: multi-lot awards keep the FIRST V.2 block only, and the
+  award detail view route is undiscovered (`source_url` stays null).
+- **Backfill** (`python -m scripts.backfill_initial`, one-shot, resumable).
+  Seed run 2026-10-28 (6 divisions, defaults): 3,755 unique tenders over
+  75 days (~7 min incl. Section-I enrich) + 771 awards with 0 PDF errors
+  (~28 min of polite sequential PDF downloads). 732/771 awards (95%)
+  carry a parsed winner + CIF; the rest are winnerless-by-structure
+  (cancelled/unawarded notices parse clean with null winner — not
+  errors). Total ~35 min, ~3.2 MB SQLite. Coverage note: awards are two
+  samples — 250 rows over 09-28→10-05 plus 521 over 10-21→10-28, with a
+  disclosed 10-05→10-21 gap (an interrupted first pass; refilling it
+  would cost ~1k extra PDF downloads for demo-marginal value, so it
+  stays open); the cron extends forward from 10-28.
+- **Cron** (`.github/workflows/sync-tenders.yml`, every 6h at minute 17,
+  plus manual dispatch): POSTs the internal endpoint and prints the
+  one-line report. Needs TWO repo secrets (Settings → Secrets →
+  Actions): `SYNC_URL` = bare backend origin WITHOUT `/api` suffix
+  (e.g. `https://api.ofera.app`, since `/internal` mounts at root) and
+  `SYNC_TOKEN` = the backend's `SYNC_SECRET` env value (see
+  `.env.example`). No secrets in the workflow file itself.
+
+## Frontend wiring (other session)
+
+- **Authority history**: `GET /api/tenders/{id}/authority-history` →
+  `{authority, cpv_group, notices{count, first_date, last_date,
+  total_estimated_value}, awards{count, total_value, winners[{name,
+  wins, total_value}]}, insufficient_data, sample_size}`. When
+  `insufficient_data`, show the sample size honestly ("based on N
+  awards") instead of a winner claim.
+- **Renewal**: detail responses now carry `renewal_pattern` (nullable —
+  see §Changed). Render `next_expected_date` WITH the estimate caveat
+  (`note`); never present it as a scheduled date.
+- **Sync internals** (`/internal/*`, `SyncReport`, checkpoints) are
+  operator-facing, not UI-facing — no frontend work needed.
+
+## No new dependencies (0.5.0)
+
+PyMuPDF (already required) parses the award PDFs — nothing added to
+`requirements.txt`.
+
+---
+
 # API Changes — backend 0.3.0 → 0.4.0 (2026-10-27)
 
 Country bidding-readiness tracking (the onboarding wizard's step 7 +

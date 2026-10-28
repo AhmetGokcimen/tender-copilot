@@ -1,0 +1,42 @@
+# Incremental SEAP sync (tenders + awards), every 6 hours.
+#
+# Calls POST /internal/sync-tenders on the deployed backend. The endpoint is
+# idempotent and checkpointed: each run pulls only what arrived since the
+# last run (default 48h lookback on a fresh checkpoint), and capped/timed_out
+# runs simply continue on the next tick — no overlap, no duplicates.
+#
+# Required repo secrets (Settings -> Secrets and variables -> Actions):
+#   SYNC_URL    Bare backend origin, e.g. https://api.ofera.app
+#               (no /api suffix — /internal is mounted at the root).
+#   SYNC_TOKEN  Must equal the backend's SYNC_SECRET env value.
+name: Sync SEAP tenders
+
+on:
+  schedule:
+    # Every 6 hours at minute 17 (off-peak, away from :00/:30 cron herds).
+    - cron: "17 */6 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Trigger incremental sync
+        run: |
+          curl -fsS -X POST \
+            "$SYNC_URL/internal/sync-tenders?include_awards=true" \
+            -H "X-Sync-Token: $SYNC_TOKEN" \
+            --max-time 600 | tee sync-report.json
+          python3 -c "
+          import json
+          r = json.load(open('sync-report.json'))
+          print('tenders:', r['tenders_synced'], 'awards:', r['awards_synced'],
+                'pdf_errors:', r['awards_pdf_errors'],
+                'capped:', r['tenders_capped'] or r['awards_capped'],
+                'timed_out:', r['tenders_timed_out'] or r['awards_timed_out'],
+                'duration_s:', round(r['duration_seconds'], 1))
+          "
+        env:
+          SYNC_URL: ${{ secrets.SYNC_URL }}
+          SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
