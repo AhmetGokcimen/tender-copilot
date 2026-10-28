@@ -10,10 +10,11 @@ in _insert_stmt below.
 from collections.abc import Generator
 from datetime import UTC, datetime
 
-from sqlalchemy import update
+from sqlalchemy import func, update
 from sqlmodel import Session, SQLModel, create_engine
 
 from core.config import settings
+from models.award import Award
 from models.tender import SourceSystem, Tender
 from models.user_tender_state import UserTenderState
 
@@ -66,6 +67,44 @@ def upsert_tenders(session: Session, tenders: list[Tender]) -> None:
         for c in table.columns
         if c.name not in _TENDER_UPSERT_EXCLUDED_COLUMNS
     }
+    stmt = stmt.on_conflict_do_update(
+        index_elements=["source_system", "external_id"],
+        set_=update_cols,
+    )
+    session.execute(stmt)
+    session.commit()
+
+
+def upsert_awards(session: Session, awards: list[Award]) -> None:
+    """Insert new awards, update existing ones in place by (source_system,
+    external_id). Same no-clobber contract as upsert_tenders: never touches
+    UserTenderState, and never wipes winner fields with NULL — a re-fetch
+    whose PDF parse failed must not erase a previously parsed winner."""
+    if not awards:
+        return
+
+    table = Award.__table__
+    now = datetime.now(UTC)
+    values = []
+    for a in awards:
+        row = a.model_dump()
+        row["last_seen_at"] = now
+        values.append(row)
+
+    stmt = _insert_stmt(table).values(values)
+    update_cols = {
+        c.name: getattr(stmt.excluded, c.name)
+        for c in table.columns
+        if c.name not in ("source_system", "external_id", "first_seen_at")
+    }
+    # Winner columns: only overwrite when the incoming row actually parsed
+    # them (list-only re-fetches carry None and must not clobber).
+    for col in ("winner_name", "winner_cif", "winner_raw", "offers_received",
+                "offers_from_sme", "contract_no", "contract_date",
+                "estimated_initial_value"):
+        update_cols[col] = func.coalesce(
+            getattr(stmt.excluded, col), getattr(table.c, col)
+        )
     stmt = stmt.on_conflict_do_update(
         index_elements=["source_system", "external_id"],
         set_=update_cols,

@@ -32,6 +32,21 @@ downloads from GET /{noticeDocumentUrl}. The download GUID is
 session-bound — listing and download MUST share one httpx client (this
 adapter's self._client does), or the download 500s. Caiet de sarcini
 files come either as plain .pdf or CMS-signed .pdf.p7s (see ai.ocr).
+
+Contract awards (confirmed live 2026-10-28 via the SPA's own traffic):
+  POST /api-pub/NoticeCommon/GetCANoticeList/ — same family as the
+  participation list (sysNoticeTypeIds [3], pageSize/pageIndex, and a
+  MANDATORY start/endPublicationDate window: unwindowed caps at 3000).
+  cPVText prefix-filters. Items carry caNoticeId, noticeNo (CAN...),
+  ronContractValue, currencyCode, cpvCodeAndName — but NO winner.
+  The winner lives only in the award print PDF:
+  POST /api-pub/NoticeCommon/GetCANoticePrintDocument/?canoticeId={id}&sysNoticeTypeId=3
+  (POST with query params; GET 405s). The PDF is text-layered with
+  stable section marks — V.2.1 contract no/date, V.2.2 offer counts,
+  V.2.3 winner name + CIF, V.2.4 values — parsed deterministically
+  (parse_award_text, no AI). Section1/Section3/GeneralInfo carry no
+  winner fields for awards (verified); the award detail view route is
+  undiscovered, so Award.source_url stays None.
 """
 
 import asyncio
@@ -40,10 +55,12 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
 import httpx
+import pymupdf
 from tenacity import RetryError, retry, stop_after_attempt, wait_exponential
 
 from adapters.base import TenderSourceAdapter
 from ai.ocr import unwrap_p7s
+from models.award import Award
 from models.tender import SourceSystem, Tender
 
 BASE_URL = "https://e-licitatie.ro"
@@ -51,6 +68,10 @@ LIST_PATH = "/api-pub/NoticeCommon/GetCNoticeList/"
 SECTION1_PATH = "/api-pub/NoticeCommon/GetSection1View/"
 SECTION3_PATH = "/api-pub/NoticeCommon/GetSection3View/"
 SECTION_FILES_PATH = "/api-pub/NoticeCommon/GetDfNoticeSectionFiles/"
+CA_LIST_PATH = "/api-pub/NoticeCommon/GetCANoticeList/"
+CA_PRINT_PATH = "/api-pub/NoticeCommon/GetCANoticePrintDocument/"
+
+AWARD_NOTICE_TYPE_ID = 3
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
@@ -77,6 +98,23 @@ class NoticeDocument:
 class CaietDocument:
     name: str
     pdf_bytes: bytes
+
+
+@dataclass
+class AwardDetail:
+    """Winner-level fields parsed from one award print PDF (section V.2).
+    Multi-lot awards carry one V.2 block per lot — v1 keeps the FIRST
+    block only (documented limitation, not silent behavior)."""
+
+    winner_name: str | None = None
+    winner_cif: str | None = None
+    winner_raw: str | None = None
+    offers_received: int | None = None
+    offers_from_sme: int | None = None
+    contract_no: str | None = None
+    contract_date: datetime | None = None
+    estimated_initial_value: float | None = None
+    publication_date: datetime | None = None  # "Anunt publicat" fallback
 
 
 # SEAP procedure vocabulary (sysProcedureType.text + sysContractAssigmentType.text,
@@ -124,32 +162,134 @@ class RomaniaSeapAdapter(TenderSourceAdapter):
         keywords: list[str] | None = None,
         days: int = 30,
         open_only: bool = False,
+        start: datetime | None = None,
+        end: datetime | None = None,
+        enrich: bool = True,
         **filters,
     ) -> list[Tender]:
         """Fetch tenders published in the last `days` days matching any of
         the given CPV codes or free-text keywords (contract name search).
-        De-duplicates by cNoticeId across all queries."""
-        end_dt = datetime.now()
-        start_dt = end_dt - timedelta(days=days)
-        start = start_dt.strftime("%Y-%m-%dT00:00:00")
-        end = end_dt.strftime("%Y-%m-%dT23:59:59")
+        De-duplicates by cNoticeId across all queries. An explicit
+        [start, end) window (checkpoint slices) overrides `days`;
+        enrich=False skips the per-tender Section I pass."""
+        if start is not None and end is not None:
+            start_s = start.strftime("%Y-%m-%dT00:00:00")
+            end_s = (end - timedelta(seconds=1)).strftime("%Y-%m-%dT%H:%M:%S")
+        else:
+            end_dt = datetime.now()
+            start_dt = end_dt - timedelta(days=days)
+            start_s = start_dt.strftime("%Y-%m-%dT00:00:00")
+            end_s = end_dt.strftime("%Y-%m-%dT23:59:59")
 
         by_id: dict[str, dict] = {}
         for code in cpv_codes or []:
-            items = await self._search(start, end, cpv_text=code, open_only=open_only)
+            items = await self._search(start_s, end_s, cpv_text=code, open_only=open_only)
             for item in items:
                 by_id.setdefault(str(item["cNoticeId"]), item)
             await asyncio.sleep(REQUEST_DELAY_SECONDS)
 
         for kw in keywords or []:
-            items = await self._search(start, end, contract_name=kw, open_only=open_only)
+            items = await self._search(start_s, end_s, contract_name=kw, open_only=open_only)
             for item in items:
                 by_id.setdefault(str(item["cNoticeId"]), item)
             await asyncio.sleep(REQUEST_DELAY_SECONDS)
 
         tenders = [self._map_notice(item) for item in by_id.values()]
-        await self._enrich_display_fields(tenders)
+        if enrich:
+            await self._enrich_display_fields(tenders)
         return tenders
+
+    async def fetch_awards(
+        self,
+        cpv_codes: list[str] | None = None,
+        days: int = 30,
+        start: datetime | None = None,
+        end: datetime | None = None,
+    ) -> list[Award]:
+        """Fetch contract awards (CAN... notices) in the window, optionally
+        prefix-filtered by CPV. List-level fields only — winners come from
+        fetch_award_detail per award. De-duplicates by caNoticeId."""
+        if start is not None and end is not None:
+            start_s = start.strftime("%Y-%m-%dT00:00:00")
+            end_s = (end - timedelta(seconds=1)).strftime("%Y-%m-%dT%H:%M:%S")
+        else:
+            end_dt = datetime.now()
+            start_dt = end_dt - timedelta(days=days)
+            start_s = start_dt.strftime("%Y-%m-%dT00:00:00")
+            end_s = end_dt.strftime("%Y-%m-%dT23:59:59")
+
+        by_id: dict[str, dict] = {}
+        queries = cpv_codes or [None]
+        for code in queries:
+            items = await self._search_awards(start_s, end_s, cpv_text=code)
+            for item in items:
+                by_id.setdefault(str(item["caNoticeId"]), item)
+            await asyncio.sleep(REQUEST_DELAY_SECONDS)
+        return [self._map_award(item) for item in by_id.values()]
+
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, max=10))
+    async def _search_awards(
+        self, start: str, end: str, *, cpv_text: str | None = None
+    ) -> list[dict]:
+        payload: dict = {
+            "sysNoticeTypeIds": [AWARD_NOTICE_TYPE_ID],
+            "sortProperties": [],
+            "startPublicationDate": start,
+            "endPublicationDate": end,
+            "pageSize": PAGE_SIZE,
+        }
+        if cpv_text:
+            payload["cPVText"] = cpv_text
+
+        items: list[dict] = []
+        page = 0
+        while page < MAX_PAGES:
+            payload["pageIndex"] = page
+            response = await self._client.post(CA_LIST_PATH, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            batch = data.get("items") or []
+            items.extend(batch)
+            total = data.get("total", 0)
+            if len(items) >= total or not batch:
+                break
+            page += 1
+            await asyncio.sleep(REQUEST_DELAY_SECONDS)
+        return items
+
+    def _map_award(self, item: dict) -> Award:
+        cpv_match = _CPV_RE.match(item.get("cpvCodeAndName") or "")
+        main_cpv = cpv_match.group(1) if cpv_match else None
+        return Award(
+            source_system=self.source_system,
+            external_id=str(item["caNoticeId"]),
+            country_code=self.country_code,
+            notice_no=item.get("noticeNo"),
+            title=item.get("contractTitle") or "",
+            contracting_authority=item.get("contractingAuthorityNameAndFN"),
+            cpv_codes=[main_cpv] if main_cpv else [],
+            contract_value=item.get("ronContractValue"),
+            currency=item.get("currencyCode"),
+            award_date=_parse_date(item.get("noticeStateDate")),
+        )
+
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, max=10))
+    async def fetch_award_detail(self, ca_notice_id: str) -> AwardDetail | None:
+        """Download one award's print PDF and parse section V.2 (winner,
+        offers, contract, values). Returns None when the PDF has no
+        parseable V.2 block (e.g. cancelled awards). Polite delay
+        included — callers loop over many awards."""
+        response = await self._client.post(
+            CA_PRINT_PATH,
+            params={"canoticeId": ca_notice_id, "sysNoticeTypeId": AWARD_NOTICE_TYPE_ID},
+        )
+        await asyncio.sleep(REQUEST_DELAY_SECONDS)
+        response.raise_for_status()
+        if not response.content.startswith(b"%PDF"):
+            return None
+        with pymupdf.open(stream=response.content, filetype="pdf") as doc:
+            text = "\n".join(page.get_text() or "" for page in doc)
+        return parse_award_text(text)
 
     async def _enrich_display_fields(self, tenders: list[Tender]) -> None:
         """Fill county + clarification_deadline from each tender's Section I
@@ -335,6 +475,91 @@ def _parse_date(value: str | None) -> datetime | None:
     except ValueError:
         return None
     return dt if dt.tzinfo else dt.replace(tzinfo=UTC)
+
+
+def _parse_ro_date(value: str | None) -> datetime | None:
+    """Romanian print format dd.mm.yyyy -> UTC datetime. None on garbage."""
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value.strip(), "%d.%m.%Y").replace(tzinfo=UTC)
+    except ValueError:
+        return None
+
+
+def _parse_ro_number(value: str | None) -> float | None:
+    """Print-format number ("891423", "1 234,50") -> float. None on garbage."""
+    if not value:
+        return None
+    cleaned = value.strip().replace(" ", "")
+    if "," in cleaned:
+        cleaned = cleaned.replace(".", "").replace(",", ".")
+    try:
+        return float(cleaned)
+    except ValueError:
+        return None
+
+
+def _slice_between(text: str, start_mark: str, end_mark: str) -> str:
+    """Text between the FIRST start_mark and the next end_mark. Capture
+    starts at the newline after the start mark's own line (marks are
+    section headings; values live on following lines). Empty string when
+    the marks are absent/misordered."""
+    start = text.find(start_mark)
+    if start < 0:
+        return ""
+    line_end = text.find("\n", start)
+    if line_end < 0:
+        return ""
+    end = text.find(end_mark, line_end)
+    if end < 0:
+        return ""
+    return text[line_end + 1:end]
+
+
+def parse_award_text(text: str) -> AwardDetail:
+    """Deterministic parse of an award print PDF's section V.2 (verified
+    against CAN1065826, 2026-10-28). Header/footer boilerplate
+    ("Sistemul Electronic…", "Anunt publicat…", "Pagina N") is tolerated
+    inside slices. Missing blocks yield None fields, never exceptions."""
+    detail = AwardDetail()
+
+    v21 = _slice_between(text, "V.2.1)", "V.2.2)")
+    for line in v21.splitlines():
+        if "Anunt publicat" in line or not line.strip():
+            continue
+        match = re.match(r"\s*(.+?)\s*/\s*(\d{2}\.\d{2}\.\d{4})\s*$", line)
+        if match:
+            detail.contract_no = match.group(1).strip()
+            detail.contract_date = _parse_ro_date(match.group(2))
+            break
+
+    v22 = _slice_between(text, "V.2.2)", "V.2.3)")
+    match = re.search(r"Numarul de oferte primite:\s*(\d+)", v22)
+    detail.offers_received = int(match.group(1)) if match else None
+    match = re.search(r"de la IMM-uri:\s*(\d+)", v22)
+    detail.offers_from_sme = int(match.group(1)) if match else None
+
+    v23 = _slice_between(text, "V.2.3)", "V.2.4)").strip()
+    if v23:
+        detail.winner_raw = v23
+        for line in v23.splitlines():
+            if line.strip():
+                detail.winner_name = line.strip()
+                break
+        match = re.search(r"Cod de identificare fiscala:\s*([^;\n]+)", v23)
+        detail.winner_cif = match.group(1).strip() if match else None
+
+    v24 = _slice_between(text, "V.2.4)", "V.2.5)")
+    match = re.search(
+        r"Valoarea totala estimata initiala a contractului/lotului:\s*([\d\s.,]+)", v24
+    )
+    detail.estimated_initial_value = _parse_ro_number(match.group(1)) if match else None
+
+    match = re.search(r"Anunt publicat:\s*\[[A-Z0-9]+/(\d{2}\.\d{2}\.\d{4})\]", text)
+    detail.publication_date = _parse_ro_date(match.group(1)) if match else None
+
+    return detail
 
 
 # sysNoticeTypeId -> public SPA view route, confirmed against the source
