@@ -174,7 +174,6 @@ def test_award_resume_skips_finished_pdfs(api: TestClient) -> None:
     class CountingStub(StubAdapter):
         async def fetch_award_detail(self, ca_notice_id):
             calls.append(ca_notice_id)
-            return None
 
     done = _mk_award("done", now - timedelta(hours=5))
     done.winner_name = "ACME SRL"
@@ -226,7 +225,6 @@ def test_backfill_resumes_from_checkpoint(api: TestClient, monkeypatch) -> None:
     window) as the next start — kill mid-run, rerun, no rework."""
     import scripts.backfill_initial as backfill
     from core.sync import set_checkpoint
-    from db import engine
 
     calls: list = []
 
