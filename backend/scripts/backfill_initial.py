@@ -2,17 +2,22 @@
 
 Fills the database with ENOUGH history to make the feed look alive and to
 feed incumbent/renewal analysis — not an archive. Defaults: 75 days of
-tenders (capped at 1200 rows) + 30 days of awards (capped at 250 rows),
-oldest slices first, checkpointed per slice: kill it halfway and rerun,
-it resumes where it stopped.
+tenders (cap 5000, effectively the whole window) + the most recent 7
+days of awards (cap 600), oldest slices first, checkpointed per slice:
+kill it halfway and rerun, it resumes where it stopped.
+
+Why these shapes: tender volume (~400/week across the six divisions)
+fits the full window; awards (~60/day with a PDF parse each) are
+deliberately a recent sample — depth comes from tenders, winners from
+recent awards. Measured 2026-10-28; see backend/API_CHANGES.md.
 
 Politeness: same 0.3s inter-request delay as the adapter's normal sync,
 sequential slices, no extra parallelism. Watch the progress lines for
 the live request rhythm.
 
 Usage (from backend/):
-    python -m scripts.backfill_initial [--days 75] [--max-tenders 1500]
-        [--awards-days 30] [--max-awards 400] [--no-awards]
+    python -m scripts.backfill_initial [--days 75] [--max-tenders 5000]
+        [--awards-days 7] [--max-awards 600] [--no-awards]
         [--divisions 45,30,33,50,72,60]
 """
 
@@ -109,9 +114,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--days", type=int, default=75)
     parser.add_argument("--divisions", default=",".join(DEFAULT_SYNC_DIVISIONS))
-    parser.add_argument("--max-tenders", type=int, default=1200)
-    parser.add_argument("--awards-days", type=int, default=30)
-    parser.add_argument("--max-awards", type=int, default=250)
+    parser.add_argument("--max-tenders", type=int, default=5000)
+    parser.add_argument("--awards-days", type=int, default=7)
+    parser.add_argument("--max-awards", type=int, default=600)
     parser.add_argument("--no-awards", action="store_true")
     parser.add_argument("--max-seconds", type=float, default=3600)
     args = parser.parse_args(argv)

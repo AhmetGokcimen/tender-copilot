@@ -163,6 +163,19 @@ class TenderFeedState(BaseModel):
     status: str
 
 
+class RenewalPattern(BaseModel):
+    """Recurrence guess for one tender (detail only — the feed leaves it
+    null to avoid N+1 sibling queries). next_expected_date is an explicitly
+    labeled estimate (see `note`), never a promise."""
+
+    detected: bool
+    confidence: str | None  # "high" | "medium" | "low"
+    prior_count: int
+    avg_interval_days: float | None
+    next_expected_date: datetime | None
+    note: str
+
+
 class TenderFeedItem(BaseModel):
     """The frontend feed shape: tender display fields + nested per-company
     state. Unknown display values degrade to "" (county/authority) or the
@@ -184,6 +197,7 @@ class TenderFeedItem(BaseModel):
     procedure_type: str
     clarification_deadline: datetime | None
     state: TenderFeedState
+    renewal_pattern: RenewalPattern | None = None
 
     @classmethod
     def from_triple(
@@ -192,6 +206,7 @@ class TenderFeedItem(BaseModel):
         state: UserTenderState | None,
         company: CompanyProfile | None,
         authorization_status: str | None = None,
+        renewal_pattern: RenewalPattern | None = None,
     ) -> "TenderFeedItem":
         return cls(
             source_system=tender.source_system,
@@ -229,6 +244,7 @@ class TenderFeedItem(BaseModel):
                 ),
                 status=state.status if state else "new",
             ),
+            renewal_pattern=renewal_pattern,
         )
 
 
@@ -403,3 +419,35 @@ class SyncReport(BaseModel):
     awards_pdf_errors: int
     awards_checkpoint: datetime | None
     duration_seconds: float
+
+
+class AuthorityNotices(BaseModel):
+    count: int
+    first_date: datetime | None
+    last_date: datetime | None
+    total_estimated_value: float | None
+
+
+class AuthorityWinner(BaseModel):
+    name: str
+    wins: int
+    total_value: float
+
+
+class AuthorityAwards(BaseModel):
+    count: int
+    total_value: float | None
+    winners: list[AuthorityWinner]
+
+
+class AuthorityHistory(BaseModel):
+    """(contracting_authority, cpv_group) aggregation. insufficient_data
+    is true until MIN_AWARDS_FOR_PATTERN awards back the winner table —
+    sample_size says how far off we are."""
+
+    authority: str | None
+    cpv_group: str | None
+    notices: AuthorityNotices
+    awards: AuthorityAwards
+    insufficient_data: bool
+    sample_size: int

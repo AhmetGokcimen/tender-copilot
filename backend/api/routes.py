@@ -11,6 +11,7 @@ from ai.client import (
     build_tender_summary,
 )
 from api.schemas import (
+    AuthorityHistory,
     AuthorizationPatch,
     CompanyDetail,
     CompanyOptions,
@@ -24,6 +25,7 @@ from api.schemas import (
     KeywordOption,
     OcrJobResponse,
     OnboardingStatus,
+    RenewalPattern,
     TenderFeedItem,
     TenderStatePatch,
     TenderWithState,
@@ -39,6 +41,7 @@ from core.authorizations import (
 from core.caiet_jobs import create_job, get_active_job, get_latest_job, run_caiet_job
 from core.country_requirements import get_country_requirements
 from core.eligibility import run_numeric_checks
+from core.history import authority_history, renewal_pattern
 from core.lookups import (
     COUNTRIES,
     INDUSTRIES,
@@ -193,9 +196,33 @@ def get_tender(
             )
         ).first()
         auth_map = authorization_status_map(session, company.id)
+    renewal = renewal_pattern(session, tender)
     return TenderFeedItem.from_triple(
-        tender, state, company, auth_map.get(tender.country_code)
+        tender,
+        state,
+        company,
+        auth_map.get(tender.country_code),
+        RenewalPattern(**renewal) if renewal else None,
     )
+
+
+@router.get(
+    "/tenders/{external_id}/authority-history",
+    response_model=AuthorityHistory,
+    tags=["tenders"],
+)
+def get_authority_history(
+    external_id: str,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> AuthorityHistory:
+    """Incumbent lens for one tender's buyer: notice volume plus the
+    award/winner breakdown in the same (authority, CPV division) pair.
+    Global data (no company scoping) — auth only gates the caller."""
+    tender = session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    return AuthorityHistory(**authority_history(session, tender))
 
 
 @router.patch(
