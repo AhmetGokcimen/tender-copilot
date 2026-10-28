@@ -165,13 +165,15 @@ async def sync_award_window(
             ).all()
         )
         completed = True
-        for award in awards:
+        for index, award in enumerate(awards):
             if award.external_id in done:
                 continue
             if time.monotonic() >= deadline:
                 timed_out = True
                 completed = False
                 break
+            if index and index % 50 == 0:
+                print(f"[awards] {index}/{len(awards)} PDFs parsed...", flush=True)
             try:
                 detail = await worker.fetch_award_detail(award.external_id)
             except Exception:  # noqa: BLE001 — partial row kept, see docstring
