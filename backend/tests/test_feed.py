@@ -14,7 +14,7 @@ TENDER_KEYS = {
     "source_system", "external_id", "country_code", "title", "cpv_codes",
     "estimated_value", "currency", "publication_date", "submission_deadline",
     "raw_description", "source_url", "authority", "county", "procedure_type",
-    "clarification_deadline", "state",
+    "clarification_deadline", "state", "renewal_pattern",
 }
 STATE_KEYS = {
     "score", "score_reasons", "ai_summary", "ai_title_simplified",

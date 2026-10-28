@@ -15,8 +15,9 @@ through here. Design rules (serverless-safe):
 import time
 from datetime import UTC, datetime, timedelta
 
-from sqlmodel import Session
+from sqlmodel import Session, select
 
+from adapters.romania_seap.adapter import RomaniaSeapAdapter
 from db import upsert_awards, upsert_tenders
 from models.award import Award
 from models.sync_state import SyncCheckpoint
@@ -79,11 +80,13 @@ async def sync_tender_window(
     max_tenders: int = 500,
     max_seconds: float = 240,
 ) -> dict:
-    """Sync tenders published in [start, end). Advances the checkpoint per
-    completed slice; stops early on max_tenders/max_seconds with the
-    checkpoint left at the last completed slice."""
-    from adapters.romania_seap.adapter import RomaniaSeapAdapter
-
+    """Sync tenders published in [start, end). Slices are atomic: the
+    checkpoint advances only over fully completed slices (empty slices
+    included — otherwise an empty week would pin the checkpoint
+    forever). Caps/timeouts are checked BETWEEN slices, so a run may
+    overshoot max_tenders by one slice rather than silently dropping a
+    slice's tail — capped/timed_out mean "unfinished work remains",
+    never "data was skipped"."""
     worker = adapter or RomaniaSeapAdapter()
     divs = divisions if divisions is not None else DEFAULT_SYNC_DIVISIONS
     deadline = time.monotonic() + max_seconds
@@ -91,29 +94,29 @@ async def sync_tender_window(
     capped = False
     timed_out = False
     for slice_start, slice_end in _slices(start, end):
+        if synced >= max_tenders:
+            capped = True
+            break
         if time.monotonic() >= deadline:
             timed_out = True
             break
         tenders: list[Tender] = await worker.fetch_tenders(
             cpv_codes=divs, start=slice_start, end=slice_end
         )
-        remaining = max_tenders - synced
-        if len(tenders) > remaining:
-            tenders = tenders[:remaining]
-            capped = True
         upsert_tenders(session, tenders)
         synced += len(tenders)
         set_checkpoint(session, TENDERS_KEY, slice_end, len(tenders))
-        if capped or synced >= max_tenders:
-            capped = synced >= max_tenders
-            break
     return {
         "synced": synced,
         "capped": capped,
         "timed_out": timed_out,
-        "checkpoint": (get_checkpoint(session, TENDERS_KEY).window_end
-                       if get_checkpoint(session, TENDERS_KEY) else None),
+        "checkpoint": _checkpoint_end(session, TENDERS_KEY),
     }
+
+
+def _checkpoint_end(session: Session, key: str):
+    cp = get_checkpoint(session, key)
+    return cp.window_end if cp else None
 
 
 async def sync_award_window(
@@ -127,11 +130,11 @@ async def sync_award_window(
     max_seconds: float = 240,
 ) -> dict:
     """Sync awards published in [start, end), winner PDFs included. Same
-    checkpoint/cap/timeout contract as sync_tender_window. A failed PDF
-    parse keeps the list-level row (winner null) and counts as an error —
-    it never fails the slice."""
-    from adapters.romania_seap.adapter import RomaniaSeapAdapter
-
+    atomic-slice contract as sync_tender_window, plus two award-specific
+    rules: a failed PDF keeps the list-level row (winner null, counted in
+    pdf_errors, slice still completes), and awards that already have a
+    winner are never re-downloaded (one lookup per slice — timeout
+    resumes redo only the missing PDFs)."""
     worker = adapter or RomaniaSeapAdapter()
     divs = divisions if divisions is not None else DEFAULT_SYNC_DIVISIONS
     deadline = time.monotonic() + max_seconds
@@ -140,19 +143,34 @@ async def sync_award_window(
     timed_out = False
     pdf_errors = 0
     for slice_start, slice_end in _slices(start, end):
+        if synced >= max_awards:
+            capped = True
+            break
         if time.monotonic() >= deadline:
             timed_out = True
             break
         awards: list[Award] = await worker.fetch_awards(
             cpv_codes=divs, start=slice_start, end=slice_end
         )
-        remaining = max_awards - synced
-        if len(awards) > remaining:
-            awards = awards[:remaining]
-            capped = True
+        if not awards:
+            set_checkpoint(session, AWARDS_KEY, slice_end, 0)
+            continue
+        done = set(
+            session.exec(
+                select(Award.external_id).where(
+                    Award.source_system == worker.source_system,
+                    Award.external_id.in_([a.external_id for a in awards]),
+                    Award.winner_name.is_not(None),
+                )
+            ).all()
+        )
+        completed = True
         for award in awards:
+            if award.external_id in done:
+                continue
             if time.monotonic() >= deadline:
                 timed_out = True
+                completed = False
                 break
             try:
                 detail = await worker.fetch_award_detail(award.external_id)
@@ -174,17 +192,14 @@ async def sync_award_window(
                 pdf_errors += 1
         upsert_awards(session, awards)
         synced += len(awards)
-        set_checkpoint(session, AWARDS_KEY, slice_end, len(awards))
-        if timed_out:
-            break
-        if capped or synced >= max_awards:
-            capped = synced >= max_awards
+        if completed:
+            set_checkpoint(session, AWARDS_KEY, slice_end, len(awards))
+        else:
             break
     return {
         "synced": synced,
         "capped": capped,
         "timed_out": timed_out,
         "pdf_errors": pdf_errors,
-        "checkpoint": (get_checkpoint(session, AWARDS_KEY).window_end
-                       if get_checkpoint(session, AWARDS_KEY) else None),
+        "checkpoint": _checkpoint_end(session, AWARDS_KEY),
     }
