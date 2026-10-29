@@ -10,11 +10,11 @@ from datetime import UTC, datetime
 
 from sqlmodel import Session, select
 
-from adapters.romania_seap.adapter import RomaniaSeapAdapter
-from ai.ocr import extract_requirements_from_pdf
-from db import engine, upsert_tender_extraction
-from models.ocr_job import ACTIVE_JOB_STATUSES, OcrJob
-from models.tender import SourceSystem, Tender
+from backend.adapters.romania_seap.adapter import RomaniaSeapAdapter
+from backend.ai.ocr import extract_requirements_from_pdf
+from backend.db import engine, upsert_tender_extraction
+from backend.models.ocr_job import ACTIVE_JOB_STATUSES, OcrJob
+from backend.models.tender import SourceSystem, Tender
 
 
 def create_job(

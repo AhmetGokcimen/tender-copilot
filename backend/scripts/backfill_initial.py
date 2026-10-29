@@ -9,14 +9,14 @@ kill it halfway and rerun, it resumes where it stopped.
 Why these shapes: tender volume (~400/week across the six divisions)
 fits the full window; awards (~60/day with a PDF parse each) are
 deliberately a recent sample — depth comes from tenders, winners from
-recent awards. Measured 2026-10-28; see backend/API_CHANGES.md.
+recent awards. Measured 2026-10-28; see API_CHANGES.md.
 
 Politeness: same 0.3s inter-request delay as the adapter's normal sync,
 sequential slices, no extra parallelism. Watch the progress lines for
 the live request rhythm.
 
-Usage (from backend/):
-    python -m scripts.backfill_initial [--days 75] [--max-tenders 5000]
+Usage (from repo root):
+    python -m backend.scripts.backfill_initial [--days 75] [--max-tenders 5000]
         [--awards-days 7] [--max-awards 600] [--no-awards]
         [--divisions 45,30,33,50,72,60]
 """
@@ -29,7 +29,7 @@ from datetime import UTC, datetime, timedelta
 
 from sqlmodel import Session
 
-from core.sync import (
+from backend.core.sync import (
     AWARDS_KEY,
     DEFAULT_SYNC_DIVISIONS,
     TENDERS_KEY,
@@ -37,7 +37,7 @@ from core.sync import (
     sync_award_window,
     sync_tender_window,
 )
-from db import engine, init_db
+from backend.db import engine, init_db
 
 
 def _window_start(session: Session, key: str, days: int, label: str) -> datetime:

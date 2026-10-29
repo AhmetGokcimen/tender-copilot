@@ -4,19 +4,19 @@ import pytest
 from fastapi import HTTPException
 from sqlmodel import Session
 
-from models.company import CompanyProfile
+from backend.models.company import CompanyProfile
 
 
 @pytest.fixture()
 def session(api):
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         yield session
 
 
 def _user(session: Session, sub: str = "u1"):
-    from core.membership import get_or_create_user
+    from backend.core.membership import get_or_create_user
 
     return get_or_create_user(
         session, subject=sub, email=f"{sub}@x.ro", name="U", provider="google"
@@ -31,7 +31,7 @@ def test_get_or_create_user_is_idempotent(session: Session) -> None:
 
 
 def test_links_scope_companies_to_user(session: Session) -> None:
-    from core.membership import link_user_company, user_companies
+    from backend.core.membership import link_user_company, user_companies
 
     session.add(CompanyProfile(name="A"))
     session.add(CompanyProfile(name="B"))
@@ -48,7 +48,7 @@ def test_links_scope_companies_to_user(session: Session) -> None:
 
 
 def test_require_company_enforces_membership(session: Session) -> None:
-    from core.membership import link_user_company, require_company
+    from backend.core.membership import link_user_company, require_company
 
     session.add(CompanyProfile(name="A"))
     session.commit()
@@ -66,7 +66,7 @@ def test_require_company_enforces_membership(session: Session) -> None:
 
 
 def test_resolve_user_company_defaults_to_first(session: Session) -> None:
-    from core.membership import link_user_company, resolve_user_company
+    from backend.core.membership import link_user_company, resolve_user_company
 
     session.add(CompanyProfile(name="A"))
     session.add(CompanyProfile(name="B"))

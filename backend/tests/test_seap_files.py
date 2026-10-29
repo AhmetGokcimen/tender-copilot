@@ -20,7 +20,7 @@ def _cms_blob(inner: bytes) -> bytes:
 
 
 def _adapter(handler) -> object:
-    from adapters.romania_seap.adapter import RomaniaSeapAdapter
+    from backend.adapters.romania_seap.adapter import RomaniaSeapAdapter
 
     client = httpx.AsyncClient(
         transport=httpx.MockTransport(handler), base_url="https://e-licitatie.ro"

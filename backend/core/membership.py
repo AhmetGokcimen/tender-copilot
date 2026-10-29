@@ -9,12 +9,12 @@ has no UserCompany link to the requested company.
 from fastapi import Depends, HTTPException
 from sqlmodel import Session, select
 
-from core.auth import CurrentUser
-from core.security import get_current_user
-from db import get_session
-from models.company import CompanyProfile
-from models.user import User
-from models.user_company import UserCompany
+from backend.core.auth import CurrentUser
+from backend.core.security import get_current_user
+from backend.db import get_session
+from backend.models.company import CompanyProfile
+from backend.models.user import User
+from backend.models.user_company import UserCompany
 
 
 def get_or_create_user(

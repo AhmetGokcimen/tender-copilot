@@ -1,4 +1,8 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_BACKEND_DIR = Path(__file__).resolve().parent.parent  # backend/
 
 
 class Settings(BaseSettings):
@@ -13,7 +17,11 @@ class Settings(BaseSettings):
     meta_api_base_url: str = "https://api.meta.ai/v1"
     meta_model: str = "muse-wonder-1.0"
 
-    database_url: str = "sqlite:///./data/app.db"
+    # Absolute and anchored to backend/ (not the cwd): the server now runs
+    # from the repo root, so a bare ./data/... would silently create a
+    # second database in the wrong place. DATABASE_URL env still overrides
+    # (tests use a temp file; production will use Postgres).
+    database_url: str = f"sqlite:///{(_BACKEND_DIR / 'data' / 'app.db').as_posix()}"
 
     # JWT secret for session/OAuth-state tokens. The default keeps local
     # demo setup frictionless but is NOT safe for anything public — set a

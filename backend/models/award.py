@@ -16,7 +16,7 @@ from datetime import UTC, datetime
 from sqlalchemy import JSON, Column
 from sqlmodel import Field, SQLModel
 
-from models.tender import SourceSystem
+from backend.models.tender import SourceSystem
 
 
 def _utcnow() -> datetime:

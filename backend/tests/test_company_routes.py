@@ -3,15 +3,15 @@
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
-from core.membership import get_or_create_user, link_user_company
-from models.company import CompanyProfile
-from models.country_authorization import CountryAuthorization
-from models.tender import SourceSystem, Tender
-from models.user_tender_state import UserTenderState
+from backend.core.membership import get_or_create_user, link_user_company
+from backend.models.company import CompanyProfile
+from backend.models.country_authorization import CountryAuthorization
+from backend.models.tender import SourceSystem, Tender
+from backend.models.user_tender_state import UserTenderState
 
 
 def _auth() -> dict:
-    from core.auth import create_access_token
+    from backend.core.auth import create_access_token
 
     token = create_access_token(sub="u", email="u@x.ro", name="U", provider="demo")
     return {"Authorization": f"Bearer {token}"}
@@ -34,7 +34,7 @@ def _seed_company(session: Session) -> int:
 def test_plural_patch_is_partial_and_returns_object(api: TestClient) -> None:
     """Regression: PATCH used to return {} and reset omitted fields to
     defaults. Now it returns the full object and touches only sent keys."""
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         company_id = _seed_company(session)
@@ -52,7 +52,7 @@ def test_plural_patch_is_partial_and_returns_object(api: TestClient) -> None:
 
 
 def test_plural_patch_explicit_null_clears(api: TestClient) -> None:
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         company_id = _seed_company(session)
@@ -65,7 +65,7 @@ def test_plural_patch_explicit_null_clears(api: TestClient) -> None:
 
 
 def test_plural_patch_blank_name_rejected(api: TestClient) -> None:
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         company_id = _seed_company(session)
@@ -75,7 +75,7 @@ def test_plural_patch_blank_name_rejected(api: TestClient) -> None:
 
 
 def test_plural_patch_preseeds_industry(api: TestClient) -> None:
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         company_id = _seed_company(session)
@@ -96,7 +96,7 @@ def test_plural_patch_preseeds_industry(api: TestClient) -> None:
 def test_plural_patch_seeds_authorizations_and_returns_object(api: TestClient) -> None:
     """The old {} came from the seed-commit expiring attrs without a
     reload — this path must return the full object too."""
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         company_id = _seed_company(session)
@@ -127,7 +127,7 @@ def _seed_scored(session: Session, company_id: int) -> None:
 
 def test_enrich_pagination(api: TestClient) -> None:
     """limit=0 makes no AI calls, so pagination is testable without mocks."""
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         company_id = _seed_company(session)

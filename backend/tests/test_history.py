@@ -5,8 +5,8 @@ from datetime import UTC, datetime, timedelta
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
-from models.award import Award
-from models.tender import SourceSystem, Tender
+from backend.models.award import Award
+from backend.models.tender import SourceSystem, Tender
 
 AUTH = "123 - Primaria Cluj"
 
@@ -31,7 +31,7 @@ def _award(external_id: str, winner: str, value: float) -> Award:
 
 
 def _auth() -> dict:
-    from core.auth import create_access_token
+    from backend.core.auth import create_access_token
 
     token = create_access_token(sub="u", email="u@x.ro", name="U", provider="demo")
     return {"Authorization": f"Bearer {token}"}
@@ -52,7 +52,7 @@ def _seed_periodic(session: Session) -> None:
 
 
 def test_authority_history_aggregates_pair(api: TestClient) -> None:
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         _seed_periodic(session)
@@ -72,7 +72,7 @@ def test_authority_history_aggregates_pair(api: TestClient) -> None:
 
 
 def test_authority_history_insufficient_data(api: TestClient) -> None:
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         session.add(_tender("solo", datetime(2026, 5, 5, tzinfo=UTC)))
@@ -90,7 +90,7 @@ def test_authority_history_404(api: TestClient) -> None:
 
 
 def test_renewal_detected_on_detail(api: TestClient) -> None:
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         _seed_periodic(session)
@@ -106,7 +106,7 @@ def test_renewal_detected_on_detail(api: TestClient) -> None:
 
 
 def test_renewal_sparse_returns_null(api: TestClient) -> None:
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         session.add(_tender("solo", datetime(2026, 5, 5, tzinfo=UTC)))
@@ -116,7 +116,7 @@ def test_renewal_sparse_returns_null(api: TestClient) -> None:
 
 
 def test_renewal_irregular_reports_no_pattern(api: TestClient) -> None:
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         session.add(_tender("r0", datetime(2026, 1, 5, tzinfo=UTC)))
@@ -131,9 +131,9 @@ def test_renewal_irregular_reports_no_pattern(api: TestClient) -> None:
 
 
 def test_feed_leaves_renewal_null(api: TestClient) -> None:
-    from core.membership import get_or_create_user, link_user_company
-    from db import engine
-    from models.company import CompanyProfile
+    from backend.core.membership import get_or_create_user, link_user_company
+    from backend.db import engine
+    from backend.models.company import CompanyProfile
 
     with Session(engine) as session:
         _seed_periodic(session)

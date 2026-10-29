@@ -9,11 +9,11 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from models.company import CompanyProfile
-from models.ocr_job import OcrJob
-from models.score_job import ScoreJob
-from models.tender import SourceSystem, Tender
-from models.user_tender_state import UserTenderState
+from backend.models.company import CompanyProfile
+from backend.models.ocr_job import OcrJob
+from backend.models.score_job import ScoreJob
+from backend.models.tender import SourceSystem, Tender
+from backend.models.user_tender_state import UserTenderState
 
 
 class TenderWithState(BaseModel):

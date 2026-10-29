@@ -5,15 +5,15 @@ from datetime import UTC, datetime
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
-from core.membership import get_or_create_user, link_user_company
-from models.company import CompanyProfile
-from models.score_job import ScoreJob
-from models.tender import SourceSystem, Tender
-from models.user_tender_state import UserTenderState
+from backend.core.membership import get_or_create_user, link_user_company
+from backend.models.company import CompanyProfile
+from backend.models.score_job import ScoreJob
+from backend.models.tender import SourceSystem, Tender
+from backend.models.user_tender_state import UserTenderState
 
 
 def _auth(sub="u") -> dict:
-    from core.auth import create_access_token
+    from backend.core.auth import create_access_token
 
     token = create_access_token(
         sub=sub, email=f"{sub}@x.ro", name="U", provider="demo"
@@ -44,7 +44,7 @@ def _seed_tenders(session: Session, n: int) -> None:
 
 
 def test_post_score_returns_202_and_scores_all(api: TestClient) -> None:
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         _seed_company(session)
@@ -53,7 +53,7 @@ def test_post_score_returns_202_and_scores_all(api: TestClient) -> None:
     # may not have run inline depending on the TestClient version, so replay
     # it explicitly — idempotent, deterministic either way. Production
     # callers poll the GET below instead.
-    from core.score_jobs import run_score_job
+    from backend.core.score_jobs import run_score_job
 
     res = api.post("/api/companies/1/score", headers=_auth())
     assert res.status_code == 202, res.text
@@ -69,7 +69,7 @@ def test_post_score_returns_202_and_scores_all(api: TestClient) -> None:
 
 
 def test_post_score_dedupes_active_job(api: TestClient) -> None:
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         _seed_company(session)
@@ -84,12 +84,12 @@ def test_post_score_dedupes_active_job(api: TestClient) -> None:
 
 
 def test_get_score_progress_and_404(api: TestClient) -> None:
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         _seed_company(session)
         _seed_tenders(session, 3)
-    from core.score_jobs import run_score_job
+    from backend.core.score_jobs import run_score_job
 
     assert api.get("/api/companies/1/score", headers=_auth()).status_code == 404
     posted = api.post("/api/companies/1/score", headers=_auth())
@@ -100,7 +100,7 @@ def test_get_score_progress_and_404(api: TestClient) -> None:
 
 
 def test_score_isolation(api: TestClient) -> None:
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         _seed_company(session, sub="owner")
@@ -113,8 +113,8 @@ def test_score_isolation(api: TestClient) -> None:
 
 
 def test_worker_fails_gracefully_for_missing_company(api: TestClient) -> None:
-    from core.score_jobs import run_score_job
-    from db import engine
+    from backend.core.score_jobs import run_score_job
+    from backend.db import engine
 
     with Session(engine) as session:
         session.add(ScoreJob(company_id=4242, status="pending"))
@@ -128,8 +128,8 @@ def test_worker_fails_gracefully_for_missing_company(api: TestClient) -> None:
 
 
 def test_reap_stale_score_jobs(api: TestClient) -> None:
-    from core.score_jobs import reap_stale_jobs
-    from db import engine
+    from backend.core.score_jobs import reap_stale_jobs
+    from backend.db import engine
 
     with Session(engine) as session:
         session.add(ScoreJob(company_id=1, status="running", total=9, processed=4))
@@ -143,8 +143,8 @@ def test_reap_stale_score_jobs(api: TestClient) -> None:
 def test_score_worker_preserves_ai_and_user_fields(api: TestClient) -> None:
     """The async path keeps the old sync path's no-clobber guarantee:
     scores land, everything else stays."""
-    from core.score_jobs import run_score_job
-    from db import engine
+    from backend.core.score_jobs import run_score_job
+    from backend.db import engine
 
     with Session(engine) as session:
         company = _seed_company(session)
@@ -178,6 +178,6 @@ def test_worker_stays_sync_so_background_tasks_use_a_thread() -> None:
     job duration. Sync callables run in a threadpool instead."""
     import inspect
 
-    from core.score_jobs import run_score_job
+    from backend.core.score_jobs import run_score_job
 
     assert not inspect.iscoroutinefunction(run_score_job)

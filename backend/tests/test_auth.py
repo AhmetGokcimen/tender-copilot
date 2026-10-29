@@ -4,11 +4,11 @@ import jwt
 import pytest
 from fastapi.testclient import TestClient
 
-from core.config import settings
+from backend.core.config import settings
 
 
 def _token(**overrides) -> str:
-    from core.auth import create_access_token
+    from backend.core.auth import create_access_token
 
     claims = {"sub": "u1", "email": "u@x.ro", "name": "U", "provider": "google"}
     claims.update(overrides)
@@ -16,14 +16,14 @@ def _token(**overrides) -> str:
 
 
 def test_token_roundtrip() -> None:
-    from core.auth import decode_access_token
+    from backend.core.auth import decode_access_token
 
     user = decode_access_token(_token())
     assert (user.sub, user.email, user.provider) == ("u1", "u@x.ro", "google")
 
 
 def test_tampered_token_rejected() -> None:
-    from core.auth import decode_access_token
+    from backend.core.auth import decode_access_token
 
     with pytest.raises(jwt.PyJWTError):
         decode_access_token(_token() + "x")
@@ -37,7 +37,7 @@ def test_protected_route_needs_bearer(api: TestClient) -> None:
 
 
 def test_demo_login_redirects_with_long_lived_token(api: TestClient) -> None:
-    from core.auth import decode_access_token
+    from backend.core.auth import decode_access_token
 
     res = api.get("/api/auth/demo")
     assert res.status_code in (302, 307)
@@ -58,8 +58,8 @@ def test_me_returns_current_user(api: TestClient) -> None:
 def test_demo_login_provisions_user_row(api: TestClient) -> None:
     from sqlmodel import Session, select
 
-    from db import engine
-    from models.user import User
+    from backend.db import engine
+    from backend.models.user import User
 
     api.get("/api/auth/demo")
     api.get("/api/auth/demo")
@@ -71,9 +71,9 @@ def test_demo_login_provisions_user_row(api: TestClient) -> None:
 def test_me_lists_user_company_ids(api: TestClient) -> None:
     from sqlmodel import Session
 
-    from core.membership import get_or_create_user, link_user_company
-    from db import engine
-    from models.company import CompanyProfile
+    from backend.core.membership import get_or_create_user, link_user_company
+    from backend.db import engine
+    from backend.models.company import CompanyProfile
 
     with Session(engine) as session:
         session.add(CompanyProfile(name="Mine"))
@@ -91,7 +91,7 @@ def test_me_lists_user_company_ids(api: TestClient) -> None:
 async def test_google_callback_mints_token_on_valid_state(
     api: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from core import auth
+    from backend.core import auth
 
     async def fake_exchange(code: str) -> dict:
         assert code == "auth-code"
@@ -101,7 +101,7 @@ async def test_google_callback_mints_token_on_valid_state(
         assert access_token == "google-at"
         return {"email": "jane@gmail.com", "name": "Jane"}
 
-    from api import auth_routes
+    from backend.api import auth_routes
 
     monkeypatch.setattr(auth_routes, "exchange_code_for_tokens", fake_exchange)
     monkeypatch.setattr(auth_routes, "fetch_google_userinfo", fake_userinfo)
@@ -120,7 +120,7 @@ def test_google_callback_rejects_bad_state_and_errors(api: TestClient) -> None:
 
 
 def test_google_login_needs_client_id(api: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
-    from core import auth
+    from backend.core import auth
 
     assert api.get("/api/auth/google/login").status_code in (302, 307)  # conftest sets a test id
     monkeypatch.setattr(settings, "google_client_id", "")

@@ -13,10 +13,10 @@ from datetime import UTC, datetime
 from sqlalchemy import func, update
 from sqlmodel import Session, SQLModel, create_engine
 
-from core.config import settings
-from models.award import Award
-from models.tender import SourceSystem, Tender
-from models.user_tender_state import UserTenderState
+from backend.core.config import settings
+from backend.models.award import Award
+from backend.models.tender import SourceSystem, Tender
+from backend.models.user_tender_state import UserTenderState
 
 _connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
 engine = create_engine(settings.database_url, connect_args=_connect_args)

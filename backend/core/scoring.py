@@ -18,8 +18,8 @@ Turkish `kural_notu` (always keep + explain, never silently drop).
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
-from models.company import CompanyProfile
-from models.tender import Tender
+from backend.models.company import CompanyProfile
+from backend.models.tender import Tender
 
 CORE_CPV_BASE_SCORE = 75
 SECONDARY_CPV_BASE_SCORE = 35

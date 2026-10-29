@@ -30,7 +30,7 @@ SECTION1 = {
 
 
 def test_map_procedure_type_covers_seap_vocab() -> None:
-    from adapters.romania_seap.adapter import map_procedure_type
+    from backend.adapters.romania_seap.adapter import map_procedure_type
 
     def proc(text: str) -> dict:
         return {"id": 0, "text": text}
@@ -47,7 +47,7 @@ def test_map_procedure_type_covers_seap_vocab() -> None:
 
 
 def test_map_notice_sets_procedure_type() -> None:
-    from adapters.romania_seap.adapter import RomaniaSeapAdapter
+    from backend.adapters.romania_seap.adapter import RomaniaSeapAdapter
 
     tender = RomaniaSeapAdapter()._map_notice(LIST_ITEM)
     assert tender.procedure_type == "open"
@@ -55,7 +55,7 @@ def test_map_notice_sets_procedure_type() -> None:
 
 @pytest.mark.asyncio
 async def test_fetch_tenders_enriches_county_and_clarification() -> None:
-    from adapters.romania_seap.adapter import RomaniaSeapAdapter
+    from backend.adapters.romania_seap.adapter import RomaniaSeapAdapter
 
     def handler(request: httpx.Request) -> httpx.Response:
         if "GetCNoticeList" in str(request.url):
@@ -77,7 +77,7 @@ async def test_fetch_tenders_enriches_county_and_clarification() -> None:
 
 @pytest.mark.asyncio
 async def test_fetch_tenders_survives_section1_failure() -> None:
-    from adapters.romania_seap.adapter import RomaniaSeapAdapter
+    from backend.adapters.romania_seap.adapter import RomaniaSeapAdapter
 
     def handler(request: httpx.Request) -> httpx.Response:
         if "GetCNoticeList" in str(request.url):

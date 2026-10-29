@@ -3,14 +3,14 @@ from typing import Literal
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Response
 from sqlmodel import Session, func, select
 
-from adapters.romania_seap.adapter import RomaniaSeapAdapter
-from ai.client import (
+from backend.adapters.romania_seap.adapter import RomaniaSeapAdapter
+from backend.ai.client import (
     ExtractedRequirements,
     MetaAIClient,
     build_company_summary,
     build_tender_summary,
 )
-from api.schemas import (
+from backend.api.schemas import (
     AuthorityHistory,
     AuthorizationPatch,
     CompanyDetail,
@@ -32,19 +32,24 @@ from api.schemas import (
     TenderWithState,
     TenderWithStatePage,
 )
-from core import score_jobs
-from core.authorizations import (
+from backend.core import score_jobs
+from backend.core.authorizations import (
     authorization_status_map,
     ensure_authorization_rows,
     list_authorizations,
     normalize_country_code,
     upsert_authorization,
 )
-from core.caiet_jobs import create_job, get_active_job, get_latest_job, run_caiet_job
-from core.country_requirements import get_country_requirements
-from core.eligibility import run_numeric_checks
-from core.history import authority_history, renewal_pattern
-from core.lookups import (
+from backend.core.caiet_jobs import (
+    create_job,
+    get_active_job,
+    get_latest_job,
+    run_caiet_job,
+)
+from backend.core.country_requirements import get_country_requirements
+from backend.core.eligibility import run_numeric_checks
+from backend.core.history import authority_history, renewal_pattern
+from backend.core.lookups import (
     COUNTRIES,
     INDUSTRIES,
     KEYWORDS,
@@ -54,16 +59,16 @@ from core.lookups import (
     profile_completeness,
     validate_company_data,
 )
-from core.membership import (
+from backend.core.membership import (
     get_request_user,
     link_user_company,
     require_company,
     resolve_user_company,
     user_companies,
 )
-from core.scoring import AI_SCORE_THRESHOLD
-from core.security import get_current_user
-from db import (
+from backend.core.scoring import AI_SCORE_THRESHOLD
+from backend.core.security import get_current_user
+from backend.db import (
     get_session,
     upsert_ai_justification,
     upsert_eligibility,
@@ -71,10 +76,10 @@ from db import (
     upsert_tender_title,
     upsert_tenders,
 )
-from models.company import CompanyProfile
-from models.tender import SourceSystem, Tender
-from models.user import User
-from models.user_tender_state import UserTenderState
+from backend.models.company import CompanyProfile
+from backend.models.tender import SourceSystem, Tender
+from backend.models.user import User
+from backend.models.user_tender_state import UserTenderState
 
 VALID_STATUSES = {"new", "reviewing", "applied", "rejected", "ignored"}
 

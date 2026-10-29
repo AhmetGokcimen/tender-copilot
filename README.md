@@ -1,20 +1,40 @@
-# Tender Copilot
+# Tender Copilot (Ofera)
 
 AI copilot that monitors public procurement systems and helps SMEs find and
 respond to tenders they're actually eligible for. Built for the Meta Global
 AI Developer Hackathon (submission deadline: 2026-11-04, 21:00 ET).
 
-## Who owns what
+One repo, one deploy: the Next.js frontend lives at the repo root and the
+FastAPI backend ships as a single Python serverless function behind the
+same origin (`/api/*`) on Vercel. No CORS in production.
+
+## Repo layout
 
 ```
 tender-copilot/
-├── backend/    ← this is the backend's: FastAPI, adapters, DB, AI layer
-├── frontend/   ← owned by the frontend agent (Muse Code); not touched from here
-└── README.md
+├── app/            Next.js App Router (locale-prefixed pages)
+├── components/     React components (+ landing/)
+├── lib/            frontend: types (backend mirror), api client, hooks, mock data
+├── stores/         zustand stores (filters, pipeline, company, generator, ...)
+├── messages/       next-intl UI strings (en.json, ...)
+├── i18n/           next-intl routing config
+├── middleware.ts   locale routing (its matcher never touches /api)
+├── backend/        FastAPI app: adapters, DB, AI layer (import as backend.*)
+├── api/
+│   └── index.py    Vercel entrypoint: re-exports backend.main:app (only file here)
+├── vercel.json     /api/* → Python function rewrite + bundle excludes
+├── requirements.txt  Python deps (project root — Vercel reads them here)
+├── pyproject.toml    ruff config
+├── .python-version   pins the Vercel Python runtime (3.14)
+├── package.json      Next.js deps
+├── API_CHANGES.md    the single changelog (backend + frontend history merged)
+└── backend/openapi.json  versioned API contract snapshot
 ```
 
-The backend talks to the frontend only through the REST API under `/api`.
-Nothing in `backend/` assumes anything about how the frontend is built.
+The frontend talks to the backend only through relative `/api/*` calls —
+same origin in production; local `next dev` proxies `/api` to the uvicorn
+backend (see `next.config.mjs`). Nothing in `backend/` assumes anything
+about how the frontend is built.
 
 ## Architecture: multi-country from day one
 
@@ -33,7 +53,7 @@ hackathon, but nothing in the core logic is Romania-specific:
   country-agnostic. CPV codes are EU-wide standard and used as the universal
   categorization key.
 - Adding a new country = writing one new adapter module. Nothing in
-  `core/`, `models/`, or `api/` needs to change.
+  `backend/core/`, `backend/models/`, or `backend/api/` needs to change.
 
 ```
 backend/
@@ -51,13 +71,15 @@ backend/
 
 SQLite to start (zero setup, file-based — no separate service to stand up
 during a 9-day hackathon), via SQLModel so moving to Postgres later is just
-changing `DATABASE_URL`.
+changing `DATABASE_URL`. The default points at `backend/data/app.db`,
+anchored to the backend directory (not the cwd), so running from the repo
+root keeps using the same file.
 
 `Tender` (raw, adapter-written) and `UserTenderState` (AI output: score,
 summary, eligibility verdict, per company) are **separate tables on
 purpose**. The previous JSON-file system had a real bug where re-seeing a
 tender wiped its AI fields, because the whole record got overwritten on
-every re-fetch. Here, `db.upsert_tenders` does a SQL
+every re-fetch. Here, `backend.db.upsert_tenders` does a SQL
 `INSERT ... ON CONFLICT (source_system, external_id) DO UPDATE` that only
 ever touches `Tender`'s own columns — it cannot reach `UserTenderState`,
 so that bug class is now structurally impossible, not just avoided by
@@ -65,7 +87,7 @@ convention.
 
 ## Scoring
 
-`core/scoring.py` ranks a tender against a `CompanyProfile` (CPV match tier
+`backend/core/scoring.py` ranks a tender against a `CompanyProfile` (CPV match tier
 -> value/capacity ratio bands -> deadline penalty -> AI-worth-it threshold),
 carried over from a validated single-company prototype's logic, rewritten
 from scratch against the normalized models. It never drops a tender —
@@ -74,7 +96,7 @@ justify, don't silently decide.
 
 ## AI layer
 
-`ai/client.py` talks to `api.meta.ai`'s Responses API — confirmed live
+`backend/ai/client.py` talks to `api.meta.ai`'s Responses API — confirmed live
 2026-10-26, and *not* the OpenAI-compatible chat/completions shape other
 Meta/Llama endpoints use: `POST {base_url}/responses` with `{model,
 instructions, input: [...], text: {format: {...}}}`; the reply text is
@@ -106,7 +128,7 @@ fetches it and runs it through `extract_requirements`.
 `extracted_requirements` and `ai_title_simplified` live on `Tender` itself,
 not `UserTenderState` — they don't depend on which company is looking, so
 keeping them per-company would mean redoing the same AI call for every
-company that scores the tender. `db.upsert_tenders`'s `ON CONFLICT DO
+company that scores the tender. `backend.db.upsert_tenders`'s `ON CONFLICT DO
 UPDATE` explicitly excludes both columns, so a re-fetch still can't wipe
 them — same no-clobber guarantee as the Tender/UserTenderState split,
 just applied within this one table too. Verified: synced → extracted →
@@ -114,13 +136,13 @@ re-synced → extraction still there.
 
 ## Eligibility-comparison engine
 
-`core/eligibility.py` + `ai.client.compare_eligibility` turn one tender's
+`backend/core/eligibility.py` + `backend.ai.client.compare_eligibility` turn one tender's
 `extracted_requirements` into a concrete verdict against a `CompanyProfile`
 (`UserTenderState.eligible`: `True`/`False`/`None`). Split in two on
 purpose:
 
 - Turnover and similar-experience-value comparisons are plain arithmetic
-  in `core/eligibility.py`, not left to the model — removes an easy
+  in `backend/core/eligibility.py`, not left to the model — removes an easy
   source of LLM arithmetic error.
 - The AI layer takes those results as given facts and only reasons about
   what genuinely needs judgment: matching free-text certification
@@ -180,7 +202,7 @@ on 5 real synced tenders + 3 real SEAP Section III extractions:
 Full schema: [backend/openapi.json](backend/openapi.json) (static snapshot —
 regenerate with the command below after changing any route) or the live,
 always-current `GET /openapi.json` / interactive `GET /docs` once the
-server is running.
+server is running. Change history: [API_CHANGES.md](API_CHANGES.md).
 
 ```
 GET   /api/tenders                        list stored tenders, paginated
@@ -219,36 +241,113 @@ edits status/note via the `PATCH .../tenders/romania/{id}` call.
 
 ## Auth and CORS
 
-No auth by default — the whole point for this hackathon is the frontend
-integrating with zero friction. Set `API_KEY` in the backend's own `.env`
-to require an `X-API-Key` header on every `/api/*` call (every route
-already wired to check it via `core/security.py`); leave it unset for the
-demo. A real login/signup/JWT system would be real work for no demo
-value — skip it unless a judge-facing requirement says otherwise.
+JWT auth: every `/api/*` call except `/api/auth/*` needs an
+`Authorization: Bearer <JWT>` header — mint one via `GET /api/auth/demo`
+(one click) or the Google OAuth flow (`/api/auth/google/login`). Data is
+multi-tenant: every login owns its companies via onboarding. See
+[API_CHANGES.md](API_CHANGES.md) for the auth history.
 
-CORS is wide open (`ALLOWED_ORIGINS=*`) by default so the Next.js
-frontend can call this from any port/origin without configuration.
-Narrow it to specific origins (comma-separated) before any real deploy —
-`*` can't be combined with credentialed requests, which this setup
-doesn't need since there's no cookie-based auth.
+CORS: production is same-origin (frontend + API on one Vercel deployment),
+so browsers never trigger CORS there. The `CORSMiddleware` in
+`backend/main.py` is KEPT for the local two-process dev flow
+(`next dev` on :3000 + `uvicorn` on :8000), where cross-origin calls still
+happen when the dev proxy is bypassed. `ALLOWED_ORIGINS` defaults to
+`http://localhost:3000`.
 
-## Setup
+## Setup (local dev)
+
+Prerequisites: Python 3.14 (see `.python-version`), Node 20+.
 
 ```bash
-cd backend
-python -m venv .venv
-.venv\Scripts\activate   # Windows
+# from the repo root
+python -m venv backend/.venv
+backend/.venv/Scripts/activate   # Windows (elsewhere: source backend/.venv/bin/activate)
 pip install -r requirements.txt
 cp .env.example .env     # fill in META_API_KEY etc.
-uvicorn main:app --reload
+npm install
+
+# terminal 1 — API on :8000
+uvicorn backend.main:app --reload
+
+# terminal 2 — web on :3000 (/api proxied to :8000 in dev)
+npm run dev
 ```
 
-Then open `http://localhost:8000/docs` for interactive docs, or regenerate
-the static snapshot after changing a route:
+Open `http://localhost:3000` in a browser (redirects to `/en`). Mock mode
+is the default (`NEXT_PUBLIC_USE_MOCK=true`); set
+`NEXT_PUBLIC_USE_MOCK=false` in `.env` to hit the real API (same-origin
+`/api`, no extra config needed).
+
+Interactive API docs: `http://localhost:8000/docs`. Regenerate the static
+contract snapshot after changing a route:
 
 ```bash
-python -c "import json, main; json.dump(main.app.openapi(), open('openapi.json', 'w', encoding='utf-8'), indent=2, ensure_ascii=False)"
+python -c "import json, backend.main as m; json.dump(m.app.openapi(), open('backend/openapi.json', 'w', encoding='utf-8'), indent=2, ensure_ascii=False)"
 ```
+
+Operator scripts (from the root): `python -m backend.scripts.migrate_demo`
+(backup-first demo reset), `python -m backend.scripts.backfill_initial`
+(one-shot history backfill).
+
+Alternative: `vercel dev` (Vercel CLI) serves the Next.js app and the
+Python function together the way production does. The two-process flow
+above is the verified default; `vercel dev` is documented but was not
+re-verified after this restructure.
+
+## Frontend
+
+Next.js (App Router) + TypeScript + Tailwind. English UI, Romanian-ready via
+`next-intl` (add `messages/ro.json` + `'ro'` in `i18n/routing.ts` — no
+component changes needed).
+
+Mock vs real API: default is mock mode (`NEXT_PUBLIC_USE_MOCK=true`): all
+data comes from `lib/mock-data.ts`, shaped exactly like the backend JSON
+(`lib/types.ts` mirrors `backend/models/*`). Set
+`NEXT_PUBLIC_USE_MOCK=false` to call the real backend — same-origin, no URL
+config needed. Only `lib/api.ts` (and `lib/assistant-api.ts`) branch on
+the flag.
+
+- `app/[locale]/page.tsx` — public landing page (`/`); sections in `components/landing/`
+- `app/[locale]/app/` — dashboard: `/app` opportunities, `/app/tenders/[id]` analysis,
+  `/app/pipeline` kanban, `/app/generator` DUAE drafts, `/app/archive`, `/app/settings`
+- `components/` — Sidebar, TenderCard, KanbanBoard, TenderDetail, chips, KPI cards
+- `lib/` — types (backend mirror), api client, react-query hooks, mock data,
+  draft templates, formatting
+- `stores/` — zustand: filters, pipeline (persisted), company (persisted), generator (persisted)
+- `messages/en.json` — all UI strings; `i18n/` — next-intl routing config
+
+## Deploy (Vercel)
+
+Single Vercel project from this repo: Next.js is auto-detected at the root,
+`api/index.py` becomes the Python function, `vercel.json` routes `/api/*`
+to it. No build-command / output-directory overrides needed.
+
+Environment variables to set in the Vercel project (see `.env.example`):
+required: `META_API_KEY`, `JWT_SECRET` (long random — the default is
+dev-only), `SYNC_SECRET` (must equal the `SYNC_TOKEN` repo secret for the
+Actions sync workflow), `FRONTEND_URL` + `BACKEND_URL` (both = the deployed
+origin, e.g. `https://ofera.vercel.app`), `NEXT_PUBLIC_USE_MOCK=false`.
+Optional: `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` (Google login; without
+them only demo login works), `META_API_BASE_URL`/`META_MODEL` (gateway
+override), `ALLOWED_ORIGINS` (same-origin production never triggers CORS;
+harmless to set to the deployed origin).
+
+Still open / next steps (not part of this restructure):
+
+- `DATABASE_URL` is SQLite by default, which doesn't work on Vercel
+  (read-only filesystem, no persistence across invocations). The Supabase
+  (Postgres) migration is the planned follow-up — until then, a production
+  deploy needs `DATABASE_URL` pointed at Postgres.
+- Function timeout: long endpoints (sync, score/enrich jobs) can exceed
+  serverless limits — the sync workflow's `max_seconds` should fit the
+  plan's `maxDuration` (no `maxDuration` is set in `vercel.json` because
+  the cap is plan-dependent).
+- Lifespan/shutdown: only 500ms on Vercel; the async job patterns
+  (extract-caiet, score) already persist progress per batch and resume via
+  re-POST, which is the serverless-safe shape — see API_CHANGES.md.
+- Cron: Vercel crons run on production only; the GitHub Actions
+  `sync-tenders.yml` workflow stays as the sync trigger (no `crons` in
+  `vercel.json`).
 
 ## Research note: website-to-API tooling
 

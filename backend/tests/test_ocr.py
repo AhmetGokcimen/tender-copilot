@@ -61,20 +61,20 @@ def _cms_blob(inner: bytes) -> bytes:
 
 
 def test_classify_pages_marks_text_scanned_empty() -> None:
-    from ai.ocr import classify_pages
+    from backend.ai.ocr import classify_pages
 
     assert classify_pages(_mixed_pdf()) == ["text", "scanned", "empty"]
 
 
 def test_unwrap_p7s_returns_inner_pdf() -> None:
-    from ai.ocr import unwrap_p7s
+    from backend.ai.ocr import unwrap_p7s
 
     inner = b"%PDF-1.5 fake-caiet-bytes"
     assert unwrap_p7s(_cms_blob(inner)) == inner
 
 
 def test_unwrap_p7s_accepts_pem_armor_and_plain_pdf() -> None:
-    from ai.ocr import unwrap_p7s
+    from backend.ai.ocr import unwrap_p7s
 
     inner = b"%PDF-1.4 fake"
     assert unwrap_p7s(pem.armor("PKCS7", _cms_blob(inner))) == inner
@@ -82,7 +82,7 @@ def test_unwrap_p7s_accepts_pem_armor_and_plain_pdf() -> None:
 
 
 def test_unwrap_p7s_rejects_garbage() -> None:
-    from ai.ocr import OCRError, unwrap_p7s
+    from backend.ai.ocr import OCRError, unwrap_p7s
 
     with pytest.raises(OCRError):
         unwrap_p7s(b"definitely not cms or pdf")
@@ -90,7 +90,7 @@ def test_unwrap_p7s_rejects_garbage() -> None:
 
 @pytest.mark.asyncio
 async def test_extract_pdf_text_merges_text_and_ocr_in_order() -> None:
-    from ai.ocr import extract_pdf_text
+    from backend.ai.ocr import extract_pdf_text
 
     async def fake_ocr(png: bytes) -> str:
         assert png[:8] == b"\x89PNG\r\n\x1a\n"
@@ -110,7 +110,7 @@ async def test_extract_pdf_text_merges_text_and_ocr_in_order() -> None:
 
 @pytest.mark.asyncio
 async def test_extract_pdf_text_marks_ocr_failures_and_continues() -> None:
-    from ai.ocr import extract_pdf_text
+    from backend.ai.ocr import extract_pdf_text
 
     async def boom(png: bytes) -> str:
         raise RuntimeError("vision down")
@@ -123,7 +123,7 @@ async def test_extract_pdf_text_marks_ocr_failures_and_continues() -> None:
 
 @pytest.mark.asyncio
 async def test_extract_pdf_text_respects_max_ocr_pages() -> None:
-    from ai.ocr import extract_pdf_text
+    from backend.ai.ocr import extract_pdf_text
 
     calls = 0
 
@@ -140,7 +140,7 @@ async def test_extract_pdf_text_respects_max_ocr_pages() -> None:
 
 @pytest.mark.asyncio
 async def test_ocr_image_sends_input_image_and_reads_output_text() -> None:
-    from ai.client import MetaAIClient
+    from backend.ai.client import MetaAIClient
 
     seen: dict = {}
 

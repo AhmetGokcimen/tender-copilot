@@ -21,8 +21,8 @@ from fastapi.testclient import TestClient
 def api():
     from sqlmodel import SQLModel
 
-    from db import engine, init_db
-    from main import app
+    from backend.db import engine, init_db
+    from backend.main import app
 
     init_db()
     yield TestClient(app, follow_redirects=False)

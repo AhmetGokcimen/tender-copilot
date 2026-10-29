@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Tender Copilot API",
-    "description": "Multi-country public-procurement copilot backend. Only Romania/SEAP is implemented so far \u2014 see the repo README for the adapter architecture. Every /api/* call except /api/auth/* needs an `Authorization: Bearer <JWT>` header; mint one via /api/auth/demo (one click) or /api/auth/google/login. Data is multi-tenant: every login owns its companies via onboarding. POST /internal/sync-tenders is the cron-triggered incremental sync (X-Sync-Token, not JWT). Breaking changes vs 0.5.0 are listed in backend/API_CHANGES.md.",
+    "description": "Multi-country public-procurement copilot backend. Only Romania/SEAP is implemented so far — see the repo README for the adapter architecture. Every /api/* call except /api/auth/* needs an `Authorization: Bearer <JWT>` header; mint one via /api/auth/demo (one click) or /api/auth/google/login. Data is multi-tenant: every login owns its companies via onboarding. POST /internal/sync-tenders is the cron-triggered incremental sync (X-Sync-Token, not JWT). Breaking changes vs 0.5.0 are listed in API_CHANGES.md.",
     "version": "0.6.0"
   },
   "paths": {
@@ -110,7 +110,7 @@
           "auth"
         ],
         "summary": "Demo Login",
-        "description": "Zero-friction demo entry: mints the fixed demo user's long-lived\ntoken and hands it to the frontend \u2014 no Google account needed.",
+        "description": "Zero-friction demo entry: mints the fixed demo user's long-lived\ntoken and hands it to the frontend — no Google account needed.",
         "operationId": "demo_login_api_auth_demo_get",
         "responses": {
           "200": {
@@ -158,7 +158,7 @@
           "tenders"
         ],
         "summary": "List Tenders",
-        "description": "The frontend feed (Opportunities + Kanban source): every stored\ntender with its per-company state nested in, filterable and sortable.\nBare array \u2014 matches lib/types.ts TenderWithState[] one to one. State\nis always the caller's own company \u2014 strangers' scores never leak.\nCountry authorization rides along as pure information: the feed never\nhides tenders for it unless the caller opts in via authorization_status.",
+        "description": "The frontend feed (Opportunities + Kanban source): every stored\ntender with its per-company state nested in, filterable and sortable.\nBare array — matches lib/types.ts TenderWithState[] one to one. State\nis always the caller's own company — strangers' scores never leak.\nCountry authorization rides along as pure information: the feed never\nhides tenders for it unless the caller opts in via authorization_status.",
         "operationId": "list_tenders_api_tenders_get",
         "security": [
           {
@@ -381,7 +381,7 @@
           "tenders"
         ],
         "summary": "Get Tender",
-        "description": "One tender + nested state, for the Tender Analysis screen. Romania\nonly for now \u2014 external_id is unique within that one source.",
+        "description": "One tender + nested state, for the Tender Analysis screen. Romania\nonly for now — external_id is unique within that one source.",
         "operationId": "get_tender_api_tenders__external_id__get",
         "security": [
           {
@@ -445,7 +445,7 @@
           "tenders"
         ],
         "summary": "Get Authority History",
-        "description": "Incumbent lens for one tender's buyer: notice volume plus the\naward/winner breakdown in the same (authority, CPV division) pair.\nGlobal data (no company scoping) \u2014 auth only gates the caller.",
+        "description": "Incumbent lens for one tender's buyer: notice volume plus the\naward/winner breakdown in the same (authority, CPV division) pair.\nGlobal data (no company scoping) — auth only gates the caller.",
         "operationId": "get_authority_history_api_tenders__external_id__authority_history_get",
         "security": [
           {
@@ -665,7 +665,7 @@
           "companies"
         ],
         "summary": "Patch Own Company",
-        "description": "Onboarding steps 2..N: partial update \u2014 only provided keys are\napplied, so wizard steps never clobber each other.",
+        "description": "Onboarding steps 2..N: partial update — only provided keys are\napplied, so wizard steps never clobber each other.",
         "operationId": "patch_own_company_api_company_patch",
         "security": [
           {
@@ -730,7 +730,7 @@
           "companies"
         ],
         "summary": "List Own Authorizations",
-        "description": "The caller's per-country bidding-readiness rows (self-declared \u2014\nnever system-verified). Rows exist for picked target countries plus\nany country opened proactively via the PATCH below.",
+        "description": "The caller's per-country bidding-readiness rows (self-declared —\nnever system-verified). Rows exist for picked target countries plus\nany country opened proactively via the PATCH below.",
         "operationId": "list_own_authorizations_api_company_authorizations_get",
         "security": [
           {
@@ -911,7 +911,7 @@
           "companies"
         ],
         "summary": "Get Onboarding Status",
-        "description": "Where the wizard stands: which minimum-viable fields (name,\nindustry, annual_turnover \u2014 the eligibility engine can't run without\nthem) and which optional fields are still missing.",
+        "description": "Where the wizard stands: which minimum-viable fields (name,\nindustry, annual_turnover — the eligibility engine can't run without\nthem) and which optional fields are still missing.",
         "operationId": "get_onboarding_status_api_company_onboarding_status_get",
         "security": [
           {
@@ -993,7 +993,7 @@
           "companies"
         ],
         "summary": "Get Company Evidence",
-        "description": "Qualification evidence derived from the company profile's own\ncertification list (a real document vault with expiry tracking is\nfuture work \u2014 see API_CHANGES.md).",
+        "description": "Qualification evidence derived from the company profile's own\ncertification list (a real document vault with expiry tracking is\nfuture work — see API_CHANGES.md).",
         "operationId": "get_company_evidence_api_company_evidence_get",
         "security": [
           {
@@ -1257,7 +1257,7 @@
           "companies"
         ],
         "summary": "Update Company",
-        "description": "Partial update \u2014 only provided keys are applied (exclude_unset),\nsame contract as PATCH /company. Explicit nulls still clear their\nfield; omitted keys are left alone (never reset to defaults).",
+        "description": "Partial update — only provided keys are applied (exclude_unset),\nsame contract as PATCH /company. Explicit nulls still clear their\nfield; omitted keys are left alone (never reset to defaults).",
         "operationId": "update_company_api_companies__company_id__patch",
         "security": [
           {
@@ -1315,7 +1315,7 @@
           "companies"
         ],
         "summary": "List Company Tenders",
-        "description": "The frontend's main feed: every tender this company has been scored\nagainst, with its score/AI/eligibility output and user status/note\nflattened in. Run /score (and /enrich, /extract + eligibility) first \u2014\na tender never scored for this company won't show up here.",
+        "description": "The frontend's main feed: every tender this company has been scored\nagainst, with its score/AI/eligibility output and user status/note\nflattened in. Run /score (and /enrich, /extract + eligibility) first —\na tender never scored for this company won't show up here.",
         "operationId": "list_company_tenders_api_companies__company_id__tenders_get",
         "security": [
           {
@@ -1432,7 +1432,7 @@
           "companies"
         ],
         "summary": "Update Tender Status",
-        "description": "User-driven status/note update \u2014 the only writer of these two\nfields; no automated step touches them.",
+        "description": "User-driven status/note update — the only writer of these two\nfields; no automated step touches them.",
         "operationId": "update_tender_status_api_companies__company_id__tenders_romania__external_id__patch",
         "security": [
           {
@@ -1499,7 +1499,7 @@
           "companies"
         ],
         "summary": "Score Tenders For Company",
-        "description": "Score every stored tender against one company profile. Returns 202\nwith a pending job (minutes at real volumes \u2014 never blocks); poll the\nGET below for processed/total. Re-POSTing while a job is still active\nreturns that job (200) instead of double-scoring. Safe to re-run:\nscore upserts only ever touch score fields, never the AI/eligibility\nfields other steps fill in.",
+        "description": "Score every stored tender against one company profile. Returns 202\nwith a pending job (minutes at real volumes — never blocks); poll the\nGET below for processed/total. Re-POSTing while a job is still active\nreturns that job (200) instead of double-scoring. Safe to re-run:\nscore upserts only ever touch score fields, never the AI/eligibility\nfields other steps fill in.",
         "operationId": "score_tenders_for_company_api_companies__company_id__score_post",
         "security": [
           {
@@ -1545,7 +1545,7 @@
           "companies"
         ],
         "summary": "Get Score Job",
-        "description": "Latest scoring job for this company: pending/running (+\nprocessed/total progress) /done/failed (+ error). 404 when never\nstarted \u2014 POST above first.",
+        "description": "Latest scoring job for this company: pending/running (+\nprocessed/total progress) /done/failed (+ error). 404 when never\nstarted — POST above first.",
         "operationId": "get_score_job_api_companies__company_id__score_get",
         "security": [
           {
@@ -1833,7 +1833,7 @@
           "companies"
         ],
         "summary": "Check Tender Eligibility",
-        "description": "Compare one tender's extracted requirements against one company\nprofile. Turnover/similar-experience-value are checked deterministically\nin core.eligibility first; the AI layer gets those results as given\nfacts and only has to reason about certification matching and the\nfinal justification \u2014 not redo arithmetic. The company is always the\ncaller's own \u2014 membership-checked, never a global singleton.",
+        "description": "Compare one tender's extracted requirements against one company\nprofile. Turnover/similar-experience-value are checked deterministically\nin core.eligibility first; the AI layer gets those results as given\nfacts and only has to reason about certification matching and the\nfinal justification — not redo arithmetic. The company is always the\ncaller's own — membership-checked, never a global singleton.",
         "operationId": "check_tender_eligibility_api_companies__company_id__tenders_romania__external_id__eligibility_post",
         "security": [
           {
@@ -2093,7 +2093,7 @@
           "sample_size"
         ],
         "title": "AuthorityHistory",
-        "description": "(contracting_authority, cpv_group) aggregation. insufficient_data\nis true until MIN_AWARDS_FOR_PATTERN awards back the winner table \u2014\nsample_size says how far off we are."
+        "description": "(contracting_authority, cpv_group) aggregation. insufficient_data\nis true until MIN_AWARDS_FOR_PATTERN awards back the winner table —\nsample_size says how far off we are."
       },
       "AuthorityNotices": {
         "properties": {
@@ -2375,7 +2375,7 @@
           "keywords"
         ],
         "title": "CompanyDetail",
-        "description": "Full company profile for the onboarding wizard and profile screens.\nA superset of the frontend's CompanyProfile \u2014 extra keys are ignored\nby TS structural typing, so this stays contract-compatible."
+        "description": "Full company profile for the onboarding wizard and profile screens.\nA superset of the frontend's CompanyProfile — extra keys are ignored\nby TS structural typing, so this stays contract-compatible."
       },
       "CompanyOptions": {
         "properties": {
@@ -2640,7 +2640,7 @@
         },
         "type": "object",
         "title": "CompanyPatch",
-        "description": "One wizard step: every field optional, only provided keys are\napplied (exclude_unset) \u2014 untouched steps never clobber each other."
+        "description": "One wizard step: every field optional, only provided keys are\napplied (exclude_unset) — untouched steps never clobber each other."
       },
       "CompanyProfile": {
         "properties": {
@@ -3194,7 +3194,7 @@
           "note"
         ],
         "title": "RenewalPattern",
-        "description": "Recurrence guess for one tender (detail only \u2014 the feed leaves it\nnull to avoid N+1 sibling queries). next_expected_date is an explicitly\nlabeled estimate (see `note`), never a promise."
+        "description": "Recurrence guess for one tender (detail only — the feed leaves it\nnull to avoid N+1 sibling queries). next_expected_date is an explicitly\nlabeled estimate (see `note`), never a promise."
       },
       "ScoreJobResponse": {
         "properties": {
@@ -3345,7 +3345,7 @@
           "duration_seconds"
         ],
         "title": "SyncReport",
-        "description": "Outcome of one POST /internal/sync-tenders run. capped/timed_out\nare normal (the next scheduled run continues from the checkpoint),\nnot errors \u2014 the HTTP status stays 200 whenever the run itself worked."
+        "description": "Outcome of one POST /internal/sync-tenders run. capped/timed_out\nare normal (the next scheduled run continues from the checkpoint),\nnot errors — the HTTP status stays 200 whenever the run itself worked."
       },
       "Tender": {
         "properties": {

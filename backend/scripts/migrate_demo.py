@@ -6,8 +6,8 @@ the blessed path: timestamped backup first, then delete, then print the
 three commands that rebuild (sync + onboard). The backup is never touched
 again, so nothing is unrecoverable.
 
-Usage (from backend/):
-    python -m scripts.migrate_demo [optional/path/to/app.db]
+Usage (from repo root):
+    python -m backend.scripts.migrate_demo [optional/path/to/app.db]
 """
 
 import shutil

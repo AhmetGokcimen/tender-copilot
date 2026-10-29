@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session
 
-from core.auth import (
+from backend.core.auth import (
     DEMO_USER,
     CurrentUser,
     build_google_authorize_url,
@@ -18,10 +18,10 @@ from core.auth import (
     frontend_token_redirect,
     verify_oauth_state,
 )
-from core.config import settings
-from core.membership import get_or_create_user, user_companies
-from core.security import get_current_user
-from db import get_session
+from backend.core.config import settings
+from backend.core.membership import get_or_create_user, user_companies
+from backend.core.security import get_current_user
+from backend.db import get_session
 
 router = APIRouter(tags=["auth"])
 

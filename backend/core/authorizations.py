@@ -9,7 +9,7 @@ from datetime import UTC, datetime
 
 from sqlmodel import Session, select
 
-from models.country_authorization import CountryAuthorization
+from backend.models.country_authorization import CountryAuthorization
 
 STATUSES = ("not_started", "in_progress", "obtained")
 _CODE_RE = re.compile(r"^[A-Z]{2}$")

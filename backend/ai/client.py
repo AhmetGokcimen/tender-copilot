@@ -24,9 +24,9 @@ import httpx
 from pydantic import BaseModel, ValidationError
 from tenacity import retry, retry_if_exception_type, stop_after_attempt
 
-from core.config import settings
-from models.company import CompanyProfile
-from models.tender import Tender
+from backend.core.config import settings
+from backend.models.company import CompanyProfile
+from backend.models.tender import Tender
 
 JUSTIFY_SYSTEM_PROMPT = """\
 You are a public-procurement advisor helping an SME decide whether a \

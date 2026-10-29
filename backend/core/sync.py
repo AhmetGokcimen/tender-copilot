@@ -17,11 +17,11 @@ from datetime import UTC, datetime, timedelta
 
 from sqlmodel import Session, select
 
-from adapters.romania_seap.adapter import RomaniaSeapAdapter
-from db import upsert_awards, upsert_tenders
-from models.award import Award
-from models.sync_state import SyncCheckpoint
-from models.tender import Tender
+from backend.adapters.romania_seap.adapter import RomaniaSeapAdapter
+from backend.db import upsert_awards, upsert_tenders
+from backend.models.award import Award
+from backend.models.sync_state import SyncCheckpoint
+from backend.models.tender import Tender
 
 TENDERS_KEY = "romania_seap:tenders"
 AWARDS_KEY = "romania_seap:awards"
