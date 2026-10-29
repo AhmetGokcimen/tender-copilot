@@ -1,6 +1,5 @@
 """Async scoring jobs: 202 spawn, progress poll, dedupe, isolation."""
 
-import asyncio
 from datetime import UTC, datetime
 
 from fastapi.testclient import TestClient
@@ -59,7 +58,7 @@ def test_post_score_returns_202_and_scores_all(api: TestClient) -> None:
     res = api.post("/api/companies/1/score", headers=_auth())
     assert res.status_code == 202, res.text
     assert res.json()["status"] == "pending"
-    asyncio.run(run_score_job(res.json()["job_id"]))
+    run_score_job(res.json()["job_id"])
     with Session(engine) as session:
         states = session.exec(select(UserTenderState)).all()
         assert len(states) == 5
@@ -94,7 +93,7 @@ def test_get_score_progress_and_404(api: TestClient) -> None:
 
     assert api.get("/api/companies/1/score", headers=_auth()).status_code == 404
     posted = api.post("/api/companies/1/score", headers=_auth())
-    asyncio.run(run_score_job(posted.json()["job_id"]))  # replay: see note above
+    run_score_job(posted.json()["job_id"])  # replay: see note above
     res = api.get("/api/companies/1/score", headers=_auth())
     assert res.status_code == 200
     assert res.json()["processed"] == res.json()["total"] == 3
@@ -121,7 +120,7 @@ def test_worker_fails_gracefully_for_missing_company(api: TestClient) -> None:
         session.add(ScoreJob(company_id=4242, status="pending"))
         session.commit()
         job_id = session.exec(select(ScoreJob)).one().id
-    asyncio.run(run_score_job(job_id))
+    run_score_job(job_id)
     with Session(engine) as session:
         job = session.get(ScoreJob, job_id)
         assert job.status == "failed"
@@ -160,7 +159,7 @@ def test_score_worker_preserves_ai_and_user_fields(api: TestClient) -> None:
         session.add(ScoreJob(company_id=company.id, status="pending"))
         session.commit()
         job_id = session.exec(select(ScoreJob)).one().id
-    asyncio.run(run_score_job(job_id))
+    run_score_job(job_id)
     with Session(engine) as session:
         kept = session.exec(
             select(UserTenderState).where(UserTenderState.tender_external_id == "s0")
@@ -170,3 +169,15 @@ def test_score_worker_preserves_ai_and_user_fields(api: TestClient) -> None:
         assert kept.score == 0  # fresh evaluate (no CPV overlap) replaced stale 1
         job = session.get(ScoreJob, job_id)
         assert (job.status, job.processed, job.total) == ("done", 2, 2)
+
+
+def test_worker_stays_sync_so_background_tasks_use_a_thread() -> None:
+    """run_score_job must stay a plain sync function: Starlette awaits
+    async background tasks on the event loop, which wedged the whole
+    single-worker server (even the progress poll stalled) for the full
+    job duration. Sync callables run in a threadpool instead."""
+    import inspect
+
+    from core.score_jobs import run_score_job
+
+    assert not inspect.iscoroutinefunction(run_score_job)

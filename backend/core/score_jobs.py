@@ -66,9 +66,14 @@ def reap_stale_jobs(session: Session) -> int:
     return len(stale)
 
 
-async def run_score_job(job_id: int, *, batch_size: int = BATCH_SIZE) -> None:
+def run_score_job(job_id: int, *, batch_size: int = BATCH_SIZE) -> None:
     """Background worker. Own DB session (never the request's). Every
-    outcome lands on the job row — nothing raises past this point."""
+    outcome lands on the job row — nothing raises past this point.
+
+    Deliberately sync: Starlette runs sync background tasks in a
+    threadpool, keeping the event loop free for polls and other
+    requests. An async def with no awaits would wedge the whole
+    single-worker server for the job's full duration."""
     with Session(engine) as session:
         job = session.get(ScoreJob, job_id)
         if job is None:
