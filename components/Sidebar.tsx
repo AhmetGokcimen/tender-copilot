@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { clsx } from 'clsx';
 import { Link, usePathname } from '@/i18n/routing';
 import { Icon } from './Icon';
-import { LogoMark } from './brand/Logo';
+import { LogoMark, Wordmark } from './brand/Logo';
 import { FlashNumber } from './FlashNumber';
 import { MOCK_QUOTA } from '@/lib/mock-data';
 import { USE_MOCK } from '@/lib/api';
@@ -76,9 +76,7 @@ export function Sidebar() {
               <LogoMark size={30} />
               {!collapsed && (
                 <>
-                  <span className="whitespace-nowrap text-[20px] font-semibold leading-none tracking-[-0.5px] text-ink">
-                    {t('brand').toLowerCase()}
-                  </span>
+                  <Wordmark className="whitespace-nowrap text-[21px] text-ink" />
                   <span className="rounded-pill bg-sunk px-2 py-0.5 text-[11px] font-medium text-muted">
                     {t('tag')}
                   </span>
@@ -184,9 +182,7 @@ export function Sidebar() {
       <div className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container-lowest lg:hidden">
         <div className="flex items-center gap-space-sm px-margin py-space-sm">
           <LogoMark size={26} />
-          <span className="text-[18px] font-semibold leading-none tracking-[-0.5px] text-ink">
-            {t('brand').toLowerCase()}
-          </span>
+          <Wordmark className="text-[19px] text-ink" />
           <span className="rounded-pill bg-sunk px-2 py-0.5 text-[11px] font-medium text-muted">
             {t('tag')}
           </span>
