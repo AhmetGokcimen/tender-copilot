@@ -25,7 +25,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
           <p className="text-[15px] leading-[24px] text-on-night/80">{t('planBody')}</p>
           <div className="pt-2">
             <Link
-              href="/auth/signup"
+              href="/#waitlist"
               className={buttonClass({ variant: 'inverse' })}
             >
               {t('planCta')}

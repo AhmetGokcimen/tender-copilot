@@ -5,10 +5,9 @@ import { SitePage } from '@/components/landing/SitePage';
 import { buttonClass } from '@/components/ui/Button';
 
 /**
- * No form-submission backend exists in this project (verified: no contact/
- * message endpoints), and no public email was provided — so this page
- * routes pilot interest through signup instead of a form that silently
- * fails or a placeholder address.
+ * There is no contact-form backend and no public email yet, so this page
+ * routes pilot interest to the landing-page waitlist instead of a form
+ * that silently fails or a placeholder address.
  */
 export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -28,7 +27,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
           <p className="text-[15px] leading-[24px] text-on-night/80">{t('pilotBody')}</p>
           <div className="pt-2">
             <Link
-              href="/auth/signup"
+              href="/#waitlist"
               className={buttonClass({ variant: 'inverse' })}
             >
               {t('ctaSignup')}

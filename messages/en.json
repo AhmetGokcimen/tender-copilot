@@ -109,7 +109,8 @@
     "emailUnavailable": "Email sign-in is not available yet. Please continue with Google or the demo workspace.",
     "forgotTitle": "Reset your password",
     "forgotBody": "Password reset by email is not available yet: the backend currently signs users in with Google OAuth or demo tokens only. If you registered with an email address in demo mode, your account lives in this browser, and clearing site data removes it. For anything else, continue with Google.",
-    "forgotCta": "Continue with Google"
+    "forgotCta": "Continue with Google",
+    "signupClosed": "Sign-ups open at launch. Join the waitlist on the home page."
   },
   "landing": {
     "navHow": "How it works",
@@ -218,17 +219,17 @@
     "what3": "Drafts the technical offer, financials and DUAE with a panel of five specialist AI agents.",
     "what4": "Tracks every bid through a kanban pipeline to submission day.",
     "honestTitle": "Where we are",
-    "honestBody": "Lichit is a hackathon project, built for the Meta Global AI Developer Hackathon. It is a working prototype in early access: real product, real code, but early days. If you bid on Romanian public tenders and want to try it, get in touch.",
-    "ctaSignup": "Get started",
+    "honestBody": "Lichit is a hackathon project, built for the Meta Global AI Developer Hackathon. It is a working prototype in early access: real product, real code, but early days. If you bid on Romanian public tenders and want to try it, join the waitlist.",
+    "ctaSignup": "Join the waitlist",
     "ctaContact": "Contact us"
   },
   "pricing": {
     "title": "Early access pricing",
-    "sub": "Lichit is in pilot stage. There are no paid tiers yet: early users shape the product and use it free while we get there.",
+    "sub": "Lichit is in pilot stage. There are no paid tiers yet: early users join from the waitlist, shape the product and use it free while we get there.",
     "planName": "Early access",
     "planPrice": "Free during the pilot",
     "planBody": "Full access to tender monitoring, AI match scoring, eligibility checks and the five-agent draft generator while the pilot runs.",
-    "planCta": "Get started",
+    "planCta": "Join the waitlist",
     "includedTitle": "What's included",
     "included1": "SEAP tender monitoring matched to your company profile",
     "included2": "AI match scores with explicit reasons on every tender",
@@ -243,9 +244,9 @@
     "sub": "Questions, pilot access, feedback: write to us directly and a human will reply.",
     "emailLabel": "Email us at",
     "pilotTitle": "Want pilot access?",
-    "pilotBody": "Tell us who you are and what you bid on. We onboard pilot users personally, so you talk to the people building the product.",
-    "noEmail": "We don't publish a contact email yet. The fastest way to reach us is to create an account and start onboarding.",
-    "ctaSignup": "Create an account"
+    "pilotBody": "We onboard pilot users personally, in small groups from the waitlist, so you talk to the people building the product.",
+    "noEmail": "We don't publish a contact email yet. The fastest way to reach us is to join the waitlist, and we'll email you.",
+    "ctaSignup": "Join the waitlist"
   },
   "legal": {
     "privacyTitle": "Privacy notice",

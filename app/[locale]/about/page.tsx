@@ -38,7 +38,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         </section>
         <div className="flex flex-wrap items-center gap-3">
           <Link
-            href="/auth/signup"
+            href="/#waitlist"
             className={buttonClass()}
           >
             {t('ctaSignup')}

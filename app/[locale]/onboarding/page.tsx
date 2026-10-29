@@ -12,6 +12,7 @@ import {
 } from '@/lib/queries';
 import { USE_MOCK } from '@/lib/api';
 import { getMockSession } from '@/lib/mock-auth';
+import { getToken } from '@/lib/auth';
 import { useFilterStore } from '@/stores/useFilterStore';
 import { Icon } from '@/components/Icon';
 import { Logo } from '@/components/brand/Logo';
@@ -125,6 +126,13 @@ export default function OnboardingPage() {
   const [dir, setDir] = useState(1);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [finishing, setFinishing] = useState(false);
+  // Signed-in users only: a mock session (mock mode) or a token (real mode).
+  const [allowed, setAllowed] = useState<boolean | null>(null);
+  useEffect(() => {
+    const ok = USE_MOCK ? getMockSession() !== null : getToken() !== null;
+    setAllowed(ok);
+    if (!ok) router.replace('/auth/login');
+  }, [router]);
 
   // Init only once the company fetch settled: the resume step is derived
   // from profile data, and status (100ms) wins the race against company
@@ -149,7 +157,7 @@ export default function OnboardingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
-  if (!draft || !options) {
+  if (!allowed || !draft || !options) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-surface px-margin">
         <p className="font-body-md text-body-md text-on-surface-variant">{tc('loading')}</p>

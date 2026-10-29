@@ -14,22 +14,10 @@ import { INPUT, LABEL } from '@/components/ui/form';
 
 function OAuthButtons({ t }: { t: ReturnType<typeof useTranslations> }) {
   return (
-    <>
-      <a
-        href={`${API_URL}/auth/google/login`}
-        className={buttonClass()}
-      >
-        <Icon name="account_circle" size="sm" />
-        {t('googleButton')}
-      </a>
-      <a
-        href={`${API_URL}/auth/demo`}
-        className={buttonClass({ variant: 'secondary' })}
-      >
-        <Icon name="bolt" size="sm" />
-        {t('demoButton')}
-      </a>
-    </>
+    <a href={`${API_URL}/auth/google/login`} className={buttonClass()}>
+      <Icon name="account_circle" size="sm" />
+      {t('googleButton')}
+    </a>
   );
 }
 
@@ -49,9 +37,13 @@ export default function LoginPage() {
         <p className="font-body-sm text-body-sm text-on-surface-variant">{t('emailUnavailable')}</p>
         <p className="text-center font-body-md text-body-md text-on-surface-variant">
           {t('needAccount')}{' '}
-          <Link href="/auth/signup" className="font-medium text-indigo-text hover:underline">
+          <span
+            aria-disabled="true"
+            title={t('signupClosed')}
+            className="cursor-not-allowed select-none font-medium text-muted/60"
+          >
             {t('signupButton')}
-          </Link>
+          </span>
         </p>
         <Link
           href="/"
@@ -68,7 +60,10 @@ export default function LoginPage() {
     if (password.length === 0) return setError(t('passwordShort'));
     setBusy(true);
     setError(null);
-    const { account, error: loginError } = await loginMockUser({ email, password });
+    const { account, error: loginError } = await loginMockUser({
+      email,
+      password,
+    });
     if (!account) {
       setBusy(false);
       setError(loginError === 'unknown' ? t('unknownUser') : t('wrongPassword'));
@@ -139,20 +134,16 @@ export default function LoginPage() {
         <Icon name="login" size="sm" />
         {t('signinButton')}
       </button>
-      <button
-        type="button"
-        onClick={() => router.push('/app')}
-        className={buttonClass({ variant: 'secondary' })}
-      >
-        <Icon name="bolt" size="sm" />
-        {t('demoButton')}
-      </button>
       <p className="font-body-sm text-body-sm text-on-surface-variant">{t('mockNote')}</p>
       <p className="text-center font-body-md text-body-md text-on-surface-variant">
         {t('needAccount')}{' '}
-        <Link href="/auth/signup" className="font-medium text-indigo-text hover:underline">
+        <span
+          aria-disabled="true"
+          title={t('signupClosed')}
+          className="cursor-not-allowed select-none font-medium text-muted/60"
+        >
           {t('signupButton')}
-        </Link>
+        </span>
       </p>
     </AuthShell>
   );
