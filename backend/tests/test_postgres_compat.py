@@ -4,7 +4,6 @@ shapes plus every JSON-touching query. Anything needing a real server
 runs through TEST_DATABASE_URL (see conftest.py) instead.
 """
 
-import pytest
 from sqlalchemy.dialects import postgresql, sqlite
 from sqlalchemy.pool import NullPool
 from sqlmodel import SQLModel
@@ -53,19 +52,19 @@ def test_create_app_engine_wires_poolclass() -> None:
     assert not isinstance(lite.pool, NullPool)
 
 
-def test_insert_stmt_dispatches_both_branches(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_insert_stmt_dispatches_both_branches() -> None:
     from sqlalchemy.dialects.postgresql import insert as pg_insert
     from sqlalchemy.dialects.sqlite import insert as lite_insert
 
-    import backend.db as dbmod
     from backend.models.tender import Tender
 
     table = Tender.__table__
-    assert type(_insert_stmt(table)) is type(lite_insert(table))
-    # The PG branch is dead code on sqlite runs — force it via a lazy PG
-    # engine (created, never connected).
-    monkeypatch.setattr(dbmod, "engine", create_app_engine("postgresql://u:p@host/db"))
-    assert type(dbmod._insert_stmt(table)) is type(pg_insert(table))
+    # Explicit binds (lazy engines, never connected) — independent of
+    # whatever the module engine happens to be in this run.
+    lite_engine = create_app_engine("sqlite:///:memory:")
+    pg_engine = create_app_engine("postgresql://u:p@host/db")
+    assert type(_insert_stmt(table, lite_engine)) is type(lite_insert(table))
+    assert type(_insert_stmt(table, pg_engine)) is type(pg_insert(table))
 
 
 def test_all_tables_render_on_postgres() -> None:
