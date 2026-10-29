@@ -2,15 +2,18 @@
 ever recurring: it only ever writes Tender's own columns, never touches
 UserTenderState.
 
-Switching from SQLite to Postgres later is meant to be just changing
-DATABASE_URL — the dialect-specific bit (ON CONFLICT target) is isolated
-in _insert_stmt below.
+SQLite is the zero-config default (local dev, tests); pointing DATABASE_URL
+at Postgres (Supabase pooler) switches dialects with no code change — the
+dialect-specific bits (ON CONFLICT target, pooling) are isolated in
+_insert_stmt and _engine_kwargs below.
 """
 
 from collections.abc import Generator
 from datetime import UTC, datetime
+from typing import Any
 
 from sqlalchemy import func, update
+from sqlalchemy.pool import NullPool
 from sqlmodel import Session, SQLModel, create_engine
 
 from backend.core.config import settings
@@ -18,8 +21,43 @@ from backend.models.award import Award
 from backend.models.tender import SourceSystem, Tender
 from backend.models.user_tender_state import UserTenderState
 
-_connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
-engine = create_engine(settings.database_url, connect_args=_connect_args)
+
+def _normalize_url(url: str) -> str:
+    """Accept Supabase-style URLs verbatim: SQLAlchemy's bare
+    ``postgresql://`` scheme means psycopg2, which isn't installed — the
+    project standard is psycopg 3. Explicit ``+psycopg``/``+psycopg2``
+    schemes (and sqlite) pass through untouched."""
+    if url.startswith("postgres://"):
+        return "postgresql+psycopg://" + url[len("postgres://"):]
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://"):]
+    return url
+
+
+def _engine_kwargs(url: str) -> dict[str, Any]:
+    if url.startswith("sqlite"):
+        return {"connect_args": {"check_same_thread": False}}
+    # Postgres (Supabase pooler, transaction mode): the pooler owns pooling,
+    # so the app must not hold server connections between requests (NullPool),
+    # and psycopg must not use server-side prepared statements, which the
+    # shared pooler doesn't support in transaction mode (Supabase KB:
+    # Psycopg -> prepare_threshold=None). Verified 2026-10-29 against the
+    # Supabase connecting/pooling docs. SSL is negotiated by libpq default
+    # (prefer) — forced "require" would break local no-TLS Postgres test
+    # instances, while Supabase negotiates TLS either way.
+    return {
+        "poolclass": NullPool,
+        "connect_args": {"prepare_threshold": None},
+    }
+
+
+def create_app_engine(url: str):
+    """Engine with the project's dialect-aware defaults. Lazy: creating it
+    opens no connection, so Postgres URLs are safe to build without a
+    server (tests, scripts)."""
+    normalized = _normalize_url(url)
+    return create_engine(normalized, **_engine_kwargs(normalized))
+engine = create_app_engine(settings.database_url)
 
 
 def init_db() -> None:
@@ -31,8 +69,9 @@ def get_session() -> Generator[Session, None, None]:
         yield session
 
 
-def _insert_stmt(table):
-    if engine.dialect.name == "postgresql":
+def _insert_stmt(table, bind=None):
+    dialect_name = (bind if bind is not None else engine).dialect.name
+    if dialect_name == "postgresql":
         from sqlalchemy.dialects.postgresql import insert as dialect_insert
     else:
         from sqlalchemy.dialects.sqlite import insert as dialect_insert
@@ -61,7 +100,7 @@ def upsert_tenders(session: Session, tenders: list[Tender]) -> None:
         row["last_seen_at"] = now
         values.append(row)
 
-    stmt = _insert_stmt(table).values(values)
+    stmt = _insert_stmt(table, session.get_bind()).values(values)
     update_cols = {
         c.name: getattr(stmt.excluded, c.name)
         for c in table.columns
@@ -91,7 +130,7 @@ def upsert_awards(session: Session, awards: list[Award]) -> None:
         row["last_seen_at"] = now
         values.append(row)
 
-    stmt = _insert_stmt(table).values(values)
+    stmt = _insert_stmt(table, session.get_bind()).values(values)
     update_cols = {
         c.name: getattr(stmt.excluded, c.name)
         for c in table.columns
@@ -192,7 +231,7 @@ def upsert_score(
         "score_reasons": reasons,
         "updated_at": now,
     }
-    stmt = _insert_stmt(table).values(**values)
+    stmt = _insert_stmt(table, session.get_bind()).values(**values)
     stmt = stmt.on_conflict_do_update(
         index_elements=["tender_source_system", "tender_external_id", "company_id"],
         set_={"score": stmt.excluded.score, "score_reasons": stmt.excluded.score_reasons,
@@ -224,7 +263,7 @@ def upsert_ai_justification(
         "ai_summary": ai_summary,
         "updated_at": now,
     }
-    stmt = _insert_stmt(table).values(**values)
+    stmt = _insert_stmt(table, session.get_bind()).values(**values)
     stmt = stmt.on_conflict_do_update(
         index_elements=["tender_source_system", "tender_external_id", "company_id"],
         set_={"ai_summary": stmt.excluded.ai_summary, "updated_at": stmt.excluded.updated_at},
@@ -260,7 +299,7 @@ def upsert_eligibility(
         "eligibility_justification": eligibility_justification,
         "updated_at": now,
     }
-    stmt = _insert_stmt(table).values(**values)
+    stmt = _insert_stmt(table, session.get_bind()).values(**values)
     stmt = stmt.on_conflict_do_update(
         index_elements=["tender_source_system", "tender_external_id", "company_id"],
         set_={

@@ -6,6 +6,55 @@ They are merged here, history preserved below. The versioned contract is
 
 ---
 
+# Supabase Postgres support (2026-10-29)
+
+The backend is now multi-dialect: SQLite stays the zero-config default,
+and pointing `DATABASE_URL` at Supabase Postgres switches everything with
+no code change. No endpoint or behavior changed.
+
+## What changed
+
+- **Engine** (`backend/db.py`): new `create_app_engine()` factory with
+  dialect-aware defaults. Postgres URLs get `NullPool` +
+  `prepare_threshold=None` (the Supabase transaction-pooler recipe —
+  the pooler owns pooling and rejects prepared statements; verified
+  against Supabase docs). Bare `postgresql://`/`postgres://` schemes are
+  normalized to `postgresql+psycopg://` (psycopg 3, new in
+  `requirements.txt`); SQLite keeps `check_same_thread=False`.
+- **Upsert dispatch**: `_insert_stmt()` now keys off the session's bind
+  instead of the module engine, so the migration script can write PG
+  while the app default is still SQLite. Same behavior everywhere else
+  (full suite green).
+- **One SQLite-ism fixed**: the feed's `cpv_code` filter did `LIKE` on
+  the JSON `cpv_codes` column (works on SQLite, invalid on PG). Now a
+  `cpv_main_filter()` helper with `CAST(... AS VARCHAR)` — identical
+  prefix semantics on both dialects, covered by the existing feed tests
+  plus PG-dialect compile tests.
+- **Migration script** (`python -m backend.scripts.migrate_to_postgres`):
+  copies all 10 tables parents-first (tenders/awards via the no-clobber
+  upserts, rest via PK-keyed merge), advances PG id sequences, logs
+  progress. Dry run unless `--apply`; idempotent; refuses sqlite→same-file.
+  Use the DIRECT connection (5432) for it, not the pooler.
+- **Tests**: new `test_postgres_compat.py` (URL/pool/dialect-compile checks,
+  no server needed) and `test_migrate_to_postgres.py` (real sqlite→sqlite
+  runs + idempotency). `TEST_DATABASE_URL` env runs the whole suite against
+  a live (empty, scratch) Postgres; default stays temp-file SQLite.
+
+## Operational notes
+
+- App traffic (local-with-PG, Vercel, tests via `TEST_DATABASE_URL`) →
+  **transaction pooler, port 6543**. One-shot ops (migration) → **direct,
+  port 5432**.
+- Schema is still `create_all` (no Alembic); PG creates one shared
+  `SourceSystem` enum type automatically.
+- Verification limit: no live Postgres was available in this environment
+  (no server, no docker), so PG-dialect behavior is covered by compile
+  tests + sqlite-parity tests only — the first real `TEST_DATABASE_URL`
+  run and the `--apply` migration still need a human with the connection
+  string. Nothing was run against production data.
+
+---
+
 # Restructure — Vercel monorepo (2026-10-29)
 
 One Vercel project instead of two deploy targets: Next.js at the repo root,

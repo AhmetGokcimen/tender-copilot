@@ -135,7 +135,7 @@ def renewal_pattern(session: Session, tender: Tender) -> dict | None:
         if len(points) == 3:
             confidence = "low"
     last = max(points)
-    if last.tzinfo is None:  # SQLite reads back naive; treat as UTC
+    if last.tzinfo is None:  # DB timestamp cols read back naive; treat as UTC
         last = last.replace(tzinfo=UTC)
     expected = (
         datetime.fromtimestamp(last.timestamp() + mean_gap * 86400, tz=UTC)

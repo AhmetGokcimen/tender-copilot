@@ -85,6 +85,45 @@ ever touches `Tender`'s own columns — it cannot reach `UserTenderState`,
 so that bug class is now structurally impossible, not just avoided by
 convention.
 
+### Postgres (Supabase) in production
+
+SQLite has no place on Vercel (read-only filesystem, no cross-invocation
+persistence), so production points `DATABASE_URL` at Supabase Postgres.
+Switching dialects is exactly that — one env var; the engine
+(`backend/db.py`) is dialect-aware:
+
+- **Driver**: psycopg 3 (`psycopg[binary]`). Supabase-style
+  `postgresql://...` URLs are accepted verbatim (normalized to
+  `postgresql+psycopg://` internally).
+- **Pooling**: the app uses `NullPool` + `prepare_threshold=None` on
+  Postgres. The Supabase transaction pooler (Supavisor, port **6543**)
+  owns pooling, and it does not support server-side prepared statements —
+  this is the Supabase-docs recipe, verified against their
+  connecting/pooling guides. Local SQLite behavior is untouched.
+- **Schema**: still `create_all` (no Alembic) — plain SQLModel (`JSON`
+  columns, naive-UTC datetimes, one shared `SourceSystem` enum, the
+  `app_user` table name dodging PG's reserved `user`). The one SQLite-ism
+  in queries (a `LIKE` on the JSON `cpv_codes` column) now goes through a
+  `CAST(... AS VARCHAR)` helper rendering identically on both dialects.
+- **Which connection where**: the app (local with PG, Vercel, tests via
+  `TEST_DATABASE_URL`) always uses the **transaction pooler (6543)**.
+  One-shot operations — the migration below — use the **direct
+  connection (5432)**.
+
+Existing data moves with the idempotent migration script (dry run unless
+`--apply`; safe to re-run; refuses sqlite→same-file):
+
+```bash
+python -m backend.scripts.migrate_to_postgres --target "$DIRECT_URL"          # plan only
+python -m backend.scripts.migrate_to_postgres --target "$DIRECT_URL" --apply  # copy
+```
+
+It copies parents before children (tenders/awards via the no-clobber
+upserts, the rest via PK-keyed merge), advances PG id sequences past the
+migrated max(id), and logs per-table progress. To run the test suite
+against Postgres: `TEST_DATABASE_URL=<empty scratch PG> python -m pytest
+backend/tests` (default stays temp-file SQLite).
+
 ## Scoring
 
 `backend/core/scoring.py` ranks a tender against a `CompanyProfile` (CPV match tier
@@ -334,10 +373,11 @@ harmless to set to the deployed origin).
 
 Still open / next steps (not part of this restructure):
 
-- `DATABASE_URL` is SQLite by default, which doesn't work on Vercel
-  (read-only filesystem, no persistence across invocations). The Supabase
-  (Postgres) migration is the planned follow-up — until then, a production
-  deploy needs `DATABASE_URL` pointed at Postgres.
+- `DATABASE_URL`: set it to the Supabase **transaction pooler** URL (port
+  6543) — SQLite can't work on Vercel (read-only filesystem, no
+  persistence). The engine/pooling code is ready; after setting the var,
+  run the data migration once from your machine (see Storage above) with
+  the **direct** connection URL.
 - Function timeout: long endpoints (sync, score/enrich jobs) can exceed
   serverless limits — the sync workflow's `max_seconds` should fit the
   plan's `maxDuration` (no `maxDuration` is set in `vercel.json` because

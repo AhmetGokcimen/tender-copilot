@@ -10,6 +10,10 @@ pymupdf>=1.24
 pillow>=10.0
 asn1crypto>=1.5
 pyjwt>=2.8
+# Postgres driver (psycopg 3): used when DATABASE_URL is postgresql://
+# (Supabase pooler). SQLite local dev doesn't need it, but installing it
+# everywhere keeps environments identical.
+psycopg[binary]>=3.2
 
 # dev
 pytest>=8.3

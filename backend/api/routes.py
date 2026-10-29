@@ -1,6 +1,7 @@
 from typing import Literal
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Response
+from sqlalchemy import String, cast
 from sqlmodel import Session, func, select
 
 from backend.adapters.romania_seap.adapter import RomaniaSeapAdapter
@@ -109,6 +110,17 @@ def _sort_key(sort: str, item: TenderFeedItem) -> tuple:
     return (item.state.score is None, -(item.state.score or 0), item.external_id)
 
 
+def cpv_main_filter(cpv_code: str):
+    """Match tenders whose MAIN cpv (index 0) equals cpv_code.
+
+    cpv_codes is a JSON array column; this matches its serialized text
+    prefix (``["<code>"``). The CAST keeps it dialect-agnostic: Postgres
+    has no LIKE on JSON, but CAST(json AS VARCHAR) renders on both
+    Postgres and SQLite with identical prefix semantics.
+    """
+    return cast(Tender.cpv_codes, String).like(f'["{cpv_code}"%')
+
+
 @router.get("/tenders", response_model=list[TenderFeedItem], tags=["tenders"])
 def list_tenders(
     company_id: int | None = None,
@@ -139,9 +151,9 @@ def list_tenders(
         query = query.where(Tender.county == county)
     if cpv_code:
         # cpv_codes is a JSON array column; this matches it as the main CPV
-        # (index 0) via a LIKE on its JSON text — a real CPV index would be
-        # cleaner, but this covers the common case without one.
-        query = query.where(Tender.cpv_codes.like(f'["{cpv_code}"%'))
+        # (index 0) via a LIKE on its JSON text (CAST: Postgres has no LIKE
+        # on JSON) — a real CPV index would be cleaner.
+        query = query.where(cpv_main_filter(cpv_code))
     if min_value is not None:
         query = query.where(Tender.estimated_value >= min_value)
     if procedure_type:

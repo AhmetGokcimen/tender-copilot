@@ -1,4 +1,5 @@
-"""Test-session isolation: every run gets a fresh temp SQLite file.
+"""Test-session isolation: every run gets a fresh temp SQLite file,
+unless TEST_DATABASE_URL points at a live (empty, scratch) database.
 
 Must execute before any app import (pytest imports conftest first), since
 db.engine and core.config.settings are created at import time.
@@ -7,8 +8,14 @@ db.engine and core.config.settings are created at import time.
 import os
 import tempfile
 
-_tmp = tempfile.mkdtemp(prefix="ofera-test-")
-os.environ["DATABASE_URL"] = f"sqlite:///{_tmp}/test.db"
+_test_db_url = os.environ.get("TEST_DATABASE_URL")
+if _test_db_url:
+    # Live-DB run (e.g. a scratch Postgres): the `api` fixture below drops
+    # all tables after every test, so point this at an EMPTY database only.
+    os.environ["DATABASE_URL"] = _test_db_url
+else:
+    _tmp = tempfile.mkdtemp(prefix="ofera-test-")
+    os.environ["DATABASE_URL"] = f"sqlite:///{_tmp}/test.db"
 os.environ.setdefault("JWT_SECRET", "test-jwt-secret")
 os.environ.setdefault("GOOGLE_CLIENT_ID", "test-client-id")
 os.environ.setdefault("GOOGLE_CLIENT_SECRET", "test-client-secret")
