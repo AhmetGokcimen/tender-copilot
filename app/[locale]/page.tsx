@@ -1,12 +1,10 @@
 import { setRequestLocale } from 'next-intl/server';
 import { Navbar } from '@/components/landing/Navbar';
-import { PageBackground } from '@/components/landing/PageBackground';
 import { Hero } from '@/components/landing/Hero';
 import { WaitlistSection } from '@/components/landing/WaitlistSection';
-import { BeforeAfter } from '@/components/landing/BeforeAfter';
-import { HowItWorks } from '@/components/landing/HowItWorks';
+import { ProductBento } from '@/components/landing/ProductBento';
 import { HoursCalculator } from '@/components/landing/HoursCalculator';
-import { Trust } from '@/components/landing/Trust';
+import { PricingPlans } from '@/components/landing/PricingPlans';
 import { Faq } from '@/components/landing/Faq';
 import { ClosingCta } from '@/components/landing/ClosingCta';
 import { Footer } from '@/components/landing/Footer';
@@ -15,16 +13,15 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
   const { locale } = await params;
   setRequestLocale(locale);
   return (
-    <div className="min-h-screen text-ink">
-      <PageBackground />
+    <div className="relative min-h-screen text-ink">
+      <div id="page-top" aria-hidden className="pointer-events-none absolute left-0 top-0 h-2 w-px" />
       <Navbar />
       <main className="relative z-10">
         <Hero />
         <WaitlistSection />
-        <BeforeAfter />
-        <HowItWorks />
+        <ProductBento />
         <HoursCalculator />
-        <Trust />
+        <PricingPlans />
         <Faq />
         <ClosingCta />
       </main>

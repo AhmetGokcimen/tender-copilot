@@ -72,18 +72,16 @@ const FEED: Row[] = [
 
 /**
  * Hero visual: a still snapshot of how Lichit reads the SEAP feed. Each
- * example notice carries its verdict and the reason behind it; the
- * winnable ones are collected in the shortlist below.
+ * example notice carries its verdict and the reason behind it.
  */
 export function TenderSieve() {
   const t = useTranslations('landing');
   const lang = useLocale() === 'ro' ? 'ro' : 'en';
   const nf = new Intl.NumberFormat(lang === 'ro' ? 'ro-RO' : 'en-US');
   const ron = (v: number) => `RON ${nf.format(v)}`;
-  const shortlist = FEED.filter((r) => r.match);
 
   return (
-    <div className="relative grid w-full max-w-[540px] gap-3">
+    <div className="relative w-full max-w-[540px]">
       <div className="rounded-card border border-line bg-raised p-4 shadow-lift-2">
         <div className="mb-3 flex items-center justify-between px-1 text-[12px] text-muted">
           <span className="font-medium text-ink-2">{t('sieveFeed')}</span>
@@ -91,7 +89,7 @@ export function TenderSieve() {
             {t('sieveExample')} · {nf.format(1264)} {t('sieveScanned')}
           </span>
         </div>
-        <ul className="grid gap-1.5">
+        <ul className="grid grid-cols-1 gap-1.5">
           {FEED.map((row) => (
             <li
               key={row.id}
@@ -112,20 +110,6 @@ export function TenderSieve() {
                 <span className="font-mono">{ron(row.value)}</span>
                 <span>{t(`sieveReason_${row.reason}`)}</span>
               </p>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="rounded-card border border-line bg-raised p-4 sm:ml-12">
-        <div className="mb-2 flex items-center justify-between px-1">
-          <span className="text-[13px] font-medium text-ink">{t('sieveShortlist')}</span>
-          <span className="font-mono text-[12px] text-eligible">{shortlist.length}</span>
-        </div>
-        <ul className="grid gap-1">
-          {shortlist.map((row) => (
-            <li key={row.id} className="flex items-center justify-between gap-3 px-1 py-1.5 text-[14px]">
-              <span className="min-w-0 truncate text-ink">{row.title[lang]}</span>
-              <span className="shrink-0 font-mono text-[12px] text-ink-2">{ron(row.value)}</span>
             </li>
           ))}
         </ul>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Logo } from '../brand/Logo';
@@ -9,14 +10,28 @@ const LINK = 'text-[14px] text-ink-2 transition-colors hover:text-ink';
 
 export function Navbar() {
   const t = useTranslations('landing');
+  // Transparent over the hero silk while the page sits at its very top
+  // (only pages that render the #page-top sentinel); frosted otherwise.
+  const [atTop, setAtTop] = useState(false);
+  useEffect(() => {
+    const sentinel = document.getElementById('page-top');
+    if (!sentinel) return;
+    const io = new IntersectionObserver(([e]) => setAtTop(e.isIntersecting));
+    io.observe(sentinel);
+    return () => io.disconnect();
+  }, []);
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-surface/80 backdrop-blur-md">
+    <header
+      className={`sticky top-0 z-50 border-b transition-[background-color,border-color] duration-300 ${
+        atTop ? 'border-transparent bg-transparent' : 'border-line bg-surface/80 backdrop-blur-md'
+      }`}
+    >
       <div className="mx-auto flex h-[68px] max-w-[1200px] items-center gap-8 px-4 md:px-8">
         <Link href="/" aria-label="Lichit home">
           <Logo />
         </Link>
         <nav className="ml-auto hidden items-center gap-7 md:flex">
-          <Link href="/#how" className={LINK}>
+          <Link href="/#product" className={LINK}>
             {t('navHow')}
           </Link>
           <Link href="/pricing" className={LINK}>

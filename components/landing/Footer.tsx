@@ -24,7 +24,7 @@ export function Footer() {
         </div>
         <nav aria-label={t('footerProduct')} className="flex flex-col gap-2.5">
           <span className={HEAD}>{t('footerProduct')}</span>
-          <Link href="/#how" className={LINK}>
+          <Link href="/#product" className={LINK}>
             {t('footerHow')}
           </Link>
           <Link href="/#faq" className={LINK}>

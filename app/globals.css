@@ -444,32 +444,6 @@
 
 /* ---------- Lichit landing: pointer-driven micro-interactions ---------- */
 
-/* Spotlight border: a 1px indigo glow follows the cursor along the card edge. */
-.spotlight {
-  position: relative;
-  isolation: isolate;
-}
-.spotlight::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: radial-gradient(260px circle at var(--x, -300px) var(--y, -300px), var(--indigo), transparent 70%);
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.3s;
-  pointer-events: none;
-  z-index: -1;
-}
-.spotlight:hover::before {
-  opacity: 1;
-}
-
 /* Calculator slider: indigo fill on a sunk track. */
 .range {
   appearance: none;
@@ -506,7 +480,4 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .spotlight::before {
-    transition: none;
-  }
 }

@@ -8,15 +8,18 @@ void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }
 `;
 
 /**
- * A wide silk ribbon crossing the top-right of the hero on a diagonal.
- * Domain-warped noise bends the ribbon and draws soft folds; colour runs
- * along it in the brand order (indigo, violet, coral, amber). The output
- * is premultiplied alpha, so the page background shows through.
+ * Five thin silk sheets fanned across the top-right of the hero. Each sheet
+ * has a crisp, pixel-sized edge, a light-to-shadow gradient across its
+ * width (so it reads as a curved surface), fine fibres running along its
+ * length and a soft highlight near one edge. Sheets cross each other at
+ * slightly different phases, which gives the folded, layered depth.
+ * Output is premultiplied alpha over the page background.
  */
 const FRAG = `
 precision highp float;
 uniform vec2 u_res;
 uniform float u_time;
+uniform float u_px;
 uniform float u_alpha;
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -43,6 +46,24 @@ vec3 palette(float s) {
   return mix(coral, amber, (s - 0.70) / 0.30);
 }
 
+vec4 sheet(vec2 r, float i, float warp, float t) {
+  float off = (i - 2.0) * 0.074;
+  float bend = 0.17 * sin(r.x * 1.25 + t * 0.07 + i * 0.32) + 0.18 * (warp - 0.5);
+  float d = r.y - bend - off - 0.025 * sin(r.x * 2.8 + i * 1.7 + t * 0.045);
+  float w = 0.084 + 0.02 * sin(r.x * 1.6 + i * 1.3 - t * 0.03);
+  float a = 0.94 * smoothstep(w, w - u_px * 1.6, abs(d));
+  float u = clamp(d / w, -1.0, 1.0);
+  // Curved surface: lit toward one edge, shadowed toward the other.
+  float shade = 0.90 + 0.24 * smoothstep(-1.0, 1.0, u) - 0.10 * u * u;
+  // Fine fibres along the sheet.
+  float fibre = 1.0 - 0.06 * (0.5 + 0.5 * sin(u * 150.0 + warp * 26.0 + i * 11.0));
+  float s = 0.44 + r.x * 0.36 + i * 0.05 + 0.2 * (warp - 0.5);
+  vec3 col = mix(palette(s), vec3(1.0), 0.10) * shade * fibre;
+  // Soft highlight running near the lit edge.
+  col = mix(col, vec3(1.0, 0.97, 0.94), 0.38 * smoothstep(0.5, 0.88, u) * smoothstep(1.0, 0.9, u));
+  return vec4(col, a);
+}
+
 void main() {
   vec2 uv = gl_FragCoord.xy / u_res;
   float aspect = u_res.x / u_res.y;
@@ -50,44 +71,26 @@ void main() {
   vec2 p = vec2(uv.x * aspect, uv.y);
   float t = u_time;
 
-  // Ribbon space: x runs along the ribbon, y across it. Wide screens get a
-  // steep sweep down the right half; narrow ones a band across the top.
-  vec2 center = wide ? vec2(aspect * 0.80, 0.56) : vec2(aspect * 0.9, 1.0);
-  float a = wide ? -0.95 : -0.42;
-  vec2 r = mat2(cos(a), -sin(a), sin(a), cos(a)) * (p - center);
+  vec2 center = wide ? vec2(aspect * 0.84, 0.52) : vec2(aspect * 0.92, 0.98);
+  float ang = wide ? -0.92 : -0.42;
+  vec2 r = mat2(cos(ang), -sin(ang), sin(ang), cos(ang)) * (p - center);
+  float warp = fbm(r * 1.05 + vec2(t * 0.03, -t * 0.02));
 
-  float warp = fbm(r * 1.1 + vec2(t * 0.04, -t * 0.025));
-  float bend = 0.18 * sin(r.x * 1.4 + t * 0.10) + 0.20 * (warp - 0.5);
-  float d = r.y - bend;
+  // Composite back to front (premultiplied).
+  vec3 acc = vec3(0.0);
+  float alpha = 0.0;
+  for (int k = 0; k < 5; k++) {
+    vec4 s = sheet(r, float(k), warp, t);
+    acc = s.rgb * s.a + acc * (1.0 - s.a);
+    alpha = s.a + alpha * (1.0 - s.a);
+  }
 
-  // Main ribbon: crisp edge, rounded body (darker toward the edges).
-  float width = (wide ? 0.25 : 0.2) + 0.05 * sin(r.x * 1.2 - t * 0.07);
-  float body = smoothstep(width, width - 0.035, abs(d));
-  float across = clamp(abs(d) / width, 0.0, 1.0);
-
-  // Companion strand along the inner side for depth.
-  float d2 = r.y - bend * 1.4 - width - 0.09;
-  float strand = 0.8 * smoothstep(0.055, 0.035, abs(d2));
-
-  // Silk folds drifting across the ribbon, with a soft highlight.
-  float folds = 0.5 + 0.5 * sin(d * 21.0 + warp * 8.0 + r.x * 2.0 + t * 0.15);
-  float sheen = pow(folds, 8.0) * 0.6;
-
-  float s = 0.48 + r.x * 0.38 + 0.22 * (warp - 0.5);
-  vec3 col = palette(s);
-  col *= 1.0 - 0.28 * across * across;                 // rounded body
-  col = mix(col, col * 0.8, (1.0 - folds) * 0.3);      // fold shadows
-  col = mix(col, vec3(1.0, 0.96, 0.92), sheen);        // fold highlights
-  vec3 strandCol = palette(s + 0.12) * 1.05;
-
-  float mask = body;
-  col = mix(strandCol, col, body);
-  mask = max(body, strand);
-
-  // Keep the headline area clear on wide screens.
-  float fade = wide ? smoothstep(0.30, 0.52, uv.x) : smoothstep(0.55, 0.9, uv.y);
-  mask *= fade * u_alpha;
-  gl_FragColor = vec4(col * mask, mask);
+  // Keep the headline clear: fade in from the left (wide) or the top band (narrow).
+  float fade = wide ? smoothstep(0.36, 0.56, uv.x) : smoothstep(0.55, 0.9, uv.y);
+  // Leave the navbar band clear so its links stay readable.
+  if (wide) fade *= 1.0 - 0.9 * smoothstep(0.86, 0.95, uv.y);
+  fade *= u_alpha;
+  gl_FragColor = vec4(acc * fade, alpha * fade);
 }
 `;
 
@@ -103,20 +106,20 @@ function compile(gl: WebGLRenderingContext, type: number, src: string) {
   return s;
 }
 
+const FRAME_MS = 33; // the motion is very slow; ~30fps is plenty
+
 /**
- * Slow-moving brand ribbon fixed behind the whole landing page. Sharp
- * behind the hero, blurred and dimmed under the sections that follow.
- * Renders at reduced resolution, pauses in background tabs, and draws one
- * still frame under reduced motion. Without WebGL a CSS wash shows.
+ * Brand silk behind the top of the landing page only. Rendered at device
+ * resolution so edges and fibres stay crisp, capped at ~30fps, paused when
+ * the hero is off screen or the tab is hidden, and a single still frame
+ * under reduced motion. Without WebGL a soft CSS wash shows instead.
  */
-export function PageBackground({ heroId = 'top' }: { heroId?: string }) {
+export function HeroRibbon({ className = '' }: { className?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const wrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const canvas = ref.current!;
-    const wrap = wrapRef.current!;
-    const gl = canvas.getContext('webgl', { premultipliedAlpha: true, antialias: false });
+    const gl = canvas.getContext('webgl', { premultipliedAlpha: true, antialias: true });
     if (!gl) return;
     const vs = compile(gl, gl.VERTEX_SHADER, VERT);
     const fs = compile(gl, gl.FRAGMENT_SHADER, FRAG);
@@ -135,34 +138,35 @@ export function PageBackground({ heroId = 'top' }: { heroId?: string }) {
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     const uRes = gl.getUniformLocation(prog, 'u_res');
     const uTime = gl.getUniformLocation(prog, 'u_time');
+    const uPx = gl.getUniformLocation(prog, 'u_px');
     const uAlpha = gl.getUniformLocation(prog, 'u_alpha');
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const scale = 0.5; // soft gradients don't need full resolution
     let raf = 0;
-    let blurred = false;
     let last = 0;
-    const start = performance.now() - 40_000; // start mid-motion, not at t = 0
+    let visible = true;
+    const start = performance.now() - 40_000;
 
     const resize = () => {
-      const w = Math.max(1, Math.round(canvas.clientWidth * scale));
-      const h = Math.max(1, Math.round(canvas.clientHeight * scale));
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = Math.max(1, Math.round(canvas.clientWidth * dpr));
+      const h = Math.max(1, Math.round(canvas.clientHeight * dpr));
       canvas.width = w;
       canvas.height = h;
       gl.viewport(0, 0, w, h);
       gl.uniform2f(uRes, w, h);
-      gl.uniform1f(uAlpha, canvas.clientWidth < 1024 ? 0.45 : 1.0);
+      gl.uniform1f(uPx, 1 / h);
+      gl.uniform1f(uAlpha, canvas.clientWidth < 1024 ? 0.5 : 1.0);
     };
     const frame = (now: number) => {
-      // Once blurred behind the content, detail is invisible: ~10fps is enough.
-      if (!reduce && blurred && now - last < 100) {
+      if (!reduce && now - last < FRAME_MS) {
         raf = requestAnimationFrame(frame);
         return;
       }
       last = now;
       gl.uniform1f(uTime, (now - start) / 1000);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
-      if (!reduce && !document.hidden) raf = requestAnimationFrame(frame);
+      if (!reduce && visible && !document.hidden) raf = requestAnimationFrame(frame);
     };
     const resume = () => {
       cancelAnimationFrame(raf);
@@ -174,16 +178,11 @@ export function PageBackground({ heroId = 'top' }: { heroId?: string }) {
       if (reduce) frame(performance.now());
     });
     ro.observe(canvas);
-    // Sharp behind the hero; blurred and dimmed once the hero scrolls away.
-    const hero = document.getElementById(heroId);
-    const io = new IntersectionObserver(
-      ([e]) => {
-        blurred = !e.isIntersecting || e.intersectionRatio < 0.35;
-        wrap.dataset.blurred = String(blurred);
-      },
-      { threshold: [0, 0.35, 1] },
-    );
-    if (hero) io.observe(hero);
+    const io = new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      if (visible && !reduce) resume();
+    });
+    io.observe(canvas);
     const onVisibility = () => {
       if (!document.hidden && !reduce) resume();
     };
@@ -202,16 +201,13 @@ export function PageBackground({ heroId = 'top' }: { heroId?: string }) {
       gl.deleteShader(vs);
       gl.deleteShader(fs);
     };
-  }, [heroId]);
+  }, []);
 
   return (
     <div
-      ref={wrapRef}
       aria-hidden
-      data-blurred="false"
-      className="pointer-events-none fixed inset-0 z-0 overflow-hidden transition-[filter,opacity] duration-700 ease-out data-[blurred=true]:opacity-60 data-[blurred=true]:blur-2xl [&:has(canvas[data-ready])>div]:hidden"
+      className={`pointer-events-none absolute inset-0 overflow-hidden [&:has(canvas[data-ready])>div]:hidden ${className}`}
     >
-      {/* Fallback for no WebGL: a static wash in the same colours. */}
       <div className="absolute -right-[10%] -top-[30%] h-[120%] w-[70%] rotate-[-28deg] rounded-full bg-[linear-gradient(100deg,var(--ribbon-1),var(--ribbon-2)_35%,var(--ribbon-3)_70%,var(--ribbon-4))] opacity-25 blur-3xl" />
       <canvas ref={ref} className="absolute inset-0 h-full w-full" />
     </div>
