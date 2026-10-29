@@ -444,22 +444,6 @@
 
 /* ---------- Lichit landing: pointer-driven micro-interactions ---------- */
 
-/* Hero feed: each new notice slides in; shortlist entries settle in. */
-@keyframes sieve-enter {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.sieve-row,
-.sieve-in {
-  animation: sieve-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
 /* Spotlight border: a 1px indigo glow follows the cursor along the card edge. */
 .spotlight {
   position: relative;
@@ -522,10 +506,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sieve-row,
-  .sieve-in {
-    animation: none;
-  }
   .spotlight::before {
     transition: none;
   }

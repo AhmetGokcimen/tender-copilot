@@ -10,7 +10,7 @@ const PERKS = ['wlPerk1', 'wlPerk2', 'wlPerk3'] as const;
 export function WaitlistSection() {
   const t = useTranslations('landing');
   return (
-    <section id="waitlist" className="scroll-mt-20 border-y border-line bg-raised">
+    <section id="waitlist" className="scroll-mt-20 border-y border-line bg-raised/70">
       <div className="mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-10 px-4 py-14 md:px-8 md:py-20 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
         <div>
           <h2 className="text-[32px] font-light leading-[1.15] tracking-[-1px] text-ink md:text-[44px] md:leading-[50px] md:tracking-[-1.3px]">

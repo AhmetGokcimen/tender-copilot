@@ -1,5 +1,6 @@
 import { setRequestLocale } from 'next-intl/server';
 import { Navbar } from '@/components/landing/Navbar';
+import { PageBackground } from '@/components/landing/PageBackground';
 import { Hero } from '@/components/landing/Hero';
 import { WaitlistSection } from '@/components/landing/WaitlistSection';
 import { BeforeAfter } from '@/components/landing/BeforeAfter';
@@ -14,9 +15,10 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
   const { locale } = await params;
   setRequestLocale(locale);
   return (
-    <div className="min-h-screen bg-surface text-ink">
+    <div className="min-h-screen text-ink">
+      <PageBackground />
       <Navbar />
-      <main>
+      <main className="relative z-10">
         <Hero />
         <WaitlistSection />
         <BeforeAfter />

@@ -11,7 +11,7 @@ const ITEMS = [
 export function Trust() {
   const t = useTranslations('landing');
   return (
-    <section className="border-y border-line bg-raised">
+    <section className="border-y border-line bg-raised/70">
       <div className="mx-auto grid max-w-[1200px] gap-10 px-4 py-16 md:px-8 md:py-24 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
         <h2 className="text-[36px] font-light leading-[1.1] tracking-[-1.2px] text-ink md:text-[52px] md:leading-[56px] md:tracking-[-1.8px]">
           {t('trustTitleA')}

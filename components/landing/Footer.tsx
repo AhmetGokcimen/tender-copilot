@@ -11,7 +11,7 @@ const HEAD = 'text-[13px] font-semibold text-ink';
 export function Footer() {
   const t = useTranslations('landing');
   return (
-    <footer className="border-t border-line bg-surface">
+    <footer className="relative z-10 border-t border-line bg-surface/85">
       <div className="mx-auto grid max-w-[1200px] grid-cols-2 gap-8 px-4 py-14 md:grid-cols-[1.6fr_1fr_1fr_1fr] md:px-8">
         <div className="col-span-2 flex flex-col gap-3 md:col-span-1">
           <Logo />

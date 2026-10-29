@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { usePathname, useRouter, type Locale } from '@/i18n/routing';
 
@@ -45,38 +45,85 @@ const LOCALES: { code: Locale; label: string; Flag: () => React.ReactElement }[]
   { code: 'ro', label: 'Română', Flag: FlagRo },
 ];
 
-/** Round flag buttons that switch the locale and keep the current page. */
+const FLAG_BTN =
+  'h-7 w-7 shrink-0 overflow-hidden rounded-full transition-[opacity,box-shadow] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo';
+const ACTIVE = 'shadow-[0_0_0_2px_var(--surface),0_0_0_4px_var(--indigo)]';
+const IDLE = 'opacity-60 shadow-[0_0_0_1px_var(--line-strong)] hover:opacity-100';
+
+/**
+ * Round flag buttons that switch the locale and keep the current page.
+ * Desktop shows every flag; on phones only the active flag shows, and
+ * tapping it opens the other languages underneath.
+ */
 export function LanguageSwitcher({ className = '' }: { className?: string }) {
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const current = LOCALES.find((l) => l.code === locale) ?? LOCALES[0];
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: PointerEvent) => {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', close);
+    return () => document.removeEventListener('pointerdown', close);
+  }, [open]);
+
+  const go = (code: Locale) => {
+    setOpen(false);
+    if (code !== locale) router.replace(pathname, { locale: code, scroll: false });
+  };
 
   return (
-    <div role="group" aria-label="Language" className={`flex items-center gap-1.5 ${className}`}>
-      {LOCALES.map(({ code, label, Flag }) => {
-        const active = code === locale;
-        return (
+    <div ref={ref} className={`relative ${className}`}>
+      <div role="group" aria-label="Language" className="hidden items-center gap-1.5 md:flex">
+        {LOCALES.map(({ code, label, Flag }) => (
           <button
             key={code}
             type="button"
             lang={code}
             title={label}
             aria-label={label}
-            aria-pressed={active}
-            onClick={() => {
-              if (active) return;
-              router.replace(pathname, { locale: code, scroll: false });
-            }}
-            className={`h-7 w-7 overflow-hidden rounded-full transition-[opacity,box-shadow] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo ${
-              active
-                ? 'shadow-[0_0_0_2px_var(--surface),0_0_0_4px_var(--indigo)]'
-                : 'opacity-60 shadow-[0_0_0_1px_var(--line-strong)] hover:opacity-100'
-            }`}
+            aria-pressed={code === locale}
+            onClick={() => go(code)}
+            className={`${FLAG_BTN} ${code === locale ? ACTIVE : IDLE}`}
           >
             <Flag />
           </button>
-        );
-      })}
+        ))}
+      </div>
+      <div className="md:hidden">
+        <button
+          type="button"
+          aria-label={`Language: ${current.label}`}
+          aria-expanded={open}
+          aria-haspopup="true"
+          onClick={() => setOpen((o) => !o)}
+          className={`${FLAG_BTN} ${ACTIVE} block`}
+        >
+          <current.Flag />
+        </button>
+        {open && (
+          <div className="absolute left-1/2 top-full z-50 mt-2 flex -translate-x-1/2 flex-col gap-2 rounded-pill border border-line bg-raised p-1.5 shadow-lift-2">
+            {LOCALES.filter((l) => l.code !== locale).map(({ code, label, Flag }) => (
+              <button
+                key={code}
+                type="button"
+                lang={code}
+                title={label}
+                aria-label={label}
+                onClick={() => go(code)}
+                className={`${FLAG_BTN} shadow-[0_0_0_1px_var(--line-strong)]`}
+              >
+                <Flag />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
