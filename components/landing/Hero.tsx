@@ -3,14 +3,14 @@
 import { useTranslations } from 'next-intl';
 import { buttonClass } from '../ui/Button';
 import { Magnetic } from './MagneticButton';
-import { SilkBackground } from './SilkBackground';
+import { ThreadsBackground } from './ThreadsBackground';
 import { TenderSieve } from './TenderSieve';
 
 export function Hero() {
   const t = useTranslations('landing');
   return (
     <section id="top" className="relative overflow-hidden">
-      <SilkBackground />
+      <ThreadsBackground />
       <div className="relative mx-auto grid min-h-[calc(100dvh-68px)] max-w-[1200px] grid-cols-1 items-center gap-12 px-4 py-14 md:px-8 lg:min-h-[640px] lg:grid-cols-[minmax(0,1fr)_minmax(0,540px)] lg:py-16">
         <div className="relative z-10">
           <p className="mb-5 inline-flex rounded-pill bg-indigo-soft px-3 py-1 text-[13px] font-medium text-indigo-text">
