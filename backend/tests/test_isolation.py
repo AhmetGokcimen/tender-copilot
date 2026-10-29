@@ -4,15 +4,15 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
-from models.company import CompanyProfile
-from models.tender import SourceSystem, Tender
-from models.user_tender_state import UserTenderState
+from backend.models.company import CompanyProfile
+from backend.models.tender import SourceSystem, Tender
+from backend.models.user_tender_state import UserTenderState
 
 
 @pytest.fixture()
 def two_tenants(api: TestClient):
-    from core.membership import get_or_create_user, link_user_company
-    from db import engine
+    from backend.core.membership import get_or_create_user, link_user_company
+    from backend.db import engine
 
     with Session(engine) as session:
         session.add(CompanyProfile(name="Company A"))
@@ -43,7 +43,7 @@ def two_tenants(api: TestClient):
 
 
 def _auth(sub: str) -> dict:
-    from core.auth import create_access_token
+    from backend.core.auth import create_access_token
 
     token = create_access_token(
         sub=sub, email=f"{sub}@x.ro", name=sub.upper(), provider="google"

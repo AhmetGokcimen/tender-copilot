@@ -58,10 +58,10 @@ import httpx
 import pymupdf
 from tenacity import RetryError, retry, stop_after_attempt, wait_exponential
 
-from adapters.base import TenderSourceAdapter
-from ai.ocr import unwrap_p7s
-from models.award import Award
-from models.tender import SourceSystem, Tender
+from backend.adapters.base import TenderSourceAdapter
+from backend.ai.ocr import unwrap_p7s
+from backend.models.award import Award
+from backend.models.tender import SourceSystem, Tender
 
 BASE_URL = "https://e-licitatie.ro"
 LIST_PATH = "/api-pub/NoticeCommon/GetCNoticeList/"

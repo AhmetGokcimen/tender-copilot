@@ -2,13 +2,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session
 
-from api.auth_routes import router as auth_router
-from api.internal_routes import router as internal_router
-from api.routes import router as api_router
-from core.caiet_jobs import reap_stale_jobs
-from core.config import settings
-from core.score_jobs import reap_stale_jobs as reap_stale_score_jobs
-from db import engine, init_db
+from backend.api.auth_routes import router as auth_router
+from backend.api.internal_routes import router as internal_router
+from backend.api.routes import router as api_router
+from backend.core.caiet_jobs import reap_stale_jobs
+from backend.core.config import settings
+from backend.core.score_jobs import reap_stale_jobs as reap_stale_score_jobs
+from backend.db import engine, init_db
 
 app = FastAPI(
     title="Tender Copilot API",
@@ -21,7 +21,7 @@ app = FastAPI(
         "(one click) or /api/auth/google/login. Data is multi-tenant: every "
         "login owns its companies via onboarding. POST /internal/sync-tenders "
         "is the cron-triggered incremental sync (X-Sync-Token, not JWT). "
-        "Breaking changes vs 0.5.0 are listed in backend/API_CHANGES.md."
+        "Breaking changes vs 0.5.0 are listed in API_CHANGES.md."
     ),
 )
 

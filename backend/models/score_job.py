@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 
 from sqlmodel import Field, SQLModel
 
-from models.ocr_job import ACTIVE_JOB_STATUSES  # noqa: F401 — shared vocabulary
+from backend.models.ocr_job import ACTIVE_JOB_STATUSES  # noqa: F401 — shared vocabulary
 
 
 def _utcnow() -> datetime:

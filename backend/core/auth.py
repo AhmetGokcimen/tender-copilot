@@ -14,7 +14,7 @@ from urllib.parse import urlencode
 import httpx
 import jwt
 
-from core.config import settings
+from backend.core.config import settings
 
 GOOGLE_AUTHORIZE_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"

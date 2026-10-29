@@ -12,7 +12,7 @@ DETAIL_KEYS = {
 
 
 def _auth(sub: str = "wiz") -> dict:
-    from core.auth import create_access_token
+    from backend.core.auth import create_access_token
 
     token = create_access_token(
         sub=sub, email=f"{sub}@x.ro", name=sub.upper(), provider="google"

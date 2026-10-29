@@ -13,16 +13,16 @@ from datetime import UTC, datetime, timedelta
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from sqlmodel import Session
 
-from api.schemas import SyncReport
-from core.config import settings
-from core.sync import (
+from backend.api.schemas import SyncReport
+from backend.core.config import settings
+from backend.core.sync import (
     AWARDS_KEY,
     TENDERS_KEY,
     get_checkpoint,
     sync_award_window,
     sync_tender_window,
 )
-from db import get_session
+from backend.db import get_session
 
 router = APIRouter()
 

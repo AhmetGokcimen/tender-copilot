@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from sqlalchemy import JSON, Column
 from sqlmodel import Field, SQLModel
 
-from models.tender import SourceSystem
+from backend.models.tender import SourceSystem
 
 ACTIVE_JOB_STATUSES = ("pending", "running")
 

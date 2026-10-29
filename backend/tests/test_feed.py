@@ -6,9 +6,9 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
-from models.company import CompanyProfile
-from models.tender import SourceSystem, Tender
-from models.user_tender_state import UserTenderState
+from backend.models.company import CompanyProfile
+from backend.models.tender import SourceSystem, Tender
+from backend.models.user_tender_state import UserTenderState
 
 TENDER_KEYS = {
     "source_system", "external_id", "country_code", "title", "cpv_codes",
@@ -49,7 +49,7 @@ EXTRACTION = {
 
 @pytest.fixture()
 def seed(api: TestClient):
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         session.add(
@@ -96,7 +96,7 @@ def seed(api: TestClient):
         session.commit()
         company = session.get(CompanyProfile, 1)
         assert company is not None
-        from core.membership import get_or_create_user, link_user_company
+        from backend.core.membership import get_or_create_user, link_user_company
 
         user = get_or_create_user(
             session, subject="u", email="u@x.ro", name="U", provider="demo"
@@ -124,7 +124,7 @@ def seed(api: TestClient):
 
 
 def _auth() -> dict:
-    from core.auth import create_access_token
+    from backend.core.auth import create_access_token
 
     token = create_access_token(sub="u", email="u@x.ro", name="U", provider="demo")
     return {"Authorization": f"Bearer {token}"}
@@ -179,9 +179,9 @@ def test_feed_detail_and_company_scope(seed: TestClient) -> None:
     assert item["state"]["status"] == "reviewing"
     assert seed.get("/api/tenders/nope", headers=_auth()).status_code == 404
 
-    from core.membership import link_user_company
-    from db import engine
-    from models.user import User
+    from backend.core.membership import link_user_company
+    from backend.db import engine
+    from backend.models.user import User
 
     with Session(engine) as session:
         session.add(CompanyProfile(name="Second Co"))

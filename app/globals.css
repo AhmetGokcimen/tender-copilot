@@ -1,0 +1,325 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Desktop sidebar width (JS-synced with the collapse toggle). */
+  --sbw: 4rem;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+@layer utilities {
+  /* Tabular figures for money, CPV codes, refs, timestamps (DESIGN.md). */
+  .tnum {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+}
+
+/* Material Symbols (icon font used by the Stitch design). */
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+/* Thin scrollbars for dense panels (kanban columns, filter lists). */
+.thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #c6c6ce transparent;
+}
+.thin-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: #c6c6ce;
+  border-radius: 9999px;
+}
+.thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Subtle dot texture for the landing hero until the video lands. */
+.dot-grid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Assistant highlight ring: calm navy outline with a soft decaying glow. */
+.assistant-highlight {
+  outline: 2px solid #0b132b;
+  outline-offset: 3px;
+  border-radius: 0.5rem;
+  animation: assistant-ring 2.6s ease-out forwards;
+}
+
+@keyframes assistant-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(11, 19, 43, 0.35);
+  }
+  40% {
+    box-shadow: 0 0 0 6px rgba(11, 19, 43, 0.12);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(11, 19, 43, 0);
+  }
+}
+
+/* Agent pipeline: slow rotating dash ring for the active node. */
+.agent-ring-rotor {
+  animation: agent-ring-rotate 2.75s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes agent-ring-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Match score sonar: a single ring expands and fades on hover. */
+.match-sonar::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 9999px;
+  border: 1px solid #0b132b;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.match-sonar:hover::after {
+  animation: sonar-ping 150ms ease-out;
+}
+
+@keyframes sonar-ping {
+  from {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Draft tag entrance when its section finishes streaming. */
+.stream-tag-in {
+  animation: stream-tag-in 400ms ease-out;
+}
+
+@keyframes stream-tag-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Rich-text document editor (Tiptap/ProseMirror) on the A4 sheet. */
+.doc-editor {
+  outline: none;
+  caret-color: #0b132b;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #0b1c30;
+  overflow-wrap: break-word;
+}
+.doc-editor > *:first-child {
+  margin-top: 0;
+}
+.doc-editor h1 {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #0b132b;
+  margin: 20px 0 8px;
+}
+.doc-editor h2 {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: #0b132b;
+  margin: 18px 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #c6c6ce;
+}
+.doc-editor h3 {
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 600;
+  color: #0b1c30;
+  margin: 14px 0 4px;
+}
+.doc-editor p {
+  margin: 0 0 10px;
+}
+.doc-editor ul,
+.doc-editor ol {
+  margin: 0 0 10px;
+  padding-left: 22px;
+}
+.doc-editor ul {
+  list-style: disc;
+}
+.doc-editor ol {
+  list-style: decimal;
+}
+.doc-editor li {
+  margin: 2px 0;
+}
+.doc-editor li > p {
+  margin: 0;
+  display: inline;
+}
+.doc-editor table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 12px;
+  font-size: 13px;
+  table-layout: auto;
+}
+.doc-editor th,
+.doc-editor td {
+  border: 1px solid #c6c6ce;
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+.doc-editor th {
+  background: #eff4ff;
+  font-weight: 600;
+}
+.doc-editor strong {
+  font-weight: 600;
+}
+
+/* Onboarding wizard: direction-aware step transitions, chip entrances, and
+   the one-shot setup sweep. The global prefers-reduced-motion blanket above
+   collapses all of these to instant. */
+@keyframes ob-slide-fwd {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes ob-slide-back {
+  from {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes setup-sweep {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.ob-enter-fwd {
+  animation: ob-slide-fwd 220ms ease-out;
+}
+.ob-enter-back {
+  animation: ob-slide-back 220ms ease-out;
+}
+.chip-in {
+  animation: chip-in 140ms ease-out;
+}
+.setup-sweep {
+  transform-origin: left;
+  animation: setup-sweep 1.5s linear forwards;
+}
+
+/* Landing ambient orbs: large blurred color fields drifting slowly behind
+   content. Transform-only animation (no layout/paint cost beyond the blur,
+   which is static). Explicit reduced-motion rule: frozen in place, visible.
+   (Must come after the global blanket: class specificity beats `*`.) */
+@keyframes orb-drift-a {
+  from {
+    transform: translate3d(-60px, -40px, 0) scale(1);
+  }
+  to {
+    transform: translate3d(90px, 70px, 0) scale(1.12);
+  }
+}
+@keyframes orb-drift-b {
+  from {
+    transform: translate3d(70px, 50px, 0) scale(1.08);
+  }
+  to {
+    transform: translate3d(-80px, -60px, 0) scale(0.96);
+  }
+}
+@keyframes orb-drift-c {
+  from {
+    transform: translate3d(0, 60px, 0) scale(1);
+  }
+  to {
+    transform: translate3d(-70px, -70px, 0) scale(1.15);
+  }
+}
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+}
+.orb-a {
+  animation: orb-drift-a 28s ease-in-out infinite alternate;
+}
+.orb-b {
+  animation: orb-drift-b 36s ease-in-out infinite alternate;
+}
+.orb-c {
+  animation: orb-drift-c 24s ease-in-out infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) {
+  .orb-a,
+  .orb-b,
+  .orb-c {
+    animation: none;
+  }
+}

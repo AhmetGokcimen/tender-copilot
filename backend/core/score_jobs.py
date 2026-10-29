@@ -11,12 +11,12 @@ from datetime import UTC, datetime
 
 from sqlmodel import Session, func, select
 
-from core.scoring import evaluate
-from db import engine, upsert_score
-from models.company import CompanyProfile
-from models.ocr_job import ACTIVE_JOB_STATUSES
-from models.score_job import ScoreJob
-from models.tender import Tender
+from backend.core.scoring import evaluate
+from backend.db import engine, upsert_score
+from backend.models.company import CompanyProfile
+from backend.models.ocr_job import ACTIVE_JOB_STATUSES
+from backend.models.score_job import ScoreJob
+from backend.models.tender import Tender
 
 BATCH_SIZE = 100
 

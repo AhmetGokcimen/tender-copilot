@@ -1,6 +1,6 @@
 """Award print-PDF text parsing (deterministic, no AI)."""
 
-from adapters.romania_seap.adapter import _parse_ro_number, parse_award_text
+from backend.adapters.romania_seap.adapter import _parse_ro_number, parse_award_text
 
 # Shape mirrors the verified CAN1065826 print (2026-10-28), trimmed to the
 # parsed sections plus realistic header/footer boilerplate.

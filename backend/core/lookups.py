@@ -9,7 +9,7 @@ so free-text industry/keyword/country values can never reach the DB.
 
 from dataclasses import dataclass
 
-from models.company import CompanyProfile
+from backend.models.company import CompanyProfile
 
 
 @dataclass(frozen=True)

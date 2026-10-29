@@ -14,9 +14,9 @@ from itertools import pairwise
 
 from sqlmodel import Session, select
 
-from core.sync import cpv_group
-from models.award import Award
-from models.tender import Tender
+from backend.core.sync import cpv_group
+from backend.models.award import Award
+from backend.models.tender import Tender
 
 # Fewer awards than this and any "who usually wins" claim is noise.
 MIN_AWARDS_FOR_PATTERN = 3

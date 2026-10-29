@@ -18,7 +18,7 @@ from typing import Literal
 import pymupdf
 from asn1crypto import cms, pem
 
-from ai.client import ExtractedRequirements, MetaAIClient
+from backend.ai.client import ExtractedRequirements, MetaAIClient
 
 PageKind = Literal["text", "scanned", "empty"]
 

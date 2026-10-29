@@ -3,12 +3,12 @@
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
-from models.company import CompanyProfile
-from models.tender import SourceSystem, Tender
+from backend.models.company import CompanyProfile
+from backend.models.tender import SourceSystem, Tender
 
 
 def _seed_tender() -> None:
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         session.add(CompanyProfile(name="Co"))
@@ -22,7 +22,7 @@ def _seed_tender() -> None:
 
 
 def _auth() -> dict:
-    from core.auth import create_access_token
+    from backend.core.auth import create_access_token
 
     token = create_access_token(sub="u", email="u@x.ro", name="U", provider="demo")
     return {"Authorization": f"Bearer {token}"}
@@ -31,7 +31,7 @@ def _auth() -> dict:
 def test_post_spawns_job_and_reuses_active(
     api: TestClient, monkeypatch
 ) -> None:
-    from api import routes
+    from backend.api import routes
 
     calls: list[int] = []
 
@@ -57,7 +57,7 @@ def test_post_validates_tender(api: TestClient) -> None:
     _seed_tender()
     assert api.post("/api/tenders/romania/nope/extract-caiet", headers=_auth()).status_code == 404
 
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         session.add(
@@ -72,7 +72,7 @@ def test_post_validates_tender(api: TestClient) -> None:
 
 
 def test_get_latest_job(api: TestClient, monkeypatch) -> None:
-    from api import routes
+    from backend.api import routes
 
     async def fake_worker(job_id: int, **kwargs) -> None:
         pass
@@ -87,12 +87,12 @@ def test_get_latest_job(api: TestClient, monkeypatch) -> None:
 
 
 def test_reap_stale_jobs_fails_orphans(api: TestClient) -> None:
-    from db import engine
-    from models.ocr_job import OcrJob
+    from backend.db import engine
+    from backend.models.ocr_job import OcrJob
 
     _seed_tender()
     with Session(engine) as session:
-        from core.caiet_jobs import create_job, reap_stale_jobs
+        from backend.core.caiet_jobs import create_job, reap_stale_jobs
 
         orphan_id = create_job(session, SourceSystem.ROMANIA_SEAP, "1001").id
         assert reap_stale_jobs(session) == 1
@@ -108,11 +108,11 @@ def test_jobs_need_auth(api: TestClient) -> None:
 
 
 def test_worker_success_writes_tender_and_job(api: TestClient, monkeypatch) -> None:
-    import core.caiet_jobs as jobs
-    from ai.client import ExtractedRequirements
-    from ai.ocr import PdfExtraction
-    from db import engine
-    from models.ocr_job import OcrJob
+    import backend.core.caiet_jobs as jobs
+    from backend.ai.client import ExtractedRequirements
+    from backend.ai.ocr import PdfExtraction
+    from backend.db import engine
+    from backend.models.ocr_job import OcrJob
 
     _seed_tender()
     with Session(engine) as session:
@@ -120,7 +120,7 @@ def test_worker_success_writes_tender_and_job(api: TestClient, monkeypatch) -> N
 
     class StubAdapter:
         async def fetch_caiet_pdf(self, external_id, notice_type_id):
-            from adapters.romania_seap.adapter import CaietDocument
+            from backend.adapters.romania_seap.adapter import CaietDocument
 
             assert (external_id, notice_type_id) == ("1001", 17)
             return CaietDocument(name="caiet.pdf", pdf_bytes=b"%PDF-1.4 x")
@@ -155,9 +155,9 @@ def test_worker_success_writes_tender_and_job(api: TestClient, monkeypatch) -> N
 def test_worker_failure_paths(api: TestClient) -> None:
     import asyncio
 
-    import core.caiet_jobs as jobs
-    from db import engine
-    from models.ocr_job import OcrJob
+    import backend.core.caiet_jobs as jobs
+    from backend.db import engine
+    from backend.models.ocr_job import OcrJob
 
     _seed_tender()
 

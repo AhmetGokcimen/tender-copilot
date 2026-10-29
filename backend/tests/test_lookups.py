@@ -4,7 +4,7 @@ import pytest
 
 
 def test_industries_carry_cpv_suggestions() -> None:
-    from core.lookups import INDUSTRIES
+    from backend.core.lookups import INDUSTRIES
 
     assert INDUSTRIES["construction"].suggested_cpv_codes == ["45000000"]
     assert "software" in INDUSTRIES
@@ -13,7 +13,7 @@ def test_industries_carry_cpv_suggestions() -> None:
 
 
 def test_keywords_and_countries_are_known_sets() -> None:
-    from core.lookups import COUNTRIES, KEYWORDS
+    from backend.core.lookups import COUNTRIES, KEYWORDS
 
     assert "it-equipment" in KEYWORDS
     assert [c.code for c in COUNTRIES] == ["RO"]
@@ -21,7 +21,7 @@ def test_keywords_and_countries_are_known_sets() -> None:
 
 
 def test_validate_company_data_accepts_good_input() -> None:
-    from core.lookups import validate_company_data
+    from backend.core.lookups import validate_company_data
 
     validate_company_data(
         {
@@ -37,7 +37,7 @@ def test_validate_company_data_accepts_good_input() -> None:
 
 
 def test_validate_company_data_rejects_unknown_values() -> None:
-    from core.lookups import validate_company_data
+    from backend.core.lookups import validate_company_data
 
     with pytest.raises(ValueError, match="industry"):
         validate_company_data({"industry": "alchemy"})
@@ -52,8 +52,8 @@ def test_validate_company_data_rejects_unknown_values() -> None:
 
 
 def test_apply_industry_preseed_seeds_empty_cpv_only() -> None:
-    from core.lookups import apply_industry_preseed
-    from models.company import CompanyProfile
+    from backend.core.lookups import apply_industry_preseed
+    from backend.models.company import CompanyProfile
 
     fresh = CompanyProfile(name="X", industry="software")
     apply_industry_preseed(fresh)
@@ -69,12 +69,12 @@ def test_apply_industry_preseed_seeds_empty_cpv_only() -> None:
 
 
 def test_profile_completeness_tracks_minimum_viable_profile() -> None:
-    from core.lookups import (
+    from backend.core.lookups import (
         OPTIONAL_PROFILE_FIELDS,
         REQUIRED_PROFILE_FIELDS,
         profile_completeness,
     )
-    from models.company import CompanyProfile
+    from backend.models.company import CompanyProfile
 
     assert REQUIRED_PROFILE_FIELDS == ["name", "industry", "annual_turnover"]
     assert "keywords" in OPTIONAL_PROFILE_FIELDS

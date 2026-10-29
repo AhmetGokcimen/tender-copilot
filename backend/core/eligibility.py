@@ -14,8 +14,8 @@ which are both "can't fail the company on this", not an automatic pass.
 
 from dataclasses import dataclass
 
-from ai.client import ExtractedRequirements
-from models.company import CompanyProfile
+from backend.ai.client import ExtractedRequirements
+from backend.models.company import CompanyProfile
 
 
 @dataclass

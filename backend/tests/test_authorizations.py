@@ -3,13 +3,13 @@
 import pytest
 from sqlmodel import Session, select
 
-from models.company import CompanyProfile
-from models.country_authorization import CountryAuthorization
+from backend.models.company import CompanyProfile
+from backend.models.country_authorization import CountryAuthorization
 
 
 @pytest.fixture()
 def session(api):
-    from db import engine
+    from backend.db import engine
 
     with Session(engine) as session:
         yield session
@@ -22,7 +22,7 @@ def _company(session: Session) -> int:
 
 
 def test_upsert_creates_then_updates(session: Session) -> None:
-    from core.authorizations import upsert_authorization
+    from backend.core.authorizations import upsert_authorization
 
     company_id = _company(session)
     first = upsert_authorization(session, company_id, "ro", "in_progress", "Filed ONRC forms")
@@ -37,7 +37,7 @@ def test_upsert_creates_then_updates(session: Session) -> None:
 
 
 def test_upsert_validates_status_and_code(session: Session) -> None:
-    from core.authorizations import upsert_authorization
+    from backend.core.authorizations import upsert_authorization
 
     company_id = _company(session)
     with pytest.raises(ValueError, match="status"):
@@ -49,7 +49,10 @@ def test_upsert_validates_status_and_code(session: Session) -> None:
 
 
 def test_ensure_rows_only_adds_missing(session: Session) -> None:
-    from core.authorizations import ensure_authorization_rows, upsert_authorization
+    from backend.core.authorizations import (
+        ensure_authorization_rows,
+        upsert_authorization,
+    )
 
     company_id = _company(session)
     upsert_authorization(session, company_id, "RO", "obtained")
@@ -62,13 +65,13 @@ def test_ensure_rows_only_adds_missing(session: Session) -> None:
 
 
 def test_status_map_empty_without_company(session: Session) -> None:
-    from core.authorizations import authorization_status_map
+    from backend.core.authorizations import authorization_status_map
 
     assert authorization_status_map(session, None) == {}
 
 
 def test_romania_guide_is_informational_not_advice() -> None:
-    from core.country_requirements import get_country_requirements
+    from backend.core.country_requirements import get_country_requirements
 
     ro = get_country_requirements("RO")
     assert ro["guide_available"] is True
@@ -77,7 +80,7 @@ def test_romania_guide_is_informational_not_advice() -> None:
 
 
 def _auth(sub: str) -> dict:
-    from core.auth import create_access_token
+    from backend.core.auth import create_access_token
 
     token = create_access_token(
         sub=sub, email=f"{sub}@x.ro", name=sub.upper(), provider="google"
@@ -173,10 +176,10 @@ def test_target_countries_seed_not_started_rows(api) -> None:
 def _seed_multicountry_feed(api) -> None:
     from sqlmodel import Session
 
-    from core.membership import get_or_create_user, link_user_company
-    from db import engine
-    from models.tender import SourceSystem, Tender
-    from models.user_tender_state import UserTenderState
+    from backend.core.membership import get_or_create_user, link_user_company
+    from backend.db import engine
+    from backend.models.tender import SourceSystem, Tender
+    from backend.models.user_tender_state import UserTenderState
 
     with Session(engine) as session:
         session.add(CompanyProfile(name="Co"))
@@ -266,7 +269,7 @@ def test_country_requirements_endpoint(api) -> None:
 
 
 def test_planned_countries_return_placeholders() -> None:
-    from core.country_requirements import get_country_requirements
+    from backend.core.country_requirements import get_country_requirements
 
     pl = get_country_requirements("pl")  # case-insensitive
     assert (pl["country_code"], pl["name"]) == ("PL", "Poland")

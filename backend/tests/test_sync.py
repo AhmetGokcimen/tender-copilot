@@ -6,10 +6,10 @@ from datetime import UTC, datetime, timedelta
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
-from models.award import Award
-from models.sync_state import SyncCheckpoint
-from models.tender import SourceSystem, Tender
-from models.user_tender_state import UserTenderState
+from backend.models.award import Award
+from backend.models.sync_state import SyncCheckpoint
+from backend.models.tender import SourceSystem, Tender
+from backend.models.user_tender_state import UserTenderState
 
 SECRET = "test-sync-secret"
 
@@ -58,12 +58,12 @@ class StubAdapter:
 
 
 def test_sync_needs_token(api: TestClient, monkeypatch) -> None:
-    monkeypatch.setattr("core.config.settings.sync_secret", SECRET)
+    monkeypatch.setattr("backend.core.config.settings.sync_secret", SECRET)
     assert api.post("/internal/sync-tenders").status_code == 403
     assert api.post("/internal/sync-tenders",
                     headers={"X-Sync-Token": "wrong"}).status_code == 403
     # A user JWT is not a sync credential either.
-    from core.auth import create_access_token
+    from backend.core.auth import create_access_token
 
     token = create_access_token(sub="u", email="u@x.ro", name="U", provider="demo")
     assert api.post("/internal/sync-tenders",
@@ -71,22 +71,22 @@ def test_sync_needs_token(api: TestClient, monkeypatch) -> None:
 
 
 def test_sync_refuses_when_unconfigured(api: TestClient, monkeypatch) -> None:
-    monkeypatch.setattr("core.config.settings.sync_secret", "")
+    monkeypatch.setattr("backend.core.config.settings.sync_secret", "")
     res = api.post("/internal/sync-tenders", headers={"X-Sync-Token": "anything"})
     assert res.status_code == 503
 
 
 def test_sync_is_idempotent(api: TestClient, monkeypatch) -> None:
-    from db import engine
+    from backend.db import engine
 
-    monkeypatch.setattr("core.config.settings.sync_secret", SECRET)
+    monkeypatch.setattr("backend.core.config.settings.sync_secret", SECRET)
     now = datetime.now(UTC)
     stub = StubAdapter(
         tenders=[_mk_tender("t1", now - timedelta(hours=10)),
                  _mk_tender("t2", now - timedelta(hours=5))],
         awards=[_mk_award("a1", now - timedelta(hours=8))],
     )
-    monkeypatch.setattr("core.sync.RomaniaSeapAdapter",
+    monkeypatch.setattr("backend.core.sync.RomaniaSeapAdapter",
                         lambda *a, **k: stub)
     headers = {"X-Sync-Token": SECRET}
 
@@ -112,8 +112,8 @@ def test_sync_caps_between_slices_and_resumes(api: TestClient) -> None:
     """Core-level (a >7d window needs two slices; the endpoint caps
     lookback at 168h by design). First run stops between slices with
     capped=True; second run continues — nothing skipped, nothing duped."""
-    from core.sync import sync_tender_window
-    from db import engine
+    from backend.core.sync import sync_tender_window
+    from backend.db import engine
 
     now = datetime.now(UTC)
     stub = StubAdapter(tenders=[
@@ -137,8 +137,8 @@ def test_sync_caps_between_slices_and_resumes(api: TestClient) -> None:
 
 
 def test_sync_timeout_leaves_checkpoint_behind(api: TestClient) -> None:
-    from core.sync import sync_tender_window
-    from db import engine
+    from backend.core.sync import sync_tender_window
+    from backend.db import engine
 
     now = datetime.now(UTC)
     stub = StubAdapter(tenders=[_mk_tender("t1", now - timedelta(hours=5))])
@@ -151,8 +151,8 @@ def test_sync_timeout_leaves_checkpoint_behind(api: TestClient) -> None:
 
 
 def test_sync_empty_slice_still_advances(api: TestClient) -> None:
-    from core.sync import sync_tender_window
-    from db import engine
+    from backend.core.sync import sync_tender_window
+    from backend.db import engine
 
     now = datetime.now(UTC)
     with Session(engine) as session:
@@ -165,8 +165,8 @@ def test_sync_empty_slice_still_advances(api: TestClient) -> None:
 
 
 def test_award_resume_skips_finished_pdfs(api: TestClient) -> None:
-    from core.sync import sync_award_window
-    from db import engine, upsert_awards
+    from backend.core.sync import sync_award_window
+    from backend.db import engine, upsert_awards
 
     now = datetime.now(UTC)
     calls: list[str] = []
@@ -187,9 +187,9 @@ def test_award_resume_skips_finished_pdfs(api: TestClient) -> None:
 
 
 def test_sync_never_touches_company_state(api: TestClient, monkeypatch) -> None:
-    from db import engine
+    from backend.db import engine
 
-    monkeypatch.setattr("core.config.settings.sync_secret", SECRET)
+    monkeypatch.setattr("backend.core.config.settings.sync_secret", SECRET)
     now = datetime.now(UTC)
     seeded = _mk_tender("t1", now - timedelta(hours=10))
     seeded.ai_title_simplified = "Human title"
@@ -206,7 +206,7 @@ def test_sync_never_touches_company_state(api: TestClient, monkeypatch) -> None:
 
     incoming = _mk_tender("t1", now - timedelta(hours=10))  # fresh re-fetch
     stub = StubAdapter(tenders=[incoming])
-    monkeypatch.setattr("core.sync.RomaniaSeapAdapter",
+    monkeypatch.setattr("backend.core.sync.RomaniaSeapAdapter",
                         lambda *a, **k: stub)
     res = api.post("/internal/sync-tenders?lookback_hours=48&include_awards=false",
                    headers={"X-Sync-Token": SECRET})
@@ -221,10 +221,10 @@ def test_sync_never_touches_company_state(api: TestClient, monkeypatch) -> None:
 
 
 def test_backfill_resumes_from_checkpoint(api: TestClient, monkeypatch) -> None:
-    """scripts.backfill_initial.run passes the checkpoint (not the flag
+    """backend.scripts.backfill_initial.run passes the checkpoint (not the flag
     window) as the next start — kill mid-run, rerun, no rework."""
-    import scripts.backfill_initial as backfill
-    from core.sync import set_checkpoint
+    import backend.scripts.backfill_initial as backfill
+    from backend.core.sync import set_checkpoint
 
     calls: list = []
 
@@ -264,7 +264,7 @@ def test_explicit_window_uses_exact_bounds() -> None:
 
     import httpx
 
-    from adapters.romania_seap.adapter import RomaniaSeapAdapter
+    from backend.adapters.romania_seap.adapter import RomaniaSeapAdapter
 
     seen: list[dict] = []
 
@@ -290,7 +290,7 @@ def test_explicit_window_uses_exact_bounds() -> None:
 
 
 def test_award_upsert_keeps_winner_on_empty_refetch(api: TestClient) -> None:
-    from db import engine, upsert_awards
+    from backend.db import engine, upsert_awards
 
     now = datetime.now(UTC)
     full = _mk_award("a1", now)

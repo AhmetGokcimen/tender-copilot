@@ -6,7 +6,7 @@ import pytest
 
 
 def test_backup_and_reset_moves_db_to_timestamped_backup(tmp_path: Path) -> None:
-    from scripts.migrate_demo import backup_and_reset
+    from backend.scripts.migrate_demo import backup_and_reset
 
     db = tmp_path / "app.db"
     db.write_bytes(b"old-data")
@@ -17,7 +17,7 @@ def test_backup_and_reset_moves_db_to_timestamped_backup(tmp_path: Path) -> None
 
 
 def test_backup_and_reset_refuses_missing_db(tmp_path: Path) -> None:
-    from scripts.migrate_demo import backup_and_reset
+    from backend.scripts.migrate_demo import backup_and_reset
 
     with pytest.raises(FileNotFoundError):
         backup_and_reset(tmp_path / "app.db")

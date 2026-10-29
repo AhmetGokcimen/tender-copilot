@@ -8,7 +8,7 @@ are isolated inside the adapter.
 
 from abc import ABC, abstractmethod
 
-from models.tender import Tender
+from backend.models.tender import Tender
 
 
 class TenderSourceAdapter(ABC):
