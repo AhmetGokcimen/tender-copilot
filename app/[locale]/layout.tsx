@@ -11,11 +11,23 @@ import '../globals.css';
 const geist = Geist({ subsets: ['latin', 'latin-ext'], variable: '--font-sans', display: 'swap' });
 const geistMono = Geist_Mono({ subsets: ['latin', 'latin-ext'], variable: '--font-mono', display: 'swap' });
 
-export const metadata = {
-  title: 'Lichit | Win the public tenders you have been missing',
-  description:
-    'Lichit reads every SEAP notice, shows which tenders your company can win, and drafts the offer with you.',
-};
+const META = {
+  en: {
+    title: 'Lichit | Win the public tenders you have been missing',
+    description:
+      'Lichit reads every SEAP notice, shows which tenders your company can win, and drafts the offer with you.',
+  },
+  ro: {
+    title: 'Lichit | Câștigă licitațiile publice pe care le-ai ratat',
+    description:
+      'Lichit citește fiecare anunț SEAP, îți arată ce licitații poate câștiga compania ta și redactează oferta împreună cu tine.',
+  },
+} as const;
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return META[locale === 'ro' ? 'ro' : 'en'];
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

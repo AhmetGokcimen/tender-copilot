@@ -1,6 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
 import { Navbar } from '@/components/landing/Navbar';
 import { Hero } from '@/components/landing/Hero';
+import { WaitlistSection } from '@/components/landing/WaitlistSection';
 import { BeforeAfter } from '@/components/landing/BeforeAfter';
 import { HowItWorks } from '@/components/landing/HowItWorks';
 import { HoursCalculator } from '@/components/landing/HoursCalculator';
@@ -17,6 +18,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       <Navbar />
       <main>
         <Hero />
+        <WaitlistSection />
         <BeforeAfter />
         <HowItWorks />
         <HoursCalculator />

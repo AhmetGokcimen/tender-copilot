@@ -2,9 +2,8 @@ import { defineRouting } from 'next-intl/routing';
 import { createNavigation } from 'next-intl/navigation';
 
 export const routing = defineRouting({
-  // English first. Ship Romanian by adding 'ro' here + messages/ro.json
-  // (same keys as messages/en.json) — no component changes needed.
-  locales: ['en'],
+  // Every locale needs messages/<locale>.json with the same keys as en.json.
+  locales: ['en', 'ro'],
   defaultLocale: 'en',
 });
 

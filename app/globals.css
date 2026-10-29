@@ -444,38 +444,20 @@
 
 /* ---------- Lichit landing: pointer-driven micro-interactions ---------- */
 
-/* Match node pulse where the ribbon strands meet the hero card. */
-@keyframes signal-ping {
+/* Hero feed: each new notice slides in; shortlist entries settle in. */
+@keyframes sieve-enter {
   from {
-    transform: scale(1);
-    opacity: 0.6;
+    opacity: 0;
+    transform: translateY(-8px);
   }
   to {
-    transform: scale(3.2);
-    opacity: 0;
+    opacity: 1;
+    transform: none;
   }
 }
-.signal-ping {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: signal-ping 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
-}
-
-/* Hero card: tilts toward the cursor (vars set in TiltCard), checks tick in on hover. */
-.tilt-card {
-  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.tilt-card .tilt-check {
-  opacity: 0.35;
-  transform: translateX(-4px);
-  transition:
-    opacity 0.35s,
-    transform 0.35s;
-}
-.tilt-card[data-on='true'] .tilt-check {
-  opacity: 1;
-  transform: none;
+.sieve-row,
+.sieve-in {
+  animation: sieve-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Spotlight border: a 1px indigo glow follows the cursor along the card edge. */
@@ -540,17 +522,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .signal-ping {
+  .sieve-row,
+  .sieve-in {
     animation: none;
-    opacity: 0;
-  }
-  .tilt-card {
-    transform: none;
-    transition: none;
-  }
-  .tilt-card .tilt-check {
-    opacity: 1;
-    transform: none;
   }
   .spotlight::before {
     transition: none;

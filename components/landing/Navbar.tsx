@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Logo } from '../brand/Logo';
+import { LanguageSwitcher } from '../i18n/LanguageSwitcher';
 
 const LINK = 'text-[14px] text-ink-2 transition-colors hover:text-ink';
 
@@ -28,7 +29,8 @@ export function Navbar() {
             {t('navContact')}
           </Link>
         </nav>
-        <div className="ml-auto flex items-center gap-5 md:ml-0">
+        <div className="ml-auto flex items-center gap-4 md:ml-0 md:gap-5">
+          <LanguageSwitcher />
           <Link href="/auth/login" className={`${LINK} hidden sm:inline`}>
             {t('signIn')}
           </Link>
