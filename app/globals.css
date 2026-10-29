@@ -36,6 +36,26 @@
   --paper-rgb: 247 248 250;
   --warn-rgb: 161 67 6;
   --warn-bg-rgb: 255 243 224;
+  --surface-sunk-2: #e6e9f0;
+  --ink-rgb: 11 16 32;
+  --ink-2-rgb: 42 50 69;
+  --muted-rgb: 91 100 120;
+  --line-rgb: 227 230 237;
+  --line-strong-rgb: 138 147 168;
+  --surface-rgb: 255 255 255;
+  --surface-sunk-rgb: 238 240 245;
+  --surface-sunk-2-rgb: 230 233 240;
+  --indigo-rgb: 79 70 229;
+  --indigo-deep-rgb: 55 48 163;
+  --indigo-text-rgb: 67 56 202;
+  --indigo-soft-rgb: 238 240 255;
+  --on-indigo-rgb: 255 255 255;
+  --night-rgb: 11 16 32;
+  --on-night-rgb: 238 240 246;
+  --eligible-rgb: 6 122 82;
+  --eligible-bg-rgb: 229 246 238;
+  --risk-rgb: 196 50 10;
+  --risk-bg-rgb: 253 236 234;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -81,6 +101,26 @@
   --paper-rgb: 11 16 32;
   --warn-rgb: 247 185 85;
   --warn-bg-rgb: 46 34 16;
+  --surface-sunk-2: #141b2e;
+  --ink-rgb: 238 240 246;
+  --ink-2-rgb: 197 202 216;
+  --muted-rgb: 143 152 173;
+  --line-rgb: 35 43 64;
+  --line-strong-rgb: 75 85 112;
+  --surface-rgb: 18 24 41;
+  --surface-sunk-rgb: 14 20 36;
+  --surface-sunk-2-rgb: 20 27 46;
+  --indigo-rgb: 79 70 229;
+  --indigo-deep-rgb: 55 48 163;
+  --indigo-text-rgb: 165 160 255;
+  --indigo-soft-rgb: 29 31 74;
+  --on-indigo-rgb: 255 255 255;
+  --night-rgb: 6 9 18;
+  --on-night-rgb: 238 240 246;
+  --eligible-rgb: 61 213 152;
+  --eligible-bg-rgb: 15 42 34;
+  --risk-rgb: 255 138 122;
+  --risk-bg-rgb: 46 20 20;
   --shadow-1: 0 1px 3px rgba(0,0,0,0.4);
   --shadow-2: 0 12px 32px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.3);
 }
@@ -113,14 +153,14 @@
 /* Thin scrollbars for dense panels (kanban columns, filter lists). */
 .thin-scroll {
   scrollbar-width: thin;
-  scrollbar-color: #c6c6ce transparent;
+  scrollbar-color: var(--line-strong) transparent;
 }
 .thin-scroll::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 .thin-scroll::-webkit-scrollbar-thumb {
-  background: #c6c6ce;
+  background: var(--line-strong);
   border-radius: 9999px;
 }
 .thin-scroll::-webkit-scrollbar-track {
@@ -135,7 +175,7 @@
 
 /* Assistant highlight ring: calm navy outline with a soft decaying glow. */
 .assistant-highlight {
-  outline: 2px solid #0b132b;
+  outline: 2px solid var(--indigo);
   outline-offset: 3px;
   border-radius: 0.5rem;
   animation: assistant-ring 2.6s ease-out forwards;
@@ -143,13 +183,13 @@
 
 @keyframes assistant-ring {
   0% {
-    box-shadow: 0 0 0 0 rgba(11, 19, 43, 0.35);
+    box-shadow: 0 0 0 0 rgb(var(--indigo-rgb) / 0.35);
   }
   40% {
-    box-shadow: 0 0 0 6px rgba(11, 19, 43, 0.12);
+    box-shadow: 0 0 0 6px rgb(var(--indigo-rgb) / 0.12);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(11, 19, 43, 0);
+    box-shadow: 0 0 0 0 rgb(var(--indigo-rgb) / 0);
   }
 }
 
@@ -172,7 +212,7 @@
   position: absolute;
   inset: -1px;
   border-radius: 9999px;
-  border: 1px solid #0b132b;
+  border: 1px solid var(--ink);
   opacity: 0;
   pointer-events: none;
 }
@@ -220,10 +260,10 @@
 /* Rich-text document editor (Tiptap/ProseMirror) on the A4 sheet. */
 .doc-editor {
   outline: none;
-  caret-color: #0b132b;
+  caret-color: var(--ink);
   font-size: 14px;
   line-height: 1.6;
-  color: #0b1c30;
+  color: var(--ink);
   overflow-wrap: break-word;
 }
 .doc-editor > *:first-child {
@@ -234,7 +274,7 @@
   line-height: 28px;
   font-weight: 600;
   letter-spacing: -0.02em;
-  color: #0b132b;
+  color: var(--ink);
   margin: 20px 0 8px;
 }
 .doc-editor h2 {
@@ -242,16 +282,16 @@
   line-height: 24px;
   font-weight: 600;
   letter-spacing: -0.015em;
-  color: #0b132b;
+  color: var(--ink);
   margin: 18px 0 6px;
   padding-bottom: 4px;
-  border-bottom: 1px solid #c6c6ce;
+  border-bottom: 1px solid var(--line-strong);
 }
 .doc-editor h3 {
   font-size: 14px;
   line-height: 22px;
   font-weight: 600;
-  color: #0b1c30;
+  color: var(--ink);
   margin: 14px 0 4px;
 }
 .doc-editor p {
@@ -284,13 +324,13 @@
 }
 .doc-editor th,
 .doc-editor td {
-  border: 1px solid #c6c6ce;
+  border: 1px solid var(--line-strong);
   padding: 6px 8px;
   text-align: left;
   vertical-align: top;
 }
 .doc-editor th {
-  background: #eff4ff;
+  background: var(--surface-sunk);
   font-weight: 600;
 }
 .doc-editor strong {

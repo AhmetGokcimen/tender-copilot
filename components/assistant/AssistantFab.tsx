@@ -19,7 +19,7 @@ export function AssistantFab() {
       onClick={() => setOpen(true)}
       title={t('title')}
       aria-label={t('title')}
-      className="fixed bottom-space-lg right-space-lg z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-navy text-white shadow-lg transition-colors hover:bg-navy-deep"
+      className="fixed bottom-space-lg right-space-lg z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-indigo text-on-indigo shadow-lg transition-colors hover:bg-indigo-deep"
     >
       <Icon name="auto_awesome" size="md" />
     </button>

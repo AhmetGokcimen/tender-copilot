@@ -9,20 +9,9 @@ import { qk } from '@/lib/queries';
 import { isValidEmail, registerMockUser } from '@/lib/mock-auth';
 import { useCompanyStore } from '@/stores/useCompanyStore';
 import { Icon } from '@/components/Icon';
-
-const INPUT =
-  'h-11 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-space-sm font-body-md text-body-md text-on-surface outline-none focus:border-navy focus:shadow-[0_0_0_3px_rgba(11,19,43,0.12)]';
-const LABEL = 'flex flex-col gap-1 font-label-md text-label-md font-semibold text-on-surface';
-
-function Shell({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-surface px-margin py-space-xl">
-      <div className="flex w-full max-w-md flex-col gap-space-md rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
-        {children}
-      </div>
-    </div>
-  );
-}
+import { AuthShell } from '@/components/ui/AuthShell';
+import { buttonClass } from '@/components/ui/Button';
+import { INPUT, LABEL } from '@/components/ui/form';
 
 export default function SignupPage() {
   const t = useTranslations('auth');
@@ -37,21 +26,17 @@ export default function SignupPage() {
 
   if (!USE_MOCK) {
     return (
-      <Shell>
-        <h1 className="font-headline-lg text-headline-lg tracking-tight text-on-surface">
-          {t('signupTitle')}
-        </h1>
-        <p className="font-body-md text-body-md text-on-surface-variant">{t('signupSub')}</p>
+      <AuthShell title={t('signupTitle')} subtitle={t('signupSub')}>
         <a
           href={`${API_URL}/auth/google/login`}
-          className="inline-flex h-11 items-center justify-center gap-space-sm rounded-lg bg-navy px-space-lg font-label-md text-label-md font-semibold text-white hover:bg-navy-deep"
+          className={buttonClass()}
         >
           <Icon name="account_circle" size="sm" />
           {t('googleButton')}
         </a>
         <a
           href={`${API_URL}/auth/demo`}
-          className="inline-flex h-11 items-center justify-center gap-space-sm rounded-lg border border-outline-variant px-space-lg font-label-md text-label-md font-semibold text-on-surface hover:bg-surface-container-high"
+          className={buttonClass({ variant: 'secondary' })}
         >
           <Icon name="bolt" size="sm" />
           {t('demoButton')}
@@ -59,11 +44,11 @@ export default function SignupPage() {
         <p className="font-body-sm text-body-sm text-on-surface-variant">{t('emailUnavailable')}</p>
         <p className="text-center font-body-md text-body-md text-on-surface-variant">
           {t('haveAccount')}{' '}
-          <Link href="/auth/login" className="font-semibold text-navy hover:underline">
+          <Link href="/auth/login" className="font-medium text-indigo-text hover:underline">
             {t('signinButton')}
           </Link>
         </p>
-      </Shell>
+      </AuthShell>
     );
   }
 
@@ -91,11 +76,7 @@ export default function SignupPage() {
   };
 
   return (
-    <Shell>
-      <h1 className="font-headline-lg text-headline-lg tracking-tight text-on-surface">
-        {t('signupTitle')}
-      </h1>
-      <p className="font-body-md text-body-md text-on-surface-variant">{t('signupSub')}</p>
+    <AuthShell title={t('signupTitle')} subtitle={t('signupSub')}>
       <label className={LABEL}>
         {t('nameLabel')}
         <input
@@ -154,7 +135,7 @@ export default function SignupPage() {
         onClick={submit}
         disabled={busy}
         data-assistant="signup-submit"
-        className="inline-flex h-11 items-center justify-center gap-space-sm rounded-lg bg-navy px-space-lg font-label-md text-label-md font-semibold text-white hover:bg-navy-deep disabled:opacity-50"
+        className={buttonClass()}
       >
         <Icon name="person_add" size="sm" />
         {t('signupButton')}
@@ -162,10 +143,10 @@ export default function SignupPage() {
       <p className="font-body-sm text-body-sm text-on-surface-variant">{t('mockNote')}</p>
       <p className="text-center font-body-md text-body-md text-on-surface-variant">
         {t('haveAccount')}{' '}
-        <Link href="/auth/login" className="font-semibold text-navy hover:underline">
+        <Link href="/auth/login" className="font-medium text-indigo-text hover:underline">
           {t('signinButton')}
         </Link>
       </p>
-    </Shell>
+    </AuthShell>
   );
 }

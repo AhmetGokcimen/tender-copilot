@@ -13,8 +13,8 @@ const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayout
  */
 function tone(score: number | null): string {
   if (score === null) return 'border-outline-variant bg-transparent text-on-surface-variant';
-  if (score >= 85) return 'border-navy bg-navy text-white';
-  if (score >= 70) return 'border-navy/30 bg-navy/10 text-navy';
+  if (score >= 85) return 'border-indigo bg-indigo text-on-indigo';
+  if (score >= 70) return 'border-indigo/30 bg-indigo-soft text-indigo-text';
   return 'border-outline-variant bg-transparent text-on-surface-variant';
 }
 

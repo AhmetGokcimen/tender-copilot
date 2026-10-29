@@ -103,7 +103,7 @@ export function TenderCard({ tender }: { tender: TenderWithState }) {
             </button>
             <Link
               href={`/app/tenders/${tender.external_id}`}
-              className="inline-flex h-9 items-center gap-1 rounded bg-navy px-space-md font-label-md text-label-md text-white transition-colors hover:bg-navy-deep"
+              className="inline-flex h-9 items-center gap-1 rounded-pill border border-line-strong bg-raised px-space-md font-label-md text-label-md text-ink transition-colors hover:border-indigo hover:text-indigo-text"
             >
               {t('viewAnalysis')}
               <Icon name="arrow_forward" size="sm" />

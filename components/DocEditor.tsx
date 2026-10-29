@@ -197,7 +197,7 @@ export function DocEditor({
           type="button"
           data-assistant="workspace-ask-ai"
           onClick={onAskAi}
-          className="flex h-9 items-center gap-space-xs rounded-lg border border-navy/40 px-space-sm font-label-md text-label-md text-navy transition-colors hover:bg-navy hover:text-white"
+          className="flex h-9 items-center gap-space-xs rounded-pill border border-navy/40 px-space-sm font-label-md text-label-md text-navy transition-colors hover:bg-indigo hover:text-on-indigo"
         >
           <Icon name="auto_awesome" size="sm" />
           {t('askAi')}
@@ -229,7 +229,7 @@ export function DocEditor({
         ref={sheetRef}
         data-assistant="workspace-editor"
         style={sheetW > 0 ? { minHeight: sheetW * A4_RATIO } : undefined}
-        className="relative rounded-[3px] border border-outline-variant bg-white px-[10%] py-[8%] shadow-[0_2px_16px_rgba(11,19,43,0.14)]"
+        className="relative rounded-[3px] border border-outline-variant bg-white px-[10%] py-[8%] shadow-lift-2"
       >
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
           {sheetW > 0 &&

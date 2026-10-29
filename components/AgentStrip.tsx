@@ -41,20 +41,20 @@ function NodeGlyph({ state }: { state: AgentState }) {
   if (state === 'active') {
     return (
       <svg width={dim} height={dim} viewBox="0 0 20 20" aria-hidden className="block">
-        <circle cx="10" cy="10" r="8" fill="none" stroke="rgba(11,19,43,0.25)" strokeWidth="1" />
+        <circle cx="10" cy="10" r="8" fill="none" stroke="var(--line-strong)" strokeWidth="1" />
         <g className="agent-ring-rotor">
           <circle
             cx="10"
             cy="10"
             r="8"
             fill="none"
-            stroke="#0B132B"
+            stroke="var(--indigo)"
             strokeWidth="1"
             strokeDasharray="14 36.3"
             strokeLinecap="round"
           />
         </g>
-        <circle cx="10" cy="10" r="2" fill="#0B132B" />
+        <circle cx="10" cy="10" r="2" fill="var(--indigo)" />
       </svg>
     );
   }

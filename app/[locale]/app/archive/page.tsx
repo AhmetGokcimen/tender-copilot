@@ -120,7 +120,7 @@ export default function ArchivePage() {
           <button
             type="button"
             onClick={() => setFormOpen((v) => !v)}
-            className="inline-flex h-9 items-center gap-space-xs rounded bg-navy px-space-md font-label-md text-label-md text-white hover:bg-navy-deep"
+            className="inline-flex h-9 items-center gap-space-xs rounded-pill bg-indigo px-space-md font-label-md text-label-md text-on-indigo hover:bg-indigo-deep"
           >
             <Icon name="add" size="sm" />
             {t('addCert')}
@@ -152,7 +152,7 @@ export default function ArchivePage() {
                 setValidUntil('');
                 setFormOpen(false);
               }}
-              className="h-9 rounded bg-navy px-space-md font-label-md text-label-md text-white disabled:opacity-50"
+              className="h-9 rounded-pill bg-indigo px-space-md font-label-md text-label-md text-on-indigo disabled:opacity-50"
             >
               {t('addCert')}
             </button>

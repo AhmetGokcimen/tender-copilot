@@ -12,12 +12,12 @@ import type { DocType } from '@/stores/useGeneratorStore';
 import { DOC_TITLES } from '@/lib/draft-template';
 import { formatDate } from '@/lib/format';
 
-const NAVY = '#0B132B';
-const INK = '#0B1C30';
-const MUTED = '#45464D';
-const FAINT = '#76767E';
-const RULE = '#C6C6CE';
-const TINT = '#EFF4FF';
+const NAVY = '#0B1020';
+const INK = '#0B1020';
+const MUTED = '#2A3245';
+const FAINT = '#5B6478';
+const RULE = '#E3E6ED';
+const TINT = '#EEF0F5';
 
 const styles = StyleSheet.create({
   // NOTE: no lineHeight here — a page-level lineHeight silently drops fixed

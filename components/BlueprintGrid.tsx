@@ -11,7 +11,7 @@ export function BlueprintGrid() {
             <path
               d="M 28 0 L 0 0 0 28"
               fill="none"
-              stroke="#0B132B"
+              stroke="var(--ink)"
               strokeOpacity="0.035"
               strokeWidth="1"
             />

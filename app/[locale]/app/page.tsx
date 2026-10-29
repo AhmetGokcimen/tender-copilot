@@ -45,6 +45,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { Icon } from '@/components/Icon';
 import { daysUntil, formatRON } from '@/lib/format';
 import type { ProcedureType, TenderWithState } from '@/lib/types';
+import { INPUT_COMPACT } from '@/components/ui/form';
 
 function download(filename: string, content: string, mime: string) {
   const blob = new Blob([content], { type: mime });
@@ -77,8 +78,6 @@ function toCsv(rows: TenderWithState[]): string {
   return [head, ...lines].join('\n');
 }
 
-const INPUT =
-  'h-9 w-full rounded border border-outline-variant bg-surface-container-lowest px-space-sm font-body-md text-body-md text-on-surface outline-none transition-colors placeholder:text-on-surface-variant focus:border-navy focus:shadow-[0_0_0_3px_rgba(11,19,43,0.12)]';
 const LABEL = 'font-label-md text-label-md font-semibold text-on-surface';
 
 const PROCEDURES: (ProcedureType | '')[] = ['', 'open', 'restricted', 'negotiated', 'direct', 'framework'];
@@ -161,7 +160,7 @@ export default function OpportunitiesPage() {
               type="button"
               data-assistant="feed-refresh"
               onClick={() => refetch()}
-              className="flex h-9 items-center gap-space-xs rounded bg-navy px-space-md font-label-md text-label-md text-white transition-colors hover:bg-navy-deep"
+              className="flex h-9 items-center gap-space-xs rounded-pill bg-indigo px-space-md font-label-md text-label-md text-on-indigo transition-colors hover:bg-indigo-deep"
             >
               <Icon name="sync" size="sm" className={isFetching ? 'animate-spin' : ''} />
               <span>{t('refresh')}</span>
@@ -238,11 +237,11 @@ export default function OpportunitiesPage() {
           </div>
           <div className="flex flex-col gap-space-xs">
             <label htmlFor="f-search" className={LABEL}>{t('searchLabel')}</label>
-            <input data-assistant="filters-search" id="f-search" className={INPUT} placeholder={t('searchPlaceholder')} value={f.search} onChange={(e) => f.set({ search: e.target.value })} />
+            <input data-assistant="filters-search" id="f-search" className={INPUT_COMPACT} placeholder={t('searchPlaceholder')} value={f.search} onChange={(e) => f.set({ search: e.target.value })} />
           </div>
           <div className="flex flex-col gap-space-xs">
             <label htmlFor="f-county" className={LABEL}>{t('region')}</label>
-            <select id="f-county" className={INPUT} value={f.county} onChange={(e) => f.set({ county: e.target.value })}>
+            <select id="f-county" className={INPUT_COMPACT} value={f.county} onChange={(e) => f.set({ county: e.target.value })}>
               <option value="">{tc('all')}</option>
               {counties.map((c) => (
                 <option key={c} value={c}>{c}</option>
@@ -251,7 +250,7 @@ export default function OpportunitiesPage() {
           </div>
           <div className="flex flex-col gap-space-xs">
             <label htmlFor="f-proc" className={LABEL}>{t('procedure')}</label>
-            <select id="f-proc" className={INPUT} value={f.procedure} onChange={(e) => f.set({ procedure: e.target.value as ProcedureType | '' })}>
+            <select id="f-proc" className={INPUT_COMPACT} value={f.procedure} onChange={(e) => f.set({ procedure: e.target.value as ProcedureType | '' })}>
               {PROCEDURES.map((p) => (
                 <option key={p || 'all'} value={p}>{p === '' ? '—' : tp(p)}</option>
               ))}
@@ -259,7 +258,7 @@ export default function OpportunitiesPage() {
           </div>
           <div className="flex flex-col gap-space-xs">
             <label htmlFor="f-value" className={LABEL}>{t('minValue')}</label>
-            <input id="f-value" type="number" min={0} step={50000} className={`${INPUT} tnum`} placeholder="0" value={f.minValue ?? ''} onChange={(e) => f.set({ minValue: e.target.value === '' ? null : Number(e.target.value) })} />
+            <input id="f-value" type="number" min={0} step={50000} className={`${INPUT_COMPACT} tnum`} placeholder="0" value={f.minValue ?? ''} onChange={(e) => f.set({ minValue: e.target.value === '' ? null : Number(e.target.value) })} />
           </div>
           <div className="flex flex-col gap-space-xs">
             <label htmlFor="f-score" className={`${LABEL} flex items-center justify-between`}>
@@ -270,7 +269,7 @@ export default function OpportunitiesPage() {
           </div>
           <div className="flex flex-col gap-space-xs">
             <label htmlFor="f-cpv" className={LABEL}>{t('cpv')}</label>
-            <input id="f-cpv" className={`${INPUT} tnum font-code-sm`} placeholder={t('cpvPlaceholder')} value={f.cpv} onChange={(e) => f.set({ cpv: e.target.value })} />
+            <input id="f-cpv" className={`${INPUT_COMPACT} tnum font-code-sm`} placeholder={t('cpvPlaceholder')} value={f.cpv} onChange={(e) => f.set({ cpv: e.target.value })} />
           </div>
           <CheckboxRow
             id="f-eligible"
@@ -308,7 +307,7 @@ export default function OpportunitiesPage() {
                 <button
                   type="button"
                   onClick={() => refetch()}
-                  className="h-9 rounded bg-navy px-space-md font-label-md text-label-md text-white hover:bg-navy-deep"
+                  className="h-9 rounded-pill bg-indigo px-space-md font-label-md text-label-md text-on-indigo hover:bg-indigo-deep"
                 >
                   {tc('retry')}
                 </button>
@@ -323,7 +322,7 @@ export default function OpportunitiesPage() {
                 <button
                   type="button"
                   onClick={() => refetch()}
-                  className="inline-flex h-9 items-center gap-space-xs rounded bg-navy px-space-md font-label-md text-label-md text-white hover:bg-navy-deep"
+                  className="inline-flex h-9 items-center gap-space-xs rounded-pill bg-indigo px-space-md font-label-md text-label-md text-on-indigo hover:bg-indigo-deep"
                 >
                   <Icon name="sync" size="sm" />
                   {t('refresh')}

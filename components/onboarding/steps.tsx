@@ -7,12 +7,9 @@ import type { CompanyOptions } from '@/lib/types';
 import { cpvLabel, searchCpv } from '@/lib/cpv';
 import { CheckboxRow } from '@/components/CheckboxRow';
 import { Icon } from '@/components/Icon';
+import { INPUT, LABEL } from '@/components/ui/form';
 
-export const INPUT =
-  'h-10 w-full rounded border border-outline-variant bg-surface-container-lowest px-space-sm font-body-md text-body-md text-on-surface outline-none focus:border-navy focus:shadow-[0_0_0_3px_rgba(11,19,43,0.12)]';
-
-export const LABEL =
-  'flex flex-col gap-1 font-label-md text-label-md font-semibold text-on-surface';
+export { INPUT, LABEL } from '@/components/ui/form';
 
 function Hint({ children }: { children: React.ReactNode }) {
   return (
@@ -70,14 +67,14 @@ export function ChipInput({
           {values.map((v) => (
             <span
               key={v}
-              className="chip-in inline-flex items-center gap-1 rounded-full bg-navy px-space-sm py-1 font-body-sm text-body-sm text-white"
+              className="chip-in inline-flex items-center gap-1 rounded-pill bg-indigo-soft px-3 py-1 text-[13px] text-indigo-text"
             >
               {v}
               <button
                 type="button"
                 aria-label={`${t('chipRemove')}: ${v}`}
                 onClick={() => onChange(values.filter((x) => x !== v))}
-                className="flex h-4 w-4 items-center justify-center rounded-full text-white/80 hover:bg-white/20 hover:text-white"
+                className="flex h-4 w-4 items-center justify-center rounded-full text-indigo-text/70 hover:bg-indigo/10 hover:text-indigo-text"
               >
                 <Icon name="close" size="xs" />
               </button>
@@ -112,7 +109,7 @@ export function ChipInput({
               key={s}
               type="button"
               onClick={() => add(s)}
-              className="rounded-full border border-outline-variant px-space-sm py-1 font-body-sm text-body-sm text-on-surface-variant transition-colors hover:border-navy hover:text-navy"
+              className="rounded-pill border border-line px-3 py-1 text-[13px] text-muted transition-colors hover:border-indigo hover:text-indigo-text"
             >
               + {s}
             </button>
@@ -370,8 +367,8 @@ export function TenderPrefsStep({
                   className={clsx(
                     'flex items-center gap-space-sm rounded-lg border px-space-sm py-space-sm text-left font-body-md text-body-md transition-all duration-150',
                     active
-                      ? 'border-navy bg-navy font-semibold text-white'
-                      : 'border-outline-variant bg-surface-container-lowest text-on-surface hover:-translate-y-0.5 hover:border-navy hover:shadow-sm',
+                      ? 'border-indigo bg-indigo-soft font-semibold text-indigo-text'
+                      : 'border-outline-variant bg-surface-container-lowest text-on-surface hover:-translate-y-0.5 hover:border-indigo hover:shadow-lift-1',
                   )}
                 >
                   <Icon
@@ -397,7 +394,7 @@ export function TenderPrefsStep({
             type="button"
             onClick={() => onManual(!manual)}
             aria-pressed={manual}
-            className="font-body-sm text-body-sm font-semibold text-navy hover:underline"
+            className="font-body-sm text-body-sm font-medium text-indigo-text hover:underline"
           >
             {manual ? t('cpvGuided') : t('cpvManual')}
           </button>
@@ -430,9 +427,9 @@ export function TenderPrefsStep({
                         onClick={() => onAddManualCpv(code)}
                         className="flex w-full items-center gap-space-sm px-space-sm py-space-xs text-left font-body-md text-body-md text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-50"
                       >
-                        <span className="tnum font-semibold text-navy">{code}</span>
+                        <span className="tnum font-semibold text-indigo-text">{code}</span>
                         <span className="flex-1 text-on-surface-variant">{cpvLabel(code)}</span>
-                        {picked && <Icon name="check" size="sm" className="text-navy" />}
+                        {picked && <Icon name="check" size="sm" className="text-indigo-text" />}
                       </button>
                     </li>
                   );
@@ -464,7 +461,7 @@ export function TenderPrefsStep({
               {[...cpv].sort().map((code) => (
                 <span
                   key={code}
-                  className="chip-in inline-flex items-center gap-1 rounded-full bg-surface-container-high px-space-sm py-1 font-body-sm text-body-sm text-on-surface"
+                  className="chip-in inline-flex items-center gap-1 rounded-pill bg-sunk px-3 py-1 text-[13px] text-ink"
                 >
                   <span className="tnum font-semibold">{code}</span>
                   <button
@@ -567,7 +564,7 @@ export function ReviewStep({
             <button
               type="button"
               onClick={() => onJump(row.step)}
-              className="font-body-sm text-body-sm font-semibold text-navy hover:underline"
+              className="font-body-sm text-body-sm font-medium text-indigo-text hover:underline"
             >
               {t('reviewEdit')}
             </button>
@@ -598,7 +595,7 @@ export function OnboardingProgress({
       <div className="relative flex items-center justify-between" aria-hidden>
         <div className="absolute left-0 right-0 top-1/2 h-0.5 -translate-y-1/2 rounded bg-surface-container-high" />
         <div
-          className="absolute left-0 top-1/2 h-0.5 -translate-y-1/2 rounded bg-navy transition-all duration-300 ease-out"
+          className="absolute left-0 top-1/2 h-0.5 -translate-y-1/2 rounded bg-indigo transition-all duration-300 ease-out"
           style={{ width: `${(step / (titles.length - 1)) * 100}%` }}
         />
         {titles.map((title, i) => (
@@ -607,13 +604,13 @@ export function OnboardingProgress({
             title={title}
             className={clsx(
               'relative z-10 flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors duration-300',
-              i < step && 'border-navy bg-navy text-white',
-              i === step && 'border-navy bg-surface-container-lowest',
+              i < step && 'border-indigo bg-indigo text-on-indigo',
+              i === step && 'border-indigo bg-raised',
               i > step && 'border-outline-variant bg-surface-container-lowest',
             )}
           >
             {i < step && <Icon name="check" size="xs" />}
-            {i === step && <span className="h-2 w-2 rounded-full bg-navy" />}
+            {i === step && <span className="h-2 w-2 rounded-full bg-indigo" />}
           </span>
         ))}
       </div>
@@ -640,7 +637,7 @@ export function SetupInterstitial() {
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-surface/95 px-margin">
       <div className="flex w-full max-w-sm flex-col items-center gap-space-md rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
         <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-surface-container-high">
-          <div className="setup-sweep absolute inset-0 rounded-full bg-navy" />
+          <div className="setup-sweep absolute inset-0 rounded-full bg-indigo" />
         </div>
         <p className="font-body-md text-body-md text-on-surface-variant">{t('setupTitle')}</p>
       </div>

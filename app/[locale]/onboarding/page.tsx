@@ -14,6 +14,8 @@ import { USE_MOCK } from '@/lib/api';
 import { getMockSession } from '@/lib/mock-auth';
 import { useFilterStore } from '@/stores/useFilterStore';
 import { Icon } from '@/components/Icon';
+import { Logo } from '@/components/brand/Logo';
+import { buttonClass } from '@/components/ui/Button';
 import type { CompanyPatch, CompanyProfile } from '@/lib/types';
 import {
   CapacityStep,
@@ -221,8 +223,11 @@ export default function OnboardingPage() {
     <div className="flex min-h-screen items-start justify-center bg-surface px-margin py-space-xl">
       {finishing && <SetupInterstitial />}
       <div className="flex w-full max-w-2xl flex-col gap-space-lg">
+        <Link href="/" aria-label="Lichit home" className="self-start">
+          <Logo />
+        </Link>
         <header className="flex flex-col gap-space-xs">
-          <h1 className="font-headline-lg text-headline-lg tracking-tight text-on-surface">
+          <h1 className="text-[32px] font-light leading-[38px] tracking-[-1px] text-ink">
             {t('title')}
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant">{t('subtitle')}</p>
@@ -297,13 +302,13 @@ export default function OnboardingPage() {
             </p>
           )}
 
-          <div className="flex items-center gap-space-md pt-space-xs">
+          <div className="flex flex-wrap items-center gap-space-md pt-space-xs">
             <button
               type="button"
               onClick={() => go(step - 1)}
               disabled={step === 0 || saving || finishing}
               data-assistant="ob-back"
-              className="inline-flex h-10 items-center rounded border border-outline-variant px-space-md font-label-md text-label-md font-semibold text-on-surface hover:bg-surface-container-high disabled:opacity-50"
+              className={buttonClass({ variant: 'secondary' })}
             >
               {t('back')}
             </button>
@@ -312,7 +317,7 @@ export default function OnboardingPage() {
               onClick={next}
               disabled={!stepValid(step, draft) || saving || finishing}
               data-assistant="ob-next"
-              className="inline-flex h-10 items-center gap-space-sm rounded bg-navy px-space-lg font-label-md text-label-md font-semibold text-white hover:bg-navy-deep disabled:opacity-50"
+              className={buttonClass()}
             >
               {saving ? t('saving') : last ? t('confirm') : t('next')}
             </button>

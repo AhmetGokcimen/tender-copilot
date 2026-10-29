@@ -262,7 +262,7 @@ export function AssistantPanel() {
                   acceptRevision();
                   appendAi(t('revisionApplied'));
                 }}
-                className="h-8 rounded bg-navy px-space-sm font-label-md text-label-md text-white hover:bg-navy-deep"
+                className="h-8 rounded-pill bg-indigo px-space-sm font-label-md text-label-md text-on-indigo hover:bg-indigo-deep"
               >
                 {t('accept')}
               </button>
@@ -302,7 +302,7 @@ export function AssistantPanel() {
           type="submit"
           disabled={sending || !draft.trim()}
           title={t('send')}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-navy text-white hover:bg-navy-deep disabled:opacity-50"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-pill bg-indigo text-on-indigo hover:bg-indigo-deep disabled:opacity-50"
         >
           <Icon name="send" size="sm" />
         </button>
