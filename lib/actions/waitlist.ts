@@ -1,14 +1,16 @@
 'use server';
 
+import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from '@/lib/supabase-public';
+
 export type WaitlistResult = { status: 'ok' | 'invalid' | 'error' };
 
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 /**
  * Adds an email to the Supabase `waitlist` table through PostgREST with the
- * service role key (server only; the table has RLS on and no public policy).
- * A duplicate email is ignored and still reported as success, so the form
- * never reveals who already signed up. The hidden `company_website` field is
+ * publishable key. RLS lets anon INSERT only (no read, update or delete),
+ * so the list itself stays private. A duplicate email is ignored and still
+ * reported as success, so the form never reveals who already signed up. The hidden `company_website` field is
  * a honeypot: bots that fill it get a fake success and nothing is stored.
  */
 export async function joinWaitlist(formData: FormData): Promise<WaitlistResult> {
@@ -19,29 +21,23 @@ export async function joinWaitlist(formData: FormData): Promise<WaitlistResult> 
     .toLowerCase();
   if (!EMAIL.test(email) || email.length > 254) return { status: 'invalid' };
 
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) {
-    console.error('waitlist: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is not set');
-    return { status: 'error' };
-  }
-
-  const res = await fetch(`${url}/rest/v1/waitlist?on_conflict=email`, {
+  // Plain INSERT: ON CONFLICT would need a SELECT policy, which would make
+  // the list readable. A duplicate surfaces as 409 (unique violation).
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/waitlist`, {
     method: 'POST',
     headers: {
-      apikey: key,
-      Authorization: `Bearer ${key}`,
+      apikey: SUPABASE_PUBLISHABLE_KEY,
       'Content-Type': 'application/json',
-      Prefer: 'resolution=ignore-duplicates,return=minimal',
+      Prefer: 'return=minimal',
     },
     body: JSON.stringify({
       email,
       locale: String(formData.get('locale') ?? 'en').slice(0, 8),
-      source: String(formData.get('source') ?? 'landing').slice(0, 32),
+      source: formData.get('source') === 'closing' ? 'closing' : 'hero',
     }),
     cache: 'no-store',
   });
-  if (!res.ok) {
+  if (!res.ok && res.status !== 409) {
     console.error('waitlist: insert failed', res.status, await res.text().catch(() => ''));
     return { status: 'error' };
   }
