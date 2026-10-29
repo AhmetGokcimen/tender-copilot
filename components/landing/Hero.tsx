@@ -1,125 +1,76 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/routing';
-import { MatchChip } from '../MatchChip';
-import { EligibilityChip } from '../EligibilityChip';
-import { AmbientOrbs } from './AmbientOrbs';
+import { SignalStage } from './SignalStage';
+import { TiltCard } from './TiltCard';
+import { WaitlistForm } from './WaitlistForm';
 
-/**
- * HERO BACKGROUND SLOT — drop the generated background video URL here.
- * Full-bleed, covered, with a solid dark overlay for text readability.
- */
-export const HERO_VIDEO_SRC: string | null = null;
-export const HERO_POSTER_SRC: string | null = null;
-
-function HeroMedia() {
-  return (
-    <div className="absolute inset-0 overflow-hidden bg-navy" aria-hidden>
-      {HERO_VIDEO_SRC ? (
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster={HERO_POSTER_SRC ?? undefined}
-          className="h-full w-full object-cover"
-        >
-          <source src={HERO_VIDEO_SRC} type="video/mp4" />
-        </video>
-      ) : (
-        <div className="dot-grid h-full w-full" />
-      )}
-      {/* Readability overlay (solid, no gradient wash) */}
-      <div className="absolute inset-0 bg-navy/75" />
-    </div>
-  );
-}
-
-/**
- * Live miniature of the match-score → eligibility flow. MatchChip counts
- * up on mount (once); the verdict and reasons join in stages after it.
- * Reduced-motion users get the final state immediately.
- */
-function HeroScoreCard() {
+/** Example tender at the end of the ribbon. Labelled "Example" on the card. */
+function HeroCard() {
   const t = useTranslations('landing');
-  const [stage, setStage] = useState(0);
-
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setStage(2);
-      return;
-    }
-    const timers = [
-      window.setTimeout(() => setStage(1), 750),
-      window.setTimeout(() => setStage(2), 1350),
-    ];
-    return () => timers.forEach((id) => window.clearTimeout(id));
-  }, []);
-
+  const checks = [t('cardCheck1'), t('cardCheck2'), t('cardCheck3')];
   return (
-    <div
-      data-assistant="hero-score-card"
-      className="flex w-full max-w-sm flex-col gap-space-sm rounded-xl bg-white p-space-lg text-on-surface shadow-2xl"
-    >
-      <div className="flex items-center justify-between gap-space-sm">
-        <span className="tnum font-code-sm text-code-sm text-on-surface-variant">CN1064821</span>
-        <MatchChip score={92} />
+    <TiltCard className="w-[300px] rounded-card border border-line bg-raised p-5 shadow-lift-2">
+      <div className="flex justify-between font-mono text-[12px] font-medium text-muted">
+        <span>CN1071284</span>
+        <span>{t('cardExample')}</span>
       </div>
-      <p className="font-headline-sm text-headline-sm font-semibold">{t('heroCardTitle')}</p>
-      <div
-        className={`transition-opacity duration-300 ${stage >= 1 ? 'opacity-100' : 'opacity-0'}`}
-      >
-        {stage >= 1 && <EligibilityChip eligible={true} label={t('heroCardEligible')} />}
-      </div>
-      <ul
-        className={`flex flex-col gap-1 transition-opacity duration-300 ${stage >= 2 ? 'opacity-100' : 'opacity-0'}`}
-      >
-        {[t('heroCardReason1'), t('heroCardReason2')].map((r) => (
-          <li key={r} className="flex items-start gap-space-xs font-body-sm text-body-sm text-on-surface-variant">
-            <span aria-hidden className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
-            {r}
+      <p className="mt-2.5 text-[17px] font-medium tracking-[-0.2px] text-ink">{t('cardTitle')}</p>
+      <p className="mt-0.5 text-[13px] text-muted">{t('cardBuyer')}</p>
+      <dl className="mt-3.5 flex gap-5 font-mono text-[13px] font-medium text-ink">
+        <div>
+          <dt className="mb-0.5 font-sans text-[11px] font-normal text-muted">{t('cardValue')}</dt>
+          <dd>RON 412,000</dd>
+        </div>
+        <div>
+          <dt className="mb-0.5 font-sans text-[11px] font-normal text-muted">{t('cardDeadline')}</dt>
+          <dd>14 Nov</dd>
+        </div>
+      </dl>
+      <span className="mt-3.5 inline-flex rounded-pill bg-eligible-bg px-2.5 py-1 text-[12px] font-semibold text-eligible">
+        {t('cardEligible')}
+      </span>
+      <ul className="mt-3 grid gap-[7px]">
+        {checks.map((c, i) => (
+          <li
+            key={c}
+            className="tilt-check flex gap-2 text-[13px] text-ink-2"
+            style={{ transitionDelay: `${i * 120}ms` }}
+          >
+            <span aria-hidden className="font-semibold text-eligible">
+              ✓
+            </span>
+            {c}
           </li>
         ))}
       </ul>
-    </div>
+    </TiltCard>
   );
 }
 
 export function Hero() {
   const t = useTranslations('landing');
   return (
-    <section id="top" className="relative overflow-hidden text-white">
-      <HeroMedia />
-      <AmbientOrbs variant="hero" />
-      <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-space-lg px-margin py-24 lg:grid-cols-[1.05fr_0.95fr] lg:px-margin-desktop lg:py-32">
-        <div className="flex flex-col items-start gap-space-md">
-          <h1
-            data-assistant="hero-title"
-            className="max-w-2xl text-5xl font-bold leading-[1.05] tracking-tight md:text-6xl"
-          >
-            {t('heroTitle')}
+    <section id="top" className="relative overflow-hidden">
+      <div className="mx-auto grid min-h-[calc(100dvh-68px)] max-w-[1200px] grid-cols-1 items-center gap-10 px-4 py-14 md:px-8 lg:min-h-[620px] lg:grid-cols-[minmax(0,560px)_1fr] lg:gap-6 lg:py-0">
+        <div id="waitlist" className="relative z-10 scroll-mt-24">
+          <h1 className="text-[40px] font-light leading-[1.08] tracking-[-1.4px] text-ink md:text-[56px] md:leading-[60px] md:tracking-[-2px]">
+            {t('heroTitleA')} <span className="text-muted">{t('heroTitleB')}</span>
           </h1>
-          <p className="max-w-xl font-body-lg text-body-lg text-white/80">{t('heroSub')}</p>
-          <div className="mt-space-sm flex flex-wrap items-center gap-space-sm">
-            <Link
-              href="/auth/signup"
-              data-assistant="hero-get-started"
-              className="inline-flex h-11 items-center rounded-lg bg-white px-space-lg font-label-md text-label-md font-semibold text-navy hover:bg-surface-container-high"
-            >
-              {t('getStarted')}
-            </Link>
-            <a
-              href="#how"
-              className="inline-flex h-11 items-center rounded-lg border border-white/40 px-space-lg font-label-md text-label-md text-white hover:bg-white/10"
-            >
-              {t('seeHow')}
-            </a>
+          <p className="mt-5 max-w-[470px] text-[17px] leading-[27px] text-ink-2 md:text-[19px] md:leading-[29px]">
+            {t('heroSub')}
+          </p>
+          <div className="mt-8">
+            <WaitlistForm source="hero" />
           </div>
         </div>
-        <div className="flex justify-start lg:justify-end">
-          <HeroScoreCard />
+        <div className="hidden lg:block">
+          <SignalStage>
+            <HeroCard />
+          </SignalStage>
+        </div>
+        <div className="flex justify-center lg:hidden">
+          <HeroCard />
         </div>
       </div>
     </section>

@@ -3,12 +3,15 @@
 import { useTranslations } from 'next-intl';
 import { Icon } from '../Icon';
 import { useAssistantStore } from '@/stores/useAssistantStore';
+import { usePathname } from '@/i18n/routing';
 
 export function AssistantFab() {
   const t = useTranslations('assistant');
   const open = useAssistantStore((s) => s.open);
   const setOpen = useAssistantStore((s) => s.setOpen);
-  if (open) return null;
+  const pathname = usePathname();
+  // The marketing landing page keeps a single call to action: the waitlist.
+  if (open || pathname === '/') return null;
   return (
     <button
       type="button"

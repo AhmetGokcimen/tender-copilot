@@ -5,6 +5,84 @@
 :root {
   /* Desktop sidebar width (JS-synced with the collapse toggle). */
   --sbw: 4rem;
+
+  /* Lichit brand tokens (source: Lichit Design System, tokens.json). */
+  --paper: #f7f8fa;
+  --surface: #ffffff;
+  --surface-sunk: #eef0f5;
+  --ink: #0b1020;
+  --ink-2: #2a3245;
+  --muted: #5b6478;
+  --line: #e3e6ed;
+  --line-strong: #8a93a8;
+  --indigo: #4f46e5;
+  --indigo-deep: #3730a3;
+  --indigo-text: #4338ca;
+  --indigo-soft: #eef0ff;
+  --on-indigo: #ffffff;
+  --ribbon-1: #4f46e5;
+  --ribbon-2: #8b5cf6;
+  --ribbon-3: #ff6b5a;
+  --ribbon-4: #ffb020;
+  --night: #0b1020;
+  --on-night: #eef0f6;
+  --eligible: #067a52;
+  --eligible-bg: #e5f6ee;
+  --warn: #a14306;
+  --warn-bg: #fff3e0;
+  --risk: #c4320a;
+  --risk-bg: #fdecea;
+  /* RGB channels for colors used with Tailwind opacity modifiers. */
+  --paper-rgb: 247 248 250;
+  --warn-rgb: 161 67 6;
+  --warn-bg-rgb: 255 243 224;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-24: 96px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --radius-pill: 9999px;
+  --shadow-1: 0 1px 3px rgba(16,24,64,0.08);
+  --shadow-2: 0 12px 32px rgba(16,24,64,0.10), 0 2px 6px rgba(16,24,64,0.05);
+}
+
+/* Dark theme tokens. Opt-in via data-theme; the marketing site stays light. */
+[data-theme='dark'] {
+  --paper: #0b1020;
+  --surface: #121829;
+  --surface-sunk: #0e1424;
+  --ink: #eef0f6;
+  --ink-2: #c5cad8;
+  --muted: #8f98ad;
+  --line: #232b40;
+  --line-strong: #4b5570;
+  --indigo: #4f46e5;
+  --indigo-deep: #3730a3;
+  --indigo-text: #a5a0ff;
+  --indigo-soft: #1d1f4a;
+  --on-indigo: #ffffff;
+  --ribbon-1: #6d66ff;
+  --ribbon-2: #9b7bff;
+  --ribbon-3: #ff7d6e;
+  --ribbon-4: #ffbe45;
+  --night: #060912;
+  --on-night: #eef0f6;
+  --eligible: #3dd598;
+  --eligible-bg: #0f2a22;
+  --warn: #f7b955;
+  --warn-bg: #2e2210;
+  --risk: #ff8a7a;
+  --risk-bg: #2e1414;
+  --paper-rgb: 11 16 32;
+  --warn-rgb: 247 185 85;
+  --warn-bg-rgb: 46 34 16;
+  --shadow-1: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-2: 0 12px 32px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.3);
 }
 
 @layer base {
@@ -321,5 +399,120 @@
   .orb-b,
   .orb-c {
     animation: none;
+  }
+}
+
+/* ---------- Lichit landing: pointer-driven micro-interactions ---------- */
+
+/* Match node pulse where the ribbon strands meet the hero card. */
+@keyframes signal-ping {
+  from {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}
+.signal-ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: signal-ping 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+/* Hero card: tilts toward the cursor (vars set in TiltCard), checks tick in on hover. */
+.tilt-card {
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.tilt-card .tilt-check {
+  opacity: 0.35;
+  transform: translateX(-4px);
+  transition:
+    opacity 0.35s,
+    transform 0.35s;
+}
+.tilt-card[data-on='true'] .tilt-check {
+  opacity: 1;
+  transform: none;
+}
+
+/* Spotlight border: a 1px indigo glow follows the cursor along the card edge. */
+.spotlight {
+  position: relative;
+  isolation: isolate;
+}
+.spotlight::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(260px circle at var(--x, -300px) var(--y, -300px), var(--indigo), transparent 70%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  z-index: -1;
+}
+.spotlight:hover::before {
+  opacity: 1;
+}
+
+/* Calculator slider: indigo fill on a sunk track. */
+.range {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 9999px;
+  outline: none;
+  background:
+    linear-gradient(var(--indigo), var(--indigo)) 0 / var(--p, 50%) 100% no-repeat,
+    var(--surface-sunk);
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--indigo);
+  box-shadow: var(--shadow-1);
+  cursor: grab;
+}
+.range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--indigo);
+  cursor: grab;
+}
+.range:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--indigo);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signal-ping {
+    animation: none;
+    opacity: 0;
+  }
+  .tilt-card {
+    transform: none;
+    transition: none;
+  }
+  .tilt-card .tilt-check {
+    opacity: 1;
+    transform: none;
+  }
+  .spotlight::before {
+    transition: none;
   }
 }

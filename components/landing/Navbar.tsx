@@ -2,57 +2,43 @@
 
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
-import { USE_MOCK } from '@/lib/api';
+import { Logo } from '../brand/Logo';
+
+const LINK = 'text-[14px] text-ink-2 transition-colors hover:text-ink';
 
 export function Navbar() {
   const t = useTranslations('landing');
   return (
-    <header className="sticky top-0 z-50 bg-navy text-white">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-space-md px-margin lg:px-margin-desktop">
-        <Link href="/" className="flex items-center gap-space-sm">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white font-headline-sm text-headline-sm font-bold text-navy">
-            O
-          </span>
-          <span className="font-headline-sm text-headline-sm font-bold tracking-tight">Ofera</span>
+    <header className="sticky top-0 z-50 border-b border-line bg-surface/80 backdrop-blur-md">
+      <div className="mx-auto flex h-[68px] max-w-[1200px] items-center gap-8 px-4 md:px-8">
+        <Link href="/" aria-label="Lichit home">
+          <Logo />
         </Link>
-        <nav className="ml-auto hidden items-center gap-space-lg md:flex">
-          <Link href="/#how" className="font-body-md text-body-md text-white/80 hover:text-white">
+        <nav className="ml-auto hidden items-center gap-7 md:flex">
+          <Link href="/#how" className={LINK}>
             {t('navHow')}
           </Link>
-          <Link href="/#agents" className="font-body-md text-body-md text-white/80 hover:text-white">
-            {t('navAgents')}
+          <Link href="/pricing" className={LINK}>
+            {t('navPricing')}
           </Link>
-          <Link
-            href="/#principles"
-            className="font-body-md text-body-md text-white/80 hover:text-white"
-          >
-            {t('navPrinciples')}
+          <Link href="/about" className={LINK}>
+            {t('navAbout')}
           </Link>
-          <Link href="/about" className="font-body-md text-body-md text-white/80 hover:text-white">
-            {t('footerAbout')}
-          </Link>
-          <Link href="/pricing" className="font-body-md text-body-md text-white/80 hover:text-white">
-            {t('footerPricing')}
-          </Link>
-          <Link href="/contact" className="font-body-md text-body-md text-white/80 hover:text-white">
-            {t('footerContact')}
+          <Link href="/contact" className={LINK}>
+            {t('navContact')}
           </Link>
         </nav>
-        {USE_MOCK ? (
-          <Link
-            href="/auth/signup"
-            className="ml-auto inline-flex h-9 items-center rounded bg-white px-space-md font-label-md text-label-md font-semibold text-navy hover:bg-surface-container-high md:ml-0"
-          >
-            {t('openApp')}
+        <div className="ml-auto flex items-center gap-5 md:ml-0">
+          <Link href="/auth/login" className={`${LINK} hidden sm:inline`}>
+            {t('signIn')}
           </Link>
-        ) : (
           <Link
-            href="/auth/signup"
-            className="ml-auto inline-flex h-9 items-center rounded bg-white px-space-md font-label-md text-label-md font-semibold text-navy hover:bg-surface-container-high md:ml-0"
+            href="/#waitlist"
+            className="inline-flex h-10 items-center whitespace-nowrap rounded-pill bg-indigo px-[18px] text-[14px] font-medium text-on-indigo transition-colors hover:bg-indigo-deep"
           >
-            {t('demoLogin')}
+            {t('wlCta')}
           </Link>
-        )}
+        </div>
       </div>
     </header>
   );
