@@ -14,18 +14,18 @@ const TIERS: Tier[] = [
   {
     id: 'start',
     price: 199,
-    has: ['fFeed', 'fFiltersStd', 'fElig10', 'fUsers1'],
+    has: ['fFeed', 'fFiltersStd', 'fElig15', 'fUsers1'],
     lacks: ['fOcr', 'fDrafts', 'fWinners', 'fRenewal'],
   },
   {
     id: 'growth',
     price: 399,
-    has: ['fFeed', 'fFiltersWide', 'fElig50', 'fOcr5', 'fDrafts1', 'fWinnersBasic', 'fAuth', 'fUsers3'],
+    has: ['fFeed', 'fFiltersWide', 'fElig60', 'fOcr20', 'fDrafts4', 'fWinners', 'fAuth', 'fUsers3'],
     lacks: ['fRenewal'],
   },
   {
     id: 'pro',
-    price: 449,
+    price: 749,
     has: [
       'fFeed',
       'fFiltersAll',
@@ -42,9 +42,8 @@ const TIERS: Tier[] = [
 ];
 
 /**
- * Three plans. Professional is the intended choice: it costs 50 RON more
- * than Growth but unlocks unlimited drafts, renewal detection and trend
- * analysis, so it carries the dark, highlighted card.
+ * Three plans priced by the value each delivers. Growth covers what most
+ * SMEs need and carries the highlighted card; prices exclude VAT (TVA).
  */
 export function PricingPlans({ heading = true }: { heading?: boolean }) {
   const t = useTranslations('pricing');
@@ -58,41 +57,40 @@ export function PricingPlans({ heading = true }: { heading?: boolean }) {
       <p className="mt-4 inline-flex rounded-pill bg-indigo-soft px-3 py-1 text-[13px] font-medium text-indigo-text">
         {t('plansTrial')}
       </p>
-      <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1fr_1.12fr] lg:items-stretch">
+      <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.08fr_1fr] lg:items-stretch">
         {TIERS.map((tier) => {
-          const pro = tier.id === 'pro';
+          const featured = tier.id === 'growth';
           return (
             <article
               key={tier.id}
               className={`relative flex flex-col rounded-card p-7 md:p-8 ${
-                pro ? 'bg-night text-on-night shadow-lift-2' : 'border border-line bg-raised text-ink'
+                featured ? 'bg-night text-on-night shadow-lift-2' : 'border border-line bg-raised text-ink'
               }`}
             >
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-[18px] font-medium">{t(`${tier.id}Name`)}</h3>
-                {pro && (
+                {featured && (
                   <span className="rounded-pill bg-ribbon-4 px-2.5 py-0.5 text-[12px] font-semibold text-night">
-                    {t('proBadge')}
+                    {t('recommendedBadge')}
                   </span>
                 )}
               </div>
-              <p className={`mt-1 text-[14px] ${pro ? 'text-on-night/70' : 'text-muted'}`}>{t(`${tier.id}For`)}</p>
+              <p className={`mt-1 text-[14px] ${featured ? 'text-on-night/70' : 'text-muted'}`}>{t(`${tier.id}For`)}</p>
               <p className="mt-6 flex items-baseline gap-1.5">
                 <span className="font-mono text-[44px] leading-none tracking-[-1.5px]">{tier.price}</span>
-                <span className={`text-[14px] ${pro ? 'text-on-night/70' : 'text-muted'}`}>{t('perMonth')}</span>
+                <span className={`text-[14px] ${featured ? 'text-on-night/70' : 'text-muted'}`}>{t('perMonth')}</span>
               </p>
-              {pro && <p className="mt-2 text-[13px] text-on-night/80">{t('proNote')}</p>}
-              <ul className="mt-6 grid flex-1 content-start gap-2.5 text-[14px] leading-[21px]">
+                            <ul className="mt-6 grid flex-1 content-start gap-2.5 text-[14px] leading-[21px]">
                 {tier.has.map((k) => (
                   <li key={k} className="flex gap-2.5">
-                    <span aria-hidden className={pro ? 'text-ribbon-4' : 'text-eligible'}>
+                    <span aria-hidden className={featured ? 'text-ribbon-4' : 'text-eligible'}>
                       ✓
                     </span>
                     {t(k)}
                   </li>
                 ))}
                 {tier.lacks.map((k) => (
-                  <li key={k} className={`flex gap-2.5 line-through ${pro ? 'text-on-night/40' : 'text-muted/70'}`}>
+                  <li key={k} className={`flex gap-2.5 line-through ${featured ? 'text-on-night/40' : 'text-muted/70'}`}>
                     <span aria-hidden>-</span>
                     <span>
                       <span className="sr-only">{t('notIncluded')}: </span>
@@ -103,7 +101,7 @@ export function PricingPlans({ heading = true }: { heading?: boolean }) {
               </ul>
               <Link
                 href="/#waitlist"
-                className={`mt-8 ${buttonClass({ variant: pro ? 'inverse' : 'secondary' })}`}
+                className={`mt-8 ${buttonClass({ variant: featured ? 'inverse' : 'secondary' })}`}
               >
                 {t('planCta')}
               </Link>

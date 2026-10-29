@@ -3,7 +3,6 @@ import { Navbar } from '@/components/landing/Navbar';
 import { Hero } from '@/components/landing/Hero';
 import { WaitlistSection } from '@/components/landing/WaitlistSection';
 import { ProductBento } from '@/components/landing/ProductBento';
-import { HoursCalculator } from '@/components/landing/HoursCalculator';
 import { PricingPlans } from '@/components/landing/PricingPlans';
 import { Faq } from '@/components/landing/Faq';
 import { ClosingCta } from '@/components/landing/ClosingCta';
@@ -20,7 +19,6 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         <Hero />
         <WaitlistSection />
         <ProductBento />
-        <HoursCalculator />
         <PricingPlans />
         <Faq />
         <ClosingCta />
