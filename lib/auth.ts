@@ -3,16 +3,28 @@
 import { useSyncExternalStore } from 'react';
 
 /**
- * JWT session handling. Real mode stores the token from /auth/callback in
- * localStorage and attaches it to every API call; mock mode never touches
- * it. Token changes broadcast so queries re-resolve without a reload.
+ * JWT session handling for the FastAPI backend. Real mode sends the
+ * Supabase Auth access token (the backend verifies it against the
+ * project's keys), or the legacy token from /auth/callback; mock mode
+ * never touches it. Token changes broadcast so queries re-resolve without a reload.
  */
 const TOKEN_KEY = 'ofera-token';
 const TOKEN_EVENT = 'ofera-token-changed';
 
+/** Supabase Auth keeps its session under "sb-<project>-auth-token". */
+function readSupabaseToken(): string | null {
+  try {
+    const key = Object.keys(window.localStorage).find((k) => /^sb-.+-auth-token$/.test(k));
+    const raw = key ? JSON.parse(window.localStorage.getItem(key) ?? 'null') : null;
+    return typeof raw?.access_token === 'string' ? raw.access_token : null;
+  } catch {
+    return null;
+  }
+}
+
 function readToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return window.localStorage.getItem(TOKEN_KEY);
+  return readSupabaseToken() ?? window.localStorage.getItem(TOKEN_KEY);
 }
 
 export function getToken(): string | null {

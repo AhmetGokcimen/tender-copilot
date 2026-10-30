@@ -27,6 +27,12 @@ class Settings(BaseSettings):
     # demo setup frictionless but is NOT safe for anything public — set a
     # long random JWT_SECRET there (see .env.example).
     jwt_secret: str = "dev-only-insecure-change-me"
+    # Supabase Auth: the frontend signs users in with Supabase and sends its
+    # access token. Tokens are verified against the project's JWKS
+    # (asymmetric keys); SUPABASE_JWT_SECRET covers projects still on the
+    # legacy shared HS256 secret. Empty URL = Supabase tokens not accepted.
+    supabase_url: str = ""
+    supabase_jwt_secret: str = ""
     # Google OAuth 2.0 (authorization code flow). Empty = Google login
     # disabled (the /auth/demo login still works).
     google_client_id: str = ""

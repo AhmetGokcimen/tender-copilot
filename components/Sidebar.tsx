@@ -15,6 +15,7 @@ const ITEMS = [
   { key: 'analysis', href: '/app/tenders', icon: 'find_in_page' },
   { key: 'pipeline', href: '/app/pipeline', icon: 'view_kanban' },
   { key: 'archive', href: '/app/archive', icon: 'folder' },
+  { key: 'profile', href: '/app/profile', icon: 'badge' },
   { key: 'settings', href: '/app/settings', icon: 'settings' },
 ] as const;
 

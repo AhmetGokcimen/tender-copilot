@@ -2,55 +2,25 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useQueryClient } from '@tanstack/react-query';
 import { Link, useRouter } from '@/i18n/routing';
-import { API_URL, USE_MOCK } from '@/lib/api';
-import { qk } from '@/lib/queries';
+import { USE_MOCK } from '@/lib/api';
+import { createInvitedAccount } from '@/lib/actions/invite-signup';
 import { isValidEmail, registerMockUser } from '@/lib/mock-auth';
-import { useCompanyStore } from '@/stores/useCompanyStore';
+import { signIn } from '@/lib/session';
 import { Icon } from '@/components/Icon';
 import { AuthShell } from '@/components/ui/AuthShell';
 import { buttonClass } from '@/components/ui/Button';
 import { INPUT, LABEL } from '@/components/ui/form';
 
-export function SignupForm() {
+export function SignupForm({ invite }: { invite: string }) {
   const t = useTranslations('auth');
   const router = useRouter();
-  const queryClient = useQueryClient();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [company, setCompany] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-
-  if (!USE_MOCK) {
-    return (
-      <AuthShell title={t('signupTitle')} subtitle={t('signupSub')} languages={false}>
-        <a
-          href={`${API_URL}/auth/google/login`}
-          className={buttonClass()}
-        >
-          <Icon name="account_circle" size="sm" />
-          {t('googleButton')}
-        </a>
-        <a
-          href={`${API_URL}/auth/demo`}
-          className={buttonClass({ variant: 'secondary' })}
-        >
-          <Icon name="bolt" size="sm" />
-          {t('demoButton')}
-        </a>
-        <p className="font-body-sm text-body-sm text-on-surface-variant">{t('emailUnavailable')}</p>
-        <p className="text-center font-body-md text-body-md text-on-surface-variant">
-          {t('haveAccount')}{' '}
-          <Link href="/auth/login" className="font-medium text-indigo-text hover:underline">
-            {t('signinButton')}
-          </Link>
-        </p>
-      </AuthShell>
-    );
-  }
 
   const submit = async () => {
     if (name.trim() === '') return setError(t('nameRequired'));
@@ -59,19 +29,25 @@ export function SignupForm() {
     if (company.trim() === '') return setError(t('companyRequired'));
     setBusy(true);
     setError(null);
-    const { error: regError } = await registerMockUser({ name, email, password, company });
-    if (regError === 'exists') {
-      setBusy(false);
-      setError(t('userExists'));
-      return;
+    if (USE_MOCK) {
+      const { error: regError } = await registerMockUser({ name, email, password, company });
+      if (regError === 'exists') {
+        setBusy(false);
+        return setError(t('userExists'));
+      }
+    } else {
+      const res = await createInvitedAccount({ invite, name, email, password, company });
+      if (res.status !== 'ok') {
+        setBusy(false);
+        return setError(
+          res.status === 'exists' ? t('userExists') : res.status === 'weak' ? t('passwordShort') : t('signupFailed'),
+        );
+      }
+      if (await signIn(email, password)) {
+        setBusy(false);
+        return setError(t('signupFailed'));
+      }
     }
-    // A new account starts with a blank company: onboarding fills it in.
-    useCompanyStore.getState().resetToEmpty();
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: qk.company }),
-      queryClient.invalidateQueries({ queryKey: qk.onboardingStatus }),
-      queryClient.invalidateQueries({ queryKey: qk.me }),
-    ]);
     router.push('/onboarding');
   };
 
@@ -140,7 +116,7 @@ export function SignupForm() {
         <Icon name="person_add" size="sm" />
         {t('signupButton')}
       </button>
-      <p className="font-body-sm text-body-sm text-on-surface-variant">{t('mockNote')}</p>
+      {USE_MOCK && <p className="font-body-sm text-body-sm text-on-surface-variant">{t('mockNote')}</p>}
       <p className="text-center font-body-md text-body-md text-on-surface-variant">
         {t('haveAccount')}{' '}
         <Link href="/auth/login" className="font-medium text-indigo-text hover:underline">

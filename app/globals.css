@@ -488,6 +488,81 @@
   }
 }
 
+/* Agent stage: a dotted page read by a moving beam. */
+.agent-in {
+  animation: agent-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes agent-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+.agent-line {
+  background-image: radial-gradient(circle, rgb(var(--line-strong-rgb) / 0.55) 1.3px, transparent 1.7px);
+  background-size: 7px 5px;
+}
+.agent-keep::after {
+  content: '';
+  position: absolute;
+  inset: -2px -3px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, rgb(var(--ribbon-1-rgb) / 0.22), rgb(var(--ribbon-4-rgb) / 0.35));
+  transform-origin: left;
+  animation: agent-keep 2.6s ease-out var(--d, 0s) infinite;
+}
+@keyframes agent-keep {
+  0%,
+  20% {
+    transform: scaleX(0);
+  }
+  45%,
+  85% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+.agent-done .agent-keep::after {
+  animation: none;
+  transform: scaleX(1);
+}
+.agent-beam {
+  background: linear-gradient(180deg, transparent, rgb(var(--ribbon-1-rgb) / 0.16) 60%, rgb(var(--ribbon-1-rgb) / 0.55) 96%, transparent);
+  border-bottom: 1px solid rgb(var(--ribbon-1-rgb) / 0.6);
+  animation: agent-beam 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes agent-beam {
+  from {
+    transform: translateY(-40%);
+  }
+  to {
+    transform: translateY(420%);
+  }
+}
+.agent-stamp {
+  animation: agent-stamp 380ms cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+@keyframes agent-stamp {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .agent-in,
+  .agent-beam,
+  .agent-stamp,
+  .agent-keep::after {
+    animation: none;
+  }
+  .agent-beam {
+    display: none;
+  }
+}
+
 /* Bento: the colour washes drift slowly so the cards feel alive. */
 @keyframes bento-wash-drift {
   0% {

@@ -54,11 +54,43 @@ def create_access_token(
 
 
 def decode_access_token(token: str) -> CurrentUser:
-    """Raises jwt.PyJWTError when the token is bad or expired."""
-    payload = jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
+    """Raises jwt.PyJWTError when the token is bad or expired. Accepts this
+    API's own tokens and, when configured, Supabase Auth access tokens."""
+    try:
+        payload = jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
+        return CurrentUser(
+            sub=payload["sub"], email=payload["email"], name=payload["name"],
+            provider=payload["provider"],
+        )
+    except jwt.PyJWTError:
+        if not settings.supabase_url:
+            raise
+    return _decode_supabase_token(token)
+
+
+_jwks_client: jwt.PyJWKClient | None = None
+
+
+def _decode_supabase_token(token: str) -> CurrentUser:
+    global _jwks_client
+    issuer = f"{settings.supabase_url.rstrip('/')}/auth/v1"
+    alg = jwt.get_unverified_header(token).get("alg")
+    if alg == "HS256":
+        if not settings.supabase_jwt_secret:
+            raise jwt.InvalidTokenError("HS256 Supabase token but no SUPABASE_JWT_SECRET")
+        key = settings.supabase_jwt_secret
+    else:
+        if _jwks_client is None:
+            _jwks_client = jwt.PyJWKClient(f"{issuer}/.well-known/jwks.json", cache_keys=True)
+        key = _jwks_client.get_signing_key_from_jwt(token).key
+    payload = jwt.decode(
+        token, key, algorithms=["HS256", "ES256", "RS256"], audience="authenticated", issuer=issuer
+    )
+    meta = payload.get("user_metadata") or {}
+    email = payload.get("email") or ""
+    # Namespaced so a Supabase user id can never collide with a Google sub.
     return CurrentUser(
-        sub=payload["sub"], email=payload["email"], name=payload["name"],
-        provider=payload["provider"],
+        sub=f"supabase:{payload['sub']}", email=email, name=meta.get("name") or email, provider="supabase"
     )
 
 
