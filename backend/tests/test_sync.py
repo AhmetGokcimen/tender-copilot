@@ -309,3 +309,14 @@ def test_award_upsert_keeps_winner_on_empty_refetch(api: TestClient) -> None:
         assert kept.winner_cif == "RO123"
         assert len(session.exec(select(Award)).all()) == 1
 
+
+
+def test_sync_token_with_non_ascii_secret_is_checked_not_crashed(api: TestClient, monkeypatch) -> None:
+    from backend.core.config import settings
+
+    monkeypatch.setattr(settings, "sync_secret", "sécret ")
+    r = api.post("/internal/sync-tenders", headers={"X-Sync-Token": "wrong"})
+    assert r.status_code == 403
+    # curl sends the env value as UTF-8 bytes.
+    r = api.get("/internal/diagnostics", headers={"X-Sync-Token": "sécret".encode()})
+    assert r.status_code == 200
