@@ -9,7 +9,6 @@ in _insert_stmt below.
 
 from collections.abc import Generator
 from datetime import UTC, datetime
-
 from urllib.parse import quote, unquote
 
 from sqlalchemy import Engine, func, inspect, text, update

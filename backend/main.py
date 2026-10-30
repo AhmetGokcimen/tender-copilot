@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session
@@ -42,26 +44,40 @@ app.include_router(internal_router)
 app.include_router(internal_router, prefix="/api")
 
 
+_log = logging.getLogger(__name__)
 _ready = False
+# Last setup failure, reported by /api/internal/diagnostics (no secrets in it).
+setup_error: str | None = None
 
 
 def ensure_ready() -> None:
     """Creates tables and reaps stale jobs once per process. Called on
     startup and, because serverless runtimes may skip ASGI startup events,
     again lazily before the first request."""
-    global _ready
+    global _ready, setup_error
     if _ready:
         return
-    init_db()
-    with Session(engine) as session:
-        reap_stale_jobs(session)
-        reap_stale_score_jobs(session)
+    try:
+        init_db()
+        with Session(engine) as session:
+            reap_stale_jobs(session)
+            reap_stale_score_jobs(session)
+    except Exception as e:
+        setup_error = f"{type(e).__name__}: {str(e).splitlines()[0][:300]}"
+        _log.exception("backend setup failed")
+        raise
+    setup_error = None
     _ready = True
 
 
 @app.on_event("startup")
 def on_startup() -> None:
-    ensure_ready()
+    # Never fail startup: a failing lifespan turns every route into a 500,
+    # diagnostics included. Requests retry setup lazily instead.
+    try:
+        ensure_ready()
+    except Exception:  # noqa: BLE001 — kept in setup_error for diagnostics
+        _log.warning("startup setup failed; retrying on first request")
 
 
 @app.middleware("http")
