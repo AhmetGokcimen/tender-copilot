@@ -7,9 +7,9 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
 from backend.models.award import Award
+from backend.models.company import CompanyProfile
 from backend.models.sync_state import SyncCheckpoint
 from backend.models.tender import SourceSystem, Tender
-from backend.models.company import CompanyProfile
 from backend.models.user_tender_state import UserTenderState
 
 SECRET = "test-sync-secret"

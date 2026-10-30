@@ -113,6 +113,9 @@ def diagnostics(x_sync_token: str | None = Header(default=None)) -> dict:
     if config_error:
         out["database"] = f"config error: {config_error}"
         return out
+    from backend import main
+
+    out["setup_error"] = main.setup_error
     try:
         with engine.connect() as conn:
             conn.execute(text("select 1"))
