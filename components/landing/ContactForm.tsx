@@ -58,44 +58,53 @@ export function ContactForm() {
     <form
       onSubmit={onSubmit}
       noValidate
-      className="relative flex flex-col gap-4 rounded-card border border-line bg-raised p-6 shadow-lift-1 md:p-8"
+      className="relative rounded-card border border-line bg-raised p-6 shadow-lift-1 md:p-8"
     >
-      <label className={LABEL} htmlFor={`${id}-subject`}>
-        {t('formSubject')}
-        <input
-          id={`${id}-subject`}
-          name="subject"
-          required
-          maxLength={150}
-          onChange={reset}
-          className={INPUT}
-        />
-      </label>
-      <label className={LABEL} htmlFor={`${id}-email`}>
-        {t('formEmail')}
-        <input
-          id={`${id}-email`}
-          name="email"
-          type="email"
-          required
-          maxLength={254}
-          autoComplete="email"
-          onChange={reset}
-          className={INPUT}
-        />
-      </label>
-      <label className={LABEL} htmlFor={`${id}-message`}>
-        {t('formMessage')}
-        <textarea
-          id={`${id}-message`}
-          name="message"
-          required
-          rows={6}
-          maxLength={5000}
-          onChange={reset}
-          className="w-full resize-y rounded-field border border-line-strong bg-raised px-3 py-2.5 text-[15px] text-ink outline-none transition-[border-color,box-shadow] placeholder:text-muted focus:border-indigo focus:shadow-[0_0_0_3px_var(--indigo-soft)]"
-        />
-      </label>
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="flex flex-col gap-4">
+          <label className={LABEL} htmlFor={`${id}-subject`}>
+            {t('formSubject')}
+            <input id={`${id}-subject`} name="subject" required maxLength={150} onChange={reset} className={INPUT} />
+          </label>
+          <label className={LABEL} htmlFor={`${id}-email`}>
+            {t('formEmail')}
+            <input
+              id={`${id}-email`}
+              name="email"
+              type="email"
+              required
+              maxLength={254}
+              autoComplete="email"
+              onChange={reset}
+              className={INPUT}
+            />
+          </label>
+          <div className="mt-auto flex flex-wrap items-center gap-4 pt-2">
+            <button
+              type="submit"
+              disabled={pending}
+              className="whitespace-nowrap rounded-pill bg-indigo px-6 py-3 text-[15px] font-medium text-on-indigo transition-colors hover:bg-indigo-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo active:scale-[0.98] disabled:cursor-progress disabled:opacity-70"
+            >
+              {pending ? t('formSending') : t('formSend')}
+            </button>
+            <p aria-live="polite" className={`text-[13px] ${bad ? 'text-risk' : 'text-muted'}`}>
+              {state === 'invalid' ? t('formInvalid') : state === 'error' ? t('formError') : ''}
+            </p>
+          </div>
+        </div>
+        <label className={`${LABEL} md:h-full`} htmlFor={`${id}-message`}>
+          {t('formMessage')}
+          <textarea
+            id={`${id}-message`}
+            name="message"
+            required
+            rows={7}
+            maxLength={5000}
+            onChange={reset}
+            className="min-h-[160px] w-full flex-1 resize-y rounded-field border border-line-strong bg-raised px-3 py-2.5 text-[15px] text-ink outline-none transition-[border-color,box-shadow] placeholder:text-muted focus:border-indigo focus:shadow-[0_0_0_3px_var(--indigo-soft)]"
+          />
+        </label>
+      </div>
       <input
         name="company_website"
         tabIndex={-1}
@@ -104,18 +113,6 @@ export function ContactForm() {
         className="absolute -left-[9999px] h-0 w-0"
       />
       <input type="hidden" name="locale" value={locale} />
-      <div className="flex flex-wrap items-center gap-4">
-        <button
-          type="submit"
-          disabled={pending}
-          className="whitespace-nowrap rounded-pill bg-indigo px-6 py-3 text-[15px] font-medium text-on-indigo transition-colors hover:bg-indigo-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo active:scale-[0.98] disabled:cursor-progress disabled:opacity-70"
-        >
-          {pending ? t('formSending') : t('formSend')}
-        </button>
-        <p aria-live="polite" className={`text-[13px] ${bad ? 'text-risk' : 'text-muted'}`}>
-          {state === 'invalid' ? t('formInvalid') : state === 'error' ? t('formError') : ''}
-        </p>
-      </div>
     </form>
   );
 }

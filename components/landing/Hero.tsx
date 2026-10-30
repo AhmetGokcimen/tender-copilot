@@ -55,7 +55,7 @@ export function Hero() {
 
   return (
     <div className="relative -mt-[68px]">
-      <div aria-hidden className="pointer-events-none absolute inset-0">
+      <div className="pointer-events-none absolute inset-0">
         <div className="sticky top-0 flex h-[100dvh] items-center justify-center overflow-hidden pt-[68px]">
           <TenderMap focus={focus} />
         </div>
@@ -64,7 +64,7 @@ export function Hero() {
         id="top"
         className="relative overflow-hidden pt-[68px]"
         // The hero fades as it leaves, so the map has the stage to itself.
-        style={{ opacity: 1 - Math.min(1, Math.max(0, (focus - 0.5) / 0.35)) }}
+        style={{ opacity: 1 - Math.min(1, Math.max(0, (focus - 0.5) / 0.35)), pointerEvents: focus > 0.5 ? 'none' : undefined }}
       >
         <HeroBackdrop />
         <div className="relative z-10 flex min-h-[calc(100dvh-68px)] flex-col">
