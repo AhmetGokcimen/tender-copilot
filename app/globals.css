@@ -460,3 +460,54 @@
     animation: none;
   }
 }
+
+/* Bento: the colour washes drift slowly so the cards feel alive. */
+@keyframes bento-wash-drift {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(var(--wash-rot, 0deg)) scale(1);
+  }
+  50% {
+    transform: translate3d(-4%, -6%, 0) rotate(calc(var(--wash-rot, 0deg) + 3deg)) scale(1.04);
+  }
+  100% {
+    transform: translate3d(3%, -2%, 0) rotate(calc(var(--wash-rot, 0deg) - 2deg)) scale(1.02);
+  }
+}
+.bento-wash {
+  animation: bento-wash-drift 16s ease-in-out infinite alternate;
+}
+.bento-wash:nth-of-type(2n) {
+  animation-duration: 21s;
+  animation-delay: -6s;
+}
+
+/* Bento detail window: fades and rises in. */
+@keyframes bento-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.bento-dialog[open] {
+  animation: bento-dialog-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bento-dialog[open]::backdrop {
+  animation: bento-backdrop-in 0.35s ease-out;
+}
+@keyframes bento-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bento-wash,
+  .bento-dialog[open],
+  .bento-dialog[open]::backdrop {
+    animation: none;
+  }
+}

@@ -44,7 +44,14 @@ export function ProductShowcase() {
                 'radial-gradient(50% 50% at 30% 40%, rgba(79,70,229,0.22), transparent 70%), radial-gradient(45% 45% at 80% 70%, rgba(255,176,32,0.20), transparent 70%)',
             }}
           />
-          <figure className="relative overflow-hidden rounded-[14px] border border-line bg-raised shadow-lift-2">
+          <figure
+            className="relative overflow-hidden rounded-[14px] border border-line bg-raised shadow-lift-2"
+            style={{
+              // Fade out toward the right edge, like the screenshot is sliding off the page.
+              maskImage: 'linear-gradient(90deg, #000 55%, transparent 96%)',
+              WebkitMaskImage: 'linear-gradient(90deg, #000 55%, transparent 96%)',
+            }}
+          >
             <div className="flex items-center gap-1.5 border-b border-line bg-sunk px-4 py-2.5">
               <span className="h-2.5 w-2.5 rounded-full bg-line-strong/60" />
               <span className="h-2.5 w-2.5 rounded-full bg-line-strong/60" />

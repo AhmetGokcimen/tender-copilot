@@ -3,7 +3,6 @@ import { Navbar } from '@/components/landing/Navbar';
 import { Hero } from '@/components/landing/Hero';
 import { ProductShowcase } from '@/components/landing/ProductShowcase';
 import { ProductBento } from '@/components/landing/ProductBento';
-import { PricingPlans } from '@/components/landing/PricingPlans';
 import { Faq } from '@/components/landing/Faq';
 import { ClosingCta } from '@/components/landing/ClosingCta';
 import { Footer } from '@/components/landing/Footer';
@@ -19,7 +18,6 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         <Hero />
         <ProductShowcase />
         <ProductBento />
-        <PricingPlans />
         <Faq />
         <ClosingCta />
       </main>
