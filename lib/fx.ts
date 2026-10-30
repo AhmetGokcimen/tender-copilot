@@ -11,6 +11,8 @@ export const BNR_EUR_RON: Record<number, number> = {
   2022: 4.9315,
   2023: 4.9465,
   2024: 4.9746,
+  // Mean of the 2025 monthly averages, as BNR computes it (financiarul.ro, Jan 2026).
+  2025: 5.0415,
 };
 
 export function eurRon(year: number): { rate: number; exact: boolean } {

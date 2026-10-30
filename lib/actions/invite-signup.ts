@@ -35,6 +35,9 @@ export async function createInvitedAccount(input: {
       email,
       password,
       email_confirm: true,
+      // Checked by the auth.users trigger (supabase/migrations): only
+      // invited accounts may be created.
+      app_metadata: { invited: true },
       user_metadata: {
         name: String(input.name ?? '').trim().slice(0, 120),
         company: String(input.company ?? '').trim().slice(0, 200),
