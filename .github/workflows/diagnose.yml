@@ -1,0 +1,25 @@
+# Manual deployment check: prints status codes and Vercel error headers for
+# the main routes, so a failing deploy can be diagnosed without dashboard
+# access. Uses the same SYNC_URL secret as the sync job (…/api).
+name: Diagnose deployment
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe routes
+        run: |
+          base="${SYNC_URL%/api}"
+          for path in /en /ro/auth/login /api/health /health /api/internal/diagnostics; do
+            echo "=== $path"
+            curl -sS -L -o body.txt -D headers.txt -H "X-Sync-Token: $SYNC_TOKEN" "$base$path" --max-time 60 || true
+            grep -iE '^(HTTP/|x-vercel-error|x-vercel-id|server|content-type|x-matched-path)' headers.txt || true
+            head -c 400 body.txt | tr '\n' ' '; echo
+          done
+        env:
+          SYNC_URL: ${{ secrets.SYNC_URL }}
+          SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
