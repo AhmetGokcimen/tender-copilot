@@ -41,7 +41,7 @@ export function ProductShowcase() {
             className="absolute -inset-8 rounded-[40px] opacity-60 blur-3xl"
             style={{
               background:
-                'radial-gradient(50% 50% at 30% 40%, rgba(79,70,229,0.22), transparent 70%), radial-gradient(45% 45% at 80% 70%, rgba(255,176,32,0.20), transparent 70%)',
+                'radial-gradient(50% 50% at 30% 40%, rgb(var(--ribbon-1-rgb) / 0.22), transparent 70%), radial-gradient(45% 45% at 80% 70%, rgb(var(--ribbon-4-rgb) / 0.20), transparent 70%)',
             }}
           />
           <figure

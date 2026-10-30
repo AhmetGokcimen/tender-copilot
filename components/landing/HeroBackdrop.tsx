@@ -37,7 +37,7 @@ const CHIPS: Chip[] = [
 ];
 
 const TONES: Record<Tone, string> = {
-  indigo: 'border-[#d9dcff] bg-[#eef0ff]/90 text-[#3730a3]',
+  indigo: 'border-indigo/20 bg-indigo-soft/90 text-indigo-deep',
   eligible: 'border-[#c8ecda] bg-[#e5f6ee]/90 text-[#067a52]',
   coral: 'border-[#ffd6cf] bg-[#fff0ec]/90 text-[#b4412f]',
   amber: 'border-[#ffe3b0] bg-[#fff6e3]/90 text-[#94600a]',
@@ -83,7 +83,7 @@ export function HeroBackdrop() {
   return (
     <div ref={ref} aria-hidden data-glow="off" className="group/glow pointer-events-none absolute inset-0 overflow-hidden">
       {/* Soft brand light and a faint grid, like paper under the cards. */}
-      <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_20%_0%,rgba(79,70,229,0.10),transparent_70%),radial-gradient(50%_45%_at_90%_100%,rgba(255,176,32,0.12),transparent_70%),radial-gradient(40%_40%_at_100%_10%,rgba(139,92,246,0.10),transparent_70%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_20%_0%,rgb(var(--ribbon-1-rgb)/0.10),transparent_70%),radial-gradient(50%_45%_at_90%_100%,rgb(var(--ribbon-4-rgb)/0.12),transparent_70%),radial-gradient(40%_40%_at_100%_10%,rgb(var(--ribbon-2-rgb)/0.10),transparent_70%)]" />
       <div
         className="absolute inset-0 opacity-50"
         style={{
@@ -99,7 +99,7 @@ export function HeroBackdrop() {
         className="absolute inset-0 opacity-0 transition-opacity duration-500 group-data-[glow=on]/glow:opacity-100"
         style={{
           backgroundImage:
-            'linear-gradient(rgba(79,70,229,0.55) 1px, transparent 1px), linear-gradient(90deg, rgba(79,70,229,0.55) 1px, transparent 1px)',
+            'linear-gradient(rgb(var(--indigo-rgb) / 0.55) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--indigo-rgb) / 0.55) 1px, transparent 1px)',
           backgroundSize: '72px 72px',
           maskImage: 'radial-gradient(170px circle at var(--mx, -999px) var(--my, -999px), #000, transparent 75%)',
           WebkitMaskImage:

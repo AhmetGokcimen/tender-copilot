@@ -1,6 +1,6 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist_Mono, Schibsted_Grotesk } from 'next/font/google';
 import { routing } from '@/i18n/routing';
 import { QueryProvider } from '@/components/QueryProvider';
 import { AssistantFab } from '@/components/assistant/AssistantFab';
@@ -8,7 +8,7 @@ import { AssistantPanel } from '@/components/assistant/AssistantPanel';
 import { AssistantTooltip } from '@/components/assistant/AssistantTooltip';
 import '../globals.css';
 
-const geist = Geist({ subsets: ['latin', 'latin-ext'], variable: '--font-sans', display: 'swap' });
+const sans = Schibsted_Grotesk({ subsets: ['latin', 'latin-ext'], variable: '--font-sans', display: 'swap' });
 const geistMono = Geist_Mono({ subsets: ['latin', 'latin-ext'], variable: '--font-mono', display: 'swap' });
 
 const META = {
@@ -53,7 +53,7 @@ export default async function LocaleLayout({
         />
       </head>
       <body
-        className={`${geist.variable} ${geistMono.variable} bg-surface font-sans text-on-surface antialiased`}
+        className={`${sans.variable} ${geistMono.variable} bg-surface font-sans text-on-surface antialiased`}
       >
         <NextIntlClientProvider messages={messages}>
           <QueryProvider>

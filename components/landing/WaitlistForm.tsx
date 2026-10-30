@@ -90,7 +90,7 @@ export function WaitlistForm({ source, onDark = false }: { source: 'hero' | 'clo
           <button
             type="submit"
             disabled={pending}
-            className="whitespace-nowrap rounded-pill bg-indigo px-5 py-3 text-[15px] font-medium text-on-indigo hover:bg-indigo-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo active:scale-[0.98] disabled:cursor-progress disabled:opacity-70"
+            className={`whitespace-nowrap rounded-pill px-5 py-3 text-[15px] font-medium ${onDark ? 'bg-ribbon-4 text-night hover:brightness-95' : 'bg-indigo text-on-indigo hover:bg-indigo-deep'} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo active:scale-[0.98] disabled:cursor-progress disabled:opacity-70`}
           >
             {pending ? t('wlSubmitting') : t('wlCta')}
           </button>
