@@ -35,11 +35,11 @@ export function HeroBackdrop() {
       {/* Soft brand light and a faint grid, like paper under the cards. */}
       <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_20%_0%,rgb(var(--ribbon-1-rgb)/0.10),transparent_70%),radial-gradient(50%_45%_at_90%_100%,rgb(var(--ribbon-4-rgb)/0.12),transparent_70%),radial-gradient(40%_40%_at_100%_10%,rgb(var(--ribbon-2-rgb)/0.10),transparent_70%)]" />
       <div
-        className="absolute inset-0 opacity-50"
+        className="absolute inset-0 opacity-[0.28]"
         style={{
           backgroundImage:
             'linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px)',
-          backgroundSize: '72px 72px',
+          backgroundSize: '28px 28px',
           maskImage: 'radial-gradient(ellipse at center, #000 25%, transparent 75%)',
           WebkitMaskImage: 'radial-gradient(ellipse at center, #000 25%, transparent 75%)',
         }}
@@ -49,11 +49,11 @@ export function HeroBackdrop() {
         className="absolute inset-0 opacity-0 transition-opacity duration-500 group-data-[glow=on]/glow:opacity-100"
         style={{
           backgroundImage:
-            'linear-gradient(rgb(var(--indigo-rgb) / 0.55) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--indigo-rgb) / 0.55) 1px, transparent 1px)',
-          backgroundSize: '72px 72px',
-          maskImage: 'radial-gradient(170px circle at var(--mx, -999px) var(--my, -999px), #000, transparent 75%)',
+            'linear-gradient(rgb(var(--indigo-rgb) / 0.16) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--indigo-rgb) / 0.16) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+          maskImage: 'radial-gradient(130px circle at var(--mx, -999px) var(--my, -999px), #000, transparent 75%)',
           WebkitMaskImage:
-            'radial-gradient(170px circle at var(--mx, -999px) var(--my, -999px), #000, transparent 75%)',
+            'radial-gradient(130px circle at var(--mx, -999px) var(--my, -999px), #000, transparent 75%)',
         }}
       />
     </div>
