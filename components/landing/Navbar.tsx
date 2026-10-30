@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Logo } from '../brand/Logo';
-import { LanguageSwitcher } from '../i18n/LanguageSwitcher';
+import { LanguageToggle } from '../i18n/LanguageToggle';
 
 const LINK = 'text-[14px] text-ink-2 transition-colors hover:text-ink';
 
@@ -28,7 +28,7 @@ export function Navbar() {
     >
       <div className="mx-auto flex h-[68px] max-w-[1200px] items-center gap-8 px-4 md:px-8">
         <Link href="/" aria-label="Licits home">
-          <Logo />
+          <Logo className="!text-[32px]" />
         </Link>
         <nav className="ml-auto hidden items-center gap-7 md:flex">
           <Link href="/#product" className={LINK}>
@@ -45,7 +45,7 @@ export function Navbar() {
           </Link>
         </nav>
         <div className="ml-auto flex items-center gap-4 md:ml-0 md:gap-5">
-          <LanguageSwitcher />
+          <LanguageToggle />
           <Link href="/auth/login" className={`${LINK} hidden sm:inline`}>
             {t('signIn')}
           </Link>

@@ -1,14 +1,10 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
-import { Icon } from '@/components/Icon';
+import { ContactForm } from '@/components/landing/ContactForm';
 import { SitePage } from '@/components/landing/SitePage';
 import { buttonClass } from '@/components/ui/Button';
 
-/**
- * There is no contact-form backend and no public email yet, so this page
- * routes pilot interest to the landing-page waitlist instead of a form
- * that silently fails or a placeholder address.
- */
+/** Contact form (saved and forwarded by email) next to the pilot-access card. */
 export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -22,22 +18,18 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
           </h1>
           <p className="max-w-[60ch] text-[17px] leading-[27px] text-ink-2 md:text-[19px] md:leading-[29px]">{t('sub')}</p>
         </header>
-        <section className="flex flex-col gap-3 rounded-card bg-night p-6 text-on-night md:p-8">
-          <h2 className="text-[22px] font-normal leading-7 tracking-[-0.4px]">{t('pilotTitle')}</h2>
-          <p className="text-[15px] leading-[24px] text-on-night/80">{t('pilotBody')}</p>
-          <div className="pt-2">
-            <Link
-              href="/#waitlist"
-              className={buttonClass({ variant: 'inverse' })}
-            >
-              {t('ctaSignup')}
-            </Link>
-          </div>
-        </section>
-        <p className="flex items-start gap-3 text-[15px] leading-[24px] text-ink-2">
-          <Icon name="info" size="sm" className="mt-0.5 shrink-0 text-indigo-text" />
-          {t('noEmail')}
-        </p>
+        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)]">
+          <ContactForm />
+          <section className="flex flex-col gap-3 rounded-card bg-night p-6 text-on-night md:p-8">
+            <h2 className="text-[22px] font-normal leading-7 tracking-[-0.4px]">{t('pilotTitle')}</h2>
+            <p className="text-[15px] leading-[24px] text-on-night/80">{t('pilotBody')}</p>
+            <div className="pt-2">
+              <Link href="/#waitlist" className={buttonClass({ variant: 'inverse' })}>
+                {t('ctaSignup')}
+              </Link>
+            </div>
+          </section>
+        </div>
       </div>
     </SitePage>
   );

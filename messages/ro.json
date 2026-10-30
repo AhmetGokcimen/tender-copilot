@@ -326,12 +326,19 @@
   },
   "contact": {
     "title": "Contactează-ne",
-    "sub": "Întrebări, acces pilot, feedback: scrie-ne direct și îți va răspunde un om.",
-    "emailLabel": "Scrie-ne la",
+    "sub": "Întrebări, acces pilot, feedback: scrie-ne și îți răspunde un om.",
     "pilotTitle": "Vrei acces la pilot?",
     "pilotBody": "Primim personal utilizatorii pilot, în grupuri mici de pe lista de așteptare, ca să vorbești direct cu oamenii care construiesc produsul.",
-    "noEmail": "Încă nu publicăm o adresă de email de contact. Cel mai rapid mod de a ne contacta este să te înscrii pe lista de așteptare, iar noi îți vom scrie.",
-    "ctaSignup": "Înscrie-te pe listă"
+    "ctaSignup": "Înscrie-te pe listă",
+    "formTitle": "Trimite-ne un mesaj",
+    "formSubject": "Subiect",
+    "formEmail": "Emailul tău",
+    "formMessage": "Mesaj",
+    "formSend": "Trimite mesajul",
+    "formSending": "Se trimite...",
+    "formSuccess": "Mulțumim, mesajul tău a plecat. Îți răspundem pe email.",
+    "formInvalid": "Adaugă un subiect, un email valid și un mesaj.",
+    "formError": "Nu am putut trimite mesajul. Încearcă din nou în câteva clipe."
   },
   "legal": {
     "privacyTitle": "Notă de confidențialitate",

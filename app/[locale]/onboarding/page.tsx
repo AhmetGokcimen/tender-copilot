@@ -7,7 +7,7 @@ import { Icon } from '@/components/Icon';
 import { Logo } from '@/components/brand/Logo';
 import { buttonClass } from '@/components/ui/Button';
 import { INPUT, LABEL } from '@/components/ui/form';
-import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
+import { LanguageToggle } from '@/components/i18n/LanguageToggle';
 import { AgentStage, type AgentFact } from '@/components/agent/AgentStage';
 import { useDocumentAgent } from '@/components/agent/useDocumentAgent';
 import {
@@ -346,7 +346,7 @@ export default function OnboardingPage() {
           <Link href="/" aria-label="Licits home">
             <Logo />
           </Link>
-          <LanguageSwitcher />
+          <LanguageToggle />
         </div>
         <header className="flex flex-col gap-space-xs">
           <h1 className="text-[32px] font-light leading-[38px] tracking-[-1px] text-ink">{t('title')}</h1>

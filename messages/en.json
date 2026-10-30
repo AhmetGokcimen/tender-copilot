@@ -326,12 +326,19 @@
   },
   "contact": {
     "title": "Contact us",
-    "sub": "Questions, pilot access, feedback: write to us directly and a human will reply.",
-    "emailLabel": "Email us at",
+    "sub": "Questions, pilot access, feedback: write to us and a human will reply.",
     "pilotTitle": "Want pilot access?",
     "pilotBody": "We onboard pilot users personally, in small groups from the waitlist, so you talk to the people building the product.",
-    "noEmail": "We don't publish a contact email yet. The fastest way to reach us is to join the waitlist, and we'll email you.",
-    "ctaSignup": "Join the waitlist"
+    "ctaSignup": "Join the waitlist",
+    "formTitle": "Send us a message",
+    "formSubject": "Subject",
+    "formEmail": "Your email",
+    "formMessage": "Message",
+    "formSend": "Send message",
+    "formSending": "Sending...",
+    "formSuccess": "Thanks, your message is on its way. We'll reply by email.",
+    "formInvalid": "Add a subject, a valid email and a message.",
+    "formError": "Couldn't send your message. Please try again in a moment."
   },
   "legal": {
     "privacyTitle": "Privacy notice",

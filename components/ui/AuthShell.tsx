@@ -1,6 +1,6 @@
 import { Link } from '@/i18n/routing';
 import { Logo } from '../brand/Logo';
-import { LanguageSwitcher } from '../i18n/LanguageSwitcher';
+import { LanguageToggle } from '../i18n/LanguageToggle';
 
 /** Centered auth card on paper with the Licits logo above it. */
 export function AuthShell({
@@ -11,13 +11,13 @@ export function AuthShell({
 }: {
   title: string;
   subtitle?: string;
-  /** Show the language flags in the corner (off on signup). */
+  /** Show the EN | RO toggle in the corner (off on signup). */
   languages?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <main className="relative flex min-h-[100dvh] flex-col items-center bg-surface px-4 py-12 text-ink">
-      {languages && <LanguageSwitcher className="absolute right-4 top-4 md:right-8 md:top-6" />}
+      {languages && <LanguageToggle className="absolute right-4 top-4 md:right-8 md:top-6" />}
       <Link href="/" aria-label="Licits home" className="mb-10">
         <Logo />
       </Link>
