@@ -1,7 +1,8 @@
 import logging
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlmodel import Session
 
 from backend.api.auth_routes import router as auth_router
@@ -9,6 +10,7 @@ from backend.api.internal_routes import router as internal_router
 from backend.api.routes import router as api_router
 from backend.core.caiet_jobs import reap_stale_jobs
 from backend.core.config import settings
+from backend.core.errors import error_summary
 from backend.core.score_jobs import reap_stale_jobs as reap_stale_score_jobs
 from backend.db import engine, init_db
 
@@ -63,7 +65,7 @@ def ensure_ready() -> None:
             reap_stale_jobs(session)
             reap_stale_score_jobs(session)
     except Exception as e:
-        setup_error = f"{type(e).__name__}: {str(e).splitlines()[0][:300]}"
+        setup_error = error_summary(e)
         _log.exception("backend setup failed")
         raise
     setup_error = None
@@ -88,6 +90,15 @@ async def _ready_before_request(request, call_next):
 
         await run_in_threadpool(ensure_ready)
     return await call_next(request)
+
+
+@app.exception_handler(Exception)
+async def _internal_error(request: Request, exc: Exception) -> JSONResponse:
+    # Unhandled errors are logged; the sync job (internal routes only) also
+    # gets the error class so a failing run says what broke.
+    _log.exception("unhandled error on %s", request.url.path)
+    detail = error_summary(exc) if "/internal/" in request.url.path else "Internal Server Error"
+    return JSONResponse(status_code=500, content={"detail": detail})
 
 
 @app.get("/health")

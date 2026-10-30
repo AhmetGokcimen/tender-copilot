@@ -16,6 +16,7 @@ from sqlmodel import Session
 
 from backend.api.schemas import SyncReport
 from backend.core.config import settings
+from backend.core.errors import error_summary
 from backend.core.sync import (
     AWARDS_KEY,
     TENDERS_KEY,
@@ -121,5 +122,5 @@ def diagnostics(x_sync_token: str | None = Header(default=None)) -> dict:
             conn.execute(text("select 1"))
         out["database"] = "ok"
     except Exception as e:  # noqa: BLE001 — reported, not raised
-        out["database"] = f"{type(e).__name__}: {str(e).splitlines()[0][:200]}"
+        out["database"] = error_summary(e, 200)
     return out
