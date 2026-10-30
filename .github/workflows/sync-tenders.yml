@@ -24,7 +24,9 @@ jobs:
     steps:
       - name: Trigger incremental sync
         run: |
-          curl -fsS -X POST \
+          # -L with --post30x keeps the POST through domain redirects
+          # (apex <-> www, http -> https).
+          curl -fsS -L --post301 --post302 --post303 -X POST \
             "$SYNC_URL/internal/sync-tenders?include_awards=true" \
             -H "X-Sync-Token: $SYNC_TOKEN" \
             --max-time 600 | tee sync-report.json
