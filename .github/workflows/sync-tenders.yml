@@ -22,14 +22,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Check the deployment
+        run: |
+          curl -sS -L -H "X-Sync-Token: $SYNC_TOKEN" "$SYNC_URL/internal/diagnostics" --max-time 60; echo
+        env:
+          SYNC_URL: ${{ secrets.SYNC_URL }}
+          SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
       - name: Trigger incremental sync
         run: |
           # -L with --post30x keeps the POST through domain redirects
           # (apex <-> www, http -> https).
-          curl -fsS -L --post301 --post302 --post303 -X POST \
+          curl -sS --fail-with-body -L --post301 --post302 --post303 -X POST \
             "$SYNC_URL/internal/sync-tenders?include_awards=true" \
             -H "X-Sync-Token: $SYNC_TOKEN" \
-            --max-time 600 | tee sync-report.json
+            --max-time 600 -o sync-report.json || { cat sync-report.json; echo; exit 1; }
+          cat sync-report.json; echo
           python3 -c "
           import json
           r = json.load(open('sync-report.json'))
