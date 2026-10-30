@@ -37,7 +37,7 @@ const REFRESH_MS = 10 * 60 * 1000;
 /** How many cards show at once, and how often the next one appears. */
 const VISIBLE_WIDE = 4;
 const VISIBLE_NARROW = 2;
-const STEP_MS = 2600;
+const STEP_MS = 3200;
 /** Notices start once the map is this much in focus (0..1). */
 const FOCUS_ON = 0.8;
 
@@ -226,8 +226,8 @@ export function TenderMap({ focus }: { focus: number }) {
     };
   }, []);
 
-  // Cards cycle only while the map is in focus. Every pin stays visible, and
-  // hovering or focusing one opens its card too.
+  // Notices cycle only while the map is in focus. A pin shows up together with
+  // its card and leaves with it.
   useEffect(() => {
     if (!active || notices.length === 0) {
       setShown([]);
@@ -274,16 +274,16 @@ export function TenderMap({ focus }: { focus: number }) {
                 href={n.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                tabIndex={active ? 0 : -1}
+                tabIndex={on ? 0 : -1}
                 aria-label={`${n.title}, ${n.city}`}
-                className={`group/pin absolute outline-none transition-opacity duration-500 hover:z-30 focus-visible:z-30 ${active ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'}`}
+                className={`group/pin absolute outline-none transition-opacity duration-500 hover:z-30 focus-visible:z-30 ${on ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'}`}
                 style={{ left: `${n.x}%`, top: `${n.y}%` }}
               >
                 <span className="absolute -left-3.5 -top-3.5 h-7 w-7 rounded-full" />
                 <span className="absolute -left-[5px] -top-[5px] h-2.5 w-2.5 rounded-full bg-indigo ring-4 ring-surface transition-transform group-hover/pin:scale-125 group-focus-visible/pin:ring-indigo-soft" />
                 {on && <span className="map-ping absolute -left-[5px] -top-[5px] h-2.5 w-2.5 rounded-full bg-indigo" />}
                 <div
-                  className={`absolute bottom-3 w-[150px] rounded-[10px] border border-line bg-raised/95 px-2.5 py-1.5 shadow-lift-2 backdrop-blur-sm transition-all duration-500 ease-out group-hover/pin:pointer-events-auto group-hover/pin:translate-y-0 group-hover/pin:opacity-100 group-focus-visible/pin:translate-y-0 group-focus-visible/pin:opacity-100 md:w-[188px] md:px-3 md:py-2 ${
+                  className={`absolute bottom-3 w-[150px] rounded-[10px] border border-line bg-raised/95 px-2.5 py-1.5 shadow-lift-2 backdrop-blur-sm transition-all duration-500 ease-out md:w-[188px] md:px-3 md:py-2 ${
                     flip ? '-right-3' : '-left-3'
                   } ${on ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-1.5 opacity-0'}`}
                 >

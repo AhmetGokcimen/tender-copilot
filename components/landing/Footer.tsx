@@ -86,9 +86,8 @@ export function Footer() {
         </nav>
       </div>
       <div className="border-t border-line">
-        <div className="mx-auto flex max-w-[1200px] flex-col gap-1 px-4 py-4 text-[12px] text-muted sm:flex-row sm:items-center sm:justify-between md:px-8">
+        <div className="mx-auto flex max-w-[1200px] flex-col gap-1 px-4 py-4 text-[12px] text-muted md:px-8">
           <span>{t('footerRights')}</span>
-          <span>{t('footerHackathon')}</span>
         </div>
       </div>
     </footer>
