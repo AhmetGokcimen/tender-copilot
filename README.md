@@ -23,9 +23,9 @@ tender-copilot/
 ├── api/
 │   └── index.py    Vercel entrypoint: re-exports backend.main:app (only file here)
 ├── vercel.json     /api/* → Python function rewrite + bundle excludes
-├── requirements.txt  Python deps (project root — Vercel reads them here)
-├── pyproject.toml    ruff config
-├── .python-version   pins the Vercel Python runtime (3.14)
+├── requirements.txt  Python runtime deps (Vercel installs these; dev tools in requirements-dev.txt)
+├── ruff.toml         ruff config
+├── .python-version   pins the Vercel Python runtime (3.12)
 ├── package.json      Next.js deps
 ├── API_CHANGES.md    the single changelog (backend + frontend history merged)
 └── backend/openapi.json  versioned API contract snapshot
@@ -262,7 +262,7 @@ Prerequisites: Python 3.14 (see `.python-version`), Node 20+.
 # from the repo root
 python -m venv backend/.venv
 backend/.venv/Scripts/activate   # Windows (elsewhere: source backend/.venv/bin/activate)
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 cp .env.example .env     # fill in META_API_KEY etc.
 npm install
 

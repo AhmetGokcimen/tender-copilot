@@ -1,4 +1,4 @@
-[tool.ruff.lint]
+[lint]
 # B008: FastAPI's Depends()/Query() in argument defaults is the documented,
 # idiomatic pattern, not the antipattern this rule targets.
 ignore = ["B008"]
