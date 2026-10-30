@@ -14,7 +14,7 @@ jobs:
       - name: Probe routes
         run: |
           base="${SYNC_URL%/api}"
-          for path in /en /ro/auth/login /api/health /health /api/internal/diagnostics; do
+          for path in /en /ro/auth/login /api/index /api/health /api/internal/diagnostics; do
             echo "=== $path"
             curl -sS -L -o body.txt -D headers.txt -H "X-Sync-Token: $SYNC_TOKEN" "$base$path" --max-time 60 || true
             grep -iE '^(HTTP/|x-vercel-error|x-vercel-id|server|content-type|x-matched-path)' headers.txt || true
