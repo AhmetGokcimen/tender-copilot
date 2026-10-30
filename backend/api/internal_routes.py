@@ -36,6 +36,20 @@ def _window_start(session: Session, key: str, fallback: datetime) -> datetime:
     return fallback
 
 
+def _token_ok(given: str | None) -> bool:
+    """Constant-time X-Sync-Token check. Compares bytes, not str:
+    compare_digest raises on non-ASCII strings, and a secret pasted with a
+    stray non-ASCII character used to turn every call into a 500. Starlette
+    decodes headers as latin-1, so that is undone to get the bytes sent."""
+    if not given:
+        return False
+    try:
+        sent = given.strip().encode("latin-1")
+    except UnicodeEncodeError:
+        return False
+    return hmac.compare_digest(sent, settings.sync_secret.strip().encode("utf-8"))
+
+
 @router.post("/internal/sync-tenders", response_model=SyncReport, tags=["internal"])
 async def sync_tenders(
     lookback_hours: int = Query(default=48, le=168),
@@ -51,7 +65,7 @@ async def sync_tenders(
     completed slice, caps/timeouts just defer the rest to the next run."""
     if not settings.sync_secret:
         raise HTTPException(status_code=503, detail="Sync not configured")
-    if not x_sync_token or not hmac.compare_digest(x_sync_token, settings.sync_secret):
+    if not _token_ok(x_sync_token):
         raise HTTPException(status_code=403, detail="Forbidden")
 
     started = time.monotonic()
@@ -104,7 +118,7 @@ def diagnostics(x_sync_token: str | None = Header(default=None)) -> dict:
     the backend uses and whether it answers. Never returns the URL itself."""
     if not settings.sync_secret:
         raise HTTPException(status_code=503, detail="SYNC_SECRET is not configured")
-    if not x_sync_token or not hmac.compare_digest(x_sync_token, settings.sync_secret):
+    if not _token_ok(x_sync_token):
         raise HTTPException(status_code=401, detail="Bad sync token")
     from sqlalchemy import text
 
