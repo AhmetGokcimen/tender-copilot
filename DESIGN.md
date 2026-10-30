@@ -1,147 +1,156 @@
 # DESIGN.md: Licits
 
-The source of truth is the Licits Design System artifact. Code tokens live as CSS variables in `app/globals.css` and are mapped to Tailwind names in `tailwind.config.ts` (`paper`, `raised` = surface, `sunk`, `ink`, `ink-2`, `muted`, `line`, `line-strong`, `indigo*`, `ribbon-1..4`, `night`, `eligible`, `warn`, `risk`; radius `field` 8px, `card` 16px, `pill`; shadow `lift-1`, `lift-2`). Use this file to brief AI design tools so generated screens stay on brand.
+Licits helps Romanian construction companies win public works tenders. It reads every SEAP notice for construction works, shows which ones a company can actually win, and drafts the offer with them. This file is the brand book for the landing page and the app. Use it to brief people and AI design tools so new screens stay on brand.
 
-## Colors
+The name is the plural of *licit*, from *licitație* (tender): Licits means "tenders", so the product is clear at a glance.
 
-| Token | Light | Dark | Usage |
-|---|---|---|---|
-| `paper` | `#f7f8fa` | `#0b1020` | Page background. Cool off-white, never warm cream. |
-| `surface` | `#ffffff` | `#121829` | Cards, inputs, the waitlist field, raised panels on paper. |
-| `surface-sunk` | `#eef0f5` | `#0e1424` | Sunk areas: slider tracks, the 'Before' column, code and data wells. |
-| `ink` | `#0b1020` | `#eef0f6` | Headlines and body text on paper or surface. Never pure black. |
-| `ink-2` | `#2a3245` | `#c5cad8` | Secondary text, second half of a two-tone headline. |
-| `muted` | `#5b6478` | `#8f98ad` | Captions, helper text, labels. Passes 4.5:1 on paper and surface in both themes. |
-| `line` | `#e3e6ed` | `#232b40` | Hairline borders on cards and dividers. 1px only. |
-| `line-strong` | `#8a93a8` | `#4b5570` | Input borders and control outlines (3:1 against surface). |
-| `indigo` | `#4f46e5` | `#4f46e5` | THE accent. Primary CTA fill, focus ring, active state. One filled CTA per section. |
-| `indigo-deep` | `#3730a3` | `#3730a3` | Primary CTA pressed state. |
-| `indigo-text` | `#4338ca` | `#a5a0ff` | Links and indigo text on paper or surface. |
-| `indigo-soft` | `#eef0ff` | `#1d1f4a` | Selected rows, soft tags, the 'With Licits' column wash. |
-| `on-indigo` | `#ffffff` | `#ffffff` | Text on indigo (6.3:1). |
-| `ribbon-1` | `#4f46e5` | `#6d66ff` | Signal ribbon stop 1 (start). Gradient lives ONLY in the ribbon, the logo mark and the cover. |
-| `ribbon-2` | `#8b5cf6` | `#9b7bff` | Signal ribbon stop 2. |
-| `ribbon-3` | `#ff6b5a` | `#ff7d6e` | Signal ribbon stop 3. |
-| `ribbon-4` | `#ffb020` | `#ffbe45` | Signal ribbon end and the match node. Also the dot in the logo. |
-| `night` | `#0b1020` | `#060912` | The one dark closing band on the landing page and the logo tile. |
-| `on-night` | `#eef0f6` | `#eef0f6` | Text on night. |
-| `eligible` | `#067a52` | `#3dd598` | Eligible state text and icon. Status only, never decoration. |
-| `eligible-bg` | `#e5f6ee` | `#0f2a22` | Eligible chip background. |
-| `warn` | `#a14306` | `#f7b955` | Partial match, approaching deadline. |
-| `warn-bg` | `#fff3e0` | `#2e2210` | Warn chip background. |
-| `risk` | `#c4320a` | `#ff8a7a` | Not eligible, missed requirement, form error text. |
-| `risk-bg` | `#fdecea` | `#2e1414` | Risk chip background. |
-
-## Typography
-
-Geist (`--font-sans`) for everything readable, Geist Mono (`--font-mono`) for data only. Tabular figures on all numbers.
-
-| Style | Family | Size / line | Weight | Tracking | Usage |
-|---|---|---|---|---|---|
-| `display-xl` | sans | 64px / 68px | 300 | -2.2px | Hero headline only. 36px on mobile. |
-| `display` | sans | 44px / 50px | 300 | -1.3px | Section headlines. |
-| `title` | sans | 26px / 32px | 400 | -0.5px | Card and step titles. |
-| `lead` | sans | 19px / 29px | 400 | -0.1px | Hero subtext and section intros. Max 65ch. |
-| `body` | sans | 15px / 23px | 400 | 0 | Default UI and body copy. |
-| `label` | sans | 13px / 18px | 500 | 0 | Form labels, button text at small size, nav. |
-| `caption` | sans | 12px / 16px | 400 | 0 | Helper text, footnotes, the 'Example' label. |
-| `data-lg` | mono | 44px / 48px | 400 | -1.5px | The big calculator result and live counters. Tabular figures. |
-| `data` | mono | 13px / 18px | 500 | 0 | Tender IDs, CPV codes, RON values, dates. Every number on the page. |
-
-## Spacing, radius, elevation
-
-- 8px base: 4, 8, 12, 16, 24, 32, 48, 96. Section padding 96px desktop, 64px mobile. Container 1200px, 16px mobile gutter.
-- Radius: inputs and inner chips 8px, cards 16px, every button and tag a pill.
-- Shadows: `0 1px 3px rgba(16,24,64,.08)` resting; `0 12px 32px rgba(16,24,64,.10), 0 2px 6px rgba(16,24,64,.05)` floating.
-
-Licits helps Romanian SMEs win public tenders. It reads every SEAP notice, shows which ones a company can actually win, and drafts the offer with them. This is the brand book for the pre-launch landing page and, after that, the whole app.
-
-The name is plural for *licit*, from *licitație* (tender): Licits means "tenders", so the product is clear at a glance. The core image is a signal: thousands of notices flow in as noise, and Licits narrows them into one clear line, the tender you can win.
-
-## Messaging
-
-**The job customers hire us for:** win public contracts without having a bid team. They are not buying AI. They want a signed contract and their evenings back.
-
-**Core message:** Licits finds the tenders you can win and prepares the offer with you.
-
-**Proof points we can state** (all live in the product):
-- A shortlist by email every morning.
-- A reminder before every deadline.
-- Every requirement checked against the company file.
-- The buyer's past tenders: who won and how, so the offer is shaped by what has won before.
-- A first pass takes about 10 minutes per tender, against hours by hand.
-
-**Hero (draft)**
-- Headline: *Win the public tenders you've been missing.*
-- Subtext (20 words max): *Licits reads every SEAP notice, shows which ones you can win, and drafts the offer with you.*
-- One CTA label on the whole page: **Join the waitlist**. Email only. Company details come later.
-
-**Page narrative**, top to bottom:
-1. Hero, waitlist form, ribbon ending in a real tender card.
-2. Live SEAP strip: tenders scanned this week, fed by our own sync. Hidden if the number is unavailable. Never invented.
-3. The loss: *Every week, tenders you could win close before you see them.*
-4. Before / With Licits, side by side (component: BeforeAfter).
-5. How it works: Monitor, Qualify, Draft, Submit. Each step shows the real product component.
-6. Hours back: the visitor's own numbers in, hours per month out (component: HoursCalculator). Our assumption is printed next to the result.
-7. Trust: official SEAP data, you approve every step, GDPR, data stays in the EU.
-8. FAQ and the closing waitlist on the one dark band.
-
-**Persuasion, used honestly**
-
-| Principle | Where |
-|---|---|
-| Loss aversion | Section 3 names the cost of doing nothing. |
-| Contrast | Before / With Licits. |
-| Present bias | "Tomorrow morning, your first shortlist." |
-| Low activation energy | One field in the hero. |
-| Authority | SEAP and e-licitatie.ro named as sources. |
-| Pratfall | "Licits never submits for you. You stay in control." |
-| Scarcity | Early access is real and capped by onboarding capacity. No fake counters. |
-
-**Voice.** Plain, specific, calm. Short sentences. Name real things: SEAP, CPV, RON, caiet de sarcini. Numbers are either real, the visitor's own, or labelled *Example*.
-
-Words we avoid: seamless, unleash, revolutionize, elevate, next-gen, supercharge, game-changer. No em dashes anywhere in copy; use a period, comma or colon.
-
-## Visual foundations
-
-**Color.** Cool neutrals with one accent.
-- `paper` page, `surface` cards, `ink` text, `muted` captions, `line` hairlines.
-- `indigo` is the only action color: one filled pill CTA per section. Links use `indigo-text`.
-- The ribbon gradient (`ribbon-1` to `ribbon-4`, indigo to violet to coral to amber) appears in exactly three places: the hero ribbon, the logo mark, the cover. Never on text, buttons, glows or backgrounds.
-- `eligible`, `warn`, `risk` are states. They never decorate.
-- `night` is used once on the landing page: the closing waitlist band.
-
-**Type.** Geist for everything readable, light (300) at display sizes with negative tracking. Geist Mono for data only: tender IDs, CPV codes, RON values, deadlines, counters. The mono layer is the brand's signature: it makes the page feel like it is reading real data.
-
-**Shape.** Pills for every button and tag (`radius-pill`), 16px cards (`radius-lg`), 8px inputs and inner chips (`radius-sm`). Hairline borders first; `shadow-2` only for the floating card and hover.
-
-**Layout.** Split hero, text left, ribbon and card right. Max 1200px container, 96px section padding. At least five different layout families on one page; never three identical cards in a row; max three small uppercase eyebrows on the whole page.
-
-**What makes it not Stripe.** Stripe tilts a blob mesh across the hero top. Licits runs a horizontal ribbon that *converges* into one line and lands on a product card: the image tells the noise to signal story. Mono data, cool paper, indigo to amber instead of indigo to pink.
-
-## Motion
-
-Every animation has a job. Springs, not linear easing. Under `prefers-reduced-motion` all of it becomes static.
-
-| Interaction | Job |
-|---|---|
-| Ribbon strands lean toward the cursor | The signal finds you. |
-| Hero card tilts up to 4 degrees and its checks tick in on hover | Shows the product working. |
-| Primary CTA pulls 4 to 6px toward the cursor | Points at the one action. |
-| Spotlight border on cards follows the cursor | Shows which card you are reading. |
-| Calculator result counts to the new value | Feedback on your input. |
-
-No custom cursors, no scroll cues, no parallax hijacks, no infinite loops outside the ribbon.
-
-## Iconography
-
-The app already uses Material Symbols Outlined (weight 300). Keep one family, outlined, 20px in UI, ink or muted. Icons never carry color alone.
+**Where it lives in code**
+- Tokens: CSS variables in `app/globals.css` (`:root`), mapped to Tailwind names in `tailwind.config.ts`.
+- Logo: `components/brand/Logo.tsx` (`Logo`, `Wordmark`, `LogoMark`). Favicon: `app/icon.svg`.
+- Font: loaded in `app/[locale]/layout.tsx` with `next/font`.
+- The token name `indigo` is historical. It now holds the forest green. Keep using `indigo*` classes; do not add new hard-coded greens.
 
 ## Logo
 
-The mark: four ribbon strands converging on an amber dot, on a `night` tile with `radius-lg` corners. The wordmark: *licits* in lowercase Geist 600, tracking -0.5px, next to the mark. See the Logo component for the lockup. The bare mark (no tile) is for dark backgrounds.
+**The logo is the wordmark.** *Licits*, capital L, in Schibsted Grotesk 600, tracking -0.035em, `ink` on light and `on-night` on dark. No frame, no tile, no icon next to it.
 
-## Open questions
+**The symbol** is for places where the name does not fit: the app sidebar, the favicon, email headers, avatars. It is a lowercase *li* built from two rounded bars and a dot:
+- a tall bar (the *l*), and a short bar (the *i*), both `ink` (or `on-night` on dark), fully rounded ends;
+- the dot of the *i* in `brand-dot` gold (`#d4a72c`), the only colour in the mark.
 
-- Domain: licits.com (DNS on Cloudflare, hosted on Vercel).
-- The hero video replaces the coded ribbon only after this look is approved.
+Geometry on a 48 × 48 grid: `l` 6 × 34 at (13, 7); `i` 6 × 21 at (25, 20); dot r 3.7 at (28, 11). The symbol has no frame or background shape. Minimum size 16px; keep clear space of one bar width all round.
+
+Do not: recolour the bars, put the gold on the bars, add a gradient, outline it, put it in a box, or set the wordmark in another typeface.
+
+## Colours: Forest + Gold
+
+Warm paper, forest green as the one action colour, gold as a rare accent.
+
+| Token | Value | Usage |
+|---|---|---|
+| `paper` | `#f6f5f0` | Page background. Warm off-white. |
+| `surface` (`raised`) | `#ffffff` | Cards, inputs, popovers, the waitlist card. |
+| `surface-sunk` (`sunk`) | `#eeede6` | Wells, tracks, table headers, inactive tabs. |
+| `surface-sunk-2` | `#e5e3da` | Deeper wells, pressed sunk controls. |
+| `ink` | `#0f1f1a` | Headlines and body text. Never pure black. |
+| `ink-2` | `#2b3a34` | Secondary text. |
+| `muted` | `#5c6a64` | Captions, helper text, the second half of a two-tone headline. |
+| `line` | `#e3e1d7` | 1px hairlines on cards and dividers. |
+| `line-strong` | `#8e988f` | Input and control borders (3:1 on surface). |
+| `indigo` (forest) | `#0f5c45` | THE action colour: primary button fill, focus ring, active nav, selected state. One filled CTA per section. |
+| `indigo-deep` | `#0a4433` | Primary button hover and pressed. |
+| `indigo-text` | `#0d5a43` | Links and green text on paper or surface. |
+| `indigo-soft` | `#e5efe8` | Selected rows, soft tags, chips, the offer pill. |
+| `on-indigo` | `#ffffff` | Text on forest. |
+| `brand-dot` | `#d4a72c` | The dot in the symbol. Nowhere else. |
+| `ribbon-1` | `#0f5c45` | Brand scale stop 1: forest. |
+| `ribbon-2` | `#4f9a76` | Brand scale stop 2: sage. |
+| `ribbon-3` | `#c9952a` | Brand scale stop 3: ochre. |
+| `ribbon-4` | `#e2b23c` | Brand scale stop 4: gold. |
+| `night` | `#0c1f19` | The one dark band (closing waitlist), dark panels. |
+| `on-night` | `#eef3ef` | Text on night. |
+| `eligible` / `eligible-bg` | `#1d7a3e` / `#e6f3e9` | Eligible, valid, done. Status only. |
+| `warn` / `warn-bg` | `#a14306` / `#fff3e0` | Partial match, expiring soon, deadline close. |
+| `risk` / `risk-bg` | `#c4320a` / `#fdecea` | Not eligible, expired, form errors. |
+
+**Rules**
+- Forest is the only action colour. Gold never fills a button and never sets body text.
+- The brand scale (forest → sage → ochre → gold) is used for data art only: the Romania map dots, the agent reading beam, soft background light. Never on text, buttons or borders.
+- `eligible`, `warn`, `risk` are states. They never decorate, and never carry meaning by colour alone (always an icon or a word too).
+- Dark theme: the marketing site is light only. `[data-theme='dark']` in `globals.css` still carries the previous palette and must be redone in forest and gold before it is offered.
+
+## Typography
+
+**Schibsted Grotesk** (`--font-sans`, latin + latin-ext for ă â î ș ț) for everything readable. **Geist Mono** (`--font-mono`) for data only. Tabular figures (`.tnum`) on every number.
+
+| Style | Size / line | Weight | Tracking | Usage |
+|---|---|---|---|---|
+| Hero | 58 / 62 (40 / 1.08 mobile) | 300 | -2.1px (-1.4px) | Hero headline only. Second half in `muted`. |
+| Display | 44 / 50 | 300 | -1.3px | Section headlines. |
+| Title | 26 / 32 | 300–400 | -0.7px | Card, step and dialog titles. |
+| Lead | 19 / 29 (17 / 27) | 400 | 0 | Hero subtext, section intros. Max 65ch. |
+| Body | 15 / 23 | 400 | 0 | Default UI and copy. |
+| Label | 13–14 / 18–21 | 500 | 0 | Form labels, nav, buttons, chips. |
+| Caption | 12 / 16 | 400 | 0 | Helper text, footnotes, "Example" labels. |
+| Data | 13 / 18 mono | 500 | 0 | Tender IDs, CPV codes, CUI, RON values, dates, counters. |
+
+Light (300) weights at display sizes with negative tracking; regular and medium below 20px. The wordmark is the only place that uses 600 at large size.
+
+## Shape, spacing, elevation
+
+- **Radius:** `field` 8px for inputs and inner chips, `card` 16px for cards and panels, `pill` for every button, tag and toggle. Small floating notices use 10px.
+- **Spacing:** 4px base: 4, 8, 12, 16, 24, 32, 48, 96. Sections 96px desktop, 64px mobile. Container 1200px, 16px mobile gutter, 32px desktop.
+- **Elevation:** hairline borders first. `lift-1` (`0 1px 3px rgba(16,24,64,.08)`) for resting cards; `lift-2` (`0 12px 32px rgba(16,24,64,.10), 0 2px 6px rgba(16,24,64,.05)`) for floating cards, popovers and the waitlist card. Floating cards over the map use `raised/95` with a light backdrop blur.
+- **Grid texture:** a faint square grid sits under content. Landing hero: 28px cells in `line` at 28% opacity, faded at the edges, with a forest copy revealed in a 130px circle around the pointer. App screens (`BlueprintGrid`): 28px cells in `ink` at 3.5% opacity, fixed, no motion. It should be felt, not seen.
+- **Icons:** Material Symbols Outlined, one family, 20px in UI, `ink` or `muted`. Icons never carry meaning by colour alone.
+
+## Landing page
+
+Sections, top to bottom: Navbar, Hero, ProductShowcase, ProductBento, FAQ, ClosingCta (the one `night` band), Footer.
+
+**Construction only.** Every headline, example and notice speaks about works: roads, schools, bridges, insulation, sewers. The eyebrow and hero subtext say so explicitly.
+
+**Hero.** Split layout: headline, subtext and a link on the left; the waitlist card on the right (offer pill "2 weeks free", three perks with green checks, one email field, one CTA). Pricing is not shown in the hero during the waitlist phase.
+- Headline: *Win the public construction tenders* / *you've been missing.* (second line `muted`).
+- Subtext: *Licits reads every SEAP notice for construction works, from roads to school renovations, shows which ones you can win, and drafts the offer with you.*
+- One CTA label on the page: **Join the waitlist**.
+
+**The Romania map** is the signature image.
+- A dotted map of Romania drawn on canvas from real Natural Earth borders (111 × 78 grid, 9px step). Dots vary in size (1.2–2.7px) and opacity, coloured west to east along the brand scale, forest → sage → gold.
+- About one dot in three twinkles gently, each at its own pace.
+- It is pinned (sticky) exactly behind the hero, faint, with no notices on it while the hero is in view.
+- Below the hero is an intentionally empty scroll band (120dvh). Scrolling through it fades the hero out and brings the map into focus: it brightens to full strength.
+- Only once the map is in focus (≥ 0.8) do example construction notices pop up at real city positions, a few at a time (4 wide, 2 narrow, one every 1.6s): a forest pin with a white ring, and a small card with the city, the works and the value in RON. A caption labels them as examples.
+
+## App
+
+- **Shell:** collapsible left sidebar with the *li* symbol at the top, `paper` background with the blueprint grid, `surface` cards.
+- **Language:** a text-only `EN | RO` toggle at the top right, no flags. The signup screen has no language switcher; onboarding has its own switcher.
+- **Tender Opportunities:** the list takes the full width. Filters live in a popover behind one Filter button at the top, not in a side column.
+- **KPI card:** light, on `surface` with hairline border, numbers in mono with tabular figures. No black blocks.
+- **No internal labels on screen:** no version strings, no "demo" or codename badges.
+- **Status:** chips use `eligible`, `warn`, `risk` with their `-bg` washes, always with an icon or a word.
+
+## Onboarding
+
+Seven steps, one question group per screen, with a step progress indicator on top:
+1. Company: CUI (autofilled from ANAF), name, main and secondary CAEN, website.
+2. Trades and works, with CPV codes and a blacklist. Works found on the website come preselected.
+3. Reach: roles, trades subcontracted out, counties, largest single contract, concurrent projects.
+4. Turnover for three years, with the BNR EUR/RON conversion shown.
+5. Authorizations (separate from ISO), each with class, number, issue and expiry dates. Uploading a document fills them in.
+6. SEAP readiness (account, e-signature with expiry, DUAE) and team counts (EU / non-EU).
+7. Review, with a profile strength score.
+
+Expiry dates are always shown with a state: valid (`eligible`), expiring (`warn`), expired (`risk`).
+
+## Agent loading (AgentStage)
+
+What the user sees while an agent works (reading the website, looking up ANAF, scanning a document). It must mean something, not just spin:
+- A page drawn in the site's dot language is swept by a reading beam. The lines the agent "keeps" light up in the brand colours.
+- Stages tick off while the request runs (for a document: upload, read, extract).
+- Then the facts the agent actually found appear one by one: type, issuer, number, holder, class, scope, issue and expiry date with its state.
+- A note reminds the user to confirm every value. Errors say what failed in plain words.
+- Under reduced motion the page is still and the facts simply appear.
+
+## Motion
+
+Every animation has a job. Ease-out and springs, never linear. Under `prefers-reduced-motion` everything becomes static: the map stops twinkling, notices do not cycle, the agent page does not sweep.
+
+| Interaction | Job |
+|---|---|
+| Map dots twinkle | The country is alive with notices. |
+| Scroll brings the map into focus, then notices pop up | Noise becomes concrete tenders. |
+| Grid glows around the pointer in the hero | The page responds to you. |
+| Primary CTA pulls a few px toward the cursor | Points at the one action. |
+| Agent reading beam and ticking stages | Shows the work being done. |
+
+No custom cursors, no scroll hijacking, no loops other than the map twinkle and the agent beam.
+
+## Voice
+
+Plain, specific, calm. Short sentences. Name real things: SEAP, CPV, CUI, ANAF, RON, DUAE, caiet de sarcini. Numbers are real, the visitor's own, or labelled *Example*.
+
+**Core message:** Licits finds the construction tenders you can win and prepares the offer with you. Licits never submits for you: you review everything and submit on SEAP yourself.
+
+Words we avoid: seamless, unleash, revolutionize, elevate, next-gen, supercharge, game-changer. No em dashes in copy; use a period, comma or colon.
