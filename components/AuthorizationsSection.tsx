@@ -97,7 +97,7 @@ export function AuthorizationsSection() {
           type="button"
           onClick={save}
           disabled={mut.isPending}
-          className="inline-flex h-9 items-center gap-space-xs rounded bg-navy px-space-md font-label-md text-label-md text-white hover:bg-navy-deep disabled:opacity-50"
+          className="inline-flex h-9 items-center gap-space-xs rounded-pill bg-indigo px-space-md font-label-md text-label-md text-on-indigo hover:bg-indigo-deep disabled:opacity-50"
         >
           <Icon name="save" size="sm" />
           {mut.isPending ? t('saving') : tc('save')}

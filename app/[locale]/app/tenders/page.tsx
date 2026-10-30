@@ -42,7 +42,7 @@ export default function TrackedTendersPage() {
           action={
             <Link
               href="/app"
-              className="inline-flex h-9 items-center gap-1 rounded bg-navy px-space-md font-label-md text-label-md text-white transition-colors hover:bg-navy-deep"
+              className="inline-flex h-9 items-center gap-1 rounded-pill bg-indigo px-space-md font-label-md text-label-md text-on-indigo transition-colors hover:bg-indigo-deep"
             >
               {t('indexBrowse')}
             </Link>

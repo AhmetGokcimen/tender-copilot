@@ -8,9 +8,8 @@ import { useAuthorizationStore } from '@/stores/useAuthorizationStore';
 import { useOnboardingStatus } from '@/lib/queries';
 import { AuthorizationsSection } from '@/components/AuthorizationsSection';
 import { Icon } from '@/components/Icon';
+import { INPUT } from '@/components/ui/form';
 
-const INPUT =
-  'h-10 w-full rounded border border-outline-variant bg-surface-container-lowest px-space-sm font-body-md text-body-md text-on-surface outline-none focus:border-navy focus:shadow-[0_0_0_3px_rgba(11,19,43,0.12)]';
 
 export default function SettingsPage() {
   const t = useTranslations('settings');
@@ -64,7 +63,7 @@ export default function SettingsPage() {
           </div>
           <Link
             href="/onboarding"
-            className="inline-flex h-9 shrink-0 items-center rounded bg-navy px-space-md font-label-md text-label-md text-white hover:bg-navy-deep"
+            className="inline-flex h-9 shrink-0 items-center rounded-pill bg-indigo px-space-md font-label-md text-label-md text-on-indigo hover:bg-indigo-deep"
           >
             {t('onboardingCta')}
           </Link>
@@ -112,7 +111,7 @@ export default function SettingsPage() {
           type="button"
           onClick={save}
           disabled={!draft.name.trim()}
-          className="inline-flex h-9 items-center gap-space-xs rounded bg-navy px-space-md font-label-md text-label-md text-white hover:bg-navy-deep disabled:opacity-50"
+          className="inline-flex h-9 items-center gap-space-xs rounded-pill bg-indigo px-space-md font-label-md text-label-md text-on-indigo hover:bg-indigo-deep disabled:opacity-50"
         >
           <Icon name="save" size="sm" />
           {tc('save')}

@@ -277,7 +277,7 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
             data-assistant="docs-generate"
             onClick={generate}
             disabled={enabledDocs.length === 0 || generating}
-            className="flex h-10 items-center justify-center gap-space-xs rounded-lg bg-navy px-space-md font-label-md text-label-md text-white transition-colors hover:bg-navy-deep disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 items-center justify-center gap-space-xs rounded-pill bg-indigo px-space-md font-label-md text-label-md text-on-indigo transition-colors hover:bg-indigo-deep disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Icon
               name={generating ? 'progress_activity' : 'auto_awesome'}

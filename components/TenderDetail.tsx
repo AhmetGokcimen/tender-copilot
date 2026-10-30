@@ -38,7 +38,7 @@ function Timeline({ pub, clar, sub }: { pub: string | null; clar: string | null;
                 className={clsx(
                   'flex h-6 w-6 items-center justify-center rounded-full border',
                   state === 'done' && 'border-navy bg-surface-container-lowest text-navy',
-                  state === 'current' && 'border-navy bg-navy text-white',
+                  state === 'current' && 'border-indigo bg-indigo text-on-indigo',
                   (state === 'upcoming' || state === 'unknown') &&
                     'border-outline-variant bg-surface-container-lowest text-on-surface-variant',
                 )}
@@ -104,7 +104,7 @@ export function TenderDetail({ externalId }: { externalId: string }) {
           hint={notFound ? externalId : undefined}
         />
         {!notFound && (
-          <button type="button" onClick={() => refetch()} className="h-9 rounded bg-navy px-space-md font-label-md text-label-md text-white">
+          <button type="button" onClick={() => refetch()} className="h-9 rounded-pill bg-indigo px-space-md font-label-md text-label-md text-on-indigo">
             {tc('retry')}
           </button>
         )}
@@ -324,7 +324,7 @@ export function TenderDetail({ externalId }: { externalId: string }) {
               type="button"
               data-assistant="tender-generate"
               onClick={() => setTab('docs')}
-              className="flex h-10 items-center justify-center gap-space-xs rounded-lg bg-navy font-label-md text-label-md text-white transition-colors hover:bg-navy-deep"
+              className="flex h-10 items-center justify-center gap-space-xs rounded-pill bg-indigo font-label-md text-label-md text-on-indigo transition-colors hover:bg-indigo-deep"
             >
               <Icon name="auto_awesome" size="sm" />
               {t('generateDraft')}

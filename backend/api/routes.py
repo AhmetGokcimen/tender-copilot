@@ -1,6 +1,7 @@
 from typing import Literal
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Response
+from sqlalchemy import String, cast
 from sqlmodel import Session, func, select
 
 from backend.adapters.romania_seap.adapter import RomaniaSeapAdapter
@@ -141,7 +142,8 @@ def list_tenders(
         # cpv_codes is a JSON array column; this matches it as the main CPV
         # (index 0) via a LIKE on its JSON text — a real CPV index would be
         # cleaner, but this covers the common case without one.
-        query = query.where(Tender.cpv_codes.like(f'["{cpv_code}"%'))
+        # (cast to text so Postgres' json type accepts LIKE, as SQLite does).
+        query = query.where(cast(Tender.cpv_codes, String).like(f'["{cpv_code}"%'))
     if min_value is not None:
         query = query.where(Tender.estimated_value >= min_value)
     if procedure_type:

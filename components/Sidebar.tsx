@@ -5,15 +5,17 @@ import { useTranslations } from 'next-intl';
 import { clsx } from 'clsx';
 import { Link, usePathname } from '@/i18n/routing';
 import { Icon } from './Icon';
+import { LogoMark, Wordmark } from './brand/Logo';
+import { LanguageToggle } from './i18n/LanguageToggle';
 import { FlashNumber } from './FlashNumber';
 import { MOCK_QUOTA } from '@/lib/mock-data';
-import { USE_MOCK } from '@/lib/api';
 
 const ITEMS = [
   { key: 'opportunities', href: '/app', icon: 'grid_view' },
   { key: 'analysis', href: '/app/tenders', icon: 'find_in_page' },
   { key: 'pipeline', href: '/app/pipeline', icon: 'view_kanban' },
   { key: 'archive', href: '/app/archive', icon: 'folder' },
+  { key: 'profile', href: '/app/profile', icon: 'badge' },
   { key: 'settings', href: '/app/settings', icon: 'settings' },
 ] as const;
 
@@ -72,36 +74,13 @@ export function Sidebar() {
             )}
           >
             <div className={clsx('flex items-center gap-space-sm', collapsed && 'justify-center')}>
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-navy font-headline-sm text-headline-sm font-bold text-white">
-                O
-              </span>
+              <LogoMark size={30} />
               {!collapsed && (
                 <>
-                  <span className="whitespace-nowrap font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface">
-                    {t('brand')}
-                  </span>
-                  <span className="rounded bg-surface-container-high px-space-xs py-0.5 font-label-sm text-label-sm font-semibold uppercase tracking-wider text-on-surface">
-                    {t('tag')}
-                  </span>
+                  <Wordmark className="whitespace-nowrap text-[21px] text-ink" />
                 </>
               )}
             </div>
-            {!collapsed && (
-              <div className="flex items-center gap-space-xs">
-                {USE_MOCK ? (
-                  <span className="whitespace-nowrap rounded-full border border-warn/30 bg-warn-bg px-space-xs py-px font-label-sm text-label-sm font-medium text-warn">
-                    {t('mockNote')}
-                  </span>
-                ) : (
-                  <>
-                    <span className="inline-block h-2 w-2 rounded-full bg-on-tertiary-container" />
-                    <span className="whitespace-nowrap font-code-sm text-code-sm font-medium text-on-tertiary-container">
-                      {t('sync')}
-                    </span>
-                  </>
-                )}
-              </div>
-            )}
           </div>
           <nav className={clsx('flex flex-col gap-space-xs py-space-sm', collapsed ? 'px-space-xs' : 'px-space-md')}>
             {ITEMS.map((item) => (
@@ -115,7 +94,7 @@ export function Sidebar() {
                   'group relative flex items-center rounded px-space-md py-space-sm font-body-md text-body-md transition-colors',
                   collapsed ? 'justify-center' : 'gap-space-md',
                   isActive(pathname, item.href)
-                    ? 'bg-primary-container font-semibold text-on-primary'
+                    ? 'bg-indigo-soft font-semibold text-indigo-text'
                     : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface',
                 )}
               >
@@ -124,7 +103,7 @@ export function Sidebar() {
                 {collapsed && (
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute left-full top-1/2 ml-2 -translate-y-1/2 whitespace-nowrap rounded bg-navy px-space-xs py-0.5 font-label-sm text-label-sm text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100"
+                    className="pointer-events-none absolute left-full top-1/2 ml-2 -translate-y-1/2 whitespace-nowrap rounded bg-night px-space-xs py-0.5 font-label-sm text-label-sm text-on-night opacity-0 shadow-lg transition-opacity group-hover:opacity-100"
                   >
                     {t(item.key)}
                   </span>
@@ -155,7 +134,7 @@ export function Sidebar() {
           {collapsed ? (
             <span
               title={t('quotaUsed', { used: MOCK_QUOTA.used, total: MOCK_QUOTA.total })}
-              className="tnum py-space-xs font-code-sm text-code-sm font-semibold text-navy"
+              className="tnum py-space-xs font-code-sm text-code-sm font-semibold text-ink"
             >
               {MOCK_QUOTA.used}/{MOCK_QUOTA.total}
             </span>
@@ -167,11 +146,11 @@ export function Sidebar() {
                 </span>
                 <FlashNumber
                   value={`${MOCK_QUOTA.used}/${MOCK_QUOTA.total}`}
-                  className="tnum font-code-sm text-code-sm font-semibold text-navy"
+                  className="tnum font-code-sm text-code-sm font-semibold text-ink"
                 />
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-container-high">
-                <div className="h-full rounded-full bg-navy" style={{ width: `${quotaPct}%` }} />
+                <div className="h-full rounded-full bg-indigo" style={{ width: `${quotaPct}%` }} />
               </div>
               <p className="mt-space-xs whitespace-nowrap font-label-sm text-label-sm text-on-surface-variant">
                 {t('quotaUsed', { used: MOCK_QUOTA.used, total: MOCK_QUOTA.total })}
@@ -184,20 +163,9 @@ export function Sidebar() {
       {/* Mobile / tablet top bar */}
       <div className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container-lowest lg:hidden">
         <div className="flex items-center gap-space-sm px-margin py-space-sm">
-          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-navy font-headline-sm text-body-md font-bold text-white">
-            O
-          </span>
-          <span className="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface">
-            {t('brand')}
-          </span>
-          <span className="rounded bg-surface-container-high px-space-xs py-0.5 font-label-sm text-label-sm font-semibold uppercase tracking-wider text-on-surface">
-            {t('tag')}
-          </span>
-          {USE_MOCK && (
-            <span className="ml-auto rounded-full border border-warn/30 bg-warn-bg px-space-xs py-px font-label-sm text-label-sm font-medium text-warn">
-              {t('mockNote')}
-            </span>
-          )}
+          <LogoMark size={26} />
+          <Wordmark className="text-[19px] text-ink" />
+          <LanguageToggle className="ml-auto" />
         </div>
         <nav className="thin-scroll flex gap-space-xs overflow-x-auto px-margin pb-space-sm">
           {ITEMS.map((item) => (
@@ -210,7 +178,7 @@ export function Sidebar() {
               className={clsx(
                 'flex shrink-0 items-center gap-1 rounded-full border px-space-sm py-1 font-body-sm text-body-sm',
                 isActive(pathname, item.href)
-                  ? 'border-primary-container bg-primary-container font-semibold text-on-primary'
+                  ? 'border-indigo-soft bg-indigo-soft font-semibold text-indigo-text'
                   : 'border-outline-variant text-on-surface-variant',
               )}
             >

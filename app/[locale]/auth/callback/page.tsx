@@ -9,6 +9,8 @@ import { qk } from '@/lib/queries';
 import { fetchMe } from '@/lib/api';
 import { setToken } from '@/lib/auth';
 import { Icon } from '@/components/Icon';
+import { AuthShell } from '@/components/ui/AuthShell';
+import { buttonClass } from '@/components/ui/Button';
 
 function CallbackInner() {
   const t = useTranslations('auth');
@@ -34,27 +36,17 @@ function CallbackInner() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface px-margin">
-        <div className="flex w-full max-w-md flex-col items-start gap-space-md rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
-          <span className="flex items-center gap-space-sm font-headline-sm text-headline-sm text-on-surface">
-            <Icon name="error" size="md" />
-            {t('callbackErrorTitle')}
-          </span>
-          <p className="font-body-md text-body-md text-on-surface-variant">{error}</p>
-          <Link
-            href="/auth/login"
-            className="inline-flex h-9 items-center rounded bg-navy px-space-md font-label-md text-label-md text-white hover:bg-navy-deep"
-          >
-            {t('backToLogin')}
-          </Link>
-        </div>
-      </div>
+      <AuthShell title={t('callbackErrorTitle')} subtitle={error}>
+        <Link href="/auth/login" className={buttonClass()}>
+          {t('backToLogin')}
+        </Link>
+      </AuthShell>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface px-margin">
-      <p className="flex items-center gap-space-sm font-body-md text-body-md text-on-surface-variant">
+    <div className="flex min-h-[100dvh] items-center justify-center bg-surface px-4">
+      <p className="flex items-center gap-2 text-[15px] text-muted">
         <Icon name="progress_activity" size="sm" />
         {t('callbackLoading')}
       </p>

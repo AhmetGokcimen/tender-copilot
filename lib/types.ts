@@ -54,6 +54,12 @@ export interface CompanyProfile {
   similar_experience_contract_count: number | null;
   target_countries: string[];
   keywords: string[];
+  website: string | null;
+  /** Construction trades picked in onboarding (keys of lib/construction TRADES). */
+  subsectors: string[];
+  annual_capacity_currency: string | null;
+  team_eu_count: number | null;
+  team_non_eu_count: number | null;
 }
 
 /** One wizard step: every field optional, only provided keys are applied. */

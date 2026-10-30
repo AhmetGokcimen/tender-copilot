@@ -103,6 +103,10 @@ def validate_company_data(data: dict) -> None:
     team = data.get("team_size")
     if team is not None and team < 0:
         raise ValueError(f"team_size must be >= 0: {team!r}")
+    for field in ("team_eu_count", "team_non_eu_count"):
+        count = data.get(field)
+        if count is not None and count < 0:
+            raise ValueError(f"{field} must be >= 0: {count!r}")
     turnover = data.get("annual_turnover")
     if turnover is not None and turnover < 0:
         raise ValueError(f"annual_turnover must be >= 0: {turnover!r}")

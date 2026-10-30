@@ -34,7 +34,7 @@ export default function PipelinePage() {
         </div>
         <Link
           href="/app"
-          className="inline-flex h-9 items-center gap-space-xs self-start rounded bg-navy px-space-md font-label-md text-label-md text-white transition-colors hover:bg-navy-deep lg:self-center"
+          className="inline-flex h-9 items-center gap-space-xs self-start rounded-pill bg-indigo px-space-md font-label-md text-label-md text-on-indigo transition-colors hover:bg-indigo-deep lg:self-center"
         >
           <Icon name="add" size="sm" />
           {t('browse')}
@@ -55,7 +55,7 @@ export default function PipelinePage() {
             <button
               type="button"
               onClick={() => refetch()}
-              className="h-9 rounded bg-navy px-space-md font-label-md text-label-md text-white"
+              className="h-9 rounded-pill bg-indigo px-space-md font-label-md text-label-md text-on-indigo"
             >
               {tc('retry')}
             </button>
@@ -69,7 +69,7 @@ export default function PipelinePage() {
           action={
             <Link
               href="/app"
-              className="inline-flex h-9 items-center rounded bg-navy px-space-md font-label-md text-label-md text-white"
+              className="inline-flex h-9 items-center rounded-pill bg-indigo px-space-md font-label-md text-label-md text-on-indigo"
             >
               {t('browse')}
             </Link>

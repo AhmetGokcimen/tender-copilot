@@ -5,6 +5,130 @@
 :root {
   /* Desktop sidebar width (JS-synced with the collapse toggle). */
   --sbw: 4rem;
+
+  /* Licits brand tokens: forest green with a gold accent on warm paper. */
+  --paper: #f6f5f0;
+  --surface: #ffffff;
+  --surface-sunk: #eeede6;
+  --ink: #0f1f1a;
+  --ink-2: #2b3a34;
+  --muted: #5c6a64;
+  --line: #e3e1d7;
+  --line-strong: #8e988f;
+  --indigo: #0f5c45;
+  --indigo-deep: #0a4433;
+  --indigo-text: #0d5a43;
+  --indigo-soft: #e5efe8;
+  --on-indigo: #ffffff;
+  --ribbon-1: #0f5c45;
+  --ribbon-2: #4f9a76;
+  --ribbon-3: #c9952a;
+  --ribbon-4: #e2b23c;
+  --night: #0c1f19;
+  --on-night: #eef3ef;
+  --eligible: #1d7a3e;
+  --eligible-bg: #e6f3e9;
+  --warn: #a14306;
+  --warn-bg: #fff3e0;
+  --risk: #c4320a;
+  --risk-bg: #fdecea;
+  /* RGB channels for colors used with Tailwind opacity modifiers. */
+  --paper-rgb: 246 245 240;
+  --warn-rgb: 161 67 6;
+  --warn-bg-rgb: 255 243 224;
+  --surface-sunk-2: #e5e3da;
+  --ink-rgb: 15 31 26;
+  --ribbon-1-rgb: 15 92 69;
+  --ribbon-2-rgb: 79 154 118;
+  --ribbon-4-rgb: 226 178 60;
+  /* The dot in the li symbol. */
+  --brand-dot: #d4a72c;
+  --ink-2-rgb: 43 58 52;
+  --muted-rgb: 92 106 100;
+  --line-rgb: 227 225 215;
+  --line-strong-rgb: 142 152 143;
+  --surface-rgb: 255 255 255;
+  --surface-sunk-rgb: 238 237 230;
+  --surface-sunk-2-rgb: 229 227 218;
+  --indigo-rgb: 15 92 69;
+  --indigo-deep-rgb: 10 68 51;
+  --indigo-text-rgb: 13 90 67;
+  --indigo-soft-rgb: 229 239 232;
+  --on-indigo-rgb: 255 255 255;
+  --night-rgb: 12 31 25;
+  --on-night-rgb: 238 243 239;
+  --eligible-rgb: 29 122 62;
+  --eligible-bg-rgb: 230 243 233;
+  --risk-rgb: 196 50 10;
+  --risk-bg-rgb: 253 236 234;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-24: 96px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --radius-pill: 9999px;
+  --shadow-1: 0 1px 3px rgba(16,24,64,0.08);
+  --shadow-2: 0 12px 32px rgba(16,24,64,0.10), 0 2px 6px rgba(16,24,64,0.05);
+}
+
+
+/* Dark theme tokens. Opt-in via data-theme; the marketing site stays light. */
+[data-theme='dark'] {
+  --paper: #0b1020;
+  --surface: #121829;
+  --surface-sunk: #0e1424;
+  --ink: #eef0f6;
+  --ink-2: #c5cad8;
+  --muted: #8f98ad;
+  --line: #232b40;
+  --line-strong: #4b5570;
+  --indigo: #4f46e5;
+  --indigo-deep: #3730a3;
+  --indigo-text: #a5a0ff;
+  --indigo-soft: #1d1f4a;
+  --on-indigo: #ffffff;
+  --ribbon-1: #6d66ff;
+  --ribbon-2: #9b7bff;
+  --ribbon-3: #ff7d6e;
+  --ribbon-4: #ffbe45;
+  --night: #060912;
+  --on-night: #eef0f6;
+  --eligible: #3dd598;
+  --eligible-bg: #0f2a22;
+  --warn: #f7b955;
+  --warn-bg: #2e2210;
+  --risk: #ff8a7a;
+  --risk-bg: #2e1414;
+  --paper-rgb: 11 16 32;
+  --warn-rgb: 247 185 85;
+  --warn-bg-rgb: 46 34 16;
+  --surface-sunk-2: #141b2e;
+  --ink-rgb: 238 240 246;
+  --ink-2-rgb: 197 202 216;
+  --muted-rgb: 143 152 173;
+  --line-rgb: 35 43 64;
+  --line-strong-rgb: 75 85 112;
+  --surface-rgb: 18 24 41;
+  --surface-sunk-rgb: 14 20 36;
+  --surface-sunk-2-rgb: 20 27 46;
+  --indigo-rgb: 79 70 229;
+  --indigo-deep-rgb: 55 48 163;
+  --indigo-text-rgb: 165 160 255;
+  --indigo-soft-rgb: 29 31 74;
+  --on-indigo-rgb: 255 255 255;
+  --night-rgb: 6 9 18;
+  --on-night-rgb: 238 240 246;
+  --eligible-rgb: 61 213 152;
+  --eligible-bg-rgb: 15 42 34;
+  --risk-rgb: 255 138 122;
+  --risk-bg-rgb: 46 20 20;
+  --shadow-1: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-2: 0 12px 32px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.3);
 }
 
 @layer base {
@@ -35,14 +159,14 @@
 /* Thin scrollbars for dense panels (kanban columns, filter lists). */
 .thin-scroll {
   scrollbar-width: thin;
-  scrollbar-color: #c6c6ce transparent;
+  scrollbar-color: var(--line-strong) transparent;
 }
 .thin-scroll::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 .thin-scroll::-webkit-scrollbar-thumb {
-  background: #c6c6ce;
+  background: var(--line-strong);
   border-radius: 9999px;
 }
 .thin-scroll::-webkit-scrollbar-track {
@@ -57,7 +181,7 @@
 
 /* Assistant highlight ring: calm navy outline with a soft decaying glow. */
 .assistant-highlight {
-  outline: 2px solid #0b132b;
+  outline: 2px solid var(--indigo);
   outline-offset: 3px;
   border-radius: 0.5rem;
   animation: assistant-ring 2.6s ease-out forwards;
@@ -65,13 +189,13 @@
 
 @keyframes assistant-ring {
   0% {
-    box-shadow: 0 0 0 0 rgba(11, 19, 43, 0.35);
+    box-shadow: 0 0 0 0 rgb(var(--indigo-rgb) / 0.35);
   }
   40% {
-    box-shadow: 0 0 0 6px rgba(11, 19, 43, 0.12);
+    box-shadow: 0 0 0 6px rgb(var(--indigo-rgb) / 0.12);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(11, 19, 43, 0);
+    box-shadow: 0 0 0 0 rgb(var(--indigo-rgb) / 0);
   }
 }
 
@@ -94,7 +218,7 @@
   position: absolute;
   inset: -1px;
   border-radius: 9999px;
-  border: 1px solid #0b132b;
+  border: 1px solid var(--ink);
   opacity: 0;
   pointer-events: none;
 }
@@ -142,10 +266,10 @@
 /* Rich-text document editor (Tiptap/ProseMirror) on the A4 sheet. */
 .doc-editor {
   outline: none;
-  caret-color: #0b132b;
+  caret-color: var(--ink);
   font-size: 14px;
   line-height: 1.6;
-  color: #0b1c30;
+  color: var(--ink);
   overflow-wrap: break-word;
 }
 .doc-editor > *:first-child {
@@ -156,7 +280,7 @@
   line-height: 28px;
   font-weight: 600;
   letter-spacing: -0.02em;
-  color: #0b132b;
+  color: var(--ink);
   margin: 20px 0 8px;
 }
 .doc-editor h2 {
@@ -164,16 +288,16 @@
   line-height: 24px;
   font-weight: 600;
   letter-spacing: -0.015em;
-  color: #0b132b;
+  color: var(--ink);
   margin: 18px 0 6px;
   padding-bottom: 4px;
-  border-bottom: 1px solid #c6c6ce;
+  border-bottom: 1px solid var(--line-strong);
 }
 .doc-editor h3 {
   font-size: 14px;
   line-height: 22px;
   font-weight: 600;
-  color: #0b1c30;
+  color: var(--ink);
   margin: 14px 0 4px;
 }
 .doc-editor p {
@@ -206,13 +330,13 @@
 }
 .doc-editor th,
 .doc-editor td {
-  border: 1px solid #c6c6ce;
+  border: 1px solid var(--line-strong);
   padding: 6px 8px;
   text-align: left;
   vertical-align: top;
 }
 .doc-editor th {
-  background: #eff4ff;
+  background: var(--surface-sunk);
   font-weight: 600;
 }
 .doc-editor strong {
@@ -320,6 +444,172 @@
   .orb-a,
   .orb-b,
   .orb-c {
+    animation: none;
+  }
+}
+
+/* Hero backdrop: example tender cards drift a few pixels, very slowly. */
+@keyframes hero-chip-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+.hero-chip {
+  animation: hero-chip-float var(--float-dur, 12s) ease-in-out var(--float-delay, 0s) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-chip {
+    animation: none;
+  }
+}
+
+/* Tender map: a ring spreads from the city when a notice appears. */
+@keyframes map-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(4.2);
+    opacity: 0;
+  }
+}
+.map-ping {
+  animation: map-ping 1.6s cubic-bezier(0.2, 0.7, 0.3, 1) 2;
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-ping {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* Agent stage: a dotted page read by a moving beam. */
+.agent-in {
+  animation: agent-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes agent-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+.agent-line {
+  background-image: radial-gradient(circle, rgb(var(--line-strong-rgb) / 0.55) 1.3px, transparent 1.7px);
+  background-size: 7px 5px;
+}
+.agent-keep::after {
+  content: '';
+  position: absolute;
+  inset: -2px -3px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, rgb(var(--ribbon-1-rgb) / 0.22), rgb(var(--ribbon-4-rgb) / 0.35));
+  transform-origin: left;
+  animation: agent-keep 2.6s ease-out var(--d, 0s) infinite;
+}
+@keyframes agent-keep {
+  0%,
+  20% {
+    transform: scaleX(0);
+  }
+  45%,
+  85% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+.agent-done .agent-keep::after {
+  animation: none;
+  transform: scaleX(1);
+}
+.agent-beam {
+  background: linear-gradient(180deg, transparent, rgb(var(--ribbon-1-rgb) / 0.16) 60%, rgb(var(--ribbon-1-rgb) / 0.55) 96%, transparent);
+  border-bottom: 1px solid rgb(var(--ribbon-1-rgb) / 0.6);
+  animation: agent-beam 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes agent-beam {
+  from {
+    transform: translateY(-40%);
+  }
+  to {
+    transform: translateY(420%);
+  }
+}
+.agent-stamp {
+  animation: agent-stamp 380ms cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+@keyframes agent-stamp {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .agent-in,
+  .agent-beam,
+  .agent-stamp,
+  .agent-keep::after {
+    animation: none;
+  }
+  .agent-beam {
+    display: none;
+  }
+}
+
+/* Bento: the colour washes drift slowly so the cards feel alive. */
+@keyframes bento-wash-drift {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(var(--wash-rot, 0deg)) scale(1);
+  }
+  50% {
+    transform: translate3d(-4%, -6%, 0) rotate(calc(var(--wash-rot, 0deg) + 3deg)) scale(1.04);
+  }
+  100% {
+    transform: translate3d(3%, -2%, 0) rotate(calc(var(--wash-rot, 0deg) - 2deg)) scale(1.02);
+  }
+}
+.bento-wash {
+  animation: bento-wash-drift 16s ease-in-out infinite alternate;
+}
+.bento-wash:nth-of-type(2n) {
+  animation-duration: 21s;
+  animation-delay: -6s;
+}
+
+/* Bento detail window: fades and rises in. */
+@keyframes bento-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.bento-dialog[open] {
+  animation: bento-dialog-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bento-dialog[open]::backdrop {
+  animation: bento-backdrop-in 0.35s ease-out;
+}
+@keyframes bento-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bento-wash,
+  .bento-dialog[open],
+  .bento-dialog[open]::backdrop {
     animation: none;
   }
 }

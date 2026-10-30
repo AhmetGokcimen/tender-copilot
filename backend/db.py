@@ -10,7 +10,7 @@ in _insert_stmt below.
 from collections.abc import Generator
 from datetime import UTC, datetime
 
-from sqlalchemy import func, update
+from sqlalchemy import func, inspect, text, update
 from sqlmodel import Session, SQLModel, create_engine
 
 from backend.core.config import settings
@@ -18,12 +18,59 @@ from backend.models.award import Award
 from backend.models.tender import SourceSystem, Tender
 from backend.models.user_tender_state import UserTenderState
 
-_connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
-engine = create_engine(settings.database_url, connect_args=_connect_args)
+# Postgres = Supabase. Its "public" schema is published through the REST
+# API, so this backend keeps every table in its own "backend" schema
+# (schema_translate_map applies it to all queries and DDL). psycopg's
+# prepared statements are off because Supabase's transaction pooler does
+# not support them.
+BACKEND_SCHEMA = "backend"
+
+
+def _engine_url(url: str) -> str:
+    for prefix in ("postgres://", "postgresql://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg://" + url[len(prefix):]
+    return url
+
+
+_url = _engine_url(settings.database_url)
+if _url.startswith("sqlite"):
+    engine = create_engine(_url, connect_args={"check_same_thread": False})
+else:
+    engine = create_engine(
+        _url,
+        connect_args={"prepare_threshold": None},
+        pool_pre_ping=True,
+        pool_size=2,
+        max_overflow=3,
+    ).execution_options(schema_translate_map={None: BACKEND_SCHEMA})
+_schema = BACKEND_SCHEMA if engine.dialect.name == "postgresql" else None
 
 
 def init_db() -> None:
+    if _schema:
+        with engine.begin() as conn:
+            conn.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{_schema}"'))
     SQLModel.metadata.create_all(engine)
+    _add_missing_columns()
+
+
+def _add_missing_columns() -> None:
+    """create_all never alters existing tables, so columns added to a
+    model later are appended here (nullable, no default). Enough for this
+    project's additive changes; a real migration tool can replace it."""
+    insp = inspect(engine)
+    with engine.begin() as conn:
+        for table in SQLModel.metadata.sorted_tables:
+            if not insp.has_table(table.name, schema=_schema):
+                continue
+            existing = {c["name"] for c in insp.get_columns(table.name, schema=_schema)}
+            for column in table.columns:
+                if column.name in existing:
+                    continue
+                ddl = column.type.compile(dialect=engine.dialect)
+                qualified = f'"{_schema}"."{table.name}"' if _schema else f'"{table.name}"'
+                conn.execute(text(f'ALTER TABLE {qualified} ADD COLUMN "{column.name}" {ddl}'))
 
 
 def get_session() -> Generator[Session, None, None]:

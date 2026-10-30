@@ -37,6 +37,9 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/api")
 app.include_router(api_router, prefix="/api")
 app.include_router(internal_router)
+# Also under /api: on Vercel only /api/* reaches this function (vercel.json),
+# so the scheduled sync calls https://<site>/api/internal/sync-tenders.
+app.include_router(internal_router, prefix="/api")
 
 
 @app.on_event("startup")
