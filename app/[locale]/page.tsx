@@ -1,7 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
 import { Navbar } from '@/components/landing/Navbar';
 import { Hero } from '@/components/landing/Hero';
-import { WaitlistSection } from '@/components/landing/WaitlistSection';
+import { ProductShowcase } from '@/components/landing/ProductShowcase';
 import { ProductBento } from '@/components/landing/ProductBento';
 import { PricingPlans } from '@/components/landing/PricingPlans';
 import { Faq } from '@/components/landing/Faq';
@@ -17,7 +17,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
       <Navbar />
       <main className="relative z-10">
         <Hero />
-        <WaitlistSection />
+        <ProductShowcase />
         <ProductBento />
         <PricingPlans />
         <Faq />

@@ -218,7 +218,7 @@ function Market() {
 export function ProductBento() {
   const t = useTranslations('landing');
   return (
-    <section id="product" className="mx-auto max-w-[1200px] scroll-mt-20 px-4 py-16 md:px-8 md:py-24">
+    <section id="features" className="mx-auto max-w-[1200px] scroll-mt-20 px-4 py-16 md:px-8 md:py-24">
       <h2 className="max-w-[760px] text-[32px] font-light leading-[1.15] tracking-[-1px] text-ink md:text-[44px] md:leading-[50px] md:tracking-[-1.3px]">
         {t('productTitleA')} <span className="text-muted">{t('productTitleB')}</span>
       </h2>

@@ -441,3 +441,22 @@
     animation: none;
   }
 }
+
+/* Hero backdrop: example tender cards drift a few pixels, very slowly. */
+@keyframes hero-chip-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+.hero-chip {
+  animation: hero-chip-float var(--float-dur, 12s) ease-in-out var(--float-delay, 0s) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-chip {
+    animation: none;
+  }
+}

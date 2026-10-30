@@ -3,9 +3,8 @@
 import { useTranslations } from 'next-intl';
 import { Icon } from '../Icon';
 import { buttonClass } from '../ui/Button';
-import { HeroRibbon } from './HeroRibbon';
-import { Magnetic } from './MagneticButton';
-import { TenderSieve } from './TenderSieve';
+import { HeroBackdrop } from './HeroBackdrop';
+import { WaitlistForm } from './WaitlistForm';
 
 const STRIP = [
   { icon: 'account_balance', key: 'stripSource' },
@@ -15,53 +14,59 @@ const STRIP = [
   { icon: 'description', key: 'stripDuae' },
 ] as const;
 
+const PERKS = ['wlPerk1', 'wlPerk2', 'wlPerk3'] as const;
+
 /**
- * The hero runs under the transparent navbar. The silk sits behind it and
- * continues beneath the strip at the bottom, which reads as the ribbon
- * passing under a layer, like paper on a desk.
+ * First screen: headline on the left, the waitlist offer on the right,
+ * example tenders drifting behind, and the facts strip at the bottom,
+ * all within one viewport. Runs under the transparent navbar.
  */
 export function Hero() {
   const t = useTranslations('landing');
   return (
-    <section id="top" className="relative -mt-[68px] overflow-hidden pt-[68px]">
-      <HeroRibbon />
-      {/* Container guide lines, drawn over the silk. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-full max-w-[1200px] -translate-x-1/2 border-x border-line/70 lg:block"
-      />
-      <div className="relative mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-12 px-4 pb-16 pt-14 md:px-8 lg:min-h-[620px] lg:grid-cols-[minmax(0,1fr)_minmax(0,540px)] lg:py-20">
+    <section id="top" className="relative -mt-[68px] flex min-h-[100dvh] flex-col overflow-hidden pt-[68px]">
+      <HeroBackdrop />
+      <div className="relative mx-auto grid w-full max-w-[1200px] flex-1 grid-cols-1 items-center gap-10 px-4 py-12 md:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:gap-16">
         <div>
-          <p className="mb-5 inline-flex rounded-pill bg-indigo-soft px-3 py-1 text-[13px] font-medium text-indigo-text">
-            {t('heroOffer')}
-          </p>
-          <h1 className="text-[40px] font-light leading-[1.08] tracking-[-1.4px] text-ink md:text-[56px] md:leading-[60px] md:tracking-[-2px]">
+          <h1 className="text-[40px] font-light leading-[1.08] tracking-[-1.4px] text-ink md:text-[58px] md:leading-[62px] md:tracking-[-2.1px]">
             {t('heroTitleA')} <span className="text-muted">{t('heroTitleB')}</span>
           </h1>
-          <p className="mt-5 max-w-[470px] text-[17px] leading-[27px] text-ink-2 md:text-[19px] md:leading-[29px]">
+          <p className="mt-5 max-w-[480px] text-[17px] leading-[27px] text-ink-2 md:text-[19px] md:leading-[29px]">
             {t('heroSub')}
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-5">
-            <Magnetic>
-              <a href="#waitlist" className={buttonClass()}>
-                {t('wlCta')}
-              </a>
-            </Magnetic>
-            <a href="#product" className={buttonClass({ variant: 'link' })}>
-              {t('seeHow')}
-            </a>
+          <a href="#product" className={`mt-6 ${buttonClass({ variant: 'link' })} !px-0`}>
+            {t('seeHow')}
+            <Icon name="arrow_downward" size="sm" />
+          </a>
+        </div>
+        <div
+          id="waitlist"
+          className="scroll-mt-24 rounded-card border border-line bg-raised/95 p-6 shadow-lift-2 backdrop-blur-sm md:p-8"
+        >
+          <p className="inline-flex rounded-pill bg-indigo-soft px-3 py-1 text-[13px] font-medium text-indigo-text">
+            {t('heroOffer')}
+          </p>
+          <h2 className="mt-4 text-[26px] font-light leading-[32px] tracking-[-0.7px] text-ink">
+            {t('wlTitleA')} <span className="text-indigo-text">{t('wlTitleB')}</span>
+          </h2>
+          <ul className="mt-4 grid gap-2">
+            {PERKS.map((k) => (
+              <li key={k} className="flex items-start gap-2.5 text-[14px] leading-[21px] text-ink-2">
+                <Icon name="check" size="sm" className="mt-0.5 text-eligible" />
+                {t(k)}
+              </li>
+            ))}
+          </ul>
+          <div className="mt-6">
+            <WaitlistForm source="hero" />
           </div>
         </div>
-        <div className="flex justify-center lg:justify-end">
-          <TenderSieve />
-        </div>
       </div>
-      {/* The layer the silk passes under. */}
-      <div className="relative mx-auto max-w-[1200px] border-y border-line bg-surface">
-        <ul className="grid grid-cols-2 gap-x-6 gap-y-4 px-4 py-6 md:px-8 lg:grid-cols-5">
+      <div className="relative border-t border-line/80 bg-surface/70 backdrop-blur-sm">
+        <ul className="mx-auto grid max-w-[1200px] grid-cols-2 gap-x-6 gap-y-3 px-4 py-5 md:px-8 lg:flex lg:justify-between">
           {STRIP.map(({ icon, key }) => (
-            <li key={key} className="flex items-center gap-2.5 text-[13px] text-ink-2">
-              <Icon name={icon} className="text-muted" />
+            <li key={key} className="flex items-center gap-2 text-[13px] text-muted">
+              <Icon name={icon} size="sm" />
               {t(key)}
             </li>
           ))}
