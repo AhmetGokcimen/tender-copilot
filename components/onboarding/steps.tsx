@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { clsx } from 'clsx';
 import type { CompanyOptions } from '@/lib/types';
-import { cpvLabel, searchCpv } from '@/lib/cpv';
+import { CERTS, TRADES, certsFor, searchWorks, workByCpv, type Lang } from '@/lib/construction';
 import { CheckboxRow } from '@/components/CheckboxRow';
 import { Icon } from '@/components/Icon';
 import { INPUT, LABEL } from '@/components/ui/form';
@@ -22,13 +22,6 @@ export function cuiValid(value: string): boolean {
   return /^RO\d{2,10}$/i.test(value.trim());
 }
 
-export const CERT_SUGGESTIONS = [
-  'ISO 9001:2015',
-  'ISO/IEC 27001:2022',
-  'ISO 14001:2015',
-  'ANAF fiscal compliance',
-  'ONRC company certificate',
-];
 
 /* ------------------------------------------------------------------ */
 /* Generic tag/chip input (certifications, blacklist keywords).        */
@@ -124,23 +117,34 @@ export function ChipInput({
 /* Step 1 — Company identity                                           */
 /* ------------------------------------------------------------------ */
 
+/** Empty, or something that reads as a web address (scheme optional). */
+export function websiteValid(value: string): boolean {
+  const v = value.trim();
+  return v === '' || /^(https?:\/\/)?[\w-]+(\.[\w-]+)+(\/\S*)?$/i.test(v);
+}
+
 export function IdentityStep({
   name,
   cui,
+  website,
   countries,
   onName,
   onCui,
+  onWebsite,
   onCountries,
   options,
 }: {
   name: string;
   cui: string;
+  website: string;
   countries: string[];
   onName: (v: string) => void;
   onCui: (v: string) => void;
+  onWebsite: (v: string) => void;
   onCountries: (v: string[]) => void;
   options: CompanyOptions;
 }) {
+  const siteOk = websiteValid(website);
   const t = useTranslations('onboarding');
   const cuiTouched = cui.trim() !== '';
   const cuiOk = cuiValid(cui);
@@ -174,6 +178,23 @@ export function IdentityStep({
           <Hint>{t('cuiHint')}</Hint>
         )}
       </label>
+      <label className={LABEL}>
+        {t('websiteLabel')}
+        <input
+          type="url"
+          inputMode="url"
+          value={website}
+          onChange={(e) => onWebsite(e.target.value)}
+          placeholder={t('websitePlaceholder')}
+          aria-invalid={!siteOk}
+          className={clsx(INPUT, !siteOk && 'border-error')}
+        />
+        {siteOk ? (
+          <Hint>{t('websiteHint')}</Hint>
+        ) : (
+          <span className="font-body-sm text-body-sm font-normal text-error">{t('websiteError')}</span>
+        )}
+      </label>
       <fieldset className="flex flex-col gap-space-xs">
         <legend className="mb-1 font-label-md text-label-md font-semibold text-on-surface">
           {t('countriesLabel')}
@@ -199,290 +220,155 @@ export function IdentityStep({
 }
 
 /* ------------------------------------------------------------------ */
-/* Step 2 — Capacity & certifications                                  */
+/* Step 2 — Trades and works (construction catalogue)                  */
 /* ------------------------------------------------------------------ */
 
-const CURRENCIES = ['RON', 'EUR', 'USD'] as const;
-
-export function MoneyStep({
-  amountLabel,
-  amountHint,
-  amount,
-  currency,
-  onAmount,
-  onCurrency,
+function WorkChip({
+  code,
+  label,
+  picked,
+  onToggle,
 }: {
-  amountLabel: string;
-  amountHint: string;
-  amount: string;
-  currency: string;
-  onAmount: (v: string) => void;
-  onCurrency: (v: string) => void;
+  code: string;
+  label: string;
+  picked: boolean;
+  onToggle: () => void;
 }) {
-  const t = useTranslations('onboarding');
   return (
-    <div className="flex flex-col gap-space-md">
-      <label className={LABEL}>
-        {amountLabel}
-        <input
-          type="number"
-          min={0}
-          value={amount}
-          onChange={(e) => onAmount(e.target.value)}
-          data-assistant="ob-turnover"
-          className={`${INPUT} tnum`}
-        />
-        <Hint>{amountHint}</Hint>
-      </label>
-      <label className={LABEL}>
-        {t('currencyLabel')}
-        <select
-          value={currency}
-          onChange={(e) => onCurrency(e.target.value)}
-          className={`${INPUT} max-w-40`}
-        >
-          {CURRENCIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-      </label>
-    </div>
-  );
-}
-
-export function CapacityStep({
-  turnover,
-  turnoverCurrency,
-  capacity,
-  certifications,
-  onTurnover,
-  onTurnoverCurrency,
-  onCapacity,
-  onCertifications,
-}: {
-  turnover: string;
-  turnoverCurrency: string;
-  capacity: string;
-  certifications: string[];
-  onTurnover: (v: string) => void;
-  onTurnoverCurrency: (v: string) => void;
-  onCapacity: (v: string) => void;
-  onCertifications: (v: string[]) => void;
-}) {
-  const t = useTranslations('onboarding');
-  return (
-    <div className="flex flex-col gap-space-lg">
-      <MoneyStep
-        amountLabel={t('turnoverLabel')}
-        amountHint={t('turnoverHint')}
-        amount={turnover}
-        currency={turnoverCurrency}
-        onAmount={onTurnover}
-        onCurrency={onTurnoverCurrency}
-      />
-      <label className={LABEL}>
-        {t('capacityLabel')}
-        <input
-          type="number"
-          min={0}
-          value={capacity}
-          onChange={(e) => onCapacity(e.target.value)}
-          data-assistant="ob-capacity"
-          className={`${INPUT} tnum`}
-        />
-        <Hint>{t('capacityHint')}</Hint>
-      </label>
-      <div className="flex flex-col gap-1">
-        <span className="font-label-md text-label-md font-semibold text-on-surface">
-          {t('certsLabel')}
-        </span>
-        <ChipInput
-          values={certifications}
-          onChange={onCertifications}
-          suggestions={CERT_SUGGESTIONS}
-          placeholder={t('certsPlaceholder')}
-          inputHook="ob-certs"
-        />
-        <Hint>{t('certsHint')}</Hint>
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Step 3 — Tender preferences (categories → CPV → blacklist)          */
-/* ------------------------------------------------------------------ */
-
-export function TenderPrefsStep({
-  categories,
-  cpv,
-  manual,
-  blacklist,
-  onToggleCategory,
-  onToggleCpv,
-  onAddManualCpv,
-  onManual,
-  onBlacklist,
-  options,
-}: {
-  categories: string[];
-  cpv: string[];
-  manual: boolean;
-  blacklist: string[];
-  onToggleCategory: (key: string) => void;
-  onToggleCpv: (code: string) => void;
-  onAddManualCpv: (code: string) => void;
-  onManual: (v: boolean) => void;
-  onBlacklist: (v: string[]) => void;
-  options: CompanyOptions;
-}) {
-  const t = useTranslations('onboarding');
-  const [query, setQuery] = useState('');
-  const results = searchCpv(query);
-
-  const suggested = [...new Set(categories.flatMap((key) => {
-    const found = options.industries.find((i) => i.key === key);
-    return found ? found.suggested_cpv_codes : [];
-  }))].sort();
-  const visibleSuggested = manual ? suggested.filter((c) => cpv.includes(c)) : suggested;
-
-  return (
-    <div className="flex flex-col gap-space-lg">
-      {!manual && (
-        <fieldset className="flex flex-col gap-space-xs">
-          <legend className="mb-1 font-label-md text-label-md font-semibold text-on-surface">
-            {t('categoriesLabel')}
-          </legend>
-          <div className="grid grid-cols-1 gap-space-xs sm:grid-cols-2">
-            {options.industries.map((ind) => {
-              const active = categories.includes(ind.key);
-              return (
-                <button
-                  key={ind.key}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => onToggleCategory(ind.key)}
-                  className={clsx(
-                    'flex items-center gap-space-sm rounded-lg border px-space-sm py-space-sm text-left font-body-md text-body-md transition-all duration-150',
-                    active
-                      ? 'border-indigo bg-indigo-soft font-semibold text-indigo-text'
-                      : 'border-outline-variant bg-surface-container-lowest text-on-surface hover:-translate-y-0.5 hover:border-indigo hover:shadow-lift-1',
-                  )}
-                >
-                  <Icon
-                    name={active ? 'check_circle' : 'circle'}
-                    size="sm"
-                    className={active ? 'text-white' : 'text-on-surface-variant'}
-                  />
-                  {ind.label}
-                </button>
-              );
-            })}
-          </div>
-          <Hint>{t('categoriesHint')}</Hint>
-        </fieldset>
+    <button
+      type="button"
+      aria-pressed={picked}
+      onClick={onToggle}
+      className={clsx(
+        'inline-flex items-center gap-2 rounded-pill border px-3 py-1.5 text-left text-[13px] transition-colors',
+        picked
+          ? 'border-indigo bg-indigo text-on-indigo'
+          : 'border-line bg-raised text-ink hover:border-indigo hover:text-indigo-text',
       )}
+    >
+      {picked && <Icon name="check" size="xs" />}
+      <span>{label}</span>
+      <span className={clsx('tnum font-mono text-[11px]', picked ? 'text-on-indigo/75' : 'text-muted')}>{code}</span>
+    </button>
+  );
+}
+
+export function TradeStep({
+  trades,
+  cpv,
+  blacklist,
+  onToggleTrade,
+  onToggleCpv,
+  onBlacklist,
+}: {
+  trades: string[];
+  cpv: string[];
+  blacklist: string[];
+  onToggleTrade: (key: string) => void;
+  onToggleCpv: (code: string, tradeKey: string) => void;
+  onBlacklist: (v: string[]) => void;
+}) {
+  const t = useTranslations('onboarding');
+  const lang: Lang = useLocale() === 'ro' ? 'ro' : 'en';
+  const [query, setQuery] = useState('');
+  const hits = searchWorks(query);
+
+  return (
+    <div className="flex flex-col gap-space-lg">
+      <div className="flex flex-col gap-space-xs">
+        <span className="font-label-md text-label-md font-semibold text-on-surface">{t('tradesLabel')}</span>
+        <div className="grid grid-cols-2 gap-space-xs sm:grid-cols-3">
+          {TRADES.map((trade) => {
+            const active = trades.includes(trade.key);
+            return (
+              <button
+                key={trade.key}
+                type="button"
+                aria-pressed={active}
+                onClick={() => onToggleTrade(trade.key)}
+                className={clsx(
+                  'flex min-h-[64px] items-center gap-space-sm rounded-lg border px-space-sm py-space-sm text-left text-[14px] leading-[18px] transition-all duration-150',
+                  active
+                    ? 'border-indigo bg-indigo-soft font-medium text-indigo-text'
+                    : 'border-outline-variant bg-surface-container-lowest text-on-surface hover:-translate-y-0.5 hover:border-indigo hover:shadow-lift-1',
+                )}
+              >
+                <Icon name={trade.icon} size="md" className={active ? 'text-indigo-text' : 'text-on-surface-variant'} />
+                {trade.name[lang]}
+              </button>
+            );
+          })}
+        </div>
+        <Hint>{t('tradesHint')}</Hint>
+      </div>
 
       <div className="flex flex-col gap-space-xs">
-        <div className="flex items-center justify-between gap-space-md">
-          <span className="font-label-md text-label-md font-semibold text-on-surface">
-            {t('cpvLabel')}
-          </span>
-          <button
-            type="button"
-            onClick={() => onManual(!manual)}
-            aria-pressed={manual}
-            className="font-body-sm text-body-sm font-medium text-indigo-text hover:underline"
-          >
-            {manual ? t('cpvGuided') : t('cpvManual')}
-          </button>
+        <label htmlFor="ob-work-search" className="font-label-md text-label-md font-semibold text-on-surface">
+          {t('worksSearchLabel')}
+        </label>
+        <div className="relative">
+          <Icon
+            name="search"
+            size="sm"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
+          />
+          <input
+            id="ob-work-search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t('worksSearchPlaceholder')}
+            data-assistant="ob-cpv-search"
+            className={`${INPUT} !pl-9`}
+          />
         </div>
-
-        {manual ? (
-          <div className="flex flex-col gap-space-xs">
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={t('cpvSearchPlaceholder')}
-              data-assistant="ob-cpv-search"
-              className={`${INPUT} tnum`}
-            />
-            {query.trim().length < 2 ? (
-              <Hint>{t('cpvSearchHint')}</Hint>
-            ) : results.length === 0 ? (
-              <p className="font-body-md text-body-md text-on-surface-variant">
-                {t('cpvNoResults')}
-              </p>
-            ) : (
-              <ul className="thin-scroll flex max-h-52 flex-col overflow-y-auto rounded border border-outline-variant">
-                {results.map((code) => {
-                  const picked = cpv.includes(code);
-                  return (
-                    <li key={code}>
-                      <button
-                        type="button"
-                        disabled={picked}
-                        onClick={() => onAddManualCpv(code)}
-                        className="flex w-full items-center gap-space-sm px-space-sm py-space-xs text-left font-body-md text-body-md text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-50"
-                      >
-                        <span className="tnum font-semibold text-indigo-text">{code}</span>
-                        <span className="flex-1 text-on-surface-variant">{cpvLabel(code)}</span>
-                        {picked && <Icon name="check" size="sm" className="text-indigo-text" />}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
-        ) : (
-          <div className="flex flex-col gap-space-xs">
-            {visibleSuggested.map((code) => (
-              <CheckboxRow
-                key={code}
-                id={`ob-cpv-${code}`}
-                label={`${code} — ${cpvLabel(code)}`}
-                checked={cpv.includes(code)}
-                onChange={() => onToggleCpv(code)}
-              />
-            ))}
-            <Hint>{t('cpvHint')}</Hint>
-          </div>
-        )}
-
-        {cpv.length > 0 && (
-          <div className="flex flex-col gap-1">
-            <span className="font-label-sm text-label-sm font-semibold uppercase tracking-wider text-on-surface-variant">
-              {t('cpvSelected')} ({cpv.length})
-            </span>
-            <div className="flex flex-wrap gap-space-xs">
-              {[...cpv].sort().map((code) => (
-                <span
-                  key={code}
-                  className="chip-in inline-flex items-center gap-1 rounded-pill bg-sunk px-3 py-1 text-[13px] text-ink"
-                >
-                  <span className="tnum font-semibold">{code}</span>
-                  <button
-                    type="button"
-                    aria-label={`${t('chipRemove')}: ${code}`}
-                    onClick={() => onToggleCpv(code)}
-                    className="flex h-4 w-4 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface"
-                  >
-                    <Icon name="close" size="xs" />
-                  </button>
-                </span>
+        {query.trim().length >= 2 &&
+          (hits.length === 0 ? (
+            <p className="font-body-md text-body-md text-on-surface-variant">{t('cpvNoResults')}</p>
+          ) : (
+            <div className="flex flex-wrap gap-space-xs rounded-lg border border-line bg-sunk/50 p-space-sm">
+              {hits.map(({ trade, work }) => (
+                <WorkChip
+                  key={work.cpv}
+                  code={work.cpv}
+                  label={work.name[lang]}
+                  picked={cpv.includes(work.cpv)}
+                  onToggle={() => onToggleCpv(work.cpv, trade.key)}
+                />
               ))}
             </div>
-          </div>
-        )}
+          ))}
       </div>
 
+      {trades.length > 0 && (
+        <div className="flex flex-col gap-space-md">
+          {TRADES.filter((tr) => trades.includes(tr.key)).map((trade) => (
+            <section key={trade.key} className="chip-in flex flex-col gap-space-xs">
+              <h3 className="flex items-center gap-2 text-[14px] font-semibold text-ink">
+                <Icon name={trade.icon} size="sm" className="text-indigo-text" />
+                {trade.name[lang]}
+                <span className="font-normal text-muted">
+                  · {t('worksPicked', { count: trade.works.filter((w) => cpv.includes(w.cpv)).length })}
+                </span>
+              </h3>
+              <div className="flex flex-wrap gap-space-xs">
+                {trade.works.map((work) => (
+                  <WorkChip
+                    key={work.cpv}
+                    code={work.cpv}
+                    label={work.name[lang]}
+                    picked={cpv.includes(work.cpv)}
+                    onToggle={() => onToggleCpv(work.cpv, trade.key)}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+          <Hint>{t('worksHint')}</Hint>
+        </div>
+      )}
+
       <div className="flex flex-col gap-1">
-        <span className="font-label-md text-label-md font-semibold text-on-surface">
-          {t('blacklistLabel')}
-        </span>
+        <span className="font-label-md text-label-md font-semibold text-on-surface">{t('blacklistLabel')}</span>
         <ChipInput
           values={blacklist}
           onChange={onBlacklist}
@@ -496,56 +382,320 @@ export function TenderPrefsStep({
 }
 
 /* ------------------------------------------------------------------ */
+/* Step 3 — Finances & certificates                                    */
+/* ------------------------------------------------------------------ */
+
+export const CURRENCIES = [
+  { code: 'EUR', sign: '€' },
+  { code: 'RON', sign: '' },
+  { code: 'USD', sign: '$' },
+] as const;
+
+/** Digits only in, "1.250.000" out (dot groups, as written in Romania). */
+export const groupDigits = (digits: string) => digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+/** Amount field that groups thousands as you type, with a small currency picker. */
+export function MoneyInput({
+  id,
+  value,
+  currency,
+  onValue,
+  onCurrency,
+  hook,
+}: {
+  id: string;
+  value: string;
+  currency: string;
+  onValue: (digits: string) => void;
+  onCurrency: (code: string) => void;
+  hook?: string;
+}) {
+  const t = useTranslations('onboarding');
+  return (
+    <div className="flex w-full max-w-xs items-stretch overflow-hidden rounded-field border border-line bg-raised focus-within:border-indigo focus-within:ring-2 focus-within:ring-indigo/20">
+      <input
+        id={id}
+        inputMode="numeric"
+        autoComplete="off"
+        value={groupDigits(value)}
+        onChange={(e) => onValue(e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, 13))}
+        placeholder="0"
+        data-assistant={hook}
+        className="tnum min-w-0 flex-1 bg-transparent px-3 py-2.5 text-[15px] text-ink outline-none"
+      />
+      <select
+        aria-label={t('currencyLabel')}
+        value={currency}
+        onChange={(e) => onCurrency(e.target.value)}
+        className="border-l border-line bg-sunk px-2 text-[14px] font-medium text-ink outline-none"
+      >
+        {CURRENCIES.map((c) => (
+          <option key={c.code} value={c.code}>
+            {c.sign ? `${c.sign} ${c.code}` : c.code}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+export function FinanceStep({
+  trades,
+  turnover,
+  turnoverCurrency,
+  capacity,
+  capacityCurrency,
+  certifications,
+  onTurnover,
+  onTurnoverCurrency,
+  onCapacity,
+  onCapacityCurrency,
+  onCertifications,
+}: {
+  trades: string[];
+  turnover: string;
+  turnoverCurrency: string;
+  capacity: string;
+  capacityCurrency: string;
+  certifications: string[];
+  onTurnover: (v: string) => void;
+  onTurnoverCurrency: (v: string) => void;
+  onCapacity: (v: string) => void;
+  onCapacityCurrency: (v: string) => void;
+  onCertifications: (v: string[]) => void;
+}) {
+  const t = useTranslations('onboarding');
+  const lang: Lang = useLocale() === 'ro' ? 'ro' : 'en';
+  const suggested = certsFor(trades);
+  const has = (name: string) => certifications.some((c) => c.toLowerCase() === name.toLowerCase());
+  const toggle = (name: string) =>
+    onCertifications(has(name) ? certifications.filter((c) => c.toLowerCase() !== name.toLowerCase()) : [...certifications, name]);
+  const known = new Set(Object.values(CERTS).map((c) => c.name.toLowerCase()));
+  const custom = certifications.filter((c) => !known.has(c.toLowerCase()));
+
+  return (
+    <div className="flex flex-col gap-space-lg">
+      <div className="flex flex-col gap-1">
+        <label htmlFor="ob-turnover" className="font-label-md text-label-md font-semibold text-on-surface">
+          {t('turnoverLabel')}
+        </label>
+        <MoneyInput
+          id="ob-turnover"
+          value={turnover}
+          currency={turnoverCurrency}
+          onValue={onTurnover}
+          onCurrency={onTurnoverCurrency}
+          hook="ob-turnover"
+        />
+        <Hint>{t('turnoverHint')}</Hint>
+      </div>
+      <div className="flex flex-col gap-1">
+        <label htmlFor="ob-capacity" className="font-label-md text-label-md font-semibold text-on-surface">
+          {t('capacityLabel')}
+        </label>
+        <MoneyInput
+          id="ob-capacity"
+          value={capacity}
+          currency={capacityCurrency}
+          onValue={onCapacity}
+          onCurrency={onCapacityCurrency}
+          hook="ob-capacity"
+        />
+        <Hint>{t('capacityHint')}</Hint>
+      </div>
+      <div className="flex flex-col gap-space-xs">
+        <span className="font-label-md text-label-md font-semibold text-on-surface">{t('certsLabel')}</span>
+        <Hint>{t('certsHintTrades')}</Hint>
+        <div className="grid grid-cols-1 gap-space-xs sm:grid-cols-2">
+          {suggested.map((c) => {
+            const on = has(c.name);
+            return (
+              <button
+                key={c.key}
+                type="button"
+                aria-pressed={on}
+                onClick={() => toggle(c.name)}
+                className={clsx(
+                  'flex items-start gap-space-sm rounded-lg border px-space-sm py-space-sm text-left transition-colors',
+                  on ? 'border-indigo bg-indigo-soft' : 'border-outline-variant bg-surface-container-lowest hover:border-indigo',
+                )}
+              >
+                <Icon
+                  name={on ? 'check_circle' : 'radio_button_unchecked'}
+                  size="sm"
+                  className={clsx('mt-0.5', on ? 'text-indigo-text' : 'text-on-surface-variant')}
+                />
+                <span className="flex flex-col">
+                  <span className="text-[14px] font-medium leading-[19px] text-ink">{c.name}</span>
+                  <span className="text-[12.5px] leading-[17px] text-muted">
+                    {c.issuer} · {c.what[lang]}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <span className="mt-space-xs text-[13px] font-medium text-ink-2">{t('certsOther')}</span>
+        <ChipInput
+          values={custom}
+          onChange={(next) => onCertifications([...certifications.filter((c) => known.has(c.toLowerCase())), ...next])}
+          placeholder={t('certsPlaceholder')}
+          inputHook="ob-certs"
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Step 4 — Team                                                       */
+/* ------------------------------------------------------------------ */
+
+function CountField({
+  id,
+  label,
+  hint,
+  value,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  hint: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const n = Number(value || 0);
+  const step = (d: number) => onChange(String(Math.max(0, n + d)));
+  return (
+    <div className="flex flex-col gap-1">
+      <label htmlFor={id} className="font-label-md text-label-md font-semibold text-on-surface">
+        {label}
+      </label>
+      <div className="flex items-center gap-space-xs">
+        <button
+          type="button"
+          aria-label="−1"
+          onClick={() => step(-1)}
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-line text-ink hover:border-indigo"
+        >
+          <Icon name="remove" size="sm" />
+        </button>
+        <input
+          id={id}
+          inputMode="numeric"
+          value={value}
+          onChange={(e) => onChange(e.target.value.replace(/\D/g, '').slice(0, 5))}
+          placeholder="0"
+          className={`${INPUT} tnum !w-24 text-center`}
+        />
+        <button
+          type="button"
+          aria-label="+1"
+          onClick={() => step(1)}
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-line text-ink hover:border-indigo"
+        >
+          <Icon name="add" size="sm" />
+        </button>
+      </div>
+      <Hint>{hint}</Hint>
+    </div>
+  );
+}
+
+export function TeamStep({
+  eu,
+  nonEu,
+  onEu,
+  onNonEu,
+}: {
+  eu: string;
+  nonEu: string;
+  onEu: (v: string) => void;
+  onNonEu: (v: string) => void;
+}) {
+  const t = useTranslations('onboarding');
+  const total = Number(eu || 0) + Number(nonEu || 0);
+  return (
+    <div className="flex flex-col gap-space-lg">
+      <p className="font-body-md text-body-md text-on-surface-variant">{t('teamIntro')}</p>
+      <CountField id="ob-team-eu" label={t('teamEuLabel')} hint={t('teamEuHint')} value={eu} onChange={onEu} />
+      <CountField
+        id="ob-team-noneu"
+        label={t('teamNonEuLabel')}
+        hint={t('teamNonEuHint')}
+        value={nonEu}
+        onChange={onNonEu}
+      />
+      <p className="tnum text-[14px] text-ink-2">{t('teamTotal', { count: total })}</p>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Step 4 — Review                                                     */
 /* ------------------------------------------------------------------ */
 
 export interface ReviewDraft {
   name: string;
   cui: string;
+  website: string;
   countries: string[];
+  trades: string[];
+  cpv: string[];
+  blacklist: string[];
   turnover: string;
   turnoverCurrency: string;
   capacity: string;
+  capacityCurrency: string;
   certifications: string[];
-  categories: string[];
-  cpv: string[];
-  blacklist: string[];
+  teamEu: string;
+  teamNonEu: string;
 }
 
 export function ReviewStep({
   draft,
-  industryLabel,
   countryName,
   onJump,
 }: {
   draft: ReviewDraft;
-  industryLabel: (key: string) => string;
   countryName: (code: string) => string;
   onJump: (step: number) => void;
 }) {
   const t = useTranslations('onboarding');
+  const lang: Lang = useLocale() === 'ro' ? 'ro' : 'en';
+  const money = (v: string, cur: string) => (v ? `${groupDigits(v)} ${cur}` : '');
   const rows: { label: string; value: string; step: number }[] = [
     { label: t('reviewName'), value: draft.name, step: 0 },
     { label: t('reviewCui'), value: draft.cui, step: 0 },
+    { label: t('reviewWebsite'), value: draft.website, step: 0 },
+    { label: t('reviewCountries'), value: draft.countries.map(countryName).join(', '), step: 0 },
     {
-      label: t('reviewCountries'),
-      value: draft.countries.map(countryName).join(', '),
-      step: 0,
-    },
-    {
-      label: t('reviewTurnover'),
-      value: draft.turnover ? `${draft.turnover} ${draft.turnoverCurrency}` : '',
+      label: t('reviewTrades'),
+      value: TRADES.filter((tr) => draft.trades.includes(tr.key))
+        .map((tr) => tr.name[lang])
+        .join(', '),
       step: 1,
     },
-    { label: t('reviewCapacity'), value: draft.capacity ? `${draft.capacity} RON` : '', step: 1 },
-    { label: t('reviewCerts'), value: draft.certifications.join(', '), step: 1 },
     {
-      label: t('reviewIndustry'),
-      value: draft.categories.length > 0 ? industryLabel(draft.categories[0]) : '',
-      step: 2,
+      label: t('reviewWorks'),
+      value: [...draft.cpv]
+        .sort()
+        .map((c) => `${workByCpv(c)?.name[lang] ?? c} (${c})`)
+        .join(', '),
+      step: 1,
     },
-    { label: t('reviewCpv'), value: [...draft.cpv].sort().join(', '), step: 2 },
-    { label: t('reviewBlacklist'), value: draft.blacklist.join(', '), step: 2 },
+    { label: t('reviewBlacklist'), value: draft.blacklist.join(', '), step: 1 },
+    { label: t('reviewTurnover'), value: money(draft.turnover, draft.turnoverCurrency), step: 2 },
+    { label: t('reviewCapacity'), value: money(draft.capacity, draft.capacityCurrency), step: 2 },
+    { label: t('reviewCerts'), value: draft.certifications.join(', '), step: 2 },
+    {
+      label: t('reviewTeam'),
+      value:
+        draft.teamEu || draft.teamNonEu
+          ? t('reviewTeamValue', { eu: Number(draft.teamEu || 0), other: Number(draft.teamNonEu || 0) })
+          : '',
+      step: 3,
+    },
   ];
   return (
     <dl className="flex flex-col">

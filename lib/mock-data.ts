@@ -449,6 +449,11 @@ export const MOCK_COMPANY: CompanyProfile = {
   similar_experience_contract_count: 6,
   target_countries: ['RO'],
   keywords: ['software-licenses', 'maintenance'],
+  website: null,
+  subsectors: [],
+  annual_capacity_currency: 'RON',
+  team_eu_count: null,
+  team_non_eu_count: null,
 };
 
 export const MOCK_EVIDENCE: EvidenceDocument[] = [

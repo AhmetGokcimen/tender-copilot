@@ -6,15 +6,18 @@ import { LanguageSwitcher } from '../i18n/LanguageSwitcher';
 export function AuthShell({
   title,
   subtitle,
+  languages = true,
   children,
 }: {
   title: string;
   subtitle?: string;
+  /** Show the language flags in the corner (off on signup). */
+  languages?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <main className="relative flex min-h-[100dvh] flex-col items-center bg-surface px-4 py-12 text-ink">
-      <LanguageSwitcher className="absolute right-4 top-4 md:right-8 md:top-6" />
+      {languages && <LanguageSwitcher className="absolute right-4 top-4 md:right-8 md:top-6" />}
       <Link href="/" aria-label="Licits home" className="mb-10">
         <Logo />
       </Link>

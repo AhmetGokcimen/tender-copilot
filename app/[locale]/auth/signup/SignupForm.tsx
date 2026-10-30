@@ -26,7 +26,7 @@ export function SignupForm() {
 
   if (!USE_MOCK) {
     return (
-      <AuthShell title={t('signupTitle')} subtitle={t('signupSub')}>
+      <AuthShell title={t('signupTitle')} subtitle={t('signupSub')} languages={false}>
         <a
           href={`${API_URL}/auth/google/login`}
           className={buttonClass()}
@@ -76,7 +76,7 @@ export function SignupForm() {
   };
 
   return (
-    <AuthShell title={t('signupTitle')} subtitle={t('signupSub')}>
+    <AuthShell title={t('signupTitle')} subtitle={t('signupSub')} languages={false}>
       <label className={LABEL}>
         {t('nameLabel')}
         <input

@@ -33,6 +33,11 @@ export const EMPTY_COMPANY: CompanyProfile = {
   similar_experience_contract_count: null,
   target_countries: [],
   keywords: [],
+  website: null,
+  subsectors: [],
+  annual_capacity_currency: null,
+  team_eu_count: null,
+  team_non_eu_count: null,
 };
 
 export const useCompanyStore = create<CompanyState>()(

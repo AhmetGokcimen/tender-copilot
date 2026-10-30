@@ -39,3 +39,13 @@ class CompanyProfile(SQLModel, table=True):
     similar_experience_value: float | None = None  # cumulative value of past similar contracts
     similar_experience_currency: str | None = None
     similar_experience_contract_count: int | None = None
+
+    # Onboarding additions: the company's site (for a later agent to read),
+    # the construction trades it works in (keys into the frontend catalogue
+    # in lib/construction.ts), the capacity's currency, and the team split
+    # that tenders ask about (EU citizens vs. others).
+    website: str | None = None
+    subsectors: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    annual_capacity_currency: str | None = None
+    team_eu_count: int | None = None
+    team_non_eu_count: int | None = None

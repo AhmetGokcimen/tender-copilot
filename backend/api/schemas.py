@@ -272,6 +272,11 @@ class CompanyDetail(BaseModel):
     similar_experience_contract_count: int | None
     target_countries: list[str]
     keywords: list[str]
+    website: str | None
+    subsectors: list[str]
+    annual_capacity_currency: str | None
+    team_eu_count: int | None
+    team_non_eu_count: int | None
 
     @classmethod
     def from_profile(cls, profile: CompanyProfile) -> "CompanyDetail":
@@ -294,6 +299,11 @@ class CompanyDetail(BaseModel):
             similar_experience_contract_count=profile.similar_experience_contract_count,
             target_countries=profile.target_countries,
             keywords=profile.keywords,
+            website=profile.website,
+            subsectors=profile.subsectors or [],
+            annual_capacity_currency=profile.annual_capacity_currency,
+            team_eu_count=profile.team_eu_count,
+            team_non_eu_count=profile.team_non_eu_count,
         )
 
 
@@ -318,6 +328,11 @@ class CompanyPatch(BaseModel):
     similar_experience_contract_count: int | None = None
     target_countries: list[str] | None = None
     keywords: list[str] | None = None
+    website: str | None = None
+    subsectors: list[str] | None = None
+    annual_capacity_currency: str | None = None
+    team_eu_count: int | None = None
+    team_non_eu_count: int | None = None
 
 
 class OnboardingStatus(BaseModel):

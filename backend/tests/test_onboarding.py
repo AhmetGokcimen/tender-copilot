@@ -8,6 +8,8 @@ DETAIL_KEYS = {
     "blacklist_keywords", "annual_turnover", "annual_turnover_currency",
     "similar_experience_value", "similar_experience_currency",
     "similar_experience_contract_count", "target_countries", "keywords",
+    "website", "subsectors", "annual_capacity_currency", "team_eu_count",
+    "team_non_eu_count",
 }
 
 

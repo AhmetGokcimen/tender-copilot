@@ -10,7 +10,7 @@ in _insert_stmt below.
 from collections.abc import Generator
 from datetime import UTC, datetime
 
-from sqlalchemy import func, update
+from sqlalchemy import func, inspect, text, update
 from sqlmodel import Session, SQLModel, create_engine
 
 from backend.core.config import settings
@@ -24,6 +24,24 @@ engine = create_engine(settings.database_url, connect_args=_connect_args)
 
 def init_db() -> None:
     SQLModel.metadata.create_all(engine)
+    _add_missing_columns()
+
+
+def _add_missing_columns() -> None:
+    """create_all never alters existing tables, so columns added to a
+    model later are appended here (nullable, no default). Enough for this
+    project's additive changes; a real migration tool can replace it."""
+    insp = inspect(engine)
+    with engine.begin() as conn:
+        for table in SQLModel.metadata.sorted_tables:
+            if not insp.has_table(table.name):
+                continue
+            existing = {c["name"] for c in insp.get_columns(table.name)}
+            for column in table.columns:
+                if column.name in existing:
+                    continue
+                ddl = column.type.compile(dialect=engine.dialect)
+                conn.execute(text(f'ALTER TABLE "{table.name}" ADD COLUMN "{column.name}" {ddl}'))
 
 
 def get_session() -> Generator[Session, None, None]:

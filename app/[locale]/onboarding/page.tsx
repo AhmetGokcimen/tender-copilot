@@ -19,47 +19,56 @@ import { Logo } from '@/components/brand/Logo';
 import { buttonClass } from '@/components/ui/Button';
 import type { CompanyPatch, CompanyProfile } from '@/lib/types';
 import {
-  CapacityStep,
+  FinanceStep,
   IdentityStep,
   OnboardingProgress,
   ReviewStep,
   SetupInterstitial,
-  TenderPrefsStep,
+  TeamStep,
+  TradeStep,
   cuiValid,
+  websiteValid,
 } from '@/components/onboarding/steps';
+import { TRADES, workByCpv } from '@/lib/construction';
+import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
 
 interface Draft {
   name: string;
   cui: string;
+  website: string;
   countries: string[];
+  trades: string[];
+  cpv: string[];
+  blacklist: string[];
   turnover: string;
   turnoverCurrency: string;
   capacity: string;
+  capacityCurrency: string;
   certifications: string[];
-  categories: string[];
-  cpv: string[];
-  manualCpv: string[];
-  manual: boolean;
-  blacklist: string[];
+  teamEu: string;
+  teamNonEu: string;
 }
 
 const str = (v: number | string | null | undefined): string =>
-  v === null || v === undefined ? '' : String(v);
+  v === null || v === undefined ? '' : String(Math.round(Number(v)));
 
 function fromCompany(company: CompanyProfile | undefined): Draft {
   return {
     name: company?.name ?? '',
     cui: company?.cui ?? '',
+    website: company?.website ?? '',
     countries: [...(company?.target_countries ?? [])],
-    turnover: str(company?.annual_turnover),
-    turnoverCurrency: company?.annual_turnover_currency ?? 'RON',
-    capacity: str(company?.annual_capacity),
-    certifications: [...(company?.certifications ?? [])],
-    categories: company?.industry ? [company.industry] : [],
-    cpv: [...(company?.cpv_codes ?? [])],
-    manualCpv: [],
-    manual: false,
+    trades: [...(company?.subsectors ?? [])],
+    // Only codes from the construction catalogue carry over.
+    cpv: (company?.cpv_codes ?? []).filter((c) => workByCpv(c)),
     blacklist: [...(company?.blacklist_keywords ?? [])],
+    turnover: str(company?.annual_turnover),
+    turnoverCurrency: company?.annual_turnover_currency ?? 'EUR',
+    capacity: str(company?.annual_capacity),
+    capacityCurrency: company?.annual_capacity_currency ?? company?.annual_turnover_currency ?? 'EUR',
+    certifications: [...(company?.certifications ?? [])],
+    teamEu: str(company?.team_eu_count),
+    teamNonEu: str(company?.team_non_eu_count),
   };
 }
 
@@ -70,9 +79,10 @@ function fromCompany(company: CompanyProfile | undefined): Draft {
  */
 function derivedStep(company: CompanyProfile | undefined): number {
   if (!company || company.name.trim() === '') return 0;
-  if (company.annual_turnover === null) return 1;
-  if (!company.industry || company.cpv_codes.length === 0) return 2;
-  return 3;
+  if ((company.subsectors ?? []).length === 0 || !company.cpv_codes.some((c) => workByCpv(c))) return 1;
+  if (company.annual_turnover === null) return 2;
+  if (company.team_eu_count == null && company.team_non_eu_count == null) return 3;
+  return 4;
 }
 
 const num = (s: string): number | null => {
@@ -81,34 +91,47 @@ const num = (s: string): number | null => {
   return Number.isFinite(n) && n >= 0 ? n : null;
 };
 
-const STEP_TITLES = ['stepIdentity', 'stepCapacity', 'stepTenders', 'stepReview'] as const;
+const STEP_TITLES = ['stepIdentity', 'stepTrades', 'stepFinance', 'stepTeam', 'stepReview'] as const;
 
 function patchFor(step: number, draft: Draft): CompanyPatch | null {
   switch (step) {
     case 0:
-      return { name: draft.name.trim(), cui: draft.cui.trim(), target_countries: draft.countries };
+      return {
+        name: draft.name.trim(),
+        cui: draft.cui.trim(),
+        website: draft.website.trim() || null,
+        target_countries: draft.countries,
+      };
     case 1:
+      return {
+        industry: 'construction',
+        subsectors: draft.trades,
+        cpv_codes: [...draft.cpv].sort(),
+        blacklist_keywords: draft.blacklist,
+      };
+    case 2:
       return {
         annual_turnover: num(draft.turnover),
         annual_turnover_currency: draft.turnoverCurrency,
         annual_capacity: num(draft.capacity),
+        annual_capacity_currency: draft.capacityCurrency,
         certifications: draft.certifications,
       };
-    case 2:
-      return {
-        industry: draft.categories[0],
-        cpv_codes: [...draft.cpv].sort(),
-        blacklist_keywords: draft.blacklist,
-      };
+    case 3: {
+      const eu = num(draft.teamEu) ?? 0;
+      const other = num(draft.teamNonEu) ?? 0;
+      return { team_eu_count: eu, team_non_eu_count: other, team_size: eu + other };
+    }
     default:
       return null; // review confirms; every step already saved its patch
   }
 }
 
 function stepValid(step: number, draft: Draft): boolean {
-  if (step === 0) return draft.name.trim().length > 0 && cuiValid(draft.cui);
-  if (step === 1) return num(draft.turnover) !== null;
-  if (step === 2) return draft.categories.length > 0 && draft.cpv.length > 0;
+  if (step === 0) return draft.name.trim().length > 0 && cuiValid(draft.cui) && websiteValid(draft.website);
+  if (step === 1) return draft.trades.length > 0 && draft.cpv.length > 0;
+  if (step === 2) return num(draft.turnover) !== null;
+  if (step === 3) return (num(draft.teamEu) ?? 0) + (num(draft.teamNonEu) ?? 0) > 0;
   return true;
 }
 
@@ -171,28 +194,23 @@ export default function OnboardingPage() {
   const last = step === STEP_TITLES.length - 1;
   const set = (slice: Partial<Draft>) => setDraft({ ...draft, ...slice });
 
-  const toggleCategory = (key: string) => {
-    const removing = draft.categories.includes(key);
-    const categories = removing
-      ? draft.categories.filter((k) => k !== key)
-      : [...draft.categories, key];
-    const suggested = (k: string) =>
-      options.industries.find((i) => i.key === k)?.suggested_cpv_codes ?? [];
-    let cpv: string[];
-    if (!removing) {
-      cpv = [...new Set([...draft.cpv, ...suggested(key)])];
+  const toggleTrade = (key: string) => {
+    if (draft.trades.includes(key)) {
+      const trades = draft.trades.filter((k) => k !== key);
+      // Drop works that only this trade offered.
+      const kept = new Set(TRADES.filter((tr) => trades.includes(tr.key)).flatMap((tr) => tr.works.map((w) => w.cpv)));
+      set({ trades, cpv: draft.cpv.filter((c) => kept.has(c)) });
     } else {
-      const stillSuggested = new Set(categories.flatMap(suggested));
-      cpv = draft.cpv.filter((c) => stillSuggested.has(c) || draft.manualCpv.includes(c));
+      set({ trades: [...draft.trades, key] });
     }
-    set({ categories, cpv });
   };
 
-  const toggleCpv = (code: string) => {
+  const toggleCpv = (code: string, tradeKey: string) => {
+    const picked = draft.cpv.includes(code);
     set({
-      cpv: draft.cpv.includes(code)
-        ? draft.cpv.filter((c) => c !== code)
-        : [...draft.cpv, code],
+      cpv: picked ? draft.cpv.filter((c) => c !== code) : [...draft.cpv, code],
+      // Picking a work from search also selects its trade.
+      trades: picked || draft.trades.includes(tradeKey) ? draft.trades : [...draft.trades, tradeKey],
     });
   };
 
@@ -230,10 +248,13 @@ export default function OnboardingPage() {
   return (
     <div className="flex min-h-screen items-start justify-center bg-surface px-margin py-space-xl">
       {finishing && <SetupInterstitial />}
-      <div className="flex w-full max-w-2xl flex-col gap-space-lg">
-        <Link href="/" aria-label="Licits home" className="self-start">
-          <Logo />
-        </Link>
+      <div className="flex w-full max-w-3xl flex-col gap-space-lg">
+        <div className="flex items-center justify-between">
+          <Link href="/" aria-label="Licits home">
+            <Logo />
+          </Link>
+          <LanguageSwitcher />
+        </div>
         <header className="flex flex-col gap-space-xs">
           <h1 className="text-[32px] font-light leading-[38px] tracking-[-1px] text-ink">
             {t('title')}
@@ -254,48 +275,51 @@ export default function OnboardingPage() {
             <IdentityStep
               name={draft.name}
               cui={draft.cui}
+              website={draft.website}
               countries={draft.countries}
               onName={(name) => set({ name })}
               onCui={(cui) => set({ cui })}
+              onWebsite={(website) => set({ website })}
               onCountries={(countries) => set({ countries })}
               options={options}
             />
           )}
           {step === 1 && (
-            <CapacityStep
+            <TradeStep
+              trades={draft.trades}
+              cpv={draft.cpv}
+              blacklist={draft.blacklist}
+              onToggleTrade={toggleTrade}
+              onToggleCpv={toggleCpv}
+              onBlacklist={(blacklist) => set({ blacklist })}
+            />
+          )}
+          {step === 2 && (
+            <FinanceStep
+              trades={draft.trades}
               turnover={draft.turnover}
               turnoverCurrency={draft.turnoverCurrency}
               capacity={draft.capacity}
+              capacityCurrency={draft.capacityCurrency}
               certifications={draft.certifications}
               onTurnover={(turnover) => set({ turnover })}
               onTurnoverCurrency={(turnoverCurrency) => set({ turnoverCurrency })}
               onCapacity={(capacity) => set({ capacity })}
+              onCapacityCurrency={(capacityCurrency) => set({ capacityCurrency })}
               onCertifications={(certifications) => set({ certifications })}
             />
           )}
-          {step === 2 && (
-            <TenderPrefsStep
-              categories={draft.categories}
-              cpv={draft.cpv}
-              manual={draft.manual}
-              blacklist={draft.blacklist}
-              onToggleCategory={toggleCategory}
-              onToggleCpv={toggleCpv}
-              onAddManualCpv={(code) =>
-                set({
-                  cpv: [...new Set([...draft.cpv, code])],
-                  manualCpv: [...new Set([...draft.manualCpv, code])],
-                })
-              }
-              onManual={(manual) => set({ manual })}
-              onBlacklist={(blacklist) => set({ blacklist })}
-              options={options}
+          {step === 3 && (
+            <TeamStep
+              eu={draft.teamEu}
+              nonEu={draft.teamNonEu}
+              onEu={(teamEu) => set({ teamEu })}
+              onNonEu={(teamNonEu) => set({ teamNonEu })}
             />
           )}
-          {step === 3 && (
+          {step === 4 && (
             <ReviewStep
               draft={draft}
-              industryLabel={(key) => options.industries.find((i) => i.key === key)?.label ?? key}
               countryName={(code) => options.countries.find((c) => c.code === code)?.name ?? code}
               onJump={go}
             />

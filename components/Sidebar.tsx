@@ -6,9 +6,9 @@ import { clsx } from 'clsx';
 import { Link, usePathname } from '@/i18n/routing';
 import { Icon } from './Icon';
 import { LogoMark, Wordmark } from './brand/Logo';
+import { LanguageToggle } from './i18n/LanguageToggle';
 import { FlashNumber } from './FlashNumber';
 import { MOCK_QUOTA } from '@/lib/mock-data';
-import { USE_MOCK } from '@/lib/api';
 
 const ITEMS = [
   { key: 'opportunities', href: '/app', icon: 'grid_view' },
@@ -77,28 +77,9 @@ export function Sidebar() {
               {!collapsed && (
                 <>
                   <Wordmark className="whitespace-nowrap text-[21px] text-ink" />
-                  <span className="rounded-pill bg-sunk px-2 py-0.5 text-[11px] font-medium text-muted">
-                    {t('tag')}
-                  </span>
                 </>
               )}
             </div>
-            {!collapsed && (
-              <div className="flex items-center gap-space-xs">
-                {USE_MOCK ? (
-                  <span className="whitespace-nowrap rounded-full border border-warn/30 bg-warn-bg px-space-xs py-px font-label-sm text-label-sm font-medium text-warn">
-                    {t('mockNote')}
-                  </span>
-                ) : (
-                  <>
-                    <span className="inline-block h-2 w-2 rounded-full bg-on-tertiary-container" />
-                    <span className="whitespace-nowrap font-code-sm text-code-sm font-medium text-on-tertiary-container">
-                      {t('sync')}
-                    </span>
-                  </>
-                )}
-              </div>
-            )}
           </div>
           <nav className={clsx('flex flex-col gap-space-xs py-space-sm', collapsed ? 'px-space-xs' : 'px-space-md')}>
             {ITEMS.map((item) => (
@@ -183,14 +164,7 @@ export function Sidebar() {
         <div className="flex items-center gap-space-sm px-margin py-space-sm">
           <LogoMark size={26} />
           <Wordmark className="text-[19px] text-ink" />
-          <span className="rounded-pill bg-sunk px-2 py-0.5 text-[11px] font-medium text-muted">
-            {t('tag')}
-          </span>
-          {USE_MOCK && (
-            <span className="ml-auto rounded-full border border-warn/30 bg-warn-bg px-space-xs py-px font-label-sm text-label-sm font-medium text-warn">
-              {t('mockNote')}
-            </span>
-          )}
+          <LanguageToggle className="ml-auto" />
         </div>
         <nav className="thin-scroll flex gap-space-xs overflow-x-auto px-margin pb-space-sm">
           {ITEMS.map((item) => (

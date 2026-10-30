@@ -167,10 +167,6 @@ export default function OpportunitiesPage() {
               <h1 className="font-headline-lg text-headline-lg tracking-tight text-on-surface">
                 {t('title')}
               </h1>
-              <span className="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-space-xs py-0.5 font-code-sm text-code-sm text-navy">
-                <span className="h-1.5 w-1.5 rounded-full bg-navy" />
-                {t('algoBadge')}
-              </span>
             </div>
             <p className="font-body-md text-body-md text-on-surface-variant">{t('subtitle')}</p>
           </div>
@@ -221,17 +217,21 @@ export default function OpportunitiesPage() {
           </div>
         </div>
         <div className="grid grid-cols-1 gap-space-md lg:grid-cols-12">
-          <div className="flex items-center gap-space-md rounded-xl bg-navy p-space-lg text-white shadow-sm lg:col-span-5">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-white/10">
+          <div className="relative flex items-center gap-space-md overflow-hidden rounded-xl border border-indigo/15 bg-indigo-soft p-space-lg lg:col-span-5">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgb(var(--ribbon-4-rgb)/0.28),transparent_65%)]"
+            />
+            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-raised text-indigo-text shadow-sm">
               <Icon name="verified" size="md" />
             </span>
-            <div className="flex min-w-0 flex-col">
-              <span className="font-label-sm text-label-sm uppercase tracking-wider text-white/70">
+            <div className="relative flex min-w-0 flex-col">
+              <span className="font-label-sm text-label-sm uppercase tracking-wider text-indigo-text">
                 {t('kpiMatch')}
               </span>
               <div className="flex items-baseline gap-space-xs">
-                <span className="tnum text-[40px] font-semibold leading-none">{kpis.high}</span>
-                <span className="font-code-sm text-code-sm text-white/70">{t('kpiQualified')}</span>
+                <span className="tnum text-[40px] font-semibold leading-none text-indigo-deep">{kpis.high}</span>
+                <span className="font-code-sm text-code-sm text-ink-2">{t('kpiQualified')}</span>
               </div>
             </div>
           </div>
