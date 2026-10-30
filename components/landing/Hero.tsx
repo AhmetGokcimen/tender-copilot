@@ -19,15 +19,15 @@ const PERKS = ['wlPerk1', 'wlPerk2', 'wlPerk3'] as const;
 
 /**
  * First screen: headline on the left, the waitlist offer on the right and
- * the facts strip at the bottom, all within one viewport. Below it, a quiet
- * band holds the dotted map of Romania, which rises behind the fold, so
- * scrolling a little reveals notices appearing city by city.
+ * the facts strip at the bottom, all within one viewport. A faint dotted map
+ * of Romania sits behind it and runs past the fold, so scrolling a little
+ * reveals notices appearing city by city in the open space below.
  * Runs under the transparent navbar.
  */
 export function Hero() {
   const t = useTranslations('landing');
   return (
-    <section id="top" className="relative -mt-[68px] overflow-hidden pb-16 pt-[68px] md:pb-24">
+    <section id="top" className="relative -mt-[68px] overflow-hidden pb-16 pt-[68px] md:pb-20">
       <HeroBackdrop />
       <div className="relative z-10 flex min-h-[calc(100dvh-68px)] flex-col">
         <div className="relative mx-auto grid w-full max-w-[1200px] flex-1 grid-cols-1 items-center gap-10 px-4 py-12 md:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:gap-16">
@@ -70,7 +70,7 @@ export function Hero() {
             </div>
           </div>
         </div>
-        <div className="relative bg-paper/75 backdrop-blur-[6px]">
+        <div className="relative">
           <ul className="mx-auto grid max-w-[1200px] grid-cols-2 gap-x-6 gap-y-3 px-4 py-5 md:px-8 lg:flex lg:justify-between">
             {STRIP.map(({ icon, key }) => (
               <li key={key} className="flex items-center gap-2 text-[13px] text-ink-2">
@@ -81,9 +81,12 @@ export function Hero() {
           </ul>
         </div>
       </div>
-      <div className="relative z-0 lg:-mt-[22vh]">
+      {/* On desktop the map sits behind the whole first screen and runs past
+          the fold; the spacer keeps its lower half in view after a short scroll. */}
+      <div className="relative z-0 lg:absolute lg:left-1/2 lg:top-[calc(100dvh-600px)] lg:w-[min(1320px,118vw)] lg:-translate-x-1/2">
         <TenderMap />
       </div>
+      <div aria-hidden className="hidden h-[calc(min(1320px,118vw)*0.704-560px)] lg:block" />
     </section>
   );
 }

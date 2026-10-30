@@ -350,7 +350,7 @@
     "kpiPipeline": "pipeline",
     "kpiUrgent": "Urgent deadlines",
     "kpiUrgentSub": "< 7 days left",
-    "filtersTitle": "Advanced filters",
+    "filtersTitle": "Filters",
     "reset": "Reset",
     "region": "County / Region",
     "procedure": "Procedure type",
@@ -374,7 +374,9 @@
     "empty": "No tenders match these filters.",
     "emptyHint": "Try widening the value range or lowering the minimum score.",
     "emptyFeed": "No tenders in the feed yet.",
-    "emptyFeedHint": "The SEAP feed returned nothing. Refresh to pull the latest notices from SICAP."
+    "emptyFeedHint": "The SEAP feed returned nothing. Refresh to pull the latest notices from SICAP.",
+    "filtersButton": "Filters",
+    "filtersShow": "Show results ({count})"
   },
   "analysis": {
     "back": "Back to opportunities",

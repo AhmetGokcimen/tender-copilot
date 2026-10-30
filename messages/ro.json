@@ -350,7 +350,7 @@
     "kpiPipeline": "pipeline",
     "kpiUrgent": "Termene urgente",
     "kpiUrgentSub": "< 7 zile rămase",
-    "filtersTitle": "Filtre avansate",
+    "filtersTitle": "Filtre",
     "reset": "Resetează",
     "region": "Județ / Regiune",
     "procedure": "Tip procedură",
@@ -374,7 +374,9 @@
     "empty": "Nicio licitație nu corespunde acestor filtre.",
     "emptyHint": "Încearcă un interval de valori mai larg sau un scor minim mai mic.",
     "emptyFeed": "Încă nu există licitații în flux.",
-    "emptyFeedHint": "Fluxul SEAP nu a returnat nimic. Actualizează pentru a prelua cele mai noi anunțuri din SICAP."
+    "emptyFeedHint": "Fluxul SEAP nu a returnat nimic. Actualizează pentru a prelua cele mai noi anunțuri din SICAP.",
+    "filtersButton": "Filtre",
+    "filtersShow": "Arată rezultatele ({count})"
   },
   "analysis": {
     "back": "Înapoi la oportunități",

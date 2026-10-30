@@ -30,10 +30,14 @@ const NOTICES: Notice[] = [
   { x: 48.94, y: 73.84, city: 'Pitești', title: { en: 'Sewer network extension', ro: 'Extindere canalizare' }, value: 4100000 },
   { x: 45.67, y: 37.52, city: 'Târgu Mureș', title: { en: 'Bridge consolidation', ro: 'Consolidare pod' }, value: 11300000 },
   { x: 69.56, y: 67.57, city: 'Buzău', title: { en: 'Social housing, 40 units', ro: 'Locuințe sociale, 40 unități' }, value: 15800000 },
+  { x: 25.58, y: 78.82, city: 'Drobeta-Turnu Severin', title: { en: 'Danube quay repair', ro: 'Reparații cheu Dunăre' }, value: 8200000 },
+  { x: 43.7, y: 83.1, city: 'Slatina', title: { en: 'Clinic energy retrofit', ro: 'Eficientizare energetică policlinică' }, value: 3600000 },
+  { x: 53.8, y: 93.1, city: 'Alexandria', title: { en: 'Rural roads, 14 km', ro: 'Drumuri comunale, 14 km' }, value: 9900000 },
+  { x: 75.0, y: 88.1, city: 'Călărași', title: { en: 'High school gym', ro: 'Sală de sport liceu' }, value: 5100000 },
   { x: 28.11, y: 51.79, city: 'Deva', title: { en: 'Stadium stands repair', ro: 'Reparații tribune stadion' }, value: 2900000 },
 ];
 
-const VISIBLE = 4;
+const VISIBLE = 3;
 const STEP_MS = 1700;
 
 /**
@@ -45,20 +49,26 @@ export function TenderMap() {
   const lang = useLocale() === 'ro' ? 'ro' : 'en';
   const t = useTranslations('landing');
   // Indices of the notices on screen, oldest first.
-  const [shown, setShown] = useState<number[]>([0, 5, 9, 13]);
+  const [shown, setShown] = useState<number[]>([0, 6, 4]);
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     // Small screens have room for two cards at a time.
     const max = window.matchMedia('(min-width: 768px)').matches ? VISIBLE : 2;
-    setShown((cur) => cur.slice(-max));
+    // On desktop the top of the map lies faintly behind the hero, so notices
+    // only appear in the open southern part, west to east.
+    const pool = window.matchMedia('(min-width: 1024px)').matches
+      ? NOTICES.flatMap((n, i) => (n.y > 72 ? [i] : [])).sort((a, b) => NOTICES[a].x - NOTICES[b].x)
+      : NOTICES.map((_, i) => i);
+    setShown((cur) => cur.filter((i) => pool.includes(i)).slice(-max));
     let next = 1;
     const id = window.setInterval(() => {
       setShown((cur) => {
         // Skip notices already on screen.
-        while (cur.includes(next % NOTICES.length)) next += 3;
-        const add = next % NOTICES.length;
-        next += 3;
+        while (cur.includes(pool[next % pool.length])) next += 1;
+        const add = pool[next % pool.length];
+        // Stepping by 4 keeps consecutive notices far apart on the map.
+        next += 4;
         return [...cur.slice(cur.length >= max ? 1 : 0), add];
       });
     }, STEP_MS);
@@ -71,20 +81,29 @@ export function TenderMap() {
   });
 
   return (
-    <figure className="relative mx-auto w-full max-w-[1100px] px-4 md:px-8">
+    <figure className="relative mx-auto w-full max-w-[1100px] px-4 md:px-8 lg:max-w-none">
       <div className="relative aspect-[1000/704]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/brand/romania-dots.svg"
-          alt=""
+        {/* The top of the map sits behind the hero copy, so it fades in from above. */}
+        <div
           aria-hidden
-          className="absolute inset-0 h-full w-full select-none"
+          className="absolute inset-0"
           style={{
-            maskImage: 'radial-gradient(75% 80% at 50% 50%, #000 60%, transparent 100%)',
-            WebkitMaskImage: 'radial-gradient(75% 80% at 50% 50%, #000 60%, transparent 100%)',
+            maskImage: 'linear-gradient(180deg, rgba(0,0,0,0.45) 0%, #000 62%)',
+            WebkitMaskImage: 'linear-gradient(180deg, rgba(0,0,0,0.45) 0%, #000 62%)',
           }}
-          draggable={false}
-        />
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/romania-dots.svg"
+            alt=""
+            className="absolute inset-0 h-full w-full select-none opacity-[0.32]"
+            style={{
+              maskImage: 'radial-gradient(75% 80% at 50% 50%, #000 60%, transparent 100%)',
+              WebkitMaskImage: 'radial-gradient(75% 80% at 50% 50%, #000 60%, transparent 100%)',
+            }}
+            draggable={false}
+          />
+        </div>
         <div aria-hidden className="absolute inset-0">
           {NOTICES.map((n, i) => {
             const on = shown.includes(i);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useTenders } from '@/lib/queries';
 import { useFilterStore } from '@/stores/useFilterStore';
@@ -87,6 +87,25 @@ export default function OpportunitiesPage() {
   const tp = useTranslations('procedures');
   const tc = useTranslations('common');
   const f = useFilterStore();
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+  const activeFilters =
+    Number(!!f.county) + Number(!!f.procedure) + Number(f.minValue != null) + Number(f.minScore > 0) + Number(!!f.cpv) + Number(f.onlyEligible);
+
+  // The filter panel closes on Escape or a click outside it.
+  useEffect(() => {
+    if (!filtersOpen) return;
+    const onDown = (e: PointerEvent) => {
+      if (!filterRef.current?.contains(e.target as Node)) setFiltersOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setFiltersOpen(false);
+    document.addEventListener('pointerdown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [filtersOpen]);
   const { data: tenders, isLoading, isError, refetch, isFetching } = useTenders();
   const [exportOpen, setExportOpen] = useState(false);
 
@@ -224,63 +243,109 @@ export default function OpportunitiesPage() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 items-start gap-gutter-desktop lg:grid-cols-12">
-        <aside className="flex flex-col gap-space-md rounded-xl bg-surface-container-lowest p-space-lg shadow-sm lg:col-span-4 xl:col-span-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-space-xs">
-              <Icon name="tune" size="sm" className="text-on-surface-variant" />
-              <h2 className="font-headline-sm text-headline-sm text-on-surface">{t('filtersTitle')}</h2>
-            </div>
-            <button type="button" onClick={() => f.reset()} className="font-label-sm text-label-sm text-navy hover:underline">
-              {t('reset')}
+      <section className="flex flex-col gap-space-md">
+        <div className="flex flex-wrap items-center gap-space-sm">
+          <div ref={filterRef} className="relative">
+            <button
+              type="button"
+              aria-expanded={filtersOpen}
+              aria-controls="feed-filters"
+              onClick={() => setFiltersOpen((v) => !v)}
+              className={clsx(
+                'flex h-9 items-center gap-space-xs rounded-pill border px-space-md font-label-md text-label-md transition-colors',
+                filtersOpen || activeFilters > 0
+                  ? 'border-indigo bg-indigo-soft text-indigo-text'
+                  : 'border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container-low',
+              )}
+            >
+              <Icon name="tune" size="sm" />
+              {t('filtersButton')}
+              {activeFilters > 0 && (
+                <span className="tnum flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo px-1 text-[11px] font-semibold text-on-indigo">
+                  {activeFilters}
+                </span>
+              )}
             </button>
+            {filtersOpen && (
+              <div
+                id="feed-filters"
+                role="dialog"
+                aria-label={t('filtersTitle')}
+                className="absolute left-0 top-11 z-20 flex w-[min(560px,calc(100vw-2rem))] flex-col gap-space-md rounded-xl border border-outline-variant bg-surface-container-lowest p-space-lg shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <h2 className="font-headline-sm text-headline-sm text-on-surface">{t('filtersTitle')}</h2>
+                  <button type="button" onClick={() => f.reset()} className="font-label-sm text-label-sm text-navy hover:underline">
+                    {t('reset')}
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 gap-space-md sm:grid-cols-2">
+                  <div className="flex flex-col gap-space-xs">
+                    <label htmlFor="f-county" className={LABEL}>{t('region')}</label>
+                    <select id="f-county" className={INPUT_COMPACT} value={f.county} onChange={(e) => f.set({ county: e.target.value })}>
+                      <option value="">{tc('all')}</option>
+                      {counties.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-space-xs">
+                    <label htmlFor="f-proc" className={LABEL}>{t('procedure')}</label>
+                    <select id="f-proc" className={INPUT_COMPACT} value={f.procedure} onChange={(e) => f.set({ procedure: e.target.value as ProcedureType | '' })}>
+                      {PROCEDURES.map((p) => (
+                        <option key={p || 'all'} value={p}>{p === '' ? '—' : tp(p)}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-space-xs">
+                    <label htmlFor="f-value" className={LABEL}>{t('minValue')}</label>
+                    <input id="f-value" type="number" min={0} step={50000} className={`${INPUT_COMPACT} tnum`} placeholder="0" value={f.minValue ?? ''} onChange={(e) => f.set({ minValue: e.target.value === '' ? null : Number(e.target.value) })} />
+                  </div>
+                  <div className="flex flex-col gap-space-xs">
+                    <label htmlFor="f-cpv" className={LABEL}>{t('cpv')}</label>
+                    <input id="f-cpv" className={`${INPUT_COMPACT} tnum font-code-sm`} placeholder={t('cpvPlaceholder')} value={f.cpv} onChange={(e) => f.set({ cpv: e.target.value })} />
+                  </div>
+                  <div className="flex flex-col gap-space-xs">
+                    <label htmlFor="f-score" className={`${LABEL} flex items-center justify-between`}>
+                      <span>{t('minScore')}</span>
+                      <span className="tnum font-code-sm text-code-sm text-navy">{f.minScore}%</span>
+                    </label>
+                    <input id="f-score" type="range" min={0} max={100} step={5} value={f.minScore} onChange={(e) => f.set({ minScore: Number(e.target.value) })} className="w-full accent-accent" />
+                  </div>
+                  <div className="flex items-end">
+                    <CheckboxRow
+                      id="f-eligible"
+                      label={t('onlyEligible')}
+                      checked={f.onlyEligible}
+                      onChange={(e) => f.set({ onlyEligible: e.target.checked })}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setFiltersOpen(false)}
+                    className="h-9 rounded-pill bg-indigo px-space-md font-label-md text-label-md text-on-indigo hover:bg-indigo-deep"
+                  >
+                    {t('filtersShow', { count: filtered.length })}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="flex flex-col gap-space-xs">
-            <label htmlFor="f-search" className={LABEL}>{t('searchLabel')}</label>
-            <input data-assistant="filters-search" id="f-search" className={INPUT_COMPACT} placeholder={t('searchPlaceholder')} value={f.search} onChange={(e) => f.set({ search: e.target.value })} />
+          <div className="relative min-w-[200px] flex-1 sm:max-w-sm">
+            <Icon name="search" size="sm" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" />
+            <input
+              data-assistant="filters-search"
+              id="f-search"
+              aria-label={t('searchLabel')}
+              className={`${INPUT_COMPACT} !rounded-pill !pl-9`}
+              placeholder={t('searchPlaceholder')}
+              value={f.search}
+              onChange={(e) => f.set({ search: e.target.value })}
+            />
           </div>
-          <div className="flex flex-col gap-space-xs">
-            <label htmlFor="f-county" className={LABEL}>{t('region')}</label>
-            <select id="f-county" className={INPUT_COMPACT} value={f.county} onChange={(e) => f.set({ county: e.target.value })}>
-              <option value="">{tc('all')}</option>
-              {counties.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex flex-col gap-space-xs">
-            <label htmlFor="f-proc" className={LABEL}>{t('procedure')}</label>
-            <select id="f-proc" className={INPUT_COMPACT} value={f.procedure} onChange={(e) => f.set({ procedure: e.target.value as ProcedureType | '' })}>
-              {PROCEDURES.map((p) => (
-                <option key={p || 'all'} value={p}>{p === '' ? '—' : tp(p)}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex flex-col gap-space-xs">
-            <label htmlFor="f-value" className={LABEL}>{t('minValue')}</label>
-            <input id="f-value" type="number" min={0} step={50000} className={`${INPUT_COMPACT} tnum`} placeholder="0" value={f.minValue ?? ''} onChange={(e) => f.set({ minValue: e.target.value === '' ? null : Number(e.target.value) })} />
-          </div>
-          <div className="flex flex-col gap-space-xs">
-            <label htmlFor="f-score" className={`${LABEL} flex items-center justify-between`}>
-              <span>{t('minScore')}</span>
-              <span className="tnum font-code-sm text-code-sm text-navy">{f.minScore}%</span>
-            </label>
-            <input id="f-score" type="range" min={0} max={100} step={5} value={f.minScore} onChange={(e) => f.set({ minScore: Number(e.target.value) })} className="w-full accent-accent" />
-          </div>
-          <div className="flex flex-col gap-space-xs">
-            <label htmlFor="f-cpv" className={LABEL}>{t('cpv')}</label>
-            <input id="f-cpv" className={`${INPUT_COMPACT} tnum font-code-sm`} placeholder={t('cpvPlaceholder')} value={f.cpv} onChange={(e) => f.set({ cpv: e.target.value })} />
-          </div>
-          <CheckboxRow
-            id="f-eligible"
-            label={t('onlyEligible')}
-            checked={f.onlyEligible}
-            onChange={(e) => f.set({ onlyEligible: e.target.checked })}
-          />
-        </aside>
-
-        <section className="flex flex-col gap-space-md lg:col-span-8 xl:col-span-9">
-          <div className="flex items-center justify-between">
+          <div className="ml-auto flex items-center gap-space-md">
             <p className="tnum font-body-md text-body-md text-on-surface-variant">
               {filtered.length} {tc('results')}
             </p>
@@ -293,6 +358,7 @@ export default function OpportunitiesPage() {
               </select>
             </div>
           </div>
+        </div>
           {isLoading ? (
             <div className="flex flex-col gap-space-md" aria-busy="true">
               {[0, 1, 2].map((i) => (
@@ -347,8 +413,7 @@ export default function OpportunitiesPage() {
           ) : (
             filtered.map((tender) => <TenderCard key={tender.external_id} tender={tender} />)
           )}
-        </section>
-      </div>
+      </section>
     </div>
   );
 }
