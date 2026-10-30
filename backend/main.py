@@ -42,14 +42,39 @@ app.include_router(internal_router)
 app.include_router(internal_router, prefix="/api")
 
 
-@app.on_event("startup")
-def on_startup() -> None:
+_ready = False
+
+
+def ensure_ready() -> None:
+    """Creates tables and reaps stale jobs once per process. Called on
+    startup and, because serverless runtimes may skip ASGI startup events,
+    again lazily before the first request."""
+    global _ready
+    if _ready:
+        return
     init_db()
     with Session(engine) as session:
         reap_stale_jobs(session)
         reap_stale_score_jobs(session)
+    _ready = True
+
+
+@app.on_event("startup")
+def on_startup() -> None:
+    ensure_ready()
+
+
+@app.middleware("http")
+async def _ready_before_request(request, call_next):
+    # Health and diagnostics must answer even when the database does not.
+    if not _ready and not request.url.path.endswith(("/health", "/internal/diagnostics")):
+        from starlette.concurrency import run_in_threadpool
+
+        await run_in_threadpool(ensure_ready)
+    return await call_next(request)
 
 
 @app.get("/health")
+@app.get("/api/health")
 def health() -> dict:
     return {"status": "ok"}

@@ -7,6 +7,7 @@ dependency — and user JWTs are not accepted here either.
 """
 
 import hmac
+import os
 import time
 from datetime import UTC, datetime, timedelta
 
@@ -94,3 +95,25 @@ async def sync_tenders(
         awards_checkpoint=awards_checkpoint,
         duration_seconds=time.monotonic() - started,
     )
+
+
+@router.get("/internal/diagnostics", tags=["internal"])
+def diagnostics(x_sync_token: str | None = Header(default=None)) -> dict:
+    """Deployment check for the sync job (same X-Sync-Token): which database
+    the backend uses and whether it answers. Never returns the URL itself."""
+    if not settings.sync_secret:
+        raise HTTPException(status_code=503, detail="SYNC_SECRET is not configured")
+    if not x_sync_token or not hmac.compare_digest(x_sync_token, settings.sync_secret):
+        raise HTTPException(status_code=401, detail="Bad sync token")
+    from sqlalchemy import text
+
+    from backend.db import engine
+
+    out: dict = {"dialect": engine.dialect.name, "database_url_set": bool(os.environ.get("DATABASE_URL"))}
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("select 1"))
+        out["database"] = "ok"
+    except Exception as e:  # noqa: BLE001 — reported, not raised
+        out["database"] = f"{type(e).__name__}: {str(e).splitlines()[0][:200]}"
+    return out
