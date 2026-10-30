@@ -1,0 +1,1022 @@
+[
+ {
+  "slug": "how-to-bid-on-a-public-tender-in-romania",
+  "published": "2026-10-30",
+  "updated": "2026-10-30",
+  "minutes": 7,
+  "en": {
+   "title": "How to bid on a public tender in Romania: a first-timer's guide",
+   "description": "A plain-language guide for construction companies bidding on Romanian public tenders for the first time: SEAP, digital signature, DUAE, requirements and submission.",
+   "answer": "To bid on a public tender in Romania, you register your company in SEAP (e-licitatie.ro) with a qualified digital certificate, find a notice that fits your trade, read the tender documentation to check the qualification requirements, prepare the DUAE and your technical and financial offer, and submit everything electronically before the deadline. Most newcomers lose time not on the bid itself but on choosing tenders they cannot qualify for.",
+   "sections": [
+    {
+     "h": "The steps at a glance",
+     "steps": [
+      "Get a qualified digital certificate and register your company in SEAP (e-licitatie.ro).",
+      "Watch the notices for your type of work and pick one that fits your size and location.",
+      "Download the tender documentation and read the data sheet (fișa de date) and the specifications (caiet de sarcini).",
+      "Check every qualification requirement against your company: turnover, similar works, authorizations, certificates, staff.",
+      "Ask for clarifications in writing if something is unclear, before the clarification deadline.",
+      "Prepare the DUAE, the technical offer, the financial offer and any guarantee.",
+      "Sign with your qualified electronic signature and submit in SEAP well before the deadline.",
+      "Wait for evaluation. If you rank first, you will be asked for the supporting documents."
+     ]
+    },
+    {
+     "h": "What to have ready before the first bid",
+     "p": [
+      "Three things decide whether you can bid at all, and all three take time to sort out, so start with them."
+     ],
+     "list": [
+      "A company in good standing: active, with tax and social contributions paid, and no grounds for exclusion.",
+      "A qualified digital certificate for the person who signs, so you can register in SEAP and sign your offers.",
+      "A company file you can reuse: turnover for recent years, a list of similar works with proof of good execution, authorizations, ISO certificates, and the key people you would put on site."
+     ]
+    },
+    {
+     "h": "Choosing tenders worth your time",
+     "p": [
+      "The common mistake of first-time bidders is reading tenders one by one and only then discovering they do not qualify. Screen first, read second.",
+      "For construction works, notices carry a main CPV code that starts with 45. Compare the type of works, the estimated value, the place of execution, the deadline and the requirements with what your company can show."
+     ],
+     "list": [
+      "Type of works: is it work you have done before, at a similar scale?",
+      "Value: is it within what your turnover and equipment can support?",
+      "Requirements: do you meet the minimum turnover, the number of similar contracts and the required authorizations?",
+      "Guarantee: can you provide the participation guarantee, and later the good execution guarantee?",
+      "Time: is there enough time left to prepare a careful offer?"
+     ]
+    },
+    {
+     "h": "What the tender documentation contains",
+     "p": [
+      "Every tender comes with documentation published in SEAP. The parts that matter most are the data sheet, which sets the qualification criteria, the deadlines and how the winner is chosen, and the specifications, which describe the works to be done.",
+      "You will also find the forms to fill in and the draft contract. Read the draft contract: payment terms, penalties and the good execution guarantee are decided there."
+     ]
+    },
+    {
+     "h": "Submitting the offer",
+     "p": [
+      "Offers are generally submitted electronically through SEAP and signed with a qualified electronic signature. Do not leave submission to the last hour: uploads, signatures and connections fail at the worst moment, and a late offer is simply not accepted.",
+      "If anything in the documentation is unclear, ask the contracting authority in writing. Answers are published for all bidders, and questions must be sent before the clarification deadline stated in the notice."
+     ]
+    },
+    {
+     "h": "After you submit",
+     "p": [
+      "The contracting authority checks the offers. In practice, the bidder ranked first is usually asked to provide the documents that prove what was declared in the DUAE. If you win, you sign the contract and provide the good execution guarantee, which by law may be at most 10% of the contract price without VAT.",
+      "Bidders who disagree with a decision can file a contestation with the CNSC or in court. These deadlines are short, so check the notice you receive as soon as it arrives."
+     ]
+    },
+    {
+     "h": "Small purchases are a way in",
+     "p": [
+      "Below certain values, contracting authorities may buy directly, including through the electronic catalogue in SEAP, without running a full tender. These thresholds have been changed by law over the years, so check the current figures on the ANAP site. Direct purchases can be a lower-risk way to build a track record of public contracts."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "Can a new company bid on a public tender in Romania?",
+     "a": "Yes. There is no rule that a company must have won public contracts before. In practice, many tenders require a minimum turnover and similar completed works, so a new company usually starts with smaller tenders, with an association with a partner, or with the support of another entity."
+    },
+    {
+     "q": "Do I need a digital signature to bid?",
+     "a": "Yes. You need a qualified digital certificate to register in SEAP and a qualified electronic signature to sign your offer."
+    },
+    {
+     "q": "Where do I find Romanian public tenders?",
+     "a": "On SEAP (SICAP), at e-licitatie.ro, the official platform. Tenders above the EU thresholds are also published on TED."
+    },
+    {
+     "q": "How do I know if a tender is right for my company?",
+     "a": "Compare the qualification requirements in the data sheet with your company's turnover, similar works, authorizations and staff before you read the rest. Tools like Licits do this comparison for every new notice."
+    }
+   ],
+   "sources": [
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    },
+    {
+     "label": "CNSC, Consiliul Național de Soluționare a Contestațiilor",
+     "url": "https://www.cnsc.ro"
+    },
+    {
+     "label": "TED, Tenders Electronic Daily",
+     "url": "https://ted.europa.eu"
+    },
+    {
+     "label": "Garanția de bună execuție: ce este și când se aplică (e-juridic)",
+     "url": "https://e-juridic.manager.ro/articole/garantia-de-buna-executie-ce-este-si-cand-se-aplica-30114.html"
+    }
+   ]
+  },
+  "ro": {
+   "title": "Cum depui oferta la o licitație publică în România: ghid pentru începători",
+   "description": "Ghid pe înțelesul tuturor pentru firmele de construcții care participă pentru prima dată la licitații publice: SEAP, semnătură electronică, DUAE, cerințe și depunere.",
+   "answer": "Ca să depui ofertă la o licitație publică în România, îți înregistrezi firma în SEAP (e-licitatie.ro) cu un certificat digital calificat, alegi un anunț potrivit meseriei tale, citești documentația de atribuire ca să verifici cerințele de calificare, pregătești DUAE, oferta tehnică și oferta financiară și depui totul electronic înainte de termen. Cei mai mulți începători pierd timp nu cu oferta în sine, ci cu licitațiile la care nu se pot califica.",
+   "sections": [
+    {
+     "h": "Pașii pe scurt",
+     "steps": [
+      "Obține un certificat digital calificat și înregistrează firma în SEAP (e-licitatie.ro).",
+      "Urmărește anunțurile pentru tipul tău de lucrări și alege unul potrivit ca mărime și locație.",
+      "Descarcă documentația de atribuire și citește fișa de date a achiziției și caietul de sarcini.",
+      "Verifică fiecare cerință de calificare față de firma ta: cifră de afaceri, lucrări similare, autorizații, certificări, personal.",
+      "Cere clarificări în scris dacă ceva nu este clar, înainte de termenul pentru clarificări.",
+      "Pregătește DUAE, oferta tehnică, oferta financiară și eventuala garanție.",
+      "Semnează cu semnătura electronică calificată și depune în SEAP cu mult timp înainte de termen.",
+      "Așteaptă evaluarea. Dacă ești clasat pe primul loc, ți se vor cere documentele justificative."
+     ]
+    },
+    {
+     "h": "Ce trebuie să ai pregătit înainte de prima ofertă",
+     "p": [
+      "Trei lucruri decid dacă poți depune ofertă, iar toate durează să fie puse la punct, așa că începe cu ele."
+     ],
+     "list": [
+      "O firmă în regulă: activă, cu taxele și contribuțiile plătite și fără motive de excludere.",
+      "Un certificat digital calificat pentru persoana care semnează, ca să te înregistrezi în SEAP și să semnezi ofertele.",
+      "Un dosar al firmei reutilizabil: cifra de afaceri pe ultimii ani, o listă de lucrări similare cu dovada bunei execuții, autorizații, certificate ISO și persoanele-cheie pe care le-ai pune pe șantier."
+     ]
+    },
+    {
+     "h": "Cum alegi licitațiile care merită timpul tău",
+     "p": [
+      "Greșeala frecventă a începătorilor este să citească licitațiile una câte una și abia apoi să descopere că nu se califică. Triază mai întâi, citește după.",
+      "Pentru lucrări de construcții, anunțurile au un cod CPV principal care începe cu 45. Compară tipul lucrărilor, valoarea estimată, locul execuției, termenul și cerințele cu ceea ce poate dovedi firma ta."
+     ],
+     "list": [
+      "Tipul lucrărilor: sunt lucrări pe care le-ai mai făcut, la o scară similară?",
+      "Valoarea: se încadrează în ce pot susține cifra de afaceri și utilajele tale?",
+      "Cerințele: îndeplinești cifra de afaceri minimă, numărul de contracte similare și autorizațiile cerute?",
+      "Garanția: poți constitui garanția de participare, iar mai târziu garanția de bună execuție?",
+      "Timpul: mai ai suficient timp pentru o ofertă atent pregătită?"
+     ]
+    },
+    {
+     "h": "Ce conține documentația de atribuire",
+     "p": [
+      "Fiecare licitație vine cu o documentație publicată în SEAP. Cele mai importante părți sunt fișa de date, care stabilește criteriile de calificare, termenele și modul de alegere a câștigătorului, și caietul de sarcini, care descrie lucrările de executat.",
+      "Vei găsi și formularele de completat și modelul de contract. Citește modelul de contract: condițiile de plată, penalitățile și garanția de bună execuție se stabilesc acolo."
+     ]
+    },
+    {
+     "h": "Depunerea ofertei",
+     "p": [
+      "Ofertele se depun, de regulă, electronic prin SEAP și se semnează cu semnătură electronică calificată. Nu lăsa depunerea pe ultima oră: încărcările, semnăturile și conexiunea cedează exact atunci, iar o ofertă depusă târziu nu este acceptată.",
+      "Dacă ceva din documentație nu este clar, întreabă autoritatea contractantă în scris. Răspunsurile se publică pentru toți ofertanții, iar întrebările trebuie trimise înainte de termenul pentru clarificări din anunț."
+     ]
+    },
+    {
+     "h": "După depunere",
+     "p": [
+      "Autoritatea contractantă analizează ofertele. În practică, ofertantul clasat pe primul loc este de obicei invitat să prezinte documentele care dovedesc ce a declarat în DUAE. Dacă câștigi, semnezi contractul și constitui garanția de bună execuție, care poate fi, potrivit legii, de cel mult 10% din prețul contractului fără TVA.",
+      "Ofertanții care nu sunt de acord cu o decizie pot depune contestație la CNSC sau în instanță. Termenele sunt scurte, așa că verifică atent comunicarea primită de îndată ce o primești."
+     ]
+    },
+    {
+     "h": "Achizițiile mici sunt o cale de intrare",
+     "p": [
+      "Sub anumite valori, autoritățile contractante pot cumpăra direct, inclusiv prin catalogul electronic din SEAP, fără o licitație completă. Pragurile au fost modificate prin lege de-a lungul anilor, așa că verifică valorile în vigoare pe site-ul ANAP. Achizițiile directe pot fi un mod mai puțin riscant de a construi un istoric de contracte publice."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "Poate o firmă nouă să participe la o licitație publică în România?",
+     "a": "Da. Nu există o regulă conform căreia firma trebuie să fi câștigat contracte publice înainte. În practică, multe licitații cer o cifră de afaceri minimă și lucrări similare finalizate, așa că o firmă nouă începe de obicei cu licitații mici, cu o asociere cu un partener sau cu sprijinul unui alt operator."
+    },
+    {
+     "q": "Am nevoie de semnătură electronică pentru a depune oferta?",
+     "a": "Da. Ai nevoie de un certificat digital calificat ca să te înregistrezi în SEAP și de o semnătură electronică calificată ca să semnezi oferta."
+    },
+    {
+     "q": "Unde găsesc licitațiile publice din România?",
+     "a": "În SEAP (SICAP), pe e-licitatie.ro, platforma oficială. Licitațiile peste pragurile europene se publică și în TED."
+    },
+    {
+     "q": "Cum aflu dacă o licitație este potrivită pentru firma mea?",
+     "a": "Compară cerințele de calificare din fișa de date cu cifra de afaceri, lucrările similare, autorizațiile și personalul firmei tale, înainte de a citi restul. Instrumente ca Licits fac această comparație pentru fiecare anunț nou."
+    }
+   ],
+   "sources": [
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    },
+    {
+     "label": "CNSC, Consiliul Național de Soluționare a Contestațiilor",
+     "url": "https://www.cnsc.ro"
+    },
+    {
+     "label": "TED, Tenders Electronic Daily",
+     "url": "https://ted.europa.eu"
+    },
+    {
+     "label": "Garanția de bună execuție: ce este și când se aplică (e-juridic)",
+     "url": "https://e-juridic.manager.ro/articole/garantia-de-buna-executie-ce-este-si-cand-se-aplica-30114.html"
+    }
+   ]
+  }
+ },
+ {
+  "slug": "register-in-seap-and-get-a-digital-signature",
+  "published": "2026-10-30",
+  "updated": "2026-10-30",
+  "minutes": 5,
+  "en": {
+   "title": "Register in SEAP and get a digital signature: what a company needs",
+   "description": "What SEAP and SICAP are, why you need a qualified digital certificate, and how a Romanian company gets set up to bid on public tenders.",
+   "answer": "SEAP, also called SICAP, is Romania's official electronic public procurement platform at e-licitatie.ro. To use it as a bidder, your company needs a qualified digital certificate, issued by a trust service provider on the EU Trusted List. The same certificate type is used to register and, as a qualified electronic signature, to sign your offers.",
+   "sections": [
+    {
+     "h": "SEAP and SICAP are the same platform",
+     "p": [
+      "You will see both names. SEAP (Sistemul Electronic de Achiziții Publice) is the long-standing name and SICAP is the name of the newer system. In practice, they mean the same public platform: e-licitatie.ro, where contracting authorities publish notices and bidders submit offers."
+     ]
+    },
+    {
+     "h": "What you need before registering",
+     "list": [
+      "Your company's tax identification number (CUI), correctly recorded in the SEAP database.",
+      "A qualified digital certificate for the person who will act for the company, from a provider on the EU Trusted List. Both token-based and cloud-based certificates are used.",
+      "A computer where the certificate is installed and works."
+     ]
+    },
+    {
+     "h": "How registration works",
+     "steps": [
+      "Obtain the qualified certificate from a trust service provider.",
+      "Open e-licitatie.ro and start the registration of an economic operator.",
+      "Sign the registration request with the certificate. If your CUI is in the database and the certificate is valid, validation can be immediate. Otherwise the request may be reviewed manually.",
+      "Add the people who will work on behalf of the company and check the roles they need."
+     ]
+    },
+    {
+     "h": "Signing offers",
+     "p": [
+      "Offers are signed with a qualified electronic signature. A person who is not the company's legal representative usually needs a power of attorney to sign for it, and the tender documentation says which documents to attach.",
+      "Certificates expire. Check the expiry date now, and renew well before the deadline of a bid you care about. An expired certificate on the day of submission cannot be fixed in time."
+     ]
+    },
+    {
+     "h": "Practical tips",
+     "list": [
+      "Test your certificate and a mock upload before your first real deadline.",
+      "Keep one person responsible for the SEAP account, and one backup.",
+      "Use the support and help pages on e-licitatie.ro for the current procedure, because screens and steps change."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "Are SEAP and SICAP different?",
+     "a": "They refer to the same national electronic public procurement platform, available at e-licitatie.ro."
+    },
+    {
+     "q": "What kind of digital signature do I need for SEAP?",
+     "a": "A qualified digital certificate from a provider on the EU Trusted List. It is used to register and, as a qualified electronic signature, to sign offers."
+    },
+    {
+     "q": "Can I use a cloud certificate instead of a USB token?",
+     "a": "Yes, both token-based and cloud-based qualified certificates are used. Check with your provider that yours works with SEAP."
+    }
+   ],
+   "sources": [
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "TED, Tenders Electronic Daily",
+     "url": "https://ted.europa.eu"
+    }
+   ]
+  },
+  "ro": {
+   "title": "Înregistrarea în SEAP și semnătura electronică: ce are nevoie o firmă",
+   "description": "Ce sunt SEAP și SICAP, de ce ai nevoie de un certificat digital calificat și cum se pregătește o firmă din România să participe la licitații publice.",
+   "answer": "SEAP, numit și SICAP, este platforma electronică oficială de achiziții publice din România, la adresa e-licitatie.ro. Ca să o folosești ca ofertant, firma ta are nevoie de un certificat digital calificat, emis de un furnizor de servicii de încredere din Lista de Încredere a UE. Același tip de certificat se folosește la înregistrare și, ca semnătură electronică calificată, la semnarea ofertelor.",
+   "sections": [
+    {
+     "h": "SEAP și SICAP sunt aceeași platformă",
+     "p": [
+      "Vei vedea ambele denumiri. SEAP (Sistemul Electronic de Achiziții Publice) este denumirea veche, iar SICAP este numele sistemului mai nou. În practică, ele desemnează aceeași platformă publică: e-licitatie.ro, unde autoritățile contractante publică anunțuri, iar ofertanții depun oferte."
+     ]
+    },
+    {
+     "h": "Ce îți trebuie înainte de înregistrare",
+     "list": [
+      "Codul de identificare fiscală (CUI) al firmei, înregistrat corect în baza de date SEAP.",
+      "Un certificat digital calificat pentru persoana care acționează în numele firmei, de la un furnizor din Lista de Încredere a UE. Se folosesc atât certificate pe token, cât și certificate în cloud.",
+      "Un calculator pe care certificatul este instalat și funcționează."
+     ]
+    },
+    {
+     "h": "Cum se face înregistrarea",
+     "steps": [
+      "Obține certificatul calificat de la un furnizor de servicii de încredere.",
+      "Deschide e-licitatie.ro și pornește înregistrarea unui operator economic.",
+      "Semnează cererea de înregistrare cu certificatul. Dacă CUI-ul se află în baza de date, iar certificatul este valid, validarea poate fi imediată. În caz contrar, cererea poate fi verificată manual.",
+      "Adaugă persoanele care vor lucra în numele firmei și verifică rolurile de care au nevoie."
+     ]
+    },
+    {
+     "h": "Semnarea ofertelor",
+     "p": [
+      "Ofertele se semnează cu semnătură electronică calificată. O persoană care nu este reprezentantul legal al firmei are, de regulă, nevoie de o împuternicire ca să semneze în numele ei, iar documentația de atribuire spune ce documente trebuie atașate.",
+      "Certificatele expiră. Verifică acum data de expirare și reînnoiește-l cu mult înainte de termenul unei oferte care contează. Un certificat expirat în ziua depunerii nu mai poate fi reparat la timp."
+     ]
+    },
+    {
+     "h": "Sfaturi practice",
+     "list": [
+      "Testează certificatul și o încărcare de probă înainte de primul termen real.",
+      "Alege o persoană responsabilă de contul SEAP și una de rezervă.",
+      "Folosește paginile de suport și ajutor de pe e-licitatie.ro pentru procedura actuală, pentru că ecranele și pașii se schimbă."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "Sunt SEAP și SICAP diferite?",
+     "a": "Se referă la aceeași platformă națională de achiziții publice electronice, disponibilă la e-licitatie.ro."
+    },
+    {
+     "q": "Ce fel de semnătură electronică îmi trebuie pentru SEAP?",
+     "a": "Un certificat digital calificat de la un furnizor din Lista de Încredere a UE. Se folosește la înregistrare și, ca semnătură electronică calificată, la semnarea ofertelor."
+    },
+    {
+     "q": "Pot folosi un certificat în cloud în loc de token USB?",
+     "a": "Da, se folosesc atât certificate calificate pe token, cât și în cloud. Verifică la furnizorul tău că certificatul funcționează cu SEAP."
+    }
+   ],
+   "sources": [
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "TED, Tenders Electronic Daily",
+     "url": "https://ted.europa.eu"
+    }
+   ]
+  }
+ },
+ {
+  "slug": "duae-espd-explained",
+  "published": "2026-10-30",
+  "updated": "2026-10-30",
+  "minutes": 5,
+  "en": {
+   "title": "DUAE (ESPD) explained: the self-declaration every bidder fills in",
+   "description": "What the DUAE, the European Single Procurement Document, is, what it declares, and the mistakes to avoid when you fill it in for a Romanian tender.",
+   "answer": "The DUAE (Document Unic de Achiziție European, in English ESPD) is a self-declaration in which a bidder states that it meets the exclusion and qualification criteria of a tender. It replaces a stack of certificates at the first stage: you declare now, and prove it with documents later if you rank first.",
+   "sections": [
+    {
+     "h": "What the DUAE is",
+     "p": [
+      "The DUAE is a standard form created at EU level so that companies do not have to submit the same certificates for every tender. It is a declaration on your own responsibility. The contracting authority defines what it must contain in the tender documentation, and in Romania it is uploaded in SEAP with the offer."
+     ]
+    },
+    {
+     "h": "What you declare in it",
+     "list": [
+      "Who you are: company details, size and legal representatives.",
+      "Whether any ground for exclusion applies, for example unpaid taxes or contributions, or a past conviction.",
+      "Whether you meet the selection criteria: suitability to carry out the activity, economic and financial standing (such as turnover), and technical ability (such as similar works and staff).",
+      "Whether you rely on other entities, such as a partner or a subcontractor, for part of the requirements."
+     ]
+    },
+    {
+     "h": "Why mistakes matter",
+     "p": [
+      "Because it is a declaration on your own responsibility, false or inaccurate information can lead to exclusion from the procedure. A declaration you cannot back up with documents is a risk, not a shortcut.",
+      "If you take part together with other companies, each one fills in its own DUAE. A DUAE you completed earlier can be reused only if the information is still correct and valid on the day you submit."
+     ]
+    },
+    {
+     "h": "How to fill it in without drama",
+     "steps": [
+      "Read the data sheet first and list the exact requirements the authority asks you to declare.",
+      "Collect the documents that prove each statement before you tick it.",
+      "Fill in the DUAE with the contracting authority's file or the EU tool, and keep the exported file in the format the authority asks for.",
+      "Have a second person check every figure against your financial statements and reference documents.",
+      "Keep the supporting documents ready, because the bidder ranked first is usually asked for them."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "What does DUAE stand for?",
+     "a": "Document Unic de Achiziție European, the Romanian name of the European Single Procurement Document (ESPD)."
+    },
+    {
+     "q": "Do I need documents when I submit the DUAE?",
+     "a": "Not at first. The DUAE is a self-declaration. The documents that prove it are usually requested from the bidder ranked first, so you must have them ready."
+    },
+    {
+     "q": "Can I reuse a DUAE from another tender?",
+     "a": "Only if the information is still correct and valid on the day you submit. Always check it against the new tender's requirements."
+    }
+   ],
+   "sources": [
+    {
+     "label": "ESPD / DUAE, European Commission",
+     "url": "https://ec.europa.eu/tools/espd"
+    },
+    {
+     "label": "Directive 2014/24/EU on public procurement (EUR-Lex)",
+     "url": "https://eur-lex.europa.eu/eli/dir/2014/24/oj"
+    },
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    },
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    }
+   ]
+  },
+  "ro": {
+   "title": "DUAE explicat: declarația pe propria răspundere pe care o completează fiecare ofertant",
+   "description": "Ce este DUAE, Documentul Unic de Achiziție European, ce declari în el și ce greșeli să eviți când îl completezi pentru o licitație din România.",
+   "answer": "DUAE (Documentul Unic de Achiziție European, în engleză ESPD) este o declarație pe propria răspundere prin care ofertantul arată că îndeplinește criteriile de excludere și de calificare dintr-o licitație. El înlocuiește la primul pas un teanc de certificate: declari acum și dovedești cu documente mai târziu, dacă te clasezi pe primul loc.",
+   "sections": [
+    {
+     "h": "Ce este DUAE",
+     "p": [
+      "DUAE este un formular standard creat la nivel european ca firmele să nu mai depună aceleași certificate la fiecare licitație. Este o declarație pe propria răspundere. Autoritatea contractantă stabilește în documentația de atribuire ce trebuie să conțină, iar în România se încarcă în SEAP împreună cu oferta."
+     ]
+    },
+    {
+     "h": "Ce declari în el",
+     "list": [
+      "Cine ești: datele firmei, dimensiunea și reprezentanții legali.",
+      "Dacă se aplică vreun motiv de excludere, de exemplu taxe sau contribuții neplătite ori o condamnare anterioară.",
+      "Dacă îndeplinești criteriile de selecție: capacitatea de exercitare a activității profesionale, situația economică și financiară (de exemplu cifra de afaceri) și capacitatea tehnică (de exemplu lucrări similare și personal).",
+      "Dacă te sprijini pe alte entități, cum ar fi un partener sau un subcontractant, pentru o parte din cerințe."
+     ]
+    },
+    {
+     "h": "De ce contează greșelile",
+     "p": [
+      "Pentru că este o declarație pe propria răspundere, informațiile false sau inexacte pot duce la excluderea din procedură. O declarație pe care nu o poți dovedi cu documente este un risc, nu o scurtătură.",
+      "Dacă participi împreună cu alte firme, fiecare completează propriul DUAE. Un DUAE completat anterior poate fi refolosit doar dacă informațiile sunt încă corecte și valabile în ziua depunerii."
+     ]
+    },
+    {
+     "h": "Cum îl completezi fără emoții",
+     "steps": [
+      "Citește mai întâi fișa de date și notează exact cerințele pe care autoritatea îți cere să le declari.",
+      "Adună documentele care dovedesc fiecare afirmație înainte să o bifezi.",
+      "Completează DUAE cu fișierul autorității contractante sau cu instrumentul european și păstrează fișierul exportat în formatul cerut de autoritate.",
+      "Roagă a doua persoană să verifice fiecare cifră față de situațiile financiare și documentele de referință.",
+      "Ține documentele justificative la îndemână, pentru că ofertantului clasat pe primul loc i se cer de obicei."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "Ce înseamnă DUAE?",
+     "a": "Document Unic de Achiziție European, denumirea în română a documentului ESPD (European Single Procurement Document)."
+    },
+    {
+     "q": "Am nevoie de documente când depun DUAE?",
+     "a": "Nu de la început. DUAE este o declarație pe propria răspundere. Documentele care o dovedesc se cer de obicei ofertantului clasat pe primul loc, așa că trebuie să le ai pregătite."
+    },
+    {
+     "q": "Pot refolosi un DUAE de la altă licitație?",
+     "a": "Doar dacă informațiile sunt încă corecte și valabile în ziua depunerii. Verifică-l mereu față de cerințele noii licitații."
+    }
+   ],
+   "sources": [
+    {
+     "label": "ESPD / DUAE, European Commission",
+     "url": "https://ec.europa.eu/tools/espd"
+    },
+    {
+     "label": "Directive 2014/24/EU on public procurement (EUR-Lex)",
+     "url": "https://eur-lex.europa.eu/eli/dir/2014/24/oj"
+    },
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    },
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    }
+   ]
+  }
+ },
+ {
+  "slug": "qualification-requirements-in-construction-tenders",
+  "published": "2026-10-30",
+  "updated": "2026-10-30",
+  "minutes": 6,
+  "en": {
+   "title": "Qualification requirements in construction tenders: what authorities ask for",
+   "description": "Turnover, similar works, authorizations, ISO certificates and key staff: the requirements in Romanian construction tenders and how to check them before you invest time.",
+   "answer": "Construction tenders in Romania typically ask for four kinds of proof: that the company may carry out the activity, that it has enough financial standing (a minimum turnover), that it has done similar works before, and that it has the people, equipment and certificates for the job. The exact figures are set in each tender's data sheet, so compare them with your company before you read anything else.",
+   "sections": [
+    {
+     "h": "1. Suitability to carry out the activity",
+     "p": [
+      "The authority wants to see that your company is legally allowed to do this work, usually through the registration certificate and an activity code (CAEN) that matches the works. Some works also need authorizations or attestations from professional bodies."
+     ]
+    },
+    {
+     "h": "2. Economic and financial standing",
+     "p": [
+      "This is most often a minimum average annual turnover over a recent period, commonly three years. EU rules say the minimum annual turnover an authority requires should not exceed twice the estimated value of the contract, except in justified cases, so a requirement far above that is worth questioning with a written clarification.",
+      "Some tenders also ask for insurance or for evidence of financial ratios."
+     ]
+    },
+    {
+     "h": "3. Similar works already done",
+     "p": [
+      "The authority asks for a list of similar works completed in the last years, typically the last five years for works. Each entry needs proof that the works were done well, such as a reception record or a good execution certificate from the beneficiary.",
+      "Read what counts as similar. It may be defined by type of work, by value, or both, and a contract that is too different will not be accepted."
+     ]
+    },
+    {
+     "h": "4. People, equipment and certificates",
+     "list": [
+      "Key staff, for example a site manager and a quality or technical execution officer, with the attestations the law and the tender require.",
+      "Equipment and machinery you can put on site, owned or rented.",
+      "Quality, environment and safety certificates such as ISO 9001, ISO 14001 and ISO 45001, when the tender asks for them.",
+      "Authorizations for special works, for example electrical installations."
+     ]
+    },
+    {
+     "h": "If you fall short",
+     "p": [
+      "Not meeting a requirement does not always mean you cannot bid. The law allows a company to rely on the capacity of another entity, and to bid in an association with other companies, so that together you meet the requirements. A third party that supports you must really commit its resources to the contract.",
+      "Guarantees are the other hurdle. The tender may ask for a participation guarantee with the offer, and the winner provides a good execution guarantee, which by law may be at most 10% of the contract price without VAT. Make sure you can provide them before you decide to bid."
+     ]
+    },
+    {
+     "h": "A quick screening checklist",
+     "steps": [
+      "Does the main CPV code and the type of works match what we do?",
+      "Is our average turnover above the minimum?",
+      "Do we have enough similar works, each with proof?",
+      "Do we have the staff, equipment and certificates required?",
+      "Can we provide the guarantees?",
+      "Is there enough time before the deadline?"
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "What turnover do I need for a construction tender?",
+     "a": "It is set in each tender's data sheet, usually as a minimum average annual turnover over a recent period. EU rules say it should generally not exceed twice the estimated contract value."
+    },
+    {
+     "q": "Do I need similar works to qualify?",
+     "a": "Often yes. Authorities usually ask for completed similar works from the last years, with proof of good execution. If you lack them, you can look at an association or at relying on another entity's capacity."
+    },
+    {
+     "q": "What is the maximum good execution guarantee?",
+     "a": "By law, up to 10% of the contract price without VAT."
+    }
+   ],
+   "sources": [
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    },
+    {
+     "label": "Directive 2014/24/EU on public procurement (EUR-Lex)",
+     "url": "https://eur-lex.europa.eu/eli/dir/2014/24/oj"
+    },
+    {
+     "label": "ISC, Inspectoratul de Stat în Construcții",
+     "url": "https://www.isc.gov.ro"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "Garanția de bună execuție: ce este și când se aplică (e-juridic)",
+     "url": "https://e-juridic.manager.ro/articole/garantia-de-buna-executie-ce-este-si-cand-se-aplica-30114.html"
+    }
+   ]
+  },
+  "ro": {
+   "title": "Cerințe de calificare în licitațiile de construcții: ce cer autoritățile",
+   "description": "Cifră de afaceri, lucrări similare, autorizații, certificări ISO și personal-cheie: cerințele din licitațiile de construcții din România și cum le verifici înainte să investești timp.",
+   "answer": "Licitațiile de construcții din România cer, de regulă, patru tipuri de dovezi: că firma poate desfășura activitatea, că are o situație financiară suficientă (o cifră de afaceri minimă), că a mai executat lucrări similare și că are oamenii, utilajele și certificatele necesare. Cifrele exacte se stabilesc în fișa de date a fiecărei licitații, așa că le compari cu firma ta înainte de a citi orice altceva.",
+   "sections": [
+    {
+     "h": "1. Capacitatea de exercitare a activității profesionale",
+     "p": [
+      "Autoritatea vrea să vadă că firma ta are dreptul legal să execute aceste lucrări, de obicei prin certificatul de înregistrare și un cod CAEN care corespunde lucrărilor. Unele lucrări cer și autorizații sau atestări de la organisme profesionale."
+     ]
+    },
+    {
+     "h": "2. Situația economică și financiară",
+     "p": [
+      "Cel mai des este vorba de o cifră de afaceri medie anuală minimă pe o perioadă recentă, de obicei trei ani. Regulile europene spun că cifra de afaceri anuală minimă cerută nu ar trebui să depășească dublul valorii estimate a contractului, cu excepția cazurilor justificate, așa că o cerință mult peste acest nivel merită pusă sub semnul întrebării printr-o solicitare de clarificare scrisă.",
+      "Unele licitații cer și asigurări sau dovada unor indicatori financiari."
+     ]
+    },
+    {
+     "h": "3. Lucrări similare deja executate",
+     "p": [
+      "Autoritatea cere o listă de lucrări similare finalizate în ultimii ani, de regulă ultimii cinci ani pentru lucrări. Fiecare poziție are nevoie de dovada că lucrările au fost bine executate, de exemplu un proces-verbal de recepție sau un certificat de bună execuție de la beneficiar.",
+      "Citește ce înseamnă „similar”. Poate fi definit prin tipul lucrării, prin valoare sau prin ambele, iar un contract prea diferit nu este acceptat."
+     ]
+    },
+    {
+     "h": "4. Oameni, utilaje și certificate",
+     "list": [
+      "Personal-cheie, de exemplu un șef de șantier și un responsabil cu calitatea sau cu execuția tehnică, cu atestările cerute de lege și de licitație.",
+      "Utilaje și echipamente pe care le poți aduce pe șantier, proprii sau închiriate.",
+      "Certificate de calitate, mediu și securitate, precum ISO 9001, ISO 14001 și ISO 45001, atunci când licitația le cere.",
+      "Autorizații pentru lucrări speciale, de exemplu instalații electrice."
+     ]
+    },
+    {
+     "h": "Dacă ți se pare că nu te califici",
+     "p": [
+      "Faptul că nu îndeplinești o cerință nu înseamnă mereu că nu poți depune ofertă. Legea permite unei firme să se sprijine pe capacitatea altei entități și să participe în asociere cu alte firme, astfel încât împreună să îndepliniți cerințele. Terțul care te susține trebuie să-și pună efectiv resursele la dispoziția contractului.",
+      "Garanțiile sunt celălalt obstacol. Licitația poate cere o garanție de participare odată cu oferta, iar câștigătorul constituie o garanție de bună execuție, care poate fi, potrivit legii, de cel mult 10% din prețul contractului fără TVA. Asigură-te că le poți constitui înainte să decizi să participi."
+     ]
+    },
+    {
+     "h": "Listă rapidă de triere",
+     "steps": [
+      "Codul CPV principal și tipul lucrărilor corespund cu ce facem?",
+      "Cifra noastră medie de afaceri depășește minimul?",
+      "Avem suficiente lucrări similare, fiecare cu dovadă?",
+      "Avem personalul, utilajele și certificatele cerute?",
+      "Putem constitui garanțiile?",
+      "Avem suficient timp până la termen?"
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "Ce cifră de afaceri îmi trebuie pentru o licitație de construcții?",
+     "a": "Se stabilește în fișa de date a fiecărei licitații, de obicei ca o cifră de afaceri medie anuală minimă pe o perioadă recentă. Regulile europene spun că, în general, nu ar trebui să depășească dublul valorii estimate a contractului."
+    },
+    {
+     "q": "Am nevoie de lucrări similare ca să mă calific?",
+     "a": "De multe ori da. Autoritățile cer de obicei lucrări similare finalizate în ultimii ani, cu dovada bunei execuții. Dacă nu le ai, poți lua în calcul o asociere sau sprijinirea pe capacitatea altei entități."
+    },
+    {
+     "q": "Care este garanția de bună execuție maximă?",
+     "a": "Potrivit legii, de până la 10% din prețul contractului fără TVA."
+    }
+   ],
+   "sources": [
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    },
+    {
+     "label": "Directive 2014/24/EU on public procurement (EUR-Lex)",
+     "url": "https://eur-lex.europa.eu/eli/dir/2014/24/oj"
+    },
+    {
+     "label": "ISC, Inspectoratul de Stat în Construcții",
+     "url": "https://www.isc.gov.ro"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "Garanția de bună execuție: ce este și când se aplică (e-juridic)",
+     "url": "https://e-juridic.manager.ro/articole/garantia-de-buna-executie-ce-este-si-cand-se-aplica-30114.html"
+    }
+   ]
+  }
+ },
+ {
+  "slug": "common-mistakes-first-time-bidders",
+  "published": "2026-10-30",
+  "updated": "2026-10-30",
+  "minutes": 4,
+  "en": {
+   "title": "Eight mistakes first-time bidders make on Romanian tenders",
+   "description": "The most common reasons new bidders lose time or get rejected on Romanian public tenders, and how to avoid each one.",
+   "answer": "First-time bidders on Romanian tenders most often lose by choosing tenders they cannot qualify for, missing a requirement hidden in the data sheet, leaving submission to the last hour, or declaring things in the DUAE that they cannot prove. All of these are avoidable with a screening step and a checklist.",
+   "sections": [
+    {
+     "h": "The mistakes",
+     "steps": [
+      "Reading the whole tender before checking whether you qualify. Screen the requirements first.",
+      "Missing a requirement in the data sheet, such as a minimum number of similar works or a required authorization.",
+      "Declaring in the DUAE something you cannot prove with documents when asked.",
+      "Waiting for the last hour to upload and sign. Technical problems and certificate issues are common on deadline day.",
+      "Not asking for clarification when a requirement is unclear, then guessing.",
+      "Forgetting the guarantees: the participation guarantee with the offer, or the funding for the good execution guarantee if you win.",
+      "Pricing without reading the draft contract: payment terms, penalties and guarantee rules change the real cost.",
+      "Submitting an offer that does not follow the exact format and documents the authority asked for."
+     ]
+    },
+    {
+     "h": "A simple routine that prevents most of them",
+     "list": [
+      "Screen new notices every day against a short list of what your company can really do.",
+      "Keep a living company file: turnover, similar works with proof, authorizations, certificates, staff.",
+      "Calendar every deadline, and plan to submit at least a day early.",
+      "Have a second person review the DUAE and the documents.",
+      "Write down why you decided to bid or to pass, so the next decision is faster."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "What is the most common reason new bidders are rejected?",
+     "a": "Not meeting or not documenting a qualification requirement, followed by errors in the declarations and missing documents."
+    },
+    {
+     "q": "Is it a mistake to bid late in the day?",
+     "a": "Submitting at the last moment is risky: a failed upload or signature cannot be fixed after the deadline."
+    }
+   ],
+   "sources": [
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    },
+    {
+     "label": "ESPD / DUAE, European Commission",
+     "url": "https://ec.europa.eu/tools/espd"
+    }
+   ]
+  },
+  "ro": {
+   "title": "Opt greșeli pe care le fac ofertanții la prima licitație din România",
+   "description": "Cele mai frecvente motive pentru care ofertanții noi pierd timp sau sunt respinși la licitațiile publice din România și cum le eviți.",
+   "answer": "La prima licitație din România, ofertanții pierd cel mai des pentru că aleg licitații la care nu se pot califica, scapă o cerință ascunsă în fișa de date, lasă depunerea pe ultima oră sau declară în DUAE lucruri pe care nu le pot dovedi. Toate se pot evita cu un pas de triere și o listă de verificare.",
+   "sections": [
+    {
+     "h": "Greșelile",
+     "steps": [
+      "Citești toată licitația înainte să verifici dacă te califici. Triază mai întâi cerințele.",
+      "Scapi o cerință din fișa de date, cum ar fi un număr minim de lucrări similare sau o autorizație cerută.",
+      "Declari în DUAE ceva ce nu poți dovedi cu documente când ți se cere.",
+      "Aștepți ultima oră ca să încarci și să semnezi. Problemele tehnice și cele cu certificatul sunt frecvente în ziua termenului.",
+      "Nu ceri clarificări când o cerință nu este clară și ghicești.",
+      "Uiți garanțiile: garanția de participare odată cu oferta sau fondurile pentru garanția de bună execuție, dacă câștigi.",
+      "Calculezi prețul fără să citești modelul de contract: condițiile de plată, penalitățile și regulile garanției schimbă costul real.",
+      "Depui o ofertă care nu respectă formatul și documentele exacte cerute de autoritate."
+     ]
+    },
+    {
+     "h": "O rutină simplă care previne cele mai multe",
+     "list": [
+      "Triază zilnic anunțurile noi față de o listă scurtă cu ce poate face cu adevărat firma ta.",
+      "Ține un dosar al firmei mereu la zi: cifră de afaceri, lucrări similare cu dovezi, autorizații, certificate, personal.",
+      "Pune fiecare termen în calendar și planifică depunerea cu cel puțin o zi înainte.",
+      "Roagă o a doua persoană să verifice DUAE și documentele.",
+      "Notează de ce ai decis să depui sau să renunți, ca următoarea decizie să fie mai rapidă."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "Care este cel mai frecvent motiv de respingere pentru ofertanții noi?",
+     "a": "Neîndeplinirea sau nedocumentarea unei cerințe de calificare, urmată de erori în declarații și documente lipsă."
+    },
+    {
+     "q": "Este o greșeală să depun în ultimul moment?",
+     "a": "Depunerea în ultimul moment este riscantă: o încărcare sau o semnătură eșuată nu mai poate fi reparată după termen."
+    }
+   ],
+   "sources": [
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    },
+    {
+     "label": "ESPD / DUAE, European Commission",
+     "url": "https://ec.europa.eu/tools/espd"
+    }
+   ]
+  }
+ },
+ {
+  "slug": "tender-consultant-vs-software",
+  "published": "2026-10-30",
+  "updated": "2026-10-30",
+  "minutes": 6,
+  "en": {
+   "title": "Tender consultant or software? How to choose for Romanian public tenders",
+   "description": "An honest comparison of hiring a public procurement consultant and using tender software like Licits, and when to combine them, for firms new to Romanian tenders.",
+   "answer": "A public procurement consultant gives personal, legal-grade advice and can run a bid for you. Tender software such as Licits watches every notice, checks your eligibility and drafts documents at a fixed monthly cost, but does not give legal advice or submit for you. A new bidder often does best by using software to screen and prepare, and a consultant for large or legally complex bids.",
+   "sections": [
+    {
+     "h": "What each one is good at",
+     "p": [
+      "Consultants and software solve different parts of the problem, so the honest answer is rarely one or the other."
+     ],
+     "list": [
+      "A consultant is strongest on judgement: legal interpretation, strategy for a high-value bid, disputes and contestations, and representing you.",
+      "Software is strongest on volume and speed: reading every new notice, comparing requirements with your company file the same day, and preparing drafts of documents."
+     ]
+    },
+    {
+     "h": "Side by side",
+     "list": [
+      "Coverage: a consultant works on the bids you hand over; software screens every construction notice published on SEAP.",
+      "Cost model: consultants usually charge per bid or a success fee; software is a monthly subscription, so extra screening costs nothing more.",
+      "Speed: software checks a notice the moment it appears; a consultant works to their calendar.",
+      "Legal advice: a consultant can give it; software does not and should say so.",
+      "Control: with software you review everything and submit yourself; with a consultant you delegate part of the work.",
+      "Learning: software shows you the reasons behind each check, so your team learns the rules over time."
+     ]
+    },
+    {
+     "h": "When a consultant is the better choice",
+     "list": [
+      "A large or strategically important bid where an error is costly.",
+      "A legal dispute, a contestation or a complex consortium agreement.",
+      "You want someone to own the whole bid and you have the budget for it."
+     ]
+    },
+    {
+     "h": "When software like Licits is the better choice",
+     "list": [
+      "You are new to public tenders and want to know which ones you can realistically win.",
+      "You bid on several tenders a year and the screening is eating your evenings.",
+      "You want to keep the know-how in your own team and stay in control of what is submitted."
+     ]
+    },
+    {
+     "h": "Using both",
+     "p": [
+      "Many firms use software to monitor and screen every day, then bring in a consultant to review the few high-value bids. That keeps consultant hours for the places where judgement matters most."
+     ]
+    },
+    {
+     "h": "What Licits does and does not do",
+     "p": [
+      "Licits is built for construction companies. It reads SEAP notices for works, checks each requirement against your company file with a plain-language reason, and drafts the offer and the DUAE from your own documents. It does not give legal advice, it is not a law firm, and it never submits an offer for you: you review everything and submit on SEAP yourself."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "Do I still need a consultant if I use Licits?",
+     "a": "Not for screening and preparation. For large, strategic or legally complex bids, a consultant's judgement is still valuable, and many firms use both."
+    },
+    {
+     "q": "Does Licits submit tenders for me?",
+     "a": "No. Licits finds, checks and drafts. You review everything and submit on SEAP yourself."
+    },
+    {
+     "q": "Is Licits legal advice?",
+     "a": "No. Licits provides software and general information. Rules change, so check the official sources and take legal advice when a bid depends on it."
+    }
+   ],
+   "sources": [
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    }
+   ]
+  },
+  "ro": {
+   "title": "Consultant de achiziții sau software? Cum alegi pentru licitațiile publice din România",
+   "description": "O comparație cinstită între un consultant în achiziții publice și un software pentru licitații precum Licits și când le poți combina, pentru firmele noi în licitații din România.",
+   "answer": "Un consultant în achiziții publice oferă sfaturi personale, de nivel juridic, și poate conduce o ofertă în locul tău. Un software pentru licitații precum Licits urmărește fiecare anunț, verifică eligibilitatea și redactează documente la un cost lunar fix, dar nu oferă consultanță juridică și nu depune în locul tău. Un ofertant nou are adesea cele mai bune rezultate folosind software pentru triere și pregătire și un consultant pentru ofertele mari sau complicate juridic.",
+   "sections": [
+    {
+     "h": "La ce se pricepe fiecare",
+     "p": [
+      "Consultanții și software-ul rezolvă părți diferite ale problemei, așa că răspunsul cinstit este rareori „unul sau altul”."
+     ],
+     "list": [
+      "Consultantul este cel mai puternic la judecată: interpretare juridică, strategie pentru o ofertă de valoare mare, litigii și contestații, reprezentare.",
+      "Software-ul este cel mai puternic la volum și viteză: citește fiecare anunț nou, compară cerințele cu dosarul firmei în aceeași zi și pregătește variante de documente."
+     ]
+    },
+    {
+     "h": "Cap la cap",
+     "list": [
+      "Acoperire: consultantul lucrează la ofertele pe care i le dai; software-ul triază fiecare anunț de construcții publicat în SEAP.",
+      "Model de cost: consultanții cer de obicei un tarif per ofertă sau un comision de succes; software-ul este un abonament lunar, deci mai multă triere nu costă mai mult.",
+      "Viteză: software-ul verifică un anunț în momentul în care apare; consultantul lucrează după calendarul lui.",
+      "Consultanță juridică: consultantul o poate da; software-ul nu o dă și trebuie să spună asta.",
+      "Control: cu software-ul verifici tot și depui singur; cu un consultant delegi o parte din muncă.",
+      "Învățare: software-ul îți arată motivele fiecărei verificări, așa că echipa ta învață regulile în timp."
+     ]
+    },
+    {
+     "h": "Când e mai bun un consultant",
+     "list": [
+      "O ofertă mare sau strategică, la care o greșeală costă scump.",
+      "Un litigiu, o contestație sau un acord de asociere complex.",
+      "Vrei pe cineva care să preia întreaga ofertă și ai bugetul necesar."
+     ]
+    },
+    {
+     "h": "Când e mai bun un software ca Licits",
+     "list": [
+      "Ești nou în licitațiile publice și vrei să știi pe care le poți câștiga realist.",
+      "Participi la mai multe licitații pe an, iar trierea îți consumă serile.",
+      "Vrei să păstrezi know-how-ul în echipa ta și să controlezi ce se depune."
+     ]
+    },
+    {
+     "h": "Folosirea ambelor",
+     "p": [
+      "Multe firme folosesc software-ul pentru monitorizare și triere zilnică, apoi cheamă un consultant să revizuiască puținele oferte de valoare mare. Așa orele de consultanță rămân pentru locurile în care judecata contează cel mai mult."
+     ]
+    },
+    {
+     "h": "Ce face și ce nu face Licits",
+     "p": [
+      "Licits este construit pentru firmele de construcții. Citește anunțurile SEAP de lucrări, verifică fiecare cerință față de dosarul firmei tale cu un motiv pe înțelesul tuturor și redactează oferta și DUAE din documentele tale. Nu oferă consultanță juridică, nu este un cabinet de avocatură și nu depune niciodată o ofertă în locul tău: verifici tot și depui singur în SEAP."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "Mai am nevoie de consultant dacă folosesc Licits?",
+     "a": "Nu pentru triere și pregătire. Pentru ofertele mari, strategice sau complicate juridic, judecata unui consultant rămâne valoroasă, iar multe firme le folosesc pe amândouă."
+    },
+    {
+     "q": "Depune Licits licitațiile în locul meu?",
+     "a": "Nu. Licits găsește, verifică și redactează. Verifici tot și depui singur în SEAP."
+    },
+    {
+     "q": "Este Licits consultanță juridică?",
+     "a": "Nu. Licits oferă software și informații generale. Regulile se schimbă, așa că verifică sursele oficiale și cere consultanță juridică atunci când o ofertă depinde de ea."
+    }
+   ],
+   "sources": [
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    }
+   ]
+  }
+ }
+]

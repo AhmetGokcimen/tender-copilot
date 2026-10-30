@@ -4,6 +4,15 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async headers() {
+    // The signed-in product and auth screens are never indexed.
+    return [
+      {
+        source: '/:locale(en|ro)/:area(app|auth|onboarding)/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+    ];
+  },
   async rewrites() {
     // Local two-process dev only: proxy /api to the separately running
     // uvicorn backend so relative fetch('/api/...') works in dev exactly

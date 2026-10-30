@@ -1,7 +1,9 @@
+import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { Geist_Mono, Schibsted_Grotesk } from 'next/font/google';
 import { routing } from '@/i18n/routing';
+import { PAGE_META, SITE_URL, toLang } from '@/lib/seo';
 import { QueryProvider } from '@/components/QueryProvider';
 import { AssistantFab } from '@/components/assistant/AssistantFab';
 import { AssistantPanel } from '@/components/assistant/AssistantPanel';
@@ -11,26 +13,16 @@ import '../globals.css';
 const sans = Schibsted_Grotesk({ subsets: ['latin', 'latin-ext'], variable: '--font-sans', display: 'swap' });
 const geistMono = Geist_Mono({ subsets: ['latin', 'latin-ext'], variable: '--font-mono', display: 'swap' });
 
-const META = {
-  en: {
-    title: 'Licits | Win the public tenders you have been missing',
-    description:
-      'Licits reads every SEAP notice, shows which tenders your company can win, and drafts the offer with you.',
-  },
-  ro: {
-    title: 'Licits | Câștigă licitațiile publice pe care le-ai ratat',
-    description:
-      'Licits citește fiecare anunț SEAP, îți arată ce licitații poate câștiga compania ta și redactează oferta împreună cu tine.',
-  },
-} as const;
-
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  const lang = locale === 'ro' ? 'ro' : 'en';
+  const fallback = PAGE_META[''][toLang(locale)];
   return {
-    ...META[lang],
     // Canonical origin for links and social previews (Vercel previews keep their own URL).
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://licits.com'),
+    metadataBase: new URL(SITE_URL),
+    applicationName: 'Licits',
+    // Pages set their own title, description, canonical and hreflang; this covers the app screens.
+    title: fallback.title,
+    description: fallback.description,
   };
 }
 

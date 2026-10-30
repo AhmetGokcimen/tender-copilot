@@ -65,6 +65,9 @@ export function Footer() {
           <Link href="/pricing" className={LINK}>
             {t('footerPricing')}
           </Link>
+          <Link href="/resources" className={LINK}>
+            {t('footerResources')}
+          </Link>
         </nav>
         <nav aria-label={t('footerCompany')} className="flex flex-col gap-2.5">
           <span className={HEAD}>{t('footerCompany')}</span>
