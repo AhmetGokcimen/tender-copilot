@@ -119,9 +119,9 @@
     "navContact": "Contact",
     "signIn": "Sign in",
     "heroOffer": "Waitlist members get 2 weeks free",
-    "heroTitleA": "Win the public tenders",
+    "heroTitleA": "Win the public construction tenders",
     "heroTitleB": "you've been missing.",
-    "heroSub": "Licits reads every SEAP notice, shows which ones you can win, and drafts the offer with you.",
+    "heroSub": "Licits reads every SEAP notice for construction works, from roads to school renovations, shows which ones you can win, and drafts the offer with you.",
     "seeHow": "See how it works",
     "wlTitleA": "Join the waitlist.",
     "wlTitleB": "Get two weeks free.",
@@ -162,7 +162,7 @@
     "footerPrivacy": "Privacy",
     "footerTerms": "Terms",
     "footerFaq": "Questions",
-    "stripSource": "Official SEAP data",
+    "stripSource": "Construction works (CPV 45) from SEAP",
     "stripSync": "Synced several times a day",
     "stripOcr": "Reads scanned PDFs",
     "stripAwards": "Buyer award history",
@@ -264,7 +264,11 @@
     "m_mktS2Body": "See whether one firm keeps winning or whether the field is open.",
     "m_mktS3Title": "Renewals, forecast",
     "m_mktS3Body": "Recurring contracts are spotted from their history, so you can prepare before the notice is published.",
-    "mMktNote": "This contract was awarded every two years, each time in spring. The next tender is likely around March 2027."
+    "mMktNote": "This contract was awarded every two years, each time in spring. The next tender is likely around March 2027.",
+    "heroEyebrow": "For construction companies",
+    "mapNote": "Example construction notices across Romania. In the product, they come from SEAP as they are published.",
+    "faq6Q": "Is Licits only for construction?",
+    "faq6A": "For now, yes. We start with construction works (CPV 45), so every check fits the trade: similar works, equipment, staff, turnover and guarantees. Other sectors come later."
   },
   "about": {
     "title": "Public tenders favor insiders. We're fixing that.",

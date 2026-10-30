@@ -119,9 +119,9 @@
     "navContact": "Contact",
     "signIn": "Conectare",
     "heroOffer": "Cei de pe lista de așteptare primesc 2 săptămâni gratuit",
-    "heroTitleA": "Câștigă licitațiile",
+    "heroTitleA": "Câștigă licitațiile de construcții",
     "heroTitleB": "pe care le-ai ratat.",
-    "heroSub": "Licits citește fiecare anunț SEAP, îți arată ce poți câștiga și redactează oferta împreună cu tine.",
+    "heroSub": "Licits citește fiecare anunț SEAP pentru lucrări de construcții, de la drumuri la renovări de școli, îți arată ce poți câștiga și redactează oferta împreună cu tine.",
     "seeHow": "Vezi cum funcționează",
     "wlTitleA": "Înscrie-te pe lista de așteptare.",
     "wlTitleB": "Primești două săptămâni gratuit.",
@@ -162,7 +162,7 @@
     "footerPrivacy": "Confidențialitate",
     "footerTerms": "Termeni",
     "footerFaq": "Întrebări",
-    "stripSource": "Date oficiale SEAP",
+    "stripSource": "Lucrări de construcții (CPV 45) din SEAP",
     "stripSync": "Sincronizat de mai multe ori pe zi",
     "stripOcr": "Citește PDF-uri scanate",
     "stripAwards": "Istoricul atribuirilor",
@@ -264,7 +264,11 @@
     "m_mktS2Body": "Vezi dacă o firmă câștigă mereu sau dacă terenul este deschis.",
     "m_mktS3Title": "Reluări, estimate",
     "m_mktS3Body": "Contractele recurente sunt identificate din istoricul lor, ca să te pregătești înainte de publicarea anunțului.",
-    "mMktNote": "Acest contract a fost atribuit la fiecare doi ani, de fiecare dată primăvara. Următoarea licitație este probabilă în jurul lunii martie 2027."
+    "mMktNote": "Acest contract a fost atribuit la fiecare doi ani, de fiecare dată primăvara. Următoarea licitație este probabilă în jurul lunii martie 2027.",
+    "heroEyebrow": "Pentru firmele de construcții",
+    "mapNote": "Exemple de anunțuri de construcții din toată țara. În produs, ele vin din SEAP pe măsură ce sunt publicate.",
+    "faq6Q": "Licits este doar pentru construcții?",
+    "faq6A": "Deocamdată, da. Începem cu lucrările de construcții (CPV 45), ca fiecare verificare să se potrivească meseriei: lucrări similare, utilaje, personal, cifră de afaceri și garanții. Alte domenii vor urma."
   },
   "about": {
     "title": "Licitațiile publice îi favorizează pe cei din interior. Schimbăm asta.",

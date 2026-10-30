@@ -3,7 +3,7 @@
 import { useId, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-const QUESTIONS = [1, 2, 3, 4, 5] as const;
+const QUESTIONS = [1, 2, 6, 3, 4, 5] as const;
 
 /** Questions with answers that slide open (height animates via grid rows). */
 export function Faq() {

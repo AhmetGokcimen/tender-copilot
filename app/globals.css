@@ -6,59 +6,59 @@
   /* Desktop sidebar width (JS-synced with the collapse toggle). */
   --sbw: 4rem;
 
-  /* Licits brand tokens (source: Licits Design System, tokens.json). */
-  --paper: #f7f8fa;
+  /* Licits brand tokens: forest green with a gold accent on warm paper. */
+  --paper: #f6f5f0;
   --surface: #ffffff;
-  --surface-sunk: #eef0f5;
-  --ink: #0b1020;
-  --ink-2: #2a3245;
-  --muted: #5b6478;
-  --line: #e3e6ed;
-  --line-strong: #8a93a8;
-  --indigo: #4f46e5;
-  --indigo-deep: #3730a3;
-  --indigo-text: #4338ca;
-  --indigo-soft: #eef0ff;
+  --surface-sunk: #eeede6;
+  --ink: #0f1f1a;
+  --ink-2: #2b3a34;
+  --muted: #5c6a64;
+  --line: #e3e1d7;
+  --line-strong: #8e988f;
+  --indigo: #0f5c45;
+  --indigo-deep: #0a4433;
+  --indigo-text: #0d5a43;
+  --indigo-soft: #e5efe8;
   --on-indigo: #ffffff;
-  --ribbon-1: #4f46e5;
-  --ribbon-2: #8b5cf6;
-  --ribbon-3: #ff6b5a;
-  --ribbon-4: #ffb020;
-  --night: #0b1020;
-  --on-night: #eef0f6;
-  --eligible: #067a52;
-  --eligible-bg: #e5f6ee;
+  --ribbon-1: #0f5c45;
+  --ribbon-2: #4f9a76;
+  --ribbon-3: #c9952a;
+  --ribbon-4: #e2b23c;
+  --night: #0c1f19;
+  --on-night: #eef3ef;
+  --eligible: #1d7a3e;
+  --eligible-bg: #e6f3e9;
   --warn: #a14306;
   --warn-bg: #fff3e0;
   --risk: #c4320a;
   --risk-bg: #fdecea;
   /* RGB channels for colors used with Tailwind opacity modifiers. */
-  --paper-rgb: 247 248 250;
+  --paper-rgb: 246 245 240;
   --warn-rgb: 161 67 6;
   --warn-bg-rgb: 255 243 224;
-  --surface-sunk-2: #e6e9f0;
-  --ink-rgb: 11 16 32;
-  --ribbon-1-rgb: 79 70 229;
-  --ribbon-2-rgb: 139 92 246;
-  --ribbon-4-rgb: 255 176 32;
+  --surface-sunk-2: #e5e3da;
+  --ink-rgb: 15 31 26;
+  --ribbon-1-rgb: 15 92 69;
+  --ribbon-2-rgb: 79 154 118;
+  --ribbon-4-rgb: 226 178 60;
   /* The dot in the li symbol. */
-  --brand-dot: #4f46e5;
-  --ink-2-rgb: 42 50 69;
-  --muted-rgb: 91 100 120;
-  --line-rgb: 227 230 237;
-  --line-strong-rgb: 138 147 168;
+  --brand-dot: #d4a72c;
+  --ink-2-rgb: 43 58 52;
+  --muted-rgb: 92 106 100;
+  --line-rgb: 227 225 215;
+  --line-strong-rgb: 142 152 143;
   --surface-rgb: 255 255 255;
-  --surface-sunk-rgb: 238 240 245;
-  --surface-sunk-2-rgb: 230 233 240;
-  --indigo-rgb: 79 70 229;
-  --indigo-deep-rgb: 55 48 163;
-  --indigo-text-rgb: 67 56 202;
-  --indigo-soft-rgb: 238 240 255;
+  --surface-sunk-rgb: 238 237 230;
+  --surface-sunk-2-rgb: 229 227 218;
+  --indigo-rgb: 15 92 69;
+  --indigo-deep-rgb: 10 68 51;
+  --indigo-text-rgb: 13 90 67;
+  --indigo-soft-rgb: 229 239 232;
   --on-indigo-rgb: 255 255 255;
-  --night-rgb: 11 16 32;
-  --on-night-rgb: 238 240 246;
-  --eligible-rgb: 6 122 82;
-  --eligible-bg-rgb: 229 246 238;
+  --night-rgb: 12 31 25;
+  --on-night-rgb: 238 243 239;
+  --eligible-rgb: 29 122 62;
+  --eligible-bg-rgb: 230 243 233;
   --risk-rgb: 196 50 10;
   --risk-bg-rgb: 253 236 234;
   --space-1: 4px;
@@ -76,100 +76,6 @@
   --shadow-2: 0 12px 32px rgba(16,24,64,0.10), 0 2px 6px rgba(16,24,64,0.05);
 }
 
-
-/* Candidate palettes (preview). Set data-palette on <html>. */
-[data-palette='forest'] {
-  --paper: #f6f5f0;
-  --paper-rgb: 246 245 240;
-  --surface: #ffffff;
-  --surface-rgb: 255 255 255;
-  --surface-sunk: #eeede6;
-  --surface-sunk-rgb: 238 237 230;
-  --surface-sunk-2: #e5e3da;
-  --surface-sunk-2-rgb: 229 227 218;
-  --ink: #0f1f1a;
-  --ink-rgb: 15 31 26;
-  --ink-2: #2b3a34;
-  --ink-2-rgb: 43 58 52;
-  --muted: #5c6a64;
-  --muted-rgb: 92 106 100;
-  --line: #e3e1d7;
-  --line-rgb: 227 225 215;
-  --line-strong: #8e988f;
-  --line-strong-rgb: 142 152 143;
-  --indigo: #0f5c45;
-  --indigo-rgb: 15 92 69;
-  --indigo-deep: #0a4433;
-  --indigo-deep-rgb: 10 68 51;
-  --indigo-text: #0d5a43;
-  --indigo-text-rgb: 13 90 67;
-  --indigo-soft: #e5efe8;
-  --indigo-soft-rgb: 229 239 232;
-  --on-indigo: #ffffff;
-  --on-indigo-rgb: 255 255 255;
-  --ribbon-1: #0f5c45;
-  --ribbon-1-rgb: 15 92 69;
-  --ribbon-2: #4f9a76;
-  --ribbon-2-rgb: 79 154 118;
-  --ribbon-3: #c9952a;
-  --ribbon-4: #e2b23c;
-  --ribbon-4-rgb: 226 178 60;
-  --night: #0c1f19;
-  --night-rgb: 12 31 25;
-  --on-night: #eef3ef;
-  --on-night-rgb: 238 243 239;
-  --brand-dot: #d4a72c;
-  --eligible: #1d7a3e;
-  --eligible-rgb: 29 122 62;
-  --eligible-bg: #e6f3e9;
-  --eligible-bg-rgb: 230 243 233;
-}
-[data-palette='mint'] {
-  --paper: #f5f8f8;
-  --paper-rgb: 245 248 248;
-  --surface: #ffffff;
-  --surface-rgb: 255 255 255;
-  --surface-sunk: #ecf1f2;
-  --surface-sunk-rgb: 236 241 242;
-  --surface-sunk-2: #e3e9eb;
-  --surface-sunk-2-rgb: 227 233 235;
-  --ink: #0a1628;
-  --ink-rgb: 10 22 40;
-  --ink-2: #26344a;
-  --ink-2-rgb: 38 52 74;
-  --muted: #56657a;
-  --muted-rgb: 86 101 122;
-  --line: #e0e6ea;
-  --line-rgb: 224 230 234;
-  --line-strong: #8693a5;
-  --line-strong-rgb: 134 147 165;
-  --indigo: #0a1628;
-  --indigo-rgb: 10 22 40;
-  --indigo-deep: #050d1a;
-  --indigo-deep-rgb: 5 13 26;
-  --indigo-text: #0a7a5a;
-  --indigo-text-rgb: 10 122 90;
-  --indigo-soft: #e2f6ee;
-  --indigo-soft-rgb: 226 246 238;
-  --on-indigo: #ffffff;
-  --on-indigo-rgb: 255 255 255;
-  --ribbon-1: #12b886;
-  --ribbon-1-rgb: 18 184 134;
-  --ribbon-2: #0ea5c6;
-  --ribbon-2-rgb: 14 165 198;
-  --ribbon-3: #5eead4;
-  --ribbon-4: #3ddc97;
-  --ribbon-4-rgb: 61 220 151;
-  --night: #0a1628;
-  --night-rgb: 10 22 40;
-  --on-night: #eef2f6;
-  --on-night-rgb: 238 242 246;
-  --brand-dot: #12b886;
-  --eligible: #0a7a5a;
-  --eligible-rgb: 10 122 90;
-  --eligible-bg: #e2f6ee;
-  --eligible-bg-rgb: 226 246 238;
-}
 
 /* Dark theme tokens. Opt-in via data-theme; the marketing site stays light. */
 [data-theme='dark'] {
@@ -558,6 +464,27 @@
 @media (prefers-reduced-motion: reduce) {
   .hero-chip {
     animation: none;
+  }
+}
+
+/* Tender map: a ring spreads from the city when a notice appears. */
+@keyframes map-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(4.2);
+    opacity: 0;
+  }
+}
+.map-ping {
+  animation: map-ping 1.6s cubic-bezier(0.2, 0.7, 0.3, 1) 2;
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-ping {
+    animation: none;
+    opacity: 0;
   }
 }
 
