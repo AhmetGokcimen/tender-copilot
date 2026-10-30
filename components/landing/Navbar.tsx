@@ -37,6 +37,9 @@ export function Navbar() {
           <Link href="/pricing" className={LINK}>
             {t('navPricing')}
           </Link>
+          <Link href="/resources" className={LINK}>
+            {t('navResources')}
+          </Link>
           <Link href="/about" className={LINK}>
             {t('navAbout')}
           </Link>

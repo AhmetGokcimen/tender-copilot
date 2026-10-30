@@ -1,3 +1,7 @@
+import type { Metadata } from 'next';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { webPage } from '@/lib/schema';
+import { PAGE_META, pageMetadata, toLang } from '@/lib/seo';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import { Icon } from '@/components/Icon';
@@ -14,13 +18,20 @@ const BELIEFS = [
 
 const SECTION_TITLE = 'text-[28px] font-light leading-[34px] tracking-[-0.8px] text-ink md:text-[34px] md:leading-[40px]';
 
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  return pageMetadata(locale, '/about');
+}
+
 /** About: who Licits is for, what it believes, and how it works. */
 export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('about');
+  const meta = PAGE_META['/about'][toLang(locale)];
   return (
     <SitePage wide>
+      <JsonLd data={webPage(toLang(locale), 'AboutPage', '/about', meta.title, meta.description)} />
       <div className="flex flex-col gap-16 md:gap-20">
         <header className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="flex flex-col gap-4">

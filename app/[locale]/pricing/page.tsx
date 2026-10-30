@@ -1,15 +1,26 @@
+import type { Metadata } from 'next';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { webPage } from '@/lib/schema';
+import { PAGE_META, pageMetadata, toLang } from '@/lib/seo';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Navbar } from '@/components/landing/Navbar';
 import { Footer } from '@/components/landing/Footer';
 import { PricingPlans } from '@/components/landing/PricingPlans';
 import { Faq } from '@/components/landing/Faq';
 
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  return pageMetadata(locale, '/pricing');
+}
+
 export default async function PricingPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('pricing');
+  const meta = PAGE_META['/pricing'][toLang(locale)];
   return (
     <div className="flex min-h-screen flex-col bg-surface text-ink">
+      <JsonLd data={webPage(toLang(locale), 'WebPage', '/pricing', meta.title, meta.description)} />
       <Navbar />
       <main className="flex-1">
         <header className="mx-auto max-w-[1200px] px-4 pt-16 md:px-8 md:pt-24">

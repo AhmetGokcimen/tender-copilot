@@ -270,7 +270,20 @@
     "heroEyebrow": "Pentru firmele de construcții",
     "mapNote": "Anunțuri de construcții publicate în SEAP în ultimele 24 de ore. Apasă pe unul ca să-l deschizi pe site-ul oficial.",
     "faq6Q": "Licits este doar pentru construcții?",
-    "faq6A": "Deocamdată, da. Începem cu lucrările de construcții (CPV 45), ca fiecare verificare să se potrivească meseriei: lucrări similare, utilaje, personal, cifră de afaceri și garanții. Alte domenii vor urma."
+    "faq6A": "Deocamdată, da. Începem cu lucrările de construcții (CPV 45), ca fiecare verificare să se potrivească meseriei: lucrări similare, utilaje, personal, cifră de afaceri și garanții. Alte domenii vor urma.",
+    "audEyebrow": "Pentru firmele noi în licitații publice",
+    "audTitle": "Ești nou în licitațiile publice? Începe cu cele pe care le poți câștiga.",
+    "audSub": "Cei mai mulți ofertanți la prima licitație pierd săptămâni cu licitații la care nu s-ar fi putut califica niciodată. Licits verifică mai întâi fiecare anunț de construcții față de firma ta.",
+    "aud1Title": "Prima ta ofertă",
+    "aud1Body": "Vezi ce licitații se potrivesc ca mărime, autorizații și referințe și ce ți-ar trebui pentru restul, de exemplu un partener sau o garanție.",
+    "aud2Title": "Pleci de la un consultant",
+    "aud2Body": "Păstrează know-how-ul în echipa ta. Fiecare verificare își arată motivul, așa că înveți regulile în loc să plătești pentru fiecare triere.",
+    "aud3Title": "Participi deja la licitații",
+    "aud3Body": "Nu mai citi anunțurile unul câte unul. Primești puținele care se potrivesc, cu cerințele deja comparate, și redactezi oferta din documentele tale.",
+    "audCta": "Citește ghidurile",
+    "audCta2": "Consultant sau software?",
+    "navResources": "Resurse",
+    "footerResources": "Ghiduri"
   },
   "about": {
     "eyebrow": "Despre Licits",
@@ -899,5 +912,22 @@
     "docType_rte": "Autorizație RTE",
     "docType_other": "Alt document",
     "turnoverFootnote": "Cifra de afaceri înregistrată: {years}. O poți modifica în răspunsurile din configurare."
+  },
+  "resources": {
+    "title": "Resurse",
+    "sub": "Ghiduri pe înțelesul tuturor pentru a câștiga licitații publice de construcții în România, pentru firmele noi în SEAP și pentru echipele care vor un proces mai clar.",
+    "minutes": "{n} min de citit",
+    "inShort": "Pe scurt",
+    "updated": "Actualizat",
+    "sources": "Surse și referințe oficiale",
+    "faq": "Întrebări frecvente",
+    "related": "Continuă lectura",
+    "disclaimer": "Acest ghid conține informații generale și nu reprezintă consultanță juridică. Regulile achizițiilor publice se schimbă, așa că verifică mereu sursele oficiale de mai sus și documentația licitației. Revizuit la {date}.",
+    "ctaTitle": "Vezi ce licitații poți câștiga",
+    "ctaBody": "Licits citește fiecare anunț SEAP de lucrări de construcții și îl verifică față de firma ta, ca să-ți petreci timpul doar la licitațiile la care te poți califica.",
+    "ctaButton": "Înscrie-te pe listă",
+    "home": "Acasă",
+    "readIn": "Citește acest ghid în engleză",
+    "all": "Toate ghidurile"
   }
 }

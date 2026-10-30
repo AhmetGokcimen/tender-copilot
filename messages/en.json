@@ -270,7 +270,20 @@
     "heroEyebrow": "For construction companies",
     "mapNote": "Construction notices published on SEAP in the last 24 hours. Click one to open it on the official site.",
     "faq6Q": "Is Licits only for construction?",
-    "faq6A": "For now, yes. We start with construction works (CPV 45), so every check fits the trade: similar works, equipment, staff, turnover and guarantees. Other sectors come later."
+    "faq6A": "For now, yes. We start with construction works (CPV 45), so every check fits the trade: similar works, equipment, staff, turnover and guarantees. Other sectors come later.",
+    "audEyebrow": "For firms new to public tenders",
+    "audTitle": "New to public tenders? Start with the ones you can win.",
+    "audSub": "Most first-time bidders lose weeks on tenders they were never going to qualify for. Licits checks every construction notice against your company first.",
+    "aud1Title": "Your first bid",
+    "aud1Body": "See which tenders fit your size, authorizations and references, and what you would need for the rest, such as a partner or a guarantee.",
+    "aud2Title": "Moving on from a consultant",
+    "aud2Body": "Keep the know-how in your own team. Every check shows its reason, so you learn the rules instead of paying for each screening.",
+    "aud3Title": "Already bidding",
+    "aud3Body": "Stop reading notices one by one. Get the few that match, with the requirements already compared, and draft the offer from your documents.",
+    "audCta": "Read the guides",
+    "audCta2": "Tender consultant or software?",
+    "navResources": "Resources",
+    "footerResources": "Guides"
   },
   "about": {
     "eyebrow": "About Licits",
@@ -899,5 +912,22 @@
     "docType_rte": "RTE authorization",
     "docType_other": "Other document",
     "turnoverFootnote": "Turnover on file: {years}. Edit it in the onboarding answers."
+  },
+  "resources": {
+    "title": "Resources",
+    "sub": "Plain-language guides to winning public construction tenders in Romania, for companies new to SEAP and for teams that want a clearer process.",
+    "minutes": "{n} min read",
+    "inShort": "In short",
+    "updated": "Updated",
+    "sources": "Sources and official references",
+    "faq": "Common questions",
+    "related": "Keep reading",
+    "disclaimer": "This guide is general information, not legal advice. Public procurement rules change, so always check the official sources above and the tender documentation. Reviewed {date}.",
+    "ctaTitle": "See which tenders you can win",
+    "ctaBody": "Licits reads every SEAP notice for construction works and checks it against your company, so you spend time only on tenders you can qualify for.",
+    "ctaButton": "Join the waitlist",
+    "home": "Home",
+    "readIn": "Read this guide in Romanian",
+    "all": "All guides"
   }
 }
