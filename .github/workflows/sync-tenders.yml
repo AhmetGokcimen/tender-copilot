@@ -1,14 +1,13 @@
 # Incremental SEAP sync (tenders + awards), every 6 hours.
 #
-# Calls POST /internal/sync-tenders on the deployed backend. The endpoint is
+# Calls POST {SYNC_URL}/internal/sync-tenders on the deployed backend. The endpoint is
 # idempotent and checkpointed: each run pulls only what arrived since the
 # last run (default 48h lookback on a fresh checkpoint), and capped/timed_out
 # runs simply continue on the next tick — no overlap, no duplicates.
 #
 # Required repo secrets (Settings -> Secrets and variables -> Actions):
 #   SYNC_URL    Deployed API base, e.g. https://licits.com/api
-#               (no /api suffix — /internal is mounted at the root; the API
-#               is same-origin with the frontend on the single deployment).
+#               (on Vercel only /api/* reaches the backend, so keep /api).
 #   SYNC_TOKEN  Must equal the backend's SYNC_SECRET env value.
 name: Sync SEAP tenders
 
