@@ -13,7 +13,7 @@ type L = { en: string; ro: string };
 export type Work = {
   cpv: string;
   name: L;
-  /** Extra search words (both languages). */
+  /** Extra search phrases, comma-separated (both languages). */
   kw?: string;
 };
 
@@ -47,22 +47,22 @@ export const TRADES: Trade[] = [
     certs: ['rte', 'isc_lab'],
     works: [
       w('45210000', 'Building construction', 'Construcții de clădiri'),
-      w('45211000', 'Residential buildings', 'Clădiri de locuințe', 'bloc locuinte housing'),
+      w('45211000', 'Residential buildings', 'Clădiri de locuințe', 'blocuri de locuinte, locuinte, housing'),
       w('45211340', 'Apartment blocks', 'Blocuri de locuințe'),
       w('45212000', 'Leisure, sport, culture and hotels', 'Clădiri de agrement, sport, cultură și hoteluri'),
-      w('45212300', 'Arts and cultural buildings', 'Clădiri pentru artă și cultură', 'teatru muzeu'),
+      w('45212300', 'Arts and cultural buildings', 'Clădiri pentru artă și cultură', 'teatru, muzeu'),
       w('45213000', 'Commercial, warehouse and transport buildings', 'Clădiri comerciale, depozite și de transport'),
       w('45214000', 'Education and research buildings', 'Clădiri pentru educație și cercetare'),
       w('45214100', 'Kindergartens', 'Grădinițe'),
-      w('45214200', 'Schools', 'Școli', 'scoala liceu'),
+      w('45214200', 'Schools', 'Școli', 'scoala, liceu'),
       w('45215000', 'Health and social care buildings', 'Clădiri de sănătate și asistență socială'),
       w('45215140', 'Hospitals', 'Spitale'),
       w('45216000', 'Police, emergency and military buildings', 'Clădiri pentru poliție, urgențe și armată'),
       w('45223500', 'Reinforced-concrete structures', 'Structuri din beton armat'),
       w('45223800', 'Prefabricated structures', 'Structuri prefabricate'),
       w('45262700', 'Building alteration', 'Modificări de clădiri'),
-      w('45262800', 'Building extension', 'Extinderi de clădiri', 'extindere'),
-      w('45453000', 'Overhaul and refurbishment', 'Reparații capitale și renovare', 'renovare'),
+      w('45262800', 'Building extension', 'Extinderi de clădiri'),
+      w('45453000', 'Overhaul and refurbishment', 'Reparații capitale și renovare', 'renovare, renovari'),
       w('45454000', 'Restructuring', 'Restructurare'),
     ],
   },
@@ -72,7 +72,7 @@ export const TRADES: Trade[] = [
     name: { en: 'Energy retrofit', ro: 'Eficiență energetică' },
     certs: ['rte', 'energy_auditor'],
     works: [
-      w('45321000', 'Thermal insulation', 'Izolații termice', 'reabilitare termica anvelopare'),
+      w('45321000', 'Thermal insulation', 'Izolații termice', 'reabilitare termica, anvelopare, termoizolatii'),
       w('45443000', 'Façade works', 'Lucrări de fațadă'),
       w('45421130', 'Doors and windows', 'Uși și ferestre', 'tamplarie'),
       w('45261410', 'Roof insulation', 'Izolarea acoperișului'),
@@ -89,11 +89,11 @@ export const TRADES: Trade[] = [
     works: [
       w('45233100', 'Highways and roads', 'Autostrăzi și drumuri'),
       w('45233110', 'Motorways', 'Autostrăzi'),
-      w('45233120', 'Road construction', 'Construcție de drumuri', 'drum judetean comunal'),
+      w('45233120', 'Road construction', 'Construcție de drumuri', 'drum judetean, drum comunal, drumuri'),
       w('45233140', 'Roadworks', 'Lucrări rutiere'),
       w('45233141', 'Road maintenance', 'Întreținere drumuri', 'deszapezire'),
       w('45233142', 'Road repair', 'Reparații drumuri'),
-      w('45233222', 'Paving and asphalting', 'Pavare și asfaltare', 'asfalt'),
+      w('45233222', 'Paving and asphalting', 'Pavare și asfaltare', 'asfalt, asfaltari'),
       w('45233221', 'Road markings', 'Marcaje rutiere'),
       w('45233290', 'Road signs', 'Indicatoare rutiere'),
       w('45233280', 'Road barriers', 'Parapete rutiere'),
@@ -118,7 +118,7 @@ export const TRADES: Trade[] = [
       w('45234116', 'Track construction', 'Construcție de linie'),
       w('45234120', 'Urban railway works', 'Lucrări de cale ferată urbană', 'metrou'),
       w('45234121', 'Tramway works', 'Linii de tramvai'),
-      w('45234200', 'Cable transport systems', 'Transport pe cablu', 'telegondola telescaun'),
+      w('45234200', 'Cable transport systems', 'Transport pe cablu', 'telegondola, telescaun'),
     ],
   },
   {
@@ -127,16 +127,16 @@ export const TRADES: Trade[] = [
     name: { en: 'Water and sewage', ro: 'Apă și canalizare' },
     certs: ['rte'],
     works: [
-      w('45231300', 'Water and sewage pipelines', 'Conducte de apă și canalizare', 'retea apa'),
+      w('45231300', 'Water and sewage pipelines', 'Conducte de apă și canalizare', 'retea de apa, retele apa canal'),
       w('45232150', 'Water distribution networks', 'Rețele de distribuție a apei', 'alimentare cu apa'),
       w('45232400', 'Sewer construction', 'Construcție de canalizare'),
       w('45232410', 'Sewerage', 'Lucrări de canalizare'),
       w('45232130', 'Storm-water drains', 'Canalizare pluvială'),
       w('45232450', 'Drainage', 'Drenaje'),
-      w('45252100', 'Sewage treatment plants', 'Stații de epurare', 'statie epurare'),
+      w('45252100', 'Sewage treatment plants', 'Stații de epurare', 'statie de epurare'),
       w('45252120', 'Water treatment plants', 'Stații de tratare a apei'),
       w('45232430', 'Water treatment works', 'Lucrări de tratare a apei'),
-      w('45262220', 'Water-well drilling', 'Foraje de puțuri', 'put forat'),
+      w('45262220', 'Water-well drilling', 'Foraje de puțuri', 'put forat, foraje puturi'),
     ],
   },
   {
@@ -146,7 +146,7 @@ export const TRADES: Trade[] = [
     certs: ['rte'],
     works: [
       w('45246000', 'River regulation and flood control', 'Regularizări de râuri și apărare împotriva inundațiilor'),
-      w('45246400', 'Flood prevention', 'Prevenirea inundațiilor', 'dig'),
+      w('45246400', 'Flood prevention', 'Prevenirea inundațiilor', 'dig, diguri'),
       w('45247000', 'Dams, canals and irrigation channels', 'Baraje, canale și canale de irigații'),
       w('45247200', 'Dams', 'Baraje'),
       w('45232120', 'Irrigation', 'Irigații'),
@@ -175,9 +175,9 @@ export const TRADES: Trade[] = [
     name: { en: 'Power networks and lighting', ro: 'Rețele electrice și iluminat' },
     certs: ['rte', 'anre_firm', 'anre_staff'],
     works: [
-      w('45231400', 'Power lines', 'Linii electrice', 'LEA LES'),
+      w('45231400', 'Power lines', 'Linii electrice', 'LEA, LES, linii electrice'),
       w('45232200', 'Power line ancillary works', 'Lucrări auxiliare pentru linii electrice'),
-      w('45232220', 'Substations', 'Posturi de transformare și stații', 'post trafo'),
+      w('45232220', 'Substations', 'Posturi de transformare și stații', 'post trafo, post de transformare'),
       w('45315300', 'Electricity supply installations', 'Instalații de alimentare cu energie'),
       w('45315400', 'High-voltage installation', 'Instalații de înaltă tensiune'),
       w('45316100', 'Outdoor lighting', 'Iluminat exterior'),
@@ -192,11 +192,11 @@ export const TRADES: Trade[] = [
     name: { en: 'Solar and renewables', ro: 'Fotovoltaice și regenerabile' },
     certs: ['rte', 'anre_firm', 'anre_staff', 'afm_pv'],
     works: [
-      w('45261215', 'Solar panels on roofs', 'Panouri solare pe acoperiș', 'fotovoltaic PV'),
+      w('45261215', 'Solar panels on roofs', 'Panouri solare pe acoperiș', 'fotovoltaic, panouri fotovoltaice'),
       w('09332000', 'Solar installations', 'Instalații solare'),
       w('09331200', 'Photovoltaic modules', 'Module fotovoltaice'),
       w('45251100', 'Power plants (solar parks)', 'Centrale electrice (parcuri solare)', 'parc fotovoltaic'),
-      w('45315300', 'Grid connection installations', 'Instalații de racordare', 'racordare retea'),
+      w('45315300', 'Grid connection installations', 'Instalații de racordare', 'racordare la retea, bransamente electrice'),
     ],
   },
   {
@@ -205,9 +205,9 @@ export const TRADES: Trade[] = [
     name: { en: 'Heating, cooling and plumbing', ro: 'Termice, HVAC și sanitare' },
     certs: ['rte', 'iscir', 'fgas'],
     works: [
-      w('45331000', 'Heating, ventilation and air conditioning', 'Încălzire, ventilație și climatizare', 'HVAC'),
+      w('45331000', 'Heating, ventilation and air conditioning', 'Încălzire, ventilație și climatizare', 'HVAC, climatizare'),
       w('45331100', 'Central heating', 'Încălzire centrală'),
-      w('45331110', 'Boilers', 'Cazane', 'centrala termica'),
+      w('45331110', 'Boilers', 'Cazane', 'centrala termica, centrale termice'),
       w('45331200', 'Ventilation and air conditioning', 'Ventilație și climatizare'),
       w('45331220', 'Air conditioning', 'Aer condiționat'),
       w('45330000', 'Plumbing and sanitary works', 'Instalații sanitare'),
@@ -227,7 +227,7 @@ export const TRADES: Trade[] = [
       w('45333000', 'Gas fitting', 'Instalații de gaze'),
       w('45333100', 'Gas regulation equipment', 'Echipamente de reglare a gazelor'),
       w('45333200', 'Gas meters', 'Contoare de gaz'),
-      w('45231220', 'Gas pipelines', 'Conducte de gaze', 'retea gaz distributie'),
+      w('45231220', 'Gas pipelines', 'Conducte de gaze', 'retea de gaz, retele gaze naturale'),
     ],
   },
   {
@@ -243,7 +243,7 @@ export const TRADES: Trade[] = [
       w('45343230', 'Sprinkler systems', 'Sisteme sprinkler'),
       w('50413200', 'Firefighting equipment maintenance', 'Întreținere echipamente de stingere'),
       w('45312200', 'Burglar alarm systems', 'Sisteme de alarmă antiefracție'),
-      w('32323500', 'Video surveillance', 'Supraveghere video', 'CCTV camere'),
+      w('32323500', 'Video surveillance', 'Supraveghere video', 'CCTV, camere video'),
     ],
   },
   {
@@ -252,7 +252,7 @@ export const TRADES: Trade[] = [
     name: { en: 'Lifts and escalators', ro: 'Ascensoare și scări rulante' },
     certs: ['iscir'],
     works: [
-      w('45313100', 'Lift installation', 'Montaj ascensoare', 'lift'),
+      w('45313100', 'Lift installation', 'Montaj ascensoare', 'lift, lifturi'),
       w('45313200', 'Escalator installation', 'Montaj scări rulante'),
       w('50750000', 'Lift maintenance', 'Întreținere ascensoare'),
     ],
@@ -288,7 +288,7 @@ export const TRADES: Trade[] = [
       w('45410000', 'Plastering', 'Tencuieli'),
       w('45421000', 'Joinery', 'Tâmplărie'),
       w('45421146', 'Suspended ceilings', 'Plafoane suspendate'),
-      w('45421141', 'Partitions', 'Compartimentări', 'rigips'),
+      w('45421141', 'Partitions', 'Compartimentări', 'rigips, gips carton'),
       w('45431000', 'Tiling', 'Placări cu faianță și gresie'),
       w('45432100', 'Floor laying', 'Pardoseli'),
       w('45441000', 'Glazing', 'Montaj geamuri'),
@@ -327,8 +327,8 @@ export const TRADES: Trade[] = [
       w('45212200', 'Sports facilities', 'Baze sportive'),
       w('45212225', 'Sports halls', 'Săli de sport'),
       w('45212212', 'Swimming pools', 'Bazine de înot'),
-      w('45236100', 'Sports surfaces', 'Suprafețe pentru sport', 'gazon sintetic teren'),
-      w('45342000', 'Fencing', 'Împrejmuiri', 'gard'),
+      w('45236100', 'Sports surfaces', 'Suprafețe pentru sport', 'gazon sintetic, terenuri de sport'),
+      w('45342000', 'Fencing', 'Împrejmuiri', 'gard, garduri, imprejmuiri'),
       w('77310000', 'Green-area planting and upkeep', 'Plantare și întreținere spații verzi'),
     ],
   },
@@ -339,7 +339,7 @@ export const TRADES: Trade[] = [
     certs: ['rte', 'heritage'],
     works: [
       w('45212350', 'Historic buildings', 'Clădiri cu valoare istorică sau arhitecturală'),
-      w('45212360', 'Religious buildings', 'Lăcașuri de cult', 'biserica'),
+      w('45212360', 'Religious buildings', 'Lăcașuri de cult', 'biserica, biserici'),
       w('45454100', 'Restoration', 'Restaurare'),
       w('45453100', 'Refurbishment', 'Renovare'),
     ],
@@ -350,7 +350,7 @@ export const TRADES: Trade[] = [
     name: { en: 'Industrial and steel structures', ro: 'Industriale și structuri metalice' },
     certs: ['rte', 'en1090', 'iso3834'],
     works: [
-      w('45213250', 'Industrial buildings', 'Clădiri industriale', 'hala'),
+      w('45213250', 'Industrial buildings', 'Clădiri industriale', 'hala, hale industriale'),
       w('45223100', 'Metal structure assembly', 'Montaj structuri metalice'),
       w('45223210', 'Structural steelwork', 'Structuri din oțel'),
       w('45262400', 'Steel erection', 'Montaj oțel'),
@@ -367,13 +367,13 @@ export const TRADES: Trade[] = [
     certs: ['verifier', 'site_supervisor', 'ancpi'],
     works: [
       w('71220000', 'Architectural design', 'Proiectare arhitecturală'),
-      w('71320000', 'Engineering design', 'Proiectare tehnică', 'PT DTAC'),
+      w('71320000', 'Engineering design', 'Proiectare tehnică', 'PT, DTAC, proiectare'),
       w('71322000', 'Civil engineering design', 'Proiectare de lucrări civile'),
-      w('71520000', 'Construction supervision', 'Supervizarea lucrărilor', 'diriginte'),
+      w('71520000', 'Construction supervision', 'Supervizarea lucrărilor', 'diriginte, dirigentie'),
       w('71521000', 'Site supervision', 'Dirigenție de șantier'),
       w('71248000', 'Project and documentation supervision', 'Supervizarea proiectului și a documentației'),
       w('71332000', 'Geotechnical engineering', 'Studii geotehnice'),
-      w('71355000', 'Surveying', 'Topografie', 'cadastru'),
+      w('71355000', 'Surveying', 'Topografie', 'cadastru, topografie'),
     ],
   },
 ];

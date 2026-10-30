@@ -602,7 +602,19 @@
     "reviewTrades": "Domenii",
     "reviewWorks": "Lucrări",
     "reviewTeam": "Echipă",
-    "reviewTeamValue": "{eu} UE, {other} din afara UE"
+    "reviewTeamValue": "{eu} UE, {other} din afara UE",
+    "scanTitle": "Îți citim site-ul",
+    "scanStageOpen": "Deschidem pagina principală",
+    "scanStagePages": "Citim paginile cu servicii și proiecte",
+    "scanStageMatch": "Potrivim lucrările cu codurile CPV",
+    "scanFound": "Am găsit {works} lucrări în {trades} domenii, din {pages} pagini.",
+    "scanContinue": "Aleg manual",
+    "scanFail_invalid": "Adresa nu poate fi deschisă. Poți alege lucrările manual.",
+    "scanFail_unreachable": "Site-ul nu a răspuns. Poți alege lucrările manual.",
+    "scanFail_empty": "Site-ul are prea puțin text. Poți alege lucrările manual.",
+    "scanFail_none": "Am citit site-ul, dar nu am găsit lucrări de construcții. Poți alege manual.",
+    "scanBanner": "Licits a citit {host} și a ales {count} lucrări pentru tine. Verifică-le mai jos.",
+    "scanClear": "Șterge sugestiile"
   },
   "authorization": {
     "statusNotStarted": "Neînceput",

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/routing';
 import {
   useCompany,
@@ -18,8 +18,12 @@ import { Icon } from '@/components/Icon';
 import { Logo } from '@/components/brand/Logo';
 import { buttonClass } from '@/components/ui/Button';
 import type { CompanyPatch, CompanyProfile } from '@/lib/types';
+import { scanCompanySite } from '@/lib/actions/site-scan';
 import {
   FinanceStep,
+  ScanBanner,
+  SiteScanOverlay,
+  type ScanView,
   IdentityStep,
   OnboardingProgress,
   ReviewStep,
@@ -149,6 +153,12 @@ export default function OnboardingPage() {
   const [dir, setDir] = useState(1);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [finishing, setFinishing] = useState(false);
+  const locale = useLocale() === 'ro' ? 'ro' : 'en';
+  // Website agent: overlay state, the site last read, and what it suggested.
+  const [scan, setScan] = useState<ScanView | null>(null);
+  const [scannedSite, setScannedSite] = useState('');
+  const [suggested, setSuggested] = useState<Record<string, string>>({});
+  const [scanSummary, setScanSummary] = useState({ host: '', summary: '' });
   // Signed-in users only: a mock session (mock mode) or a token (real mode).
   const [allowed, setAllowed] = useState<boolean | null>(null);
   useEffect(() => {
@@ -214,6 +224,42 @@ export default function OnboardingPage() {
     });
   };
 
+  /** Reads the site, preselects what it found, then moves to the trades step. */
+  const runScan = async (site: string) => {
+    const host = site.replace(/^https?:\/\//i, '').replace(/\/.*$/, '');
+    setScan({ phase: 'running', host });
+    setScannedSite(site);
+    const started = Date.now();
+    const result = await scanCompanySite(site, locale).catch(() => ({ status: 'unreachable' as const }));
+    // Let the progress read as work rather than a flash.
+    await new Promise((r) => setTimeout(r, Math.max(0, 2600 - (Date.now() - started))));
+    if (result.status !== 'ok' || result.picks.length === 0) {
+      setScan({ phase: 'failed', host, reason: result.status === 'ok' ? 'none' : result.status });
+      return;
+    }
+    const tradesFound = [...new Set(result.picks.map((p) => p.trade))];
+    setDraft((d) =>
+      d && {
+        ...d,
+        trades: [...new Set([...d.trades, ...tradesFound])],
+        cpv: [...new Set([...d.cpv, ...result.picks.map((p) => p.cpv)])],
+      },
+    );
+    setSuggested(Object.fromEntries(result.picks.map((p) => [p.cpv, p.evidence])));
+    setScanSummary({ host, summary: result.summary });
+    setScan({ phase: 'done', host, pages: result.pages.length, works: result.picks.length, trades: tradesFound.length });
+    window.setTimeout(() => {
+      setScan(null);
+      go(1);
+    }, 1600);
+  };
+
+  const clearSuggestions = () => {
+    const picked = new Set(Object.keys(suggested));
+    set({ cpv: draft.cpv.filter((c) => !picked.has(c)) });
+    setSuggested({});
+  };
+
   const go = (nextStep: number) => {
     setDir(nextStep > step ? 1 : -1);
     setStep(nextStep);
@@ -237,7 +283,9 @@ export default function OnboardingPage() {
       router.push('/app');
       return;
     }
-    const done = { onSuccess: () => go(step + 1) };
+    const site = draft.website.trim();
+    const readSite = step === 0 && site !== '' && site !== scannedSite;
+    const done = { onSuccess: () => (readSite ? runScan(site) : go(step + 1)) };
     if (!hasCompany) {
       createMut.mutate({ ...patch, name: draft.name.trim() }, done);
     } else {
@@ -248,6 +296,15 @@ export default function OnboardingPage() {
   return (
     <div className="flex min-h-screen items-start justify-center bg-surface px-margin py-space-xl">
       {finishing && <SetupInterstitial />}
+      {scan && (
+        <SiteScanOverlay
+          view={scan}
+          onContinue={() => {
+            setScan(null);
+            go(1);
+          }}
+        />
+      )}
       <div className="flex w-full max-w-3xl flex-col gap-space-lg">
         <div className="flex items-center justify-between">
           <Link href="/" aria-label="Licits home">
@@ -289,6 +346,17 @@ export default function OnboardingPage() {
               trades={draft.trades}
               cpv={draft.cpv}
               blacklist={draft.blacklist}
+              suggested={suggested}
+              banner={
+                Object.keys(suggested).length > 0 ? (
+                  <ScanBanner
+                    host={scanSummary.host}
+                    summary={scanSummary.summary}
+                    count={draft.cpv.filter((c) => c in suggested).length}
+                    onClear={clearSuggestions}
+                  />
+                ) : undefined
+              }
               onToggleTrade={toggleTrade}
               onToggleCpv={toggleCpv}
               onBlacklist={(blacklist) => set({ blacklist })}
@@ -347,7 +415,7 @@ export default function OnboardingPage() {
             <button
               type="button"
               onClick={next}
-              disabled={!stepValid(step, draft) || saving || finishing}
+              disabled={!stepValid(step, draft) || saving || finishing || scan !== null}
               data-assistant="ob-next"
               className={buttonClass()}
             >

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { clsx } from 'clsx';
 import type { CompanyOptions } from '@/lib/types';
@@ -120,7 +120,7 @@ export function ChipInput({
 /** Empty, or something that reads as a web address (scheme optional). */
 export function websiteValid(value: string): boolean {
   const v = value.trim();
-  return v === '' || /^(https?:\/\/)?[\w-]+(\.[\w-]+)+(\/\S*)?$/i.test(v);
+  return v === '' || /^(https?:\/\/)?[\w-]+(\.[\w-]+)+(:\d{2,5})?(\/\S*)?$/i.test(v);
 }
 
 export function IdentityStep({
@@ -227,11 +227,14 @@ function WorkChip({
   code,
   label,
   picked,
+  evidence,
   onToggle,
 }: {
   code: string;
   label: string;
   picked: boolean;
+  /** Set when the website agent suggested this work: the sentence it read. */
+  evidence?: string;
   onToggle: () => void;
 }) {
   return (
@@ -246,8 +249,8 @@ function WorkChip({
           : 'border-line bg-raised text-ink hover:border-indigo hover:text-indigo-text',
       )}
     >
-      {picked && <Icon name="check" size="xs" />}
-      <span>{label}</span>
+      {picked && <Icon name={evidence ? 'auto_awesome' : 'check'} size="xs" />}
+      <span title={evidence ? `“${evidence}”` : undefined}>{label}</span>
       <span className={clsx('tnum font-mono text-[11px]', picked ? 'text-on-indigo/75' : 'text-muted')}>{code}</span>
     </button>
   );
@@ -257,6 +260,8 @@ export function TradeStep({
   trades,
   cpv,
   blacklist,
+  suggested,
+  banner,
   onToggleTrade,
   onToggleCpv,
   onBlacklist,
@@ -264,6 +269,9 @@ export function TradeStep({
   trades: string[];
   cpv: string[];
   blacklist: string[];
+  /** CPV -> evidence sentence, for works the website agent picked. */
+  suggested: Record<string, string>;
+  banner?: React.ReactNode;
   onToggleTrade: (key: string) => void;
   onToggleCpv: (code: string, tradeKey: string) => void;
   onBlacklist: (v: string[]) => void;
@@ -275,6 +283,7 @@ export function TradeStep({
 
   return (
     <div className="flex flex-col gap-space-lg">
+      {banner}
       <div className="flex flex-col gap-space-xs">
         <span className="font-label-md text-label-md font-semibold text-on-surface">{t('tradesLabel')}</span>
         <div className="grid grid-cols-2 gap-space-xs sm:grid-cols-3">
@@ -332,6 +341,7 @@ export function TradeStep({
                   code={work.cpv}
                   label={work.name[lang]}
                   picked={cpv.includes(work.cpv)}
+                  evidence={suggested[work.cpv]}
                   onToggle={() => onToggleCpv(work.cpv, trade.key)}
                 />
               ))}
@@ -357,6 +367,7 @@ export function TradeStep({
                     code={work.cpv}
                     label={work.name[lang]}
                     picked={cpv.includes(work.cpv)}
+                    evidence={suggested[work.cpv]}
                     onToggle={() => onToggleCpv(work.cpv, trade.key)}
                   />
                 ))}
@@ -791,6 +802,107 @@ export function SetupInterstitial() {
         </div>
         <p className="font-body-md text-body-md text-on-surface-variant">{t('setupTitle')}</p>
       </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Website agent: progress overlay + suggestion banner                 */
+/* ------------------------------------------------------------------ */
+
+export type ScanView =
+  | { phase: 'running'; host: string }
+  | { phase: 'done'; host: string; pages: number; works: number; trades: number }
+  | { phase: 'failed'; host: string; reason: 'invalid' | 'unreachable' | 'empty' | 'none' };
+
+const SCAN_STAGES = ['scanStageOpen', 'scanStagePages', 'scanStageMatch'] as const;
+
+/**
+ * Shown while the agent reads the company's site. Stages advance on a
+ * timer while the request runs; the final line reports what it found.
+ */
+export function SiteScanOverlay({ view, onContinue }: { view: ScanView; onContinue: () => void }) {
+  const t = useTranslations('onboarding');
+  const [stage, setStage] = useState(0);
+  useEffect(() => {
+    if (view.phase !== 'running') return;
+    const id = window.setInterval(() => setStage((s) => Math.min(s + 1, SCAN_STAGES.length - 1)), 1400);
+    return () => window.clearInterval(id);
+  }, [view.phase]);
+  const running = view.phase === 'running';
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-surface/90 px-margin backdrop-blur-sm">
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex w-full max-w-md flex-col gap-space-md rounded-xl border border-line bg-raised p-space-lg shadow-lift-2"
+      >
+        <div className="flex items-center gap-space-sm">
+          <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-indigo-soft text-indigo-text">
+            <Icon name="travel_explore" size="md" />
+            {running && <span className="map-ping absolute inset-0 rounded-full bg-indigo/30" />}
+          </span>
+          <div className="min-w-0">
+            <p className="text-[16px] font-medium text-ink">{t('scanTitle')}</p>
+            <p className="truncate font-mono text-[12px] text-muted">{view.host}</p>
+          </div>
+        </div>
+        <ol className="flex flex-col gap-2">
+          {SCAN_STAGES.map((key, i) => {
+            const done = !running || i < stage;
+            const active = running && i === stage;
+            return (
+              <li key={key} className={clsx('flex items-center gap-2 text-[14px]', done || active ? 'text-ink' : 'text-muted/60')}>
+                <Icon
+                  name={done ? 'check_circle' : active ? 'progress_activity' : 'radio_button_unchecked'}
+                  size="sm"
+                  className={clsx(done ? 'text-eligible' : active ? 'animate-spin text-indigo-text' : '')}
+                />
+                {t(key)}
+              </li>
+            );
+          })}
+        </ol>
+        {view.phase === 'done' && (
+          <p className="rounded-lg bg-indigo-soft px-space-sm py-space-xs text-[14px] text-indigo-text">
+            {t('scanFound', { works: view.works, trades: view.trades, pages: view.pages })}
+          </p>
+        )}
+        {view.phase === 'failed' && (
+          <>
+            <p className="rounded-lg bg-warn-bg px-space-sm py-space-xs text-[14px] text-warn">{t(`scanFail_${view.reason}`)}</p>
+            <button type="button" onClick={onContinue} className="self-end rounded-pill bg-indigo px-4 py-2 text-[14px] font-medium text-on-indigo">
+              {t('scanContinue')}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function ScanBanner({
+  host,
+  summary,
+  count,
+  onClear,
+}: {
+  host: string;
+  summary: string;
+  count: number;
+  onClear: () => void;
+}) {
+  const t = useTranslations('onboarding');
+  return (
+    <div className="flex items-start gap-space-sm rounded-lg border border-indigo/20 bg-indigo-soft p-space-sm">
+      <Icon name="auto_awesome" size="sm" className="mt-0.5 text-indigo-text" />
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <p className="text-[14px] font-medium text-indigo-text">{t('scanBanner', { host, count })}</p>
+        {summary && <p className="text-[13px] leading-[19px] text-ink-2">{summary}</p>}
+      </div>
+      <button type="button" onClick={onClear} className="shrink-0 text-[13px] font-medium text-indigo-text hover:underline">
+        {t('scanClear')}
+      </button>
     </div>
   );
 }

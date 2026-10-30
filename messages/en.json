@@ -602,7 +602,19 @@
     "reviewTrades": "Trades",
     "reviewWorks": "Works",
     "reviewTeam": "Team",
-    "reviewTeamValue": "{eu} EU, {other} non-EU"
+    "reviewTeamValue": "{eu} EU, {other} non-EU",
+    "scanTitle": "Reading your website",
+    "scanStageOpen": "Opening your home page",
+    "scanStagePages": "Reading your services and projects pages",
+    "scanStageMatch": "Matching your work to CPV codes",
+    "scanFound": "Found {works} works in {trades} trades across {pages} pages.",
+    "scanContinue": "Pick manually",
+    "scanFail_invalid": "That address can’t be opened. You can pick your works by hand.",
+    "scanFail_unreachable": "Your website didn’t answer. You can pick your works by hand.",
+    "scanFail_empty": "Your website has too little text to read. You can pick your works by hand.",
+    "scanFail_none": "We read your website but couldn’t match any construction works. You can pick them by hand.",
+    "scanBanner": "Licits read {host} and picked {count} works for you. Check them below.",
+    "scanClear": "Clear suggestions"
   },
   "authorization": {
     "statusNotStarted": "Not started",
