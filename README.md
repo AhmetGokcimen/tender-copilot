@@ -25,7 +25,7 @@ tender-copilot/
 ├── vercel.json     /api/* → Python function rewrite + bundle excludes
 ├── requirements.txt  Python runtime deps (Vercel installs these; dev tools in requirements-dev.txt)
 ├── ruff.toml         ruff config
-├── .python-version   pins the Vercel Python runtime (3.14)
+├── .python-version   pins the Vercel Python runtime (3.12)
 ├── package.json      Next.js deps
 ├── API_CHANGES.md    the single changelog (backend + frontend history merged)
 └── backend/openapi.json  versioned API contract snapshot
