@@ -9,6 +9,7 @@ from sqlmodel import Session, select
 from backend.models.award import Award
 from backend.models.sync_state import SyncCheckpoint
 from backend.models.tender import SourceSystem, Tender
+from backend.models.company import CompanyProfile
 from backend.models.user_tender_state import UserTenderState
 
 SECRET = "test-sync-secret"
@@ -197,6 +198,9 @@ def test_sync_never_touches_company_state(api: TestClient, monkeypatch) -> None:
     seeded.extraction_confidence = "high"
     with Session(engine) as session:
         session.add(seeded)
+        # Postgres enforces the company foreign key (SQLite does not).
+        session.add(CompanyProfile(id=7, name="State owner"))
+        session.flush()
         session.add(UserTenderState(
             tender_source_system=SourceSystem.ROMANIA_SEAP,
             tender_external_id="t1", company_id=7, score=88,

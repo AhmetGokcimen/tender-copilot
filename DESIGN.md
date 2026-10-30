@@ -143,5 +143,5 @@ The mark: four ribbon strands converging on an amber dot, on a `night` tile with
 
 ## Open questions
 
-- Domain: licits.com.
+- Domain: licits.com (DNS on Cloudflare, hosted on Vercel).
 - The hero video replaces the coded ribbon only after this look is approved.
