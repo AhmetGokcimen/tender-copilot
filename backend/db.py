@@ -10,7 +10,10 @@ in _insert_stmt below.
 from collections.abc import Generator
 from datetime import UTC, datetime
 
-from sqlalchemy import func, inspect, text, update
+from urllib.parse import quote, unquote
+
+from sqlalchemy import Engine, func, inspect, text, update
+from sqlalchemy.exc import ArgumentError
 from sqlmodel import Session, SQLModel, create_engine
 
 from backend.core.config import settings
@@ -26,28 +29,68 @@ from backend.models.user_tender_state import UserTenderState
 BACKEND_SCHEMA = "backend"
 
 
-def _engine_url(url: str) -> str:
-    for prefix in ("postgres://", "postgresql://"):
+class DatabaseConfigError(RuntimeError):
+    """DATABASE_URL is set but unusable. The message never includes the password."""
+
+
+def _engine_url(raw: str) -> str:
+    """Normalizes a Postgres URL as pasted from Supabase: trims whitespace and
+    quotes, picks the psycopg driver, and percent-encodes the password so
+    characters like @ # / ? in it do not break parsing."""
+    url = raw.strip().strip('"').strip("'").strip()
+    if url.upper().startswith("DATABASE_URL="):
+        url = url.split("=", 1)[1].strip().strip('"').strip("'")
+    for prefix in ("postgres://", "postgresql://", "postgresql+psycopg://"):
         if url.startswith(prefix):
-            return "postgresql+psycopg://" + url[len(prefix):]
-    return url
+            rest = url[len(prefix):]
+            break
+    else:
+        return url
+    if "[YOUR-PASSWORD]" in rest or "[YOUR_PASSWORD]" in rest:
+        raise DatabaseConfigError("DATABASE_URL still contains the [YOUR-PASSWORD] placeholder")
+    if "@" not in rest:
+        raise DatabaseConfigError("DATABASE_URL has no user@host part")
+    # The host part never contains "@", so the last one ends the credentials.
+    creds, host = rest.rsplit("@", 1)
+    if ":" in creds:
+        user, password = creds.split(":", 1)
+        creds = f"{user}:{quote(unquote(password), safe='')}"
+    return f"postgresql+psycopg://{creds}@{host}"
 
 
-_url = _engine_url(settings.database_url)
-if _url.startswith("sqlite"):
-    engine = create_engine(_url, connect_args={"check_same_thread": False})
-else:
-    engine = create_engine(
-        _url,
-        connect_args={"prepare_threshold": None},
-        pool_pre_ping=True,
-        pool_size=2,
-        max_overflow=3,
-    ).execution_options(schema_translate_map={None: BACKEND_SCHEMA})
+def _make_engine(raw: str) -> Engine:
+    url = _engine_url(raw)
+    if url.startswith("sqlite"):
+        return create_engine(url, connect_args={"check_same_thread": False})
+    try:
+        return create_engine(
+            url,
+            connect_args={"prepare_threshold": None},
+            pool_pre_ping=True,
+            pool_size=2,
+            max_overflow=3,
+        ).execution_options(schema_translate_map={None: BACKEND_SCHEMA})
+    except ArgumentError:
+        raise DatabaseConfigError(
+            "DATABASE_URL could not be parsed; expected postgresql://user:password@host:port/database"
+        ) from None
+
+
+# A bad DATABASE_URL must not stop the module from importing (that takes the
+# whole function down, health checks included). Keep the error and raise it
+# from init_db instead, so diagnostics can report it.
+config_error: DatabaseConfigError | None = None
+try:
+    engine = _make_engine(settings.database_url)
+except DatabaseConfigError as e:
+    config_error = e
+    engine = create_engine("sqlite://")
 _schema = BACKEND_SCHEMA if engine.dialect.name == "postgresql" else None
 
 
 def init_db() -> None:
+    if config_error:
+        raise config_error
     if _schema:
         with engine.begin() as conn:
             conn.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{_schema}"'))

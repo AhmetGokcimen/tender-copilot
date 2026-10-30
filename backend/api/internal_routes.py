@@ -107,9 +107,12 @@ def diagnostics(x_sync_token: str | None = Header(default=None)) -> dict:
         raise HTTPException(status_code=401, detail="Bad sync token")
     from sqlalchemy import text
 
-    from backend.db import engine
+    from backend.db import config_error, engine
 
     out: dict = {"dialect": engine.dialect.name, "database_url_set": bool(os.environ.get("DATABASE_URL"))}
+    if config_error:
+        out["database"] = f"config error: {config_error}"
+        return out
     try:
         with engine.connect() as conn:
             conn.execute(text("select 1"))
