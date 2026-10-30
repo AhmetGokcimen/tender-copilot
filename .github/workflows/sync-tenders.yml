@@ -6,7 +6,7 @@
 # runs simply continue on the next tick — no overlap, no duplicates.
 #
 # Required repo secrets (Settings -> Secrets and variables -> Actions):
-#   SYNC_URL    Deployed app origin, e.g. https://ofera.vercel.app
+#   SYNC_URL    Deployed API base, e.g. https://licits.com/api
 #               (no /api suffix — /internal is mounted at the root; the API
 #               is same-origin with the frontend on the single deployment).
 #   SYNC_TOKEN  Must equal the backend's SYNC_SECRET env value.
