@@ -153,7 +153,6 @@
     "closingTitle": "Următorul tău contract este deja pe SEAP.",
     "closingSub": "Înscrie-te pe lista de așteptare și primești două săptămâni gratuit, din dimineața în care ți se deschide accesul.",
     "footerTag": "Licitații publice pe care le poți câștiga, găsite și redactate împreună cu tine.",
-    "footerHackathon": "Construit pentru Meta Global AI Developer Hackathon.",
     "footerRights": "© 2026 Licits. Toate drepturile rezervate.",
     "footerProduct": "Produs",
     "footerHow": "Cum funcționează",
@@ -269,7 +268,7 @@
     "m_mktS3Body": "Contractele recurente sunt identificate din istoricul lor, ca să te pregătești înainte de publicarea anunțului.",
     "mMktNote": "Acest contract a fost atribuit la fiecare doi ani, de fiecare dată primăvara. Următoarea licitație este probabilă în jurul lunii martie 2027.",
     "heroEyebrow": "Pentru firmele de construcții",
-    "mapNote": "Anunțuri de construcții publicate în SEAP în ultimele 24 de ore, câte unul pe oraș. Apasă pe unul ca să-l deschizi pe site-ul oficial.",
+    "mapNote": "Anunțuri de construcții publicate în SEAP în ultimele 24 de ore. Apasă pe unul ca să-l deschizi pe site-ul oficial.",
     "faq6Q": "Licits este doar pentru construcții?",
     "faq6A": "Deocamdată, da. Începem cu lucrările de construcții (CPV 45), ca fiecare verificare să se potrivească meseriei: lucrări similare, utilaje, personal, cifră de afaceri și garanții. Alte domenii vor urma."
   },

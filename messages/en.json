@@ -153,7 +153,6 @@
     "closingTitle": "Your next contract is already on SEAP.",
     "closingSub": "Join the waitlist and get two weeks free, starting the morning your access opens.",
     "footerTag": "Public tenders you can win, found and drafted with you.",
-    "footerHackathon": "Built for the Meta Global AI Developer Hackathon.",
     "footerRights": "© 2026 Licits. All rights reserved.",
     "footerProduct": "Product",
     "footerHow": "How it works",
@@ -269,7 +268,7 @@
     "m_mktS3Body": "Recurring contracts are spotted from their history, so you can prepare before the notice is published.",
     "mMktNote": "This contract was awarded every two years, each time in spring. The next tender is likely around March 2027.",
     "heroEyebrow": "For construction companies",
-    "mapNote": "Construction notices published on SEAP in the last 24 hours, one per city. Click one to open it on the official site.",
+    "mapNote": "Construction notices published on SEAP in the last 24 hours. Click one to open it on the official site.",
     "faq6Q": "Is Licits only for construction?",
     "faq6A": "For now, yes. We start with construction works (CPV 45), so every check fits the trade: similar works, equipment, staff, turnover and guarantees. Other sectors come later."
   },
