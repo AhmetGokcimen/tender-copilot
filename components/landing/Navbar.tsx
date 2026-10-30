@@ -27,7 +27,7 @@ export function Navbar() {
       }`}
     >
       <div className="mx-auto flex h-[68px] max-w-[1200px] items-center gap-8 px-4 md:px-8">
-        <Link href="/" aria-label="Lichit home">
+        <Link href="/" aria-label="Licits home">
           <Logo />
         </Link>
         <nav className="ml-auto hidden items-center gap-7 md:flex">

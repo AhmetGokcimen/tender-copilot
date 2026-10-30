@@ -1,4 +1,4 @@
-/** Shared Lichit form field classes (labels above inputs, indigo focus ring). */
+/** Shared Licits form field classes (labels above inputs, indigo focus ring). */
 const FIELD =
   'w-full rounded-field border border-line-strong bg-raised px-3 text-[15px] text-ink outline-none transition-[border-color,box-shadow] placeholder:text-muted focus:border-indigo focus:shadow-[0_0_0_3px_var(--indigo-soft)]';
 

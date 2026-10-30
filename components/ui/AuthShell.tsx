@@ -2,7 +2,7 @@ import { Link } from '@/i18n/routing';
 import { Logo } from '../brand/Logo';
 import { LanguageSwitcher } from '../i18n/LanguageSwitcher';
 
-/** Centered auth card on paper with the Lichit logo above it. */
+/** Centered auth card on paper with the Licits logo above it. */
 export function AuthShell({
   title,
   subtitle,
@@ -15,7 +15,7 @@ export function AuthShell({
   return (
     <main className="relative flex min-h-[100dvh] flex-col items-center bg-surface px-4 py-12 text-ink">
       <LanguageSwitcher className="absolute right-4 top-4 md:right-8 md:top-6" />
-      <Link href="/" aria-label="Lichit home" className="mb-10">
+      <Link href="/" aria-label="Licits home" className="mb-10">
         <Logo />
       </Link>
       <div className="flex w-full max-w-md flex-col gap-6 rounded-card border border-line bg-raised p-6 shadow-lift-1 sm:p-8">

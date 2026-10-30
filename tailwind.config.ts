@@ -1,8 +1,8 @@
 import type { Config } from 'tailwindcss';
 
 /**
- * Lichit brand tokens live as CSS variables in app/globals.css (source: the
- * Lichit Design System). The Stitch-era names below stay as aliases so the
+ * Licits brand tokens live as CSS variables in app/globals.css (source: the
+ * Licits Design System). The Stitch-era names below stay as aliases so the
  * app area keeps working while it moves onto the new tokens.
  */
 const config: Config = {
@@ -74,7 +74,7 @@ const config: Config = {
         info: 'rgb(var(--indigo-text-rgb) / <alpha-value>)',
         'info-bg': 'rgb(var(--indigo-soft-rgb) / <alpha-value>)',
         'surface-depth': 'rgb(var(--surface-sunk-rgb) / <alpha-value>)',
-        // Lichit brand tokens
+        // Licits brand tokens
         paper: 'var(--paper)',
         raised: 'rgb(var(--surface-rgb) / <alpha-value>)',
         sunk: 'rgb(var(--surface-sunk-rgb) / <alpha-value>)',

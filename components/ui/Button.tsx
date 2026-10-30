@@ -19,7 +19,7 @@ const SIZES: Record<Size, string> = {
 };
 
 /**
- * Lichit button classes. Every button is a pill; `primary` (indigo) is the
+ * Licits button classes. Every button is a pill; `primary` (indigo) is the
  * one filled action per view. Works on <button>, <a> and next-intl <Link>.
  */
 export function buttonClass({

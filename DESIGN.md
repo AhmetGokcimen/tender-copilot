@@ -1,6 +1,6 @@
-# DESIGN.md: Lichit
+# DESIGN.md: Licits
 
-The source of truth is the Lichit Design System artifact. Code tokens live as CSS variables in `app/globals.css` and are mapped to Tailwind names in `tailwind.config.ts` (`paper`, `raised` = surface, `sunk`, `ink`, `ink-2`, `muted`, `line`, `line-strong`, `indigo*`, `ribbon-1..4`, `night`, `eligible`, `warn`, `risk`; radius `field` 8px, `card` 16px, `pill`; shadow `lift-1`, `lift-2`). Use this file to brief AI design tools so generated screens stay on brand.
+The source of truth is the Licits Design System artifact. Code tokens live as CSS variables in `app/globals.css` and are mapped to Tailwind names in `tailwind.config.ts` (`paper`, `raised` = surface, `sunk`, `ink`, `ink-2`, `muted`, `line`, `line-strong`, `indigo*`, `ribbon-1..4`, `night`, `eligible`, `warn`, `risk`; radius `field` 8px, `card` 16px, `pill`; shadow `lift-1`, `lift-2`). Use this file to brief AI design tools so generated screens stay on brand.
 
 ## Colors
 
@@ -17,7 +17,7 @@ The source of truth is the Lichit Design System artifact. Code tokens live as CS
 | `indigo` | `#4f46e5` | `#4f46e5` | THE accent. Primary CTA fill, focus ring, active state. One filled CTA per section. |
 | `indigo-deep` | `#3730a3` | `#3730a3` | Primary CTA pressed state. |
 | `indigo-text` | `#4338ca` | `#a5a0ff` | Links and indigo text on paper or surface. |
-| `indigo-soft` | `#eef0ff` | `#1d1f4a` | Selected rows, soft tags, the 'With Lichit' column wash. |
+| `indigo-soft` | `#eef0ff` | `#1d1f4a` | Selected rows, soft tags, the 'With Licits' column wash. |
 | `on-indigo` | `#ffffff` | `#ffffff` | Text on indigo (6.3:1). |
 | `ribbon-1` | `#4f46e5` | `#6d66ff` | Signal ribbon stop 1 (start). Gradient lives ONLY in the ribbon, the logo mark and the cover. |
 | `ribbon-2` | `#8b5cf6` | `#9b7bff` | Signal ribbon stop 2. |
@@ -54,15 +54,15 @@ Geist (`--font-sans`) for everything readable, Geist Mono (`--font-mono`) for da
 - Radius: inputs and inner chips 8px, cards 16px, every button and tag a pill.
 - Shadows: `0 1px 3px rgba(16,24,64,.08)` resting; `0 12px 32px rgba(16,24,64,.10), 0 2px 6px rgba(16,24,64,.05)` floating.
 
-Lichit helps Romanian SMEs win public tenders. It reads every SEAP notice, shows which ones a company can actually win, and drafts the offer with them. This is the brand book for the pre-launch landing page and, after that, the whole app.
+Licits helps Romanian SMEs win public tenders. It reads every SEAP notice, shows which ones a company can actually win, and drafts the offer with them. This is the brand book for the pre-launch landing page and, after that, the whole app.
 
-The name blends *licitație* (tender) and *lichid* (liquid). The core image is a liquid signal: thousands of notices flow in as noise, and Lichit narrows them into one clear line, the tender you can win.
+The name is plural for *licit*, from *licitație* (tender): Licits means "tenders", so the product is clear at a glance. The core image is a signal: thousands of notices flow in as noise, and Licits narrows them into one clear line, the tender you can win.
 
 ## Messaging
 
 **The job customers hire us for:** win public contracts without having a bid team. They are not buying AI. They want a signed contract and their evenings back.
 
-**Core message:** Lichit finds the tenders you can win and prepares the offer with you.
+**Core message:** Licits finds the tenders you can win and prepares the offer with you.
 
 **Proof points we can state** (all live in the product):
 - A shortlist by email every morning.
@@ -73,14 +73,14 @@ The name blends *licitație* (tender) and *lichid* (liquid). The core image is a
 
 **Hero (draft)**
 - Headline: *Win the public tenders you've been missing.*
-- Subtext (20 words max): *Lichit reads every SEAP notice, shows which ones you can win, and drafts the offer with you.*
+- Subtext (20 words max): *Licits reads every SEAP notice, shows which ones you can win, and drafts the offer with you.*
 - One CTA label on the whole page: **Join the waitlist**. Email only. Company details come later.
 
 **Page narrative**, top to bottom:
 1. Hero, waitlist form, ribbon ending in a real tender card.
 2. Live SEAP strip: tenders scanned this week, fed by our own sync. Hidden if the number is unavailable. Never invented.
 3. The loss: *Every week, tenders you could win close before you see them.*
-4. Before / With Lichit, side by side (component: BeforeAfter).
+4. Before / With Licits, side by side (component: BeforeAfter).
 5. How it works: Monitor, Qualify, Draft, Submit. Each step shows the real product component.
 6. Hours back: the visitor's own numbers in, hours per month out (component: HoursCalculator). Our assumption is printed next to the result.
 7. Trust: official SEAP data, you approve every step, GDPR, data stays in the EU.
@@ -91,11 +91,11 @@ The name blends *licitație* (tender) and *lichid* (liquid). The core image is a
 | Principle | Where |
 |---|---|
 | Loss aversion | Section 3 names the cost of doing nothing. |
-| Contrast | Before / With Lichit. |
+| Contrast | Before / With Licits. |
 | Present bias | "Tomorrow morning, your first shortlist." |
 | Low activation energy | One field in the hero. |
 | Authority | SEAP and e-licitatie.ro named as sources. |
-| Pratfall | "Lichit never submits for you. You stay in control." |
+| Pratfall | "Licits never submits for you. You stay in control." |
 | Scarcity | Early access is real and capped by onboarding capacity. No fake counters. |
 
 **Voice.** Plain, specific, calm. Short sentences. Name real things: SEAP, CPV, RON, caiet de sarcini. Numbers are either real, the visitor's own, or labelled *Example*.
@@ -117,7 +117,7 @@ Words we avoid: seamless, unleash, revolutionize, elevate, next-gen, supercharge
 
 **Layout.** Split hero, text left, ribbon and card right. Max 1200px container, 96px section padding. At least five different layout families on one page; never three identical cards in a row; max three small uppercase eyebrows on the whole page.
 
-**What makes it not Stripe.** Stripe tilts a blob mesh across the hero top. Lichit runs a horizontal ribbon that *converges* into one line and lands on a product card: the image tells the noise to signal story. Mono data, cool paper, indigo to amber instead of indigo to pink.
+**What makes it not Stripe.** Stripe tilts a blob mesh across the hero top. Licits runs a horizontal ribbon that *converges* into one line and lands on a product card: the image tells the noise to signal story. Mono data, cool paper, indigo to amber instead of indigo to pink.
 
 ## Motion
 
@@ -139,9 +139,9 @@ The app already uses Material Symbols Outlined (weight 300). Keep one family, ou
 
 ## Logo
 
-The mark: four ribbon strands converging on an amber dot, on a `night` tile with `radius-lg` corners. The wordmark: *lichit* in lowercase Geist 600, tracking -0.5px, next to the mark. See the Logo component for the lockup. The bare mark (no tile) is for dark backgrounds.
+The mark: four ribbon strands converging on an amber dot, on a `night` tile with `radius-lg` corners. The wordmark: *licits* in lowercase Geist 600, tracking -0.5px, next to the mark. See the Logo component for the lockup. The bare mark (no tile) is for dark backgrounds.
 
 ## Open questions
 
-- Domain: lichit.app.
+- Domain: licits.com.
 - The hero video replaces the coded ribbon only after this look is approved.

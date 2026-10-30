@@ -57,7 +57,7 @@ export function ProductShowcase() {
               <span className="h-2.5 w-2.5 rounded-full bg-line-strong/60" />
               <span className="h-2.5 w-2.5 rounded-full bg-line-strong/60" />
               <span className="mx-auto rounded-pill bg-raised px-3 py-0.5 font-mono text-[11px] text-muted">
-                Lichit
+                Licits
               </span>
             </div>
             <Image

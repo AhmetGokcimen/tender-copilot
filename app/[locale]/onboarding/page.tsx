@@ -231,7 +231,7 @@ export default function OnboardingPage() {
     <div className="flex min-h-screen items-start justify-center bg-surface px-margin py-space-xl">
       {finishing && <SetupInterstitial />}
       <div className="flex w-full max-w-2xl flex-col gap-space-lg">
-        <Link href="/" aria-label="Lichit home" className="self-start">
+        <Link href="/" aria-label="Licits home" className="self-start">
           <Logo />
         </Link>
         <header className="flex flex-col gap-space-xs">

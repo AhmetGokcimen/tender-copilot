@@ -1,5 +1,5 @@
 /**
- * Public Supabase coordinates for the Lichit project. The publishable key is
+ * Public Supabase coordinates for the Licits project. The publishable key is
  * designed to ship to clients; what it can do is limited by RLS (the
  * `waitlist` table only allows INSERT for anon). Env vars override these.
  */

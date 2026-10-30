@@ -1,5 +1,5 @@
 /**
- * The Lichit mark: a square-cut "L" on an ink tile, with a small indigo
+ * The Licits mark: a square-cut "L" on an ink tile, with a small indigo
  * signal square in the open corner. `onDark` inverts the tile for night
  * surfaces; the signal square stays indigo on both.
  */
@@ -19,9 +19,9 @@ export function LogoMark({ size = 28, onDark = false }: { size?: number; onDark?
   );
 }
 
-/** The "Lichit" wordmark in Geist SemiBold with tight tracking. */
+/** The "Licits" wordmark in Geist SemiBold with tight tracking. */
 export function Wordmark({ className = '' }: { className?: string }) {
-  return <span className={`font-semibold leading-none tracking-[-0.03em] ${className}`}>Lichit</span>;
+  return <span className={`font-semibold leading-none tracking-[-0.03em] ${className}`}>Licits</span>;
 }
 
 /** Mark plus wordmark. `onDark` switches both to their night variants. */

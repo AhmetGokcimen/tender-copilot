@@ -13,14 +13,14 @@ const geistMono = Geist_Mono({ subsets: ['latin', 'latin-ext'], variable: '--fon
 
 const META = {
   en: {
-    title: 'Lichit | Win the public tenders you have been missing',
+    title: 'Licits | Win the public tenders you have been missing',
     description:
-      'Lichit reads every SEAP notice, shows which tenders your company can win, and drafts the offer with you.',
+      'Licits reads every SEAP notice, shows which tenders your company can win, and drafts the offer with you.',
   },
   ro: {
-    title: 'Lichit | Câștigă licitațiile publice pe care le-ai ratat',
+    title: 'Licits | Câștigă licitațiile publice pe care le-ai ratat',
     description:
-      'Lichit citește fiecare anunț SEAP, îți arată ce licitații poate câștiga compania ta și redactează oferta împreună cu tine.',
+      'Licits citește fiecare anunț SEAP, îți arată ce licitații poate câștiga compania ta și redactează oferta împreună cu tine.',
   },
 } as const;
 

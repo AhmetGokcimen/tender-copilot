@@ -1,4 +1,4 @@
-# Lichit (Tender Copilot)
+# Licits (Tender Copilot)
 
 AI copilot that monitors public procurement systems and helps SMEs find and
 respond to tenders they're actually eligible for. Built for the Meta Global

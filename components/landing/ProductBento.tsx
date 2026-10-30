@@ -365,7 +365,7 @@ function DetailDialog({ card, onClose }: { card: (typeof CARDS)[number] | null; 
   );
 }
 
-/** What Lichit does: four product views; each opens a detail window. */
+/** What Licits does: four product views; each opens a detail window. */
 export function ProductBento() {
   const t = useTranslations('landing');
   const [open, setOpen] = useState<Key | null>(null);
