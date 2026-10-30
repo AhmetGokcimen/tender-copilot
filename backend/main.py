@@ -7,6 +7,7 @@ from sqlmodel import Session
 
 from backend.api.auth_routes import router as auth_router
 from backend.api.internal_routes import router as internal_router
+from backend.api.public_routes import router as public_router
 from backend.api.routes import router as api_router
 from backend.core.caiet_jobs import reap_stale_jobs
 from backend.core.config import settings
@@ -39,6 +40,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/api")
+app.include_router(public_router, prefix="/api")
 app.include_router(api_router, prefix="/api")
 app.include_router(internal_router)
 # Also under /api: on Vercel only /api/* reaches this function (vercel.json),
