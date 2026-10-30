@@ -31,7 +31,6 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     ...META[lang],
     // Canonical origin for links and social previews (Vercel previews keep their own URL).
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://licits.com'),
-    alternates: { canonical: `/${lang}`, languages: { en: '/en', ro: '/ro' } },
   };
 }
 
