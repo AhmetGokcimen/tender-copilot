@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { SITE } from '@/lib/site';
+import { CookieSettingsLink } from '../CookieConsent';
 import { Logo } from '../brand/Logo';
 
 const LINK = 'text-[14px] text-ink-2 transition-colors hover:text-ink';
@@ -86,6 +87,7 @@ export function Footer() {
           <Link href="/terms" className={LINK}>
             {t('footerTerms')}
           </Link>
+          <CookieSettingsLink className={`${LINK} text-left`} />
         </nav>
       </div>
       <div className="border-t border-line">

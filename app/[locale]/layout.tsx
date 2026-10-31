@@ -8,6 +8,7 @@ import { QueryProvider } from '@/components/QueryProvider';
 import { AssistantFab } from '@/components/assistant/AssistantFab';
 import { AssistantPanel } from '@/components/assistant/AssistantPanel';
 import { AssistantTooltip } from '@/components/assistant/AssistantTooltip';
+import { CookieConsent } from '@/components/CookieConsent';
 import '../globals.css';
 
 const sans = Schibsted_Grotesk({ subsets: ['latin', 'latin-ext'], variable: '--font-sans', display: 'swap' });
@@ -58,6 +59,7 @@ export default async function LocaleLayout({
             <AssistantFab />
             <AssistantPanel />
             <AssistantTooltip />
+            <CookieConsent />
           </QueryProvider>
         </NextIntlClientProvider>
       </body>

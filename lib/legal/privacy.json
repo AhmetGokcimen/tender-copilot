@@ -72,10 +72,17 @@
       "w": "To keep you signed in and remember your language.",
       "b": "Strictly necessary to provide the service you asked for, so no consent is needed.",
       "k": "Until you sign out or clear your browser data; the language cookie lasts up to a year."
+     },
+     {
+      "t": "Visitor statistics (only if you accept)",
+      "d": "If you accept analytics in the cookie notice, Google Analytics sets cookies in your browser and receives your IP address, device and browser details, the pages you view and how you arrived.",
+      "w": "To count visits and understand which pages are useful, so we can improve the site.",
+      "b": "Your consent (Art. 6(1)(a) GDPR). You can refuse at the notice, and change your mind at any time with Cookie settings in the footer.",
+      "k": "The cookies last up to two years; analytics data is kept for two months."
      }
     ],
     "p": [
-     "We do not use advertising or tracking cookies, and we do not run analytics on this site."
+     "We do not use advertising cookies. The only optional cookies are those of Google Analytics, and they are set only if you accept them in the cookie notice."
     ]
    },
    {
@@ -114,7 +121,8 @@
      "Meta Platforms: the AI model described above.",
      "FormSubmit: forwards contact-form messages to our inbox. Your browser sends the message to FormSubmit, which emails it to us.",
      "Google: the icon font is loaded from Google Fonts, so your IP address is sent to Google when a page loads.",
-     "ANAF: when you enter a CUI, the CUI is sent to ANAF's public service to look up the company's registration details."
+     "ANAF: when you enter a CUI, the CUI is sent to ANAF's public service to look up the company's registration details.",
+     "Google Analytics: visitor statistics, only if you accept the analytics cookies. Google acts as our processor."
     ],
     "p2": [
      "Tender notices come from SEAP, where they are public. We do not sell personal data or share it for advertising. We may disclose data when the law requires it or to protect our rights."
@@ -268,10 +276,17 @@
       "w": "Ca să rămâi autentificat și să ne amintim limba.",
       "b": "Strict necesare pentru serviciul cerut de tine, deci nu este nevoie de consimțământ.",
       "k": "Până te deconectezi sau ștergi datele browserului; cookie-ul de limbă durează până la un an."
+     },
+     {
+      "t": "Statistici despre vizitatori (doar dacă accepți)",
+      "d": "Dacă accepți analiza în notificarea despre cookie-uri, Google Analytics setează cookie-uri în browserul tău și primește adresa ta IP, detalii despre dispozitiv și browser, paginile vizualizate și modul în care ai ajuns pe site.",
+      "w": "Pentru a număra vizitele și a înțelege ce pagini sunt utile, ca să putem îmbunătăți site-ul.",
+      "b": "Consimțământul tău (art. 6 alin. (1) lit. a) GDPR). Poți refuza în notificare și te poți răzgândi oricând din Setări cookie, din subsolul paginii.",
+      "k": "Cookie-urile durează până la doi ani; datele de analiză se păstrează două luni."
      }
     ],
     "p": [
-     "Nu folosim cookie-uri de publicitate sau de urmărire și nu rulăm analize (analytics) pe acest site."
+     "Nu folosim cookie-uri de publicitate. Singurele cookie-uri opționale sunt cele ale Google Analytics și se setează doar dacă le accepți în notificarea despre cookie-uri."
     ]
    },
    {
@@ -310,7 +325,8 @@
      "Meta Platforms: modelul AI descris mai sus.",
      "FormSubmit: transmite mesajele din formularul de contact în căsuța noastră. Browserul tău trimite mesajul către FormSubmit, care ni-l trimite prin email.",
      "Google: fontul de pictograme se încarcă din Google Fonts, deci adresa ta IP este trimisă către Google când se încarcă o pagină.",
-     "ANAF: când introduci un CUI, acesta este trimis serviciului public al ANAF pentru a obține datele de înregistrare ale firmei."
+     "ANAF: când introduci un CUI, acesta este trimis serviciului public al ANAF pentru a obține datele de înregistrare ale firmei.",
+     "Google Analytics: statistici despre vizitatori, doar dacă accepți cookie-urile de analiză. Google acționează ca persoană împuternicită a noastră."
     ],
     "p2": [
      "Anunțurile de licitație provin din SEAP, unde sunt publice. Nu vindem date personale și nu le împărtășim pentru publicitate. Putem dezvălui date când legea o cere sau pentru a ne apăra drepturile."
