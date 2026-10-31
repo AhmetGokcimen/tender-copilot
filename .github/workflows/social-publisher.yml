@@ -13,6 +13,11 @@ on:
         description: "Force-publish the entry for this date (YYYY-MM-DD) instead of today. Leave blank for normal behavior."
         required: false
         type: string
+      verify:
+        description: "Only check the token, the account and the scheduled images. Nothing is published."
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: social-publisher
@@ -33,6 +38,7 @@ jobs:
           META_PAGE_ACCESS_TOKEN: ${{ secrets.META_PAGE_ACCESS_TOKEN }}
           META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
           TARGET_DATE: ${{ inputs.target_date }}
+          VERIFY: ${{ inputs.verify }}
         run: node scripts/social-publisher.mjs
       - name: Commit updated schedule status
         if: always()
