@@ -28,8 +28,6 @@ type ApiTender = {
 };
 
 const API = process.env.NEXT_PUBLIC_API_URL || '/api';
-/** A notice leaves the map this long after SEAP published it. */
-const MAX_AGE_MS = 24 * 60 * 60 * 1000;
 /** At most this many pins at once, so the map is never bare or crowded. */
 const MAX_PINS = 12;
 const REFRESH_MS = 10 * 60 * 1000;
@@ -88,8 +86,8 @@ function bucketColor(b: number) {
  * A dotted map of Romania drawn on canvas (from Natural Earth borders). Its
  * dots shimmer softly. `focus` (0..1) comes from the scroll position: the map
  * brightens as it comes into focus, and only then do the live notices appear:
- * the newest SEAP construction notice of each big city, published in the last
- * 24 hours, at most one per city. Each one links to the official notice.
+ * the newest open SEAP construction notice of each big city, at most one per
+ * city, kept until a newer one arrives. Each one links to the official notice.
  */
 export function TenderMap({ focus }: { focus: number }) {
   const lang = useLocale() === 'ro' ? 'ro' : 'en';
@@ -100,7 +98,6 @@ export function TenderMap({ focus }: { focus: number }) {
   const active = focus >= FOCUS_ON;
   const [shown, setShown] = useState<number[]>([]);
   const [fetched, setFetched] = useState<Notice[]>([]);
-  const [now, setNow] = useState(() => Date.now());
 
   // Live notices from the public feed. A failure just leaves the map bare.
   useEffect(() => {
@@ -121,25 +118,21 @@ export function TenderMap({ focus }: { focus: number }) {
         })
         .catch(() => {});
     load();
-    const id = window.setInterval(() => {
-      setNow(Date.now());
-      load();
-    }, REFRESH_MS);
+    const id = window.setInterval(load, REFRESH_MS);
     return () => {
       dead = true;
       window.clearInterval(id);
     };
   }, []);
 
-  // One pin per city, newest first, expired ones dropped.
+  // One pin per city: its newest notice stays until a newer one replaces it.
   const notices = useMemo(() => {
     const seen = new Set<string>();
-    return fetched
-      .filter((n) => now - n.publishedAt < MAX_AGE_MS)
+    return [...fetched]
       .sort((a, b) => b.publishedAt - a.publishedAt)
       .filter((n) => !seen.has(n.city) && seen.add(n.city))
       .slice(0, MAX_PINS);
-  }, [fetched, now]);
+  }, [fetched]);
 
   // Draw loop: static dots are cached once, shimmering ones redraw ~24 fps
   // while the map is on screen.
