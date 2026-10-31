@@ -409,6 +409,24 @@
     "filtersButton": "Filters",
     "filtersShow": "Show results ({count})"
   },
+  "pastWinners": {
+    "title": "Past winners",
+    "intro": "Who this buyer awarded its last contracts to in the same kind of work, with each company's latest filed figures from ANAF. Bidders on an open tender are not public, so past winners are the closest guide to who you may face.",
+    "button": "Show past winners",
+    "buttonRepeat": "Show again",
+    "left": "{left} of {limit} lookups left this month",
+    "costNote": "Uses one lookup. Opening the same tender again is free.",
+    "loading": "Reading the buyer’s last contracts and ANAF filings…",
+    "none": "No awarded contracts from this buyer in this kind of work yet.",
+    "limit": "You have used all {limit} lookups for this month.",
+    "error": "Could not load past winners. Try again in a moment.",
+    "turnover": "Turnover",
+    "profit": "Net profit",
+    "employees": "Employees",
+    "noFigures": "No filed balance sheet found at ANAF",
+    "year": "FY {year}",
+    "caveat": "Past winners are a guide, not a list of this tender’s bidders. Figures are as filed with ANAF."
+  },
   "analysis": {
     "back": "Back to opportunities",
     "execSheet": "Executive data sheet",

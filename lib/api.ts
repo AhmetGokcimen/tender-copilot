@@ -116,6 +116,30 @@ export async function fetchTender(externalId: string): Promise<TenderWithState> 
   return get<TenderWithState>(`/tenders/${encodeURIComponent(externalId)}`);
 }
 
+export type PastWinner = {
+  title: string;
+  awarded_on: string | null;
+  value: number | null;
+  currency: string | null;
+  winner_name: string | null;
+  winner_cui: string | null;
+  url: string | null;
+  figures: { year: number; turnover: number | null; net_profit: number | null; employees: number | null } | null;
+};
+export type Quota = { used: number; limit: number };
+export type PastWinnersResult = { authority: string | null; items: PastWinner[]; quota: Quota; charged: boolean };
+
+export async function fetchPastWinnersQuota(): Promise<Quota> {
+  if (USE_MOCK) return { used: 0, limit: 10 };
+  return get<Quota>('/usage/past-winners');
+}
+
+/** Past winners of the tender's buyer. Spends one unit of the monthly quota the first time per tender. */
+export async function lookupPastWinners(externalId: string): Promise<PastWinnersResult> {
+  if (USE_MOCK) return { authority: null, items: [], quota: { used: 0, limit: 10 }, charged: false };
+  return post<PastWinnersResult>(`/tenders/${encodeURIComponent(externalId)}/past-winners`, {});
+}
+
 /** A contract SEAP shows as awarded to a company (public notice data). */
 export type WonContract = {
   title: string;

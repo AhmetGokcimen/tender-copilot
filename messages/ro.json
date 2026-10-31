@@ -409,6 +409,24 @@
     "filtersButton": "Filtre",
     "filtersShow": "Arată rezultatele ({count})"
   },
+  "pastWinners": {
+    "title": "Câștigători anteriori",
+    "intro": "Cui a atribuit autoritatea ultimele contracte de același tip de lucrări, cu ultimele cifre depuse de fiecare firmă la ANAF. Ofertanții unei licitații deschise nu sunt publici, deci câștigătorii anteriori sunt cel mai bun indiciu despre cine ar putea concura.",
+    "button": "Arată câștigătorii anteriori",
+    "buttonRepeat": "Arată din nou",
+    "left": "{left} din {limit} căutări rămase luna aceasta",
+    "costNote": "Consumă o căutare. Redeschiderea aceleiași licitații este gratuită.",
+    "loading": "Citim ultimele contracte ale autorității și bilanțurile de la ANAF…",
+    "none": "Nu există încă contracte atribuite de această autoritate pentru acest tip de lucrări.",
+    "limit": "Ai folosit toate cele {limit} căutări din această lună.",
+    "error": "Nu s-au putut încărca câștigătorii anteriori. Încearcă din nou în scurt timp.",
+    "turnover": "Cifra de afaceri",
+    "profit": "Profit net",
+    "employees": "Angajați",
+    "noFigures": "Nu există bilanț depus la ANAF",
+    "year": "Anul {year}",
+    "caveat": "Câștigătorii anteriori sunt un indiciu, nu lista ofertanților acestei licitații. Cifrele sunt cele depuse la ANAF."
+  },
   "analysis": {
     "back": "Înapoi la oportunități",
     "execSheet": "Fișă sintetică",
