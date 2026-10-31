@@ -1,5 +1,865 @@
 [
  {
+  "slug": "how-public-procurement-works-in-romania",
+  "published": "2026-10-31",
+  "updated": "2026-10-31",
+  "minutes": 7,
+  "en": {
+   "title": "How public procurement works in Romania: laws, institutions and procedures explained",
+   "description": "A plain guide to the Romanian public procurement system: the laws, who runs it (ANAP, SEAP, CNSC), the value bands and how a tender moves from notice to contract.",
+   "answer": "Romanian public procurement is governed by Law 98/2016 for ordinary contracting authorities, alongside Law 99/2016 for utilities, Law 100/2016 for concessions and Law 101/2016 for appeals, all built on EU directives. Authorities run their procedures through SEAP (e-licitatie.ro), ANAP coordinates policy and guidance, and CNSC decides contestations. The procedure an authority must use depends mainly on the estimated value of the contract.",
+   "sections": [
+    {
+     "h": "The laws that apply",
+     "p": [
+      "The system rests on a small set of laws that transpose the EU procurement directives. Most construction contracts awarded by ministries, county councils, municipalities and other public bodies fall under the first one."
+     ],
+     "list": [
+      "Law 98/2016 on public procurement: the main law for ordinary contracting authorities.",
+      "Law 99/2016 on sectoral procurement: for entities in water, energy, transport and postal services.",
+      "Law 100/2016 on works and services concessions.",
+      "Law 101/2016 on remedies and appeals, including the work of CNSC.",
+      "Government Decision 395/2016: the methodological norms that apply Law 98/2016 in practice.",
+      "Directive 2014/24/EU: the EU directive behind Law 98/2016."
+     ]
+    },
+    {
+     "h": "Principles behind every tender",
+     "p": [
+      "Article 2 of Law 98/2016 lists the principles an authority must respect in every procedure. They are the yardstick CNSC and the courts use when a bidder says a procedure was unfair."
+     ],
+     "list": [
+      "Non-discrimination",
+      "Equal treatment",
+      "Mutual recognition",
+      "Transparency",
+      "Proportionality",
+      "Accountability"
+     ]
+    },
+    {
+     "h": "Who does what",
+     "list": [
+      "Contracting authorities (autorități contractante) prepare the tender, publish it, evaluate offers and sign the contract.",
+      "SEAP, also called SICAP, is the national electronic system where notices, documentation, questions and offers move. Bidders need an account and a qualified digital signature.",
+      "ANAP, the national agency, coordinates procurement policy and publishes guidance and clarifications for authorities and bidders.",
+      "CNSC, the National Council for Solving Complaints, is an out-of-court body that decides contestations against authorities' acts.",
+      "The courts of appeal hear appeals against CNSC decisions.",
+      "TED, the EU's tender portal, carries notices for contracts at or above the EU thresholds."
+     ]
+    },
+    {
+     "h": "The value of the contract decides the procedure",
+     "p": [
+      "Law 98/2016 sorts contracts into value bands, using the estimated value without VAT. The exact limits are set in lei in the law, and the EU thresholds are revised by the European Commission every two years, so we do not quote amounts here. Check the current figures on ANAP or in the consolidated law."
+     ],
+     "list": [
+      "Below the direct-purchase limit (article 7, paragraph 5), the authority may buy directly, with simple rules on publicity and on consulting several suppliers that tighten as the value grows.",
+      "Between that limit and the EU thresholds, the authority must use a simplified procedure, with shorter deadlines and fewer formalities (article 7, paragraphs 2 and 4).",
+      "At or above the EU thresholds, the authority publishes in the Official Journal of the EU and, as a rule, uses open or restricted tender (articles 7 and 69)."
+     ]
+    },
+    {
+     "h": "From notice to contract",
+     "steps": [
+      "The authority estimates the contract value and chooses the procedure.",
+      "It publishes a notice and the documentation in SEAP, and in the EU journal for contracts above the thresholds.",
+      "Bidders ask for clarifications within the deadline the documentation sets.",
+      "Bidders submit offers in SEAP before the deadline, signed with a qualified electronic signature.",
+      "The authority opens and evaluates the offers against the criteria in the documentation.",
+      "The top-ranked bidder proves it meets the requirements, and the authority communicates the result.",
+      "A waiting period follows in which unsuccessful bidders may contest.",
+      "The contract is signed and performed, usually with a performance guarantee."
+     ]
+    },
+    {
+     "h": "What this means for a construction company",
+     "p": [
+      "Knowing the band tells you what to expect. Small works usually come as direct purchases or simplified procedures, with faster calendars and lighter paperwork. Large works come as open tenders with full documentation, the DUAE and strict qualification rules. Start with the guide on how to bid, then read the qualification and DUAE guides before your first offer.",
+      "This guide is general information, not legal advice. Laws, thresholds and deadlines change, so confirm the figures that matter to your bid in the current consolidated text or with a procurement lawyer."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "Which law governs public tenders for construction works in Romania?",
+     "a": "For ordinary contracting authorities such as ministries, county councils and municipalities, Law 98/2016 on public procurement, applied through Government Decision 395/2016. Entities in water, energy, transport and postal services use Law 99/2016, and concessions fall under Law 100/2016."
+    },
+    {
+     "q": "Do I need SEAP to bid?",
+     "a": "In practice yes. Authorities run their procedures through SEAP (e-licitatie.ro), so a bidder needs an account there and a qualified electronic signature to submit and sign an offer."
+    },
+    {
+     "q": "Where can I check the current thresholds?",
+     "a": "On the ANAP website, in the consolidated text of Law 98/2016 on legislatie.just.ro, and in the Official Gazette. Limits in lei change by law, and the EU thresholds are updated every two years, so avoid relying on figures from older articles."
+    },
+    {
+     "q": "What happens if I think a procedure was unfair?",
+     "a": "A bidder can contest the authority's act before CNSC, and CNSC decisions can be taken to the court of appeal. Deadlines are short, so see the guide on contestations and talk to a lawyer quickly."
+    }
+   ],
+   "sources": [
+    {
+     "label": "Legea nr. 98/2016, consolidated text (ANAP)",
+     "url": "https://anap.gov.ro/ro/wp-content/uploads/2022/10/Legea-nr.-98-din-2016-privind-achizitiile-publice-versiune-actualizata-la-13.06.2024.pdf"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    },
+    {
+     "label": "Directive 2014/24/EU on public procurement (EUR-Lex)",
+     "url": "https://eur-lex.europa.eu/eli/dir/2014/24/oj"
+    },
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    },
+    {
+     "label": "CNSC, Consiliul Național de Soluționare a Contestațiilor",
+     "url": "https://www.cnsc.ro"
+    },
+    {
+     "label": "TED, Tenders Electronic Daily",
+     "url": "https://ted.europa.eu"
+    }
+   ]
+  },
+  "ro": {
+   "title": "Cum funcționează achizițiile publice în România: legi, instituții și proceduri explicate",
+   "description": "Ghid clar despre achizițiile publice din România: legile, instituțiile (ANAP, SEAP, CNSC), pragurile valorice și drumul unei licitații de la anunț la contract.",
+   "answer": "Achizițiile publice din România sunt reglementate de Legea 98/2016 pentru autoritățile contractante obișnuite, alături de Legea 99/2016 pentru achizițiile sectoriale, Legea 100/2016 pentru concesiuni și Legea 101/2016 pentru căile de atac, toate construite pe directivele UE. Autoritățile își derulează procedurile prin SEAP (e-licitatie.ro), ANAP coordonează politica și oferă îndrumare, iar CNSC soluționează contestațiile. Procedura aplicabilă depinde în principal de valoarea estimată a contractului.",
+   "sections": [
+    {
+     "h": "Legile aplicabile",
+     "p": [
+      "Sistemul se sprijină pe câteva legi care transpun directivele europene privind achizițiile. Majoritatea contractelor de lucrări atribuite de ministere, consilii județene, primării și alte instituții publice intră sub incidența primei dintre ele."
+     ],
+     "list": [
+      "Legea 98/2016 privind achizițiile publice: legea principală pentru autoritățile contractante obișnuite.",
+      "Legea 99/2016 privind achizițiile sectoriale: pentru entitățile din domeniile apei, energiei, transporturilor și serviciilor poștale.",
+      "Legea 100/2016 privind concesiunile de lucrări și de servicii.",
+      "Legea 101/2016 privind remediile și căile de atac, inclusiv activitatea CNSC.",
+      "Hotărârea Guvernului 395/2016: normele metodologice de aplicare a Legii 98/2016.",
+      "Directiva 2014/24/UE: directiva europeană pe care se bazează Legea 98/2016."
+     ]
+    },
+    {
+     "h": "Principiile din spatele fiecărei licitații",
+     "p": [
+      "Articolul 2 din Legea 98/2016 enumeră principiile pe care autoritatea trebuie să le respecte în orice procedură. Sunt reperul după care CNSC și instanțele judecă atunci când un ofertant susține că o procedură a fost inechitabilă."
+     ],
+     "list": [
+      "Nediscriminarea",
+      "Tratamentul egal",
+      "Recunoașterea reciprocă",
+      "Transparența",
+      "Proporționalitatea",
+      "Asumarea răspunderii"
+     ]
+    },
+    {
+     "h": "Cine face ce",
+     "list": [
+      "Autoritățile contractante pregătesc licitația, o publică, evaluează ofertele și semnează contractul.",
+      "SEAP, numit și SICAP, este sistemul electronic național prin care circulă anunțurile, documentația, întrebările și ofertele. Ofertanții au nevoie de cont și de semnătură electronică calificată.",
+      "ANAP, agenția națională, coordonează politica în domeniul achizițiilor și publică îndrumări și clarificări pentru autorități și ofertanți.",
+      "CNSC, Consiliul Național de Soluționare a Contestațiilor, este un organ extrajudiciar care soluționează contestațiile împotriva actelor autorităților.",
+      "Curțile de apel judecă plângerile împotriva deciziilor CNSC.",
+      "TED, portalul european de licitații, publică anunțurile pentru contractele care ating sau depășesc pragurile UE."
+     ]
+    },
+    {
+     "h": "Valoarea contractului stabilește procedura",
+     "p": [
+      "Legea 98/2016 împarte contractele pe trepte de valoare, folosind valoarea estimată fără TVA. Limitele exacte sunt stabilite în lei prin lege, iar pragurile UE sunt revizuite de Comisia Europeană din doi în doi ani, așa că nu redăm sume aici. Verificați cifrele în vigoare pe site-ul ANAP sau în legea consolidată."
+     ],
+     "list": [
+      "Sub pragul pentru achiziția directă (articolul 7 alineatul 5), autoritatea poate cumpăra direct, cu reguli simple de publicitate și de consultare a mai multor furnizori, care se înăspresc pe măsură ce valoarea crește.",
+      "Între acest prag și pragurile UE, autoritatea aplică procedura simplificată, cu termene mai scurte și formalități reduse (articolul 7 alineatele 2 și 4).",
+      "La pragurile UE sau peste ele, autoritatea publică în Jurnalul Oficial al Uniunii Europene și, de regulă, aplică licitația deschisă sau restrânsă (articolele 7 și 69)."
+     ]
+    },
+    {
+     "h": "De la anunț la contract",
+     "steps": [
+      "Autoritatea estimează valoarea contractului și alege procedura.",
+      "Publică anunțul și documentația în SEAP, iar pentru contractele peste praguri și în jurnalul european.",
+      "Ofertanții cer clarificări în termenul prevăzut de documentație.",
+      "Ofertanții depun ofertele în SEAP înainte de termen, semnate cu semnătură electronică calificată.",
+      "Autoritatea deschide și evaluează ofertele după criteriile din documentație.",
+      "Ofertantul clasat pe primul loc dovedește că îndeplinește cerințele, iar autoritatea comunică rezultatul.",
+      "Urmează o perioadă de așteptare în care ofertanții necâștigători pot contesta.",
+      "Contractul se semnează și se execută, de regulă cu garanție de bună execuție."
+     ]
+    },
+    {
+     "h": "Ce înseamnă pentru o firmă de construcții",
+     "p": [
+      "Cunoașterea treptei de valoare arată la ce să vă așteptați. Lucrările mici vin de obicei ca achiziții directe sau proceduri simplificate, cu calendare rapide și acte mai puține. Lucrările mari vin ca licitații deschise, cu documentație completă, DUAE și reguli stricte de calificare. Începeți cu ghidul despre cum depui o ofertă, apoi citiți ghidurile despre calificare și DUAE înainte de prima ofertă.",
+      "Acest ghid are caracter informativ și nu constituie consultanță juridică. Legile, pragurile și termenele se modifică, așa că verificați cifrele care contează pentru oferta dvs. în textul consolidat în vigoare sau cu un avocat specializat în achiziții publice."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "Ce lege reglementează licitațiile publice de lucrări din România?",
+     "a": "Pentru autoritățile contractante obișnuite, precum ministerele, consiliile județene și primăriile, Legea 98/2016 privind achizițiile publice, aplicată prin Hotărârea Guvernului 395/2016. Entitățile din domeniul apei, energiei, transporturilor și serviciilor poștale folosesc Legea 99/2016, iar concesiunile intră sub Legea 100/2016."
+    },
+    {
+     "q": "Am nevoie de SEAP ca să particip?",
+     "a": "În practică, da. Autoritățile își derulează procedurile prin SEAP (e-licitatie.ro), deci ofertantul are nevoie de cont acolo și de semnătură electronică calificată pentru a depune și a semna oferta."
+    },
+    {
+     "q": "Unde pot verifica pragurile în vigoare?",
+     "a": "Pe site-ul ANAP, în textul consolidat al Legii 98/2016 de pe legislatie.just.ro și în Monitorul Oficial. Limitele în lei se schimbă prin lege, iar pragurile UE se actualizează din doi în doi ani, deci nu vă bazați pe cifre din articole mai vechi."
+    },
+    {
+     "q": "Ce fac dacă cred că o procedură a fost inechitabilă?",
+     "a": "Un ofertant poate contesta actul autorității la CNSC, iar deciziile CNSC pot fi atacate la curtea de apel. Termenele sunt scurte, așa că citiți ghidul despre contestații și vorbiți repede cu un avocat."
+    }
+   ],
+   "sources": [
+    {
+     "label": "Legea nr. 98/2016, text consolidat (ANAP)",
+     "url": "https://anap.gov.ro/ro/wp-content/uploads/2022/10/Legea-nr.-98-din-2016-privind-achizitiile-publice-versiune-actualizata-la-13.06.2024.pdf"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    },
+    {
+     "label": "Directive 2014/24/EU on public procurement (EUR-Lex)",
+     "url": "https://eur-lex.europa.eu/eli/dir/2014/24/oj"
+    },
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    },
+    {
+     "label": "CNSC, Consiliul Național de Soluționare a Contestațiilor",
+     "url": "https://www.cnsc.ro"
+    },
+    {
+     "label": "TED, Tenders Electronic Daily",
+     "url": "https://ted.europa.eu"
+    }
+   ]
+  }
+ },
+ {
+  "slug": "public-procurement-procedures-in-romania",
+  "published": "2026-10-31",
+  "updated": "2026-10-31",
+  "minutes": 7,
+  "en": {
+   "title": "Public procurement procedures in Romania: open tender, restricted tender, simplified procedure and more",
+   "description": "The procedures Romanian authorities can use to award public contracts, when each one applies, and how the winning offer is chosen under Law 98/2016.",
+   "answer": "Law 98/2016 lists nine procedures: open tender, restricted tender, competitive negotiation, competitive dialogue, innovation partnership, negotiation without prior publication, design contest, a regime for social and other specific services, and the simplified procedure. Contracts at or above the EU thresholds go through open or restricted tender, the others are allowed only in the cases the law names, and below the thresholds the simplified procedure or a direct purchase applies.",
+   "sections": [
+    {
+     "h": "The nine procedures in article 68",
+     "list": [
+      "Open tender (licitație deschisă)",
+      "Restricted tender (licitație restrânsă)",
+      "Competitive negotiation (negociere competitivă)",
+      "Competitive dialogue (dialog competitiv)",
+      "Innovation partnership (parteneriat pentru inovare)",
+      "Negotiation without prior publication (negociere fără publicare prealabilă)",
+      "Design contest (concurs de soluții)",
+      "The procedure for social and other specific services",
+      "Simplified procedure (procedura simplificată)"
+     ]
+    },
+    {
+     "h": "Open and restricted tender: the normal route above the EU thresholds",
+     "p": [
+      "Article 69 sets the rule: when the estimated value reaches the EU thresholds, the authority awards the contract through open tender or restricted tender.",
+      "In an open tender, any interested economic operator can submit an offer after the notice is published. In a restricted tender, operators first send a request to participate, the authority checks who qualifies, and only the selected candidates are invited to bid. For construction, open tender is the form you will meet most often, but always read the notice to see which one applies."
+     ]
+    },
+    {
+     "h": "Exceptions that need a legal reason",
+     "p": [
+      "The other procedures are exceptions, and the authority must be able to justify using them."
+     ],
+     "list": [
+      "Competitive negotiation and competitive dialogue (article 70): for example when needs cannot be met without adapting available solutions, when the works involve design or innovative solutions, when negotiation is needed because of complexity or risk, when technical specifications cannot be defined precisely, or when an earlier procedure drew only non-compliant or unacceptable offers.",
+      "Negotiation without prior publication (article 104): only in the cases that article lists.",
+      "Innovation partnership (articles 95 to 103): to develop and then buy an innovative solution.",
+      "Design contest (articles 105 to 110): the authority selects a plan or project through a jury.",
+      "Social and other specific services (articles 111 and 112): a lighter regime for the services in annex 2 of the law."
+     ]
+    },
+    {
+     "h": "Simplified procedure and direct purchase",
+     "p": [
+      "Below the EU thresholds the authority must use the simplified procedure, which the law describes as having shorter deadlines and fewer formalities than the full procedures (article 7). Below the direct-purchase limit the authority may buy directly instead, and the rules on publicity and on consulting several suppliers tighten as the value grows.",
+      "This is where many first-time bidders can start. The documentation is lighter and the calendar faster, but qualification rules and the DUAE still apply. Limits in lei are set by law and change, so check the current figures on ANAP or in the consolidated text."
+     ]
+    },
+    {
+     "h": "How the winning offer is chosen",
+     "p": [
+      "Article 187 says the authority awards the contract to the most economically advantageous offer, judged on the award criterion and evaluation factors stated in the documentation. It may use one of four criteria:"
+     ],
+     "list": [
+      "Best price-quality ratio",
+      "Best quality-cost ratio",
+      "Lowest cost",
+      "Lowest price"
+     ]
+    },
+    {
+     "h": "Reading the notice as a bidder",
+     "p": [
+      "The notice and the data sheet (fișa de date) tell you the procedure, the award criterion and the deadlines. Check the criterion first. With a price-quality ratio, the technical offer carries real weight and is worth the extra preparation. With lowest price, a compliant offer at the right number wins. Under the 2024 consolidated text, lowest price is allowed only below the EU thresholds and in a narrow exception, and quality factors may include environmental and social aspects.",
+      "This guide is general information, not legal advice. Laws, thresholds and deadlines change, so confirm the figures that matter to your bid in the current consolidated text or with a procurement lawyer."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "Which procedure applies to a works contract above the EU threshold?",
+     "a": "As a rule, open tender or restricted tender under article 69 of Law 98/2016. Competitive negotiation, competitive dialogue and negotiation without prior publication are allowed only in the cases the law lists."
+    },
+    {
+     "q": "What is the simplified procedure?",
+     "a": "The procedure authorities must use for contracts below the EU thresholds. The law says it involves shorter deadlines and fewer formalities than the full procedures, while still respecting the principles of article 2."
+    },
+    {
+     "q": "Can an authority award on lowest price alone?",
+     "a": "Sometimes. Article 187 allows lowest price among four criteria, but in the 2024 consolidated text it can be used as the criterion only below the EU thresholds and in a specific negotiation case. Always read the criterion in the documentation."
+    },
+    {
+     "q": "What is the difference between open and restricted tender?",
+     "a": "In open tender anyone interested can bid after the notice. In restricted tender operators first apply to participate, the authority selects candidates, and only those are invited to submit offers."
+    }
+   ],
+   "sources": [
+    {
+     "label": "Legea nr. 98/2016, consolidated text (ANAP)",
+     "url": "https://anap.gov.ro/ro/wp-content/uploads/2022/10/Legea-nr.-98-din-2016-privind-achizitiile-publice-versiune-actualizata-la-13.06.2024.pdf"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    },
+    {
+     "label": "Directive 2014/24/EU on public procurement (EUR-Lex)",
+     "url": "https://eur-lex.europa.eu/eli/dir/2014/24/oj"
+    },
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    }
+   ]
+  },
+  "ro": {
+   "title": "Procedurile de achiziție publică în România: licitație deschisă, restrânsă, procedură simplificată și altele",
+   "description": "Procedurile prin care autoritățile din România atribuie contracte publice, când se aplică fiecare și cum se alege oferta câștigătoare conform Legii 98/2016.",
+   "answer": "Legea 98/2016 enumeră nouă proceduri: licitația deschisă, licitația restrânsă, negocierea competitivă, dialogul competitiv, parteneriatul pentru inovare, negocierea fără publicare prealabilă, concursul de soluții, regimul pentru serviciile sociale și alte servicii specifice și procedura simplificată. Contractele care ating pragurile UE se atribuie prin licitație deschisă sau restrânsă, celelalte sunt permise doar în cazurile prevăzute de lege, iar sub praguri se aplică procedura simplificată sau achiziția directă.",
+   "sections": [
+    {
+     "h": "Cele nouă proceduri din articolul 68",
+     "list": [
+      "Licitația deschisă",
+      "Licitația restrânsă",
+      "Negocierea competitivă",
+      "Dialogul competitiv",
+      "Parteneriatul pentru inovare",
+      "Negocierea fără publicare prealabilă",
+      "Concursul de soluții",
+      "Procedura aplicabilă serviciilor sociale și altor servicii specifice",
+      "Procedura simplificată"
+     ]
+    },
+    {
+     "h": "Licitația deschisă și restrânsă: calea normală peste pragurile UE",
+     "p": [
+      "Articolul 69 stabilește regula: când valoarea estimată atinge pragurile UE, autoritatea atribuie contractul prin licitație deschisă sau licitație restrânsă.",
+      "În licitația deschisă, orice operator economic interesat poate depune ofertă după publicarea anunțului. În licitația restrânsă, operatorii trimit mai întâi o solicitare de participare, autoritatea verifică cine se califică, iar doar candidații selectați sunt invitați să depună oferte. Pentru construcții, licitația deschisă este forma pe care o veți întâlni cel mai des, dar citiți întotdeauna anunțul ca să vedeți ce procedură se aplică."
+     ]
+    },
+    {
+     "h": "Excepții care cer un temei legal",
+     "p": [
+      "Celelalte proceduri sunt excepții, iar autoritatea trebuie să poată justifica utilizarea lor."
+     ],
+     "list": [
+      "Negocierea competitivă și dialogul competitiv (articolul 70): de exemplu când nevoile nu pot fi satisfăcute fără adaptarea soluțiilor disponibile, când lucrările includ soluții de proiectare sau soluții inovatoare, când sunt necesare negocieri din cauza complexității sau a riscurilor, când specificațiile tehnice nu pot fi definite suficient de precis sau când o procedură anterioară a primit doar oferte neconforme sau inacceptabile.",
+      "Negocierea fără publicare prealabilă (articolul 104): doar în cazurile enumerate de acel articol.",
+      "Parteneriatul pentru inovare (articolele 95-103): pentru dezvoltarea și apoi achiziția unei soluții inovatoare.",
+      "Concursul de soluții (articolele 105-110): autoritatea alege un plan sau un proiect prin intermediul unui juriu.",
+      "Serviciile sociale și alte servicii specifice (articolele 111 și 112): un regim mai ușor pentru serviciile din anexa 2 a legii."
+     ]
+    },
+    {
+     "h": "Procedura simplificată și achiziția directă",
+     "p": [
+      "Sub pragurile UE, autoritatea trebuie să aplice procedura simplificată, pe care legea o descrie ca având termene mai scurte și formalități mai reduse decât procedurile complete (articolul 7). Sub pragul pentru achiziția directă, autoritatea poate cumpăra direct, iar regulile de publicitate și de consultare a mai multor furnizori se înăspresc pe măsură ce valoarea crește.",
+      "Aici pot începe mulți ofertanți la primele licitații. Documentația este mai ușoară și calendarul mai rapid, dar regulile de calificare și DUAE se aplică în continuare. Limitele în lei sunt stabilite prin lege și se schimbă, deci verificați cifrele în vigoare pe site-ul ANAP sau în textul consolidat."
+     ]
+    },
+    {
+     "h": "Cum se alege oferta câștigătoare",
+     "p": [
+      "Articolul 187 prevede că autoritatea atribuie contractul ofertei celei mai avantajoase din punct de vedere economic, stabilită pe baza criteriului de atribuire și a factorilor de evaluare din documentație. Poate folosi unul dintre cele patru criterii:"
+     ],
+     "list": [
+      "Cel mai bun raport calitate-preț",
+      "Cel mai bun raport calitate-cost",
+      "Costul cel mai scăzut",
+      "Prețul cel mai scăzut"
+     ]
+    },
+    {
+     "h": "Cum citiți anunțul ca ofertant",
+     "p": [
+      "Anunțul și fișa de date vă spun procedura, criteriul de atribuire și termenele. Verificați întâi criteriul. La raportul calitate-preț, oferta tehnică are pondere reală și merită pregătită cu grijă. La prețul cel mai scăzut, o ofertă conformă la cifra potrivită câștigă. Potrivit textului consolidat din 2024, prețul cel mai scăzut se poate folosi doar sub pragurile UE și într-o excepție restrânsă, iar factorii de calitate pot include aspecte de mediu și sociale.",
+      "Acest ghid are caracter informativ și nu constituie consultanță juridică. Legile, pragurile și termenele se modifică, așa că verificați cifrele care contează pentru oferta dvs. în textul consolidat în vigoare sau cu un avocat specializat în achiziții publice."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "Ce procedură se aplică unui contract de lucrări peste pragul UE?",
+     "a": "De regulă, licitația deschisă sau licitația restrânsă, conform articolului 69 din Legea 98/2016. Negocierea competitivă, dialogul competitiv și negocierea fără publicare prealabilă sunt permise doar în cazurile enumerate de lege."
+    },
+    {
+     "q": "Ce este procedura simplificată?",
+     "a": "Procedura pe care autoritățile trebuie să o aplice pentru contractele sub pragurile UE. Legea spune că implică termene mai scurte și formalități mai reduse decât procedurile complete, cu respectarea principiilor din articolul 2."
+    },
+    {
+     "q": "Poate o autoritate să atribuie doar după prețul cel mai scăzut?",
+     "a": "Uneori. Articolul 187 permite prețul cel mai scăzut printre cele patru criterii, dar în textul consolidat din 2024 acesta poate fi folosit doar sub pragurile UE și într-un caz specific de negociere. Citiți mereu criteriul din documentație."
+    },
+    {
+     "q": "Care este diferența dintre licitația deschisă și cea restrânsă?",
+     "a": "La licitația deschisă oricine este interesat poate depune ofertă după anunț. La licitația restrânsă operatorii cer mai întâi să participe, autoritatea selectează candidații, iar doar aceștia sunt invitați să depună oferte."
+    }
+   ],
+   "sources": [
+    {
+     "label": "Legea nr. 98/2016, text consolidat (ANAP)",
+     "url": "https://anap.gov.ro/ro/wp-content/uploads/2022/10/Legea-nr.-98-din-2016-privind-achizitiile-publice-versiune-actualizata-la-13.06.2024.pdf"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    },
+    {
+     "label": "Directive 2014/24/EU on public procurement (EUR-Lex)",
+     "url": "https://eur-lex.europa.eu/eli/dir/2014/24/oj"
+    },
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    }
+   ]
+  }
+ },
+ {
+  "slug": "exclusion-grounds-in-romanian-tenders",
+  "published": "2026-10-31",
+  "updated": "2026-10-31",
+  "minutes": 6,
+  "en": {
+   "title": "Exclusion grounds in Romanian tenders: who cannot bid and how to avoid being excluded",
+   "description": "The situations in which Law 98/2016 requires an authority to exclude a bidder, from convictions and unpaid taxes to conflicts of interest, and how companies avoid them.",
+   "answer": "Law 98/2016 requires contracting authorities to exclude bidders convicted by final judgment of listed serious offences, bidders with established unpaid taxes or social contributions, and bidders in situations such as insolvency, grave professional misconduct, conflict of interest, bid-rigging or false declarations. A tax debt does not exclude you if you pay it or have it rescheduled before the exclusion decision, and very small debts are ignored.",
+   "sections": [
+    {
+     "h": "Why exclusion grounds matter",
+     "p": [
+      "Every bidder starts by declaring in the DUAE that none of these grounds applies to it. A wrong declaration is itself a ground for exclusion, so this is the first thing to check, before price and before the technical offer."
+     ]
+    },
+    {
+     "h": "Convictions (article 164)",
+     "p": [
+      "The authority excludes any operator it finds, or learns in any other way, was convicted by a final court judgment for certain offences. The list in the article includes:"
+     ],
+     "list": [
+      "Setting up an organised criminal group",
+      "Corruption offences and offences treated as corruption",
+      "Offences against the financial interests of the European Union",
+      "Acts of terrorism",
+      "Other serious offences named in the article"
+     ]
+    },
+    {
+     "h": "Unpaid taxes and social contributions (article 165)",
+     "p": [
+      "The authority excludes an operator that breached its obligation to pay taxes or contributions to the consolidated state budget, when this was established by a final decision or the authority can demonstrate it by suitable means.",
+      "You are not excluded if, before the exclusion decision, you pay what is owed, extinguish it by another lawful route, or benefit from an instalment plan or other facility. For the main office the winner shows documents proving compliance, and for secondary offices and work points it gives a declaration on its own responsibility. Article 166 also sets a small threshold below which overdue amounts do not lead to exclusion (10,000 lei in the 2024 consolidated text, so confirm the current figure)."
+     ]
+    },
+    {
+     "h": "Other grounds (article 167)",
+     "p": [
+      "The authority also excludes an operator that is in any of these situations:"
+     ],
+     "list": [
+      "It breached environmental, social or labour obligations and the authority can prove it.",
+      "It is in insolvency, liquidation, judicial supervision or has ceased activity.",
+      "It committed grave professional misconduct that puts its integrity in doubt.",
+      "There are reasonable indications of agreements with others that distort competition.",
+      "It has a conflict of interest that cannot be remedied by milder measures.",
+      "Its earlier involvement in preparing the procedure distorted competition and that cannot be remedied otherwise.",
+      "It seriously or repeatedly failed on an earlier public, sectoral or concession contract, leading to early termination, damages or comparable sanctions.",
+      "It made false declarations, did not provide requested information or cannot provide the supporting documents."
+     ]
+    },
+    {
+     "h": "How companies avoid exclusion",
+     "steps": [
+      "Fill in the DUAE from facts you have checked, never from a template.",
+      "Keep tax and social contribution compliance current, and settle or reschedule any debt before you bid.",
+      "Ask yourself, and your partners and subcontractors, about any link to the authority's staff or to people who helped write the documentation.",
+      "Do not coordinate prices or offers with other bidders.",
+      "Keep records of how earlier contracts ended, since early termination can count against you.",
+      "If something on this list might apply to you, speak to a procurement lawyer before bidding, not after."
+     ]
+    },
+    {
+     "h": "Where to read the rule",
+     "p": [
+      "Articles 164 to 167 of Law 98/2016 contain the grounds, and the DUAE guide shows where you declare them. This guide is general information, not legal advice. Laws, thresholds and deadlines change, so confirm the figures that matter to your bid in the current consolidated text or with a procurement lawyer."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "Does a small tax debt exclude my company from a tender?",
+     "a": "Not necessarily. You are not excluded if you pay or reschedule the debt before the exclusion decision, and article 166 ignores overdue amounts below a small legal limit. Confirm the current limit in the consolidated text."
+    },
+    {
+     "q": "What happens if I tick the wrong box in the DUAE?",
+     "a": "False declarations are a ground for exclusion under article 167, and the authority can check them when it asks the top-ranked bidder for supporting documents. Declare only what you have verified."
+    },
+    {
+     "q": "Can an authority exclude me for a problem on an earlier contract?",
+     "a": "Yes, if you seriously or repeatedly failed on an earlier public, sectoral or concession contract and it led to early termination, damages or comparable sanctions (article 167)."
+    }
+   ],
+   "sources": [
+    {
+     "label": "Legea nr. 98/2016, consolidated text (ANAP)",
+     "url": "https://anap.gov.ro/ro/wp-content/uploads/2022/10/Legea-nr.-98-din-2016-privind-achizitiile-publice-versiune-actualizata-la-13.06.2024.pdf"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    },
+    {
+     "label": "Directive 2014/24/EU on public procurement (EUR-Lex)",
+     "url": "https://eur-lex.europa.eu/eli/dir/2014/24/oj"
+    },
+    {
+     "label": "ESPD / DUAE, European Commission",
+     "url": "https://ec.europa.eu/tools/espd"
+    },
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    }
+   ]
+  },
+  "ro": {
+   "title": "Motivele de excludere din licitațiile românești: cine nu poate participa și cum eviți excluderea",
+   "description": "Situațiile în care Legea 98/2016 obligă autoritatea să excludă un ofertant, de la condamnări și datorii fiscale la conflicte de interese, și cum le evită firmele.",
+   "answer": "Legea 98/2016 obligă autoritățile contractante să excludă ofertanții condamnați definitiv pentru anumite infracțiuni grave, pe cei cu datorii stabilite la impozite, taxe sau contribuții și pe cei aflați în situații precum insolvența, abaterea profesională gravă, conflictul de interese, înțelegerile anticoncurențiale sau declarațiile false. O datorie fiscală nu duce la excludere dacă o plătiți sau o eșalonați înainte de decizia de excludere, iar sumele foarte mici sunt ignorate.",
+   "sections": [
+    {
+     "h": "De ce contează motivele de excludere",
+     "p": [
+      "Orice ofertant începe prin a declara în DUAE că niciunul dintre aceste motive nu i se aplică. O declarație greșită este ea însăși motiv de excludere, deci este primul lucru de verificat, înainte de preț și înainte de oferta tehnică."
+     ]
+    },
+    {
+     "h": "Condamnările (articolul 164)",
+     "p": [
+      "Autoritatea exclude orice operator despre care constată sau află în alt mod că a fost condamnat prin hotărâre definitivă pentru anumite infracțiuni. Lista din articol include:"
+     ],
+     "list": [
+      "Constituirea unui grup infracțional organizat",
+      "Infracțiuni de corupție și infracțiuni asimilate",
+      "Infracțiuni împotriva intereselor financiare ale Uniunii Europene",
+      "Acte de terorism",
+      "Alte infracțiuni grave menționate în articol"
+     ]
+    },
+    {
+     "h": "Impozite, taxe și contribuții neplătite (articolul 165)",
+     "p": [
+      "Autoritatea exclude operatorul care și-a încălcat obligațiile de plată a impozitelor, taxelor sau contribuțiilor la bugetul general consolidat, atunci când acest lucru a fost stabilit printr-o hotărâre sau decizie definitivă ori autoritatea îl poate demonstra prin mijloace adecvate.",
+      "Nu sunteți exclus dacă, înainte de decizia de excludere, plătiți ce datorați, stingeți obligația prin alte modalități legale sau beneficiați de eșalonare ori de alte facilități. Pentru sediul principal, câștigătorul prezintă documente care dovedesc îndeplinirea obligațiilor, iar pentru sediile secundare și punctele de lucru dă o declarație pe propria răspundere. Articolul 166 stabilește și un prag mic sub care sumele restante nu duc la excludere (10.000 lei în textul consolidat din 2024, deci confirmați cifra în vigoare)."
+     ]
+    },
+    {
+     "h": "Alte motive (articolul 167)",
+     "p": [
+      "Autoritatea exclude și operatorul aflat în oricare dintre aceste situații:"
+     ],
+     "list": [
+      "A încălcat obligații de mediu, sociale sau de muncă, iar autoritatea poate dovedi acest lucru.",
+      "Este în insolvență, lichidare, supraveghere judiciară sau și-a încetat activitatea.",
+      "A comis o abatere profesională gravă care îi pune în discuție integritatea.",
+      "Există indicii rezonabile că a încheiat înțelegeri cu alții care denaturează concurența.",
+      "Se află într-un conflict de interese care nu poate fi remediat prin măsuri mai puțin severe.",
+      "Participarea sa anterioară la pregătirea procedurii a distorsionat concurența, iar situația nu poate fi remediată altfel.",
+      "Și-a încălcat grav sau repetat obligațiile într-un contract public, sectorial sau de concesiune anterior, ceea ce a dus la încetare anticipată, daune-interese sau sancțiuni comparabile.",
+      "A făcut declarații false, nu a prezentat informațiile cerute sau nu poate prezenta documentele justificative."
+     ]
+    },
+    {
+     "h": "Cum evită firmele excluderea",
+     "steps": [
+      "Completați DUAE pe baza unor fapte verificate, nu dintr-un model.",
+      "Păstrați la zi conformitatea fiscală și a contribuțiilor, iar orice datorie achitați-o sau eșalonați-o înainte de a depune oferta.",
+      "Întrebați-vă pe dvs., partenerii și subcontractanții dacă există legături cu personalul autorității sau cu persoane care au ajutat la întocmirea documentației.",
+      "Nu coordonați prețurile sau ofertele cu alți ofertanți.",
+      "Păstrați dovezi despre cum s-au încheiat contractele anterioare, deoarece încetarea anticipată poate conta împotriva dvs.",
+      "Dacă ceva din această listă s-ar putea aplica, vorbiți cu un avocat specializat în achiziții publice înainte de ofertă, nu după."
+     ]
+    },
+    {
+     "h": "Unde citiți regula",
+     "p": [
+      "Articolele 164-167 din Legea 98/2016 conțin motivele, iar ghidul DUAE arată unde le declarați. Acest ghid are caracter informativ și nu constituie consultanță juridică. Legile, pragurile și termenele se modifică, așa că verificați cifrele care contează pentru oferta dvs. în textul consolidat în vigoare sau cu un avocat specializat în achiziții publice."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "O datorie fiscală mică mă exclude dintr-o licitație?",
+     "a": "Nu neapărat. Nu sunteți exclus dacă plătiți sau eșalonați datoria înainte de decizia de excludere, iar articolul 166 ignoră sumele restante sub o limită legală mică. Confirmați limita în vigoare în textul consolidat."
+    },
+    {
+     "q": "Ce se întâmplă dacă bifez greșit în DUAE?",
+     "a": "Declarațiile false sunt motiv de excludere conform articolului 167, iar autoritatea le poate verifica atunci când cere documente justificative ofertantului clasat pe primul loc. Declarați doar ce ați verificat."
+    },
+    {
+     "q": "Pot fi exclus pentru o problemă la un contract anterior?",
+     "a": "Da, dacă v-ați încălcat grav sau repetat obligațiile într-un contract public, sectorial sau de concesiune anterior, iar asta a dus la încetare anticipată, daune-interese sau sancțiuni comparabile (articolul 167)."
+    }
+   ],
+   "sources": [
+    {
+     "label": "Legea nr. 98/2016, text consolidat (ANAP)",
+     "url": "https://anap.gov.ro/ro/wp-content/uploads/2022/10/Legea-nr.-98-din-2016-privind-achizitiile-publice-versiune-actualizata-la-13.06.2024.pdf"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    },
+    {
+     "label": "Directive 2014/24/EU on public procurement (EUR-Lex)",
+     "url": "https://eur-lex.europa.eu/eli/dir/2014/24/oj"
+    },
+    {
+     "label": "ESPD / DUAE, European Commission",
+     "url": "https://ec.europa.eu/tools/espd"
+    },
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    }
+   ]
+  }
+ },
+ {
+  "slug": "contesting-a-tender-decision-in-romania",
+  "published": "2026-10-31",
+  "updated": "2026-10-31",
+  "minutes": 5,
+  "en": {
+   "title": "Contesting a tender decision in Romania: CNSC and the courts explained",
+   "description": "How a bidder can challenge an authority's act in a Romanian tender: the role of CNSC, the court of appeal, why deadlines are short and what to do first.",
+   "answer": "A bidder that believes a contracting authority broke the procurement rules can challenge the authority's act before CNSC, the National Council for Solving Complaints, under Law 101/2016, and appeal CNSC's decision to the court of appeal. The deadlines are counted in days and are short, so a company should act the day it learns of the act and speak to a procurement lawyer.",
+   "sections": [
+    {
+     "h": "What can be challenged",
+     "p": [
+      "A bidder with a legitimate interest can challenge acts of the authority that it considers unlawful. In practice that includes the contents of the tender documentation, such as a requirement that seems to favour one company, and the outcome of the evaluation, such as a rejection or an award to another bidder."
+     ]
+    },
+    {
+     "h": "The path in three levels",
+     "steps": [
+      "The authority: Law 101/2016 lets a bidder raise the problem with the contracting authority itself. Check whether a prior step is required and what form it must take.",
+      "CNSC: the National Council for Solving Complaints is an out-of-court body that examines contestations against the authority's acts, and may in justified cases suspend the procedure.",
+      "The court of appeal: CNSC decisions can be challenged before the court of appeal that has jurisdiction."
+     ]
+    },
+    {
+     "h": "Why timing is everything",
+     "p": [
+      "Law 101/2016 counts deadlines in days, and the length depends on whether the contract value is above or below the EU thresholds. In the original 2016 text the periods were 10 days above and 5 days below, with a further 10 days to appeal a CNSC decision to the court. The law has been amended since, so treat those numbers as a warning about how short the windows are, and confirm the current rules in the consolidated text.",
+      "The same law pauses the signing of the contract for a period after the result is communicated, which is the window in which a contestation can still change the outcome."
+     ]
+    },
+    {
+     "h": "Before you contest",
+     "list": [
+      "Write down the date you learned of the act and the exact text of the decision or requirement.",
+      "Read the documentation and the notice again, and ask yourself which rule was broken.",
+      "Think about what you want: a changed requirement, a re-evaluation or a cancelled procedure.",
+      "Remember that your company may be challenged in turn by another bidder.",
+      "Speak to a procurement lawyer the same day. This is the one step in the process where outside advice is clearly worth it."
+     ]
+    },
+    {
+     "h": "Clarifications are cheaper than contestations",
+     "p": [
+      "Most unclear or restrictive requirements can be raised as a written clarification question during the tender, before the clarification deadline. It costs nothing, creates a record, and often leads the authority to correct the documentation. This guide is general information, not legal advice. Laws, thresholds and deadlines change, so confirm the figures that matter to your bid in the current consolidated text or with a procurement lawyer."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "Who decides contestations in Romanian public procurement?",
+     "a": "CNSC, the National Council for Solving Complaints, an out-of-court body set up under Law 101/2016. Its decisions can be challenged before the court of appeal."
+    },
+    {
+     "q": "How long do I have to contest?",
+     "a": "Very little. Law 101/2016 counts deadlines in days, and in the 2016 text they were 10 days above and 5 days below the EU thresholds. Check the current consolidated text and act on the day you learn of the act."
+    },
+    {
+     "q": "Should I contest or ask a clarification first?",
+     "a": "If the problem is a requirement in the documentation, send a written clarification question first, within the clarification deadline. Contest only when clarification does not solve it and a deadline is running."
+    }
+   ],
+   "sources": [
+    {
+     "label": "CNSC, Consiliul Național de Soluționare a Contestațiilor",
+     "url": "https://www.cnsc.ro"
+    },
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "Legea nr. 98/2016, consolidated text (ANAP)",
+     "url": "https://anap.gov.ro/ro/wp-content/uploads/2022/10/Legea-nr.-98-din-2016-privind-achizitiile-publice-versiune-actualizata-la-13.06.2024.pdf"
+    },
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    }
+   ]
+  },
+  "ro": {
+   "title": "Contestarea unei decizii într-o licitație din România: CNSC și instanțele explicate",
+   "description": "Cum poate un ofertant să conteste un act al autorității într-o licitație din România: rolul CNSC, curtea de apel, de ce termenele sunt scurte și ce faci mai întâi.",
+   "answer": "Un ofertant care consideră că o autoritate contractantă a încălcat regulile achizițiilor poate contesta actul autorității la CNSC, Consiliul Național de Soluționare a Contestațiilor, potrivit Legii 101/2016, iar decizia CNSC poate fi atacată la curtea de apel. Termenele sunt calculate în zile și sunt scurte, deci firma trebuie să acționeze în ziua în care ia cunoștință de act și să vorbească cu un avocat specializat în achiziții publice.",
+   "sections": [
+    {
+     "h": "Ce se poate contesta",
+     "p": [
+      "Un ofertant cu interes legitim poate contesta actele autorității pe care le consideră nelegale. În practică intră conținutul documentației de atribuire, de exemplu o cerință care pare să favorizeze o firmă, și rezultatul evaluării, de exemplu o respingere sau o atribuire către alt ofertant."
+     ]
+    },
+    {
+     "h": "Drumul pe trei niveluri",
+     "steps": [
+      "Autoritatea: Legea 101/2016 permite ofertantului să ridice problema chiar către autoritatea contractantă. Verificați dacă este necesar un pas prealabil și ce formă trebuie să aibă.",
+      "CNSC: Consiliul Național de Soluționare a Contestațiilor este un organ extrajudiciar care examinează contestațiile împotriva actelor autorității și poate, în cazuri justificate, suspenda procedura.",
+      "Curtea de apel: deciziile CNSC pot fi atacate la curtea de apel competentă."
+     ]
+    },
+    {
+     "h": "De ce contează timpul",
+     "p": [
+      "Legea 101/2016 calculează termenele în zile, iar durata depinde de faptul că valoarea contractului este peste sau sub pragurile UE. În textul inițial din 2016, termenele erau de 10 zile peste praguri și 5 zile sub praguri, plus încă 10 zile pentru plângerea împotriva deciziei CNSC la instanță. Legea a fost modificată de atunci, așa că tratați aceste cifre ca un avertisment despre cât de scurte sunt ferestrele și confirmați regulile în vigoare în textul consolidat.",
+      "Aceeași lege suspendă semnarea contractului pentru o perioadă după comunicarea rezultatului, fereastra în care o contestație mai poate schimba rezultatul."
+     ]
+    },
+    {
+     "h": "Înainte să contestați",
+     "list": [
+      "Notați data la care ați aflat de act și textul exact al deciziei sau cerinței.",
+      "Recitiți documentația și anunțul și identificați ce regulă a fost încălcată.",
+      "Stabiliți ce doriți: modificarea unei cerințe, o reevaluare sau anularea procedurii.",
+      "Țineți cont că și firma dvs. poate fi contestată la rândul ei de alt ofertant.",
+      "Vorbiți cu un avocat specializat în achiziții publice în aceeași zi. Este singurul pas din proces în care sfatul extern merită clar efortul."
+     ]
+    },
+    {
+     "h": "Clarificările costă mai puțin decât contestațiile",
+     "p": [
+      "Majoritatea cerințelor neclare sau restrictive pot fi ridicate ca o întrebare de clarificare în scris în timpul licitației, înainte de termenul de clarificări. Nu costă nimic, lasă o urmă scrisă și deseori duce la corectarea documentației de către autoritate. Acest ghid are caracter informativ și nu constituie consultanță juridică. Legile, pragurile și termenele se modifică, așa că verificați cifrele care contează pentru oferta dvs. în textul consolidat în vigoare sau cu un avocat specializat în achiziții publice."
+     ]
+    }
+   ],
+   "faq": [
+    {
+     "q": "Cine soluționează contestațiile în achizițiile publice din România?",
+     "a": "CNSC, Consiliul Național de Soluționare a Contestațiilor, un organ extrajudiciar înființat prin Legea 101/2016. Deciziile sale pot fi atacate la curtea de apel."
+    },
+    {
+     "q": "Cât timp am la dispoziție pentru a contesta?",
+     "a": "Foarte puțin. Legea 101/2016 calculează termenele în zile, iar în textul din 2016 erau de 10 zile peste și 5 zile sub pragurile UE. Verificați textul consolidat în vigoare și acționați în ziua în care aflați de act."
+    },
+    {
+     "q": "Contest sau cer mai întâi o clarificare?",
+     "a": "Dacă problema este o cerință din documentație, trimiteți întâi o întrebare de clarificare în scris, în termenul de clarificări. Contestați doar dacă clarificarea nu rezolvă problema și un termen curge."
+    }
+   ],
+   "sources": [
+    {
+     "label": "CNSC, Consiliul Național de Soluționare a Contestațiilor",
+     "url": "https://www.cnsc.ro"
+    },
+    {
+     "label": "Legislație consolidată (legislatie.just.ro)",
+     "url": "https://legislatie.just.ro"
+    },
+    {
+     "label": "ANAP, Agenția Națională pentru Achiziții Publice",
+     "url": "https://anap.gov.ro"
+    },
+    {
+     "label": "Legea nr. 98/2016, text consolidat (ANAP)",
+     "url": "https://anap.gov.ro/ro/wp-content/uploads/2022/10/Legea-nr.-98-din-2016-privind-achizitiile-publice-versiune-actualizata-la-13.06.2024.pdf"
+    },
+    {
+     "label": "SEAP / SICAP (e-licitatie.ro)",
+     "url": "https://www.e-licitatie.ro"
+    }
+   ]
+  }
+ },
+ {
   "slug": "how-to-bid-on-a-public-tender-in-romania",
   "published": "2026-10-30",
   "updated": "2026-10-30",
