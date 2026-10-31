@@ -4,7 +4,7 @@ import { RESOURCES } from '@/lib/resources';
 import { PUBLIC_PATHS, pageUrl } from '@/lib/seo';
 
 /** Date the marketing pages were last reviewed. Bump it when their copy changes. */
-const REVIEWED = '2026-10-30';
+const REVIEWED = '2026-10-31';
 
 const entry = (path: string, lastModified: string, priority: number): MetadataRoute.Sitemap =>
   routing.locales.map((locale) => ({
