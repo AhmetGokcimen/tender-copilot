@@ -122,9 +122,15 @@ def diagnostics(x_sync_token: str | None = Header(default=None)) -> dict:
         raise HTTPException(status_code=401, detail="Bad sync token")
     from sqlalchemy import text
 
+    from backend.core.auth import jwt_secret_unsafe
     from backend.db import config_error, engine
 
-    out: dict = {"dialect": engine.dialect.name, "database_url_set": bool(os.environ.get("DATABASE_URL"))}
+    out: dict = {
+        "dialect": engine.dialect.name,
+        "database_url_set": bool(os.environ.get("DATABASE_URL")),
+        # False means JWT_SECRET is missing on this deployment: session tokens are refused.
+        "jwt_secret_ok": not jwt_secret_unsafe(),
+    }
     if config_error:
         out["database"] = f"config error: {config_error}"
         return out

@@ -7,18 +7,36 @@ with plain httpx against the documented OAuth2/userinfo endpoints — no
 google-auth/authlib dependency needed.
 """
 
+import os
 import time
 from dataclasses import dataclass
 from urllib.parse import urlencode
 
 import httpx
 import jwt
+from fastapi import HTTPException
 
 from backend.core.config import settings
 
 GOOGLE_AUTHORIZE_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
+
+DEFAULT_JWT_SECRET = "dev-only-insecure-change-me"
+
+
+def jwt_secret_unsafe() -> bool:
+    """True when this process runs on Vercel with the public default secret.
+    The default is in the repository, so anyone could sign tokens with it;
+    a deployed API must not accept or issue tokens signed that way."""
+    return settings.jwt_secret == DEFAULT_JWT_SECRET and bool(os.environ.get("VERCEL"))
+
+
+def _signing_secret() -> str:
+    if jwt_secret_unsafe():
+        raise HTTPException(status_code=503, detail="JWT_SECRET is not configured on this deployment")
+    return settings.jwt_secret
+
 
 DEMO_USER = {"sub": "demo", "email": "demo@ofera.local", "name": "Demo User"}
 
@@ -48,7 +66,7 @@ def create_access_token(
             "iat": now,
             "exp": now + expires_in,
         },
-        settings.jwt_secret,
+        _signing_secret(),
         algorithm="HS256",
     )
 
@@ -57,6 +75,8 @@ def decode_access_token(token: str) -> CurrentUser:
     """Raises jwt.PyJWTError when the token is bad or expired. Accepts this
     API's own tokens and, when configured, Supabase Auth access tokens."""
     try:
+        if jwt_secret_unsafe():
+            raise jwt.InvalidKeyError("JWT_SECRET is not configured on this deployment")
         payload = jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
         return CurrentUser(
             sub=payload["sub"], email=payload["email"], name=payload["name"],
@@ -106,13 +126,15 @@ def create_oauth_state() -> str:
     now = int(time.time())
     return jwt.encode(
         {"purpose": "oauth-state", "iat": now, "exp": now + OAUTH_STATE_EXPIRE_SECONDS},
-        settings.jwt_secret,
+        _signing_secret(),
         algorithm="HS256",
     )
 
 
 def verify_oauth_state(state: str) -> None:
     """Raises jwt.PyJWTError/ValueError when the state is forged or stale."""
+    if jwt_secret_unsafe():
+        raise jwt.InvalidKeyError("JWT_SECRET is not configured on this deployment")
     payload = jwt.decode(state, settings.jwt_secret, algorithms=["HS256"])
     if payload.get("purpose") != "oauth-state":
         raise ValueError("Not an OAuth state token")
