@@ -56,7 +56,7 @@ export function Hero() {
   return (
     <div className="relative -mt-[68px]">
       <div className="pointer-events-none absolute inset-0">
-        <div className="sticky top-0 flex h-[100dvh] items-center justify-center overflow-hidden pt-[68px]">
+        <div className="sticky top-0 flex h-[400px] items-center justify-center overflow-hidden pt-[68px] md:h-[100dvh]">
           <TenderMap focus={focus} />
         </div>
       </div>
@@ -121,7 +121,7 @@ export function Hero() {
         </div>
       </section>
       {/* Empty on purpose: scrolling through it brings the map into focus. */}
-      <div ref={bandRef} aria-hidden className="h-[120dvh]" />
+      <div ref={bandRef} aria-hidden className="h-[40dvh] md:h-[120dvh]" />
     </div>
   );
 }
