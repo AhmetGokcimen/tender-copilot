@@ -71,12 +71,12 @@ export const PAGE_META: Record<string, Record<Lang, { title: string; description
     },
   },
   '/privacy': {
-    en: { title: 'Privacy notice | Licits', description: 'How Licits uses company data to operate the product, and how to ask for deletion.' },
-    ro: { title: 'Notă de confidențialitate | Licits', description: 'Cum folosește Licits datele companiei pentru a opera produsul și cum ceri ștergerea lor.' },
+    en: { title: 'Privacy notice | Licits', description: 'How Licits collects, uses and protects personal data and confidential company data, who it is shared with, and the rights you have.' },
+    ro: { title: 'Notă de confidențialitate | Licits', description: 'Cum colectează, folosește și protejează Licits datele personale și datele confidențiale ale companiilor, cu cine le împarte și ce drepturi ai.' },
   },
   '/terms': {
-    en: { title: 'Terms of use | Licits', description: 'Terms for the Licits early-access pilot.' },
-    ro: { title: 'Termeni de utilizare | Licits', description: 'Termenii pilotului Licits în acces anticipat.' },
+    en: { title: 'Terms of use | Licits', description: 'The terms for using the Licits early-access pilot: who it is for, what it does and does not do, your content, acceptable use, and liability.' },
+    ro: { title: 'Termeni de utilizare | Licits', description: 'Termenii de utilizare a pilotului Licits în acces anticipat: pentru cine este, ce face și ce nu face, conținutul tău, utilizarea acceptabilă și răspunderea.' },
   },
 };
 

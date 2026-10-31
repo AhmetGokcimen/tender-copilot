@@ -365,12 +365,6 @@
     "formInvalid": "Adaugă un subiect, un email valid și un mesaj.",
     "formError": "Nu am putut trimite mesajul. Încearcă din nou în câteva clipe."
   },
-  "legal": {
-    "privacyTitle": "Notă de confidențialitate",
-    "termsTitle": "Termeni de utilizare",
-    "stubBody": "Textul juridic complet este în pregătire, deoarece Licits este momentan un pilot în acces anticipat. Pe scurt: datele companiei tale sunt folosite doar pentru a-ți oferi produsul și poți cere ștergerea lor oricând.",
-    "contactLine": "Întrebări despre confidențialitate sau termeni? Contactează-ne și îți răspundem direct."
-  },
   "opportunities": {
     "title": "Oportunități recomandate de AI",
     "algoBadge": "Algoritm v3.8.1",

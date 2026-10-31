@@ -1,0 +1,258 @@
+{
+ "en": {
+  "title": "Terms of use",
+  "description": "The terms for using the Licits early-access pilot: who it is for, what it does and does not do, your content, acceptable use, and liability.",
+  "updated": "2026-10-31",
+  "intro": "These terms govern your use of licits.com and the Licits pilot. By creating an account or using Licits you accept them on behalf of your company. If you do not agree, please do not use Licits. Licits is an early-access pilot, so some things will change.",
+  "sections": [
+   {
+    "id": "service",
+    "h": "What Licits is",
+    "p": [
+     "Licits is software for construction companies in Romania. It reads public tender notices from SEAP, compares them with your company profile, and helps you prepare offers and supporting documents. Access is by invitation. Joining the waitlist is not a contract and does not guarantee access."
+    ]
+   },
+   {
+    "id": "not-advice",
+    "h": "What Licits is not",
+    "list": [
+     "Licits is not legal, financial or procurement advice, and it is not a tender consultant or a law firm.",
+     "Licits never submits an offer for you. You review everything and submit on SEAP yourself.",
+     "Licits does not guarantee that you will qualify for, bid on or win any tender.",
+     "Licits is not affiliated with, or endorsed by, ANAP, SEAP or any contracting authority."
+    ]
+   },
+   {
+    "id": "accuracy",
+    "h": "Check everything before you rely on it",
+    "p": [
+     "Scores, eligibility checks, summaries, drafts and values read from documents are produced automatically, in part by AI. They can be wrong, incomplete or out of date. Notices can change after we read them, and our copy of a notice may lag behind SEAP.",
+     "The official tender documentation and the notice on SEAP always prevail. You are responsible for checking every requirement, deadline, figure and document against them, and for the content of every offer you submit."
+    ]
+   },
+   {
+    "id": "account",
+    "h": "Your account",
+    "list": [
+     "Use Licits for your business, and only if you are authorized to act for your company.",
+     "Give accurate information and keep it up to date.",
+     "Keep your sign-in details secret. You are responsible for activity under your account. Tell us at once if you think it has been misused.",
+     "Do not share an account between people or let others use your access."
+    ]
+   },
+   {
+    "id": "content",
+    "h": "Your content",
+    "p": [
+     "You keep all rights in the information and files you put into Licits. You give us permission to store, process and display them, and to pass them to the providers named in the privacy notice, only as needed to run Licits for you.",
+     "You promise that you have the right to upload what you upload. If a document contains personal data of other people, such as an employee's attestation, you must be allowed to share it for this purpose. You must not upload unlawful content or anything harmful to our systems or to others."
+    ]
+   },
+   {
+    "id": "confidentiality",
+    "h": "Confidentiality and your data",
+    "p": [
+     "We treat your company information as confidential. We do not show it to other users, we do not sell it, and we do not use your documents to train AI models. How we handle personal data is described in the privacy notice, which forms part of these terms. If your company needs a data processing agreement, ask us."
+    ]
+   },
+   {
+    "id": "use",
+    "h": "Acceptable use",
+    "list": [
+     "Do not try to break, probe or overload Licits, or to reach data that is not yours.",
+     "Do not copy, resell or reverse-engineer the service, or collect its data in bulk with automated tools.",
+     "Do not use Licits to break the law or to mislead a contracting authority.",
+     "Do not use the service in a way that harms others or the pilot."
+    ],
+    "p2": [
+     "We may suspend access if these rules are broken or the service is at risk."
+    ]
+   },
+   {
+    "id": "pilot",
+    "h": "Pilot status and availability",
+    "p": [
+     "Licits is provided as an early-access pilot, as is and as available. Features, limits and data sources may change, and the service may be interrupted or stopped. We may end the pilot or any account with notice where we can give it. If we stop the service, you can ask us for your data before it is deleted."
+    ]
+   },
+   {
+    "id": "fees",
+    "h": "Fees",
+    "p": [
+     "Access during the pilot, including the free trial for people on the waitlist, is free unless we agree otherwise in writing. Paid plans will be offered later, and you will agree to them before you are charged. Prices shown on the pricing page exclude VAT."
+    ]
+   },
+   {
+    "id": "ip",
+    "h": "Our rights",
+    "p": [
+     "The Licits software, design and brand belong to us. These terms give you the right to use the service, not to own any part of it. If you send us feedback, we may use it without owing you anything."
+    ]
+   },
+   {
+    "id": "liability",
+    "h": "Liability",
+    "p": [
+     "Nothing in these terms limits liability that cannot be limited by law, including liability for intent or gross negligence, or for death or injury.",
+     "Subject to that, and as far as the law allows, we are not liable for indirect or consequential loss, or for lost profits, lost tenders or lost contracts, and our total liability for any claim is limited to the fees you paid us in the 12 months before the event that caused it. Because the pilot is free, you use it at your own risk and we give no warranty that it is accurate, complete or fit for a particular purpose."
+    ]
+   },
+   {
+    "id": "end",
+    "h": "Ending your use",
+    "p": [
+     "You can stop using Licits at any time and ask us to delete your account and data, as set out in the privacy notice. We may suspend or end your access if you break these terms. Sections that by their nature should continue, such as those on liability and your content, continue after that."
+    ]
+   },
+   {
+    "id": "law",
+    "h": "Governing law",
+    "p": [
+     "These terms are governed by Romanian law, and the Romanian courts have jurisdiction, unless mandatory law says otherwise. These terms are available in English and Romanian. If the versions differ, the Romanian version prevails."
+    ]
+   },
+   {
+    "id": "changes",
+    "h": "Changes to these terms",
+    "p": [
+     "We may update these terms as the pilot develops. We change the date at the top, and tell registered users by email before a material change takes effect. If you keep using Licits after the change, you accept the new terms."
+    ]
+   },
+   {
+    "id": "contact",
+    "h": "Contact",
+    "p": [
+     "Questions about these terms go to the address below, or through the contact page."
+    ]
+   }
+  ]
+ },
+ "ro": {
+  "title": "Termeni de utilizare",
+  "description": "Termenii de utilizare a pilotului Licits în acces anticipat: pentru cine este, ce face și ce nu face, conținutul tău, utilizarea acceptabilă și răspunderea.",
+  "updated": "2026-10-31",
+  "intro": "Acești termeni reglementează utilizarea licits.com și a pilotului Licits. Prin crearea unui cont sau prin utilizarea Licits îi accepți în numele firmei tale. Dacă nu ești de acord, te rugăm să nu folosești Licits. Licits este un pilot în acces anticipat, deci unele lucruri se vor schimba.",
+  "sections": [
+   {
+    "id": "service",
+    "h": "Ce este Licits",
+    "p": [
+     "Licits este un software pentru firmele de construcții din România. Citește anunțurile publice de licitație din SEAP, le compară cu profilul companiei tale și te ajută să pregătești oferte și documente justificative. Accesul se face pe bază de invitație. Înscrierea pe lista de așteptare nu este un contract și nu garantează accesul."
+    ]
+   },
+   {
+    "id": "not-advice",
+    "h": "Ce nu este Licits",
+    "list": [
+     "Licits nu este consultanță juridică, financiară sau în achiziții publice și nu este un consultant de licitații sau un cabinet de avocatură.",
+     "Licits nu depune niciodată o ofertă în locul tău. Verifici tot și depui singur în SEAP.",
+     "Licits nu garantează că te vei califica, că vei depune ofertă sau că vei câștiga vreo licitație.",
+     "Licits nu este afiliat și nu este susținut de ANAP, SEAP sau de vreo autoritate contractantă."
+    ]
+   },
+   {
+    "id": "accuracy",
+    "h": "Verifică totul înainte să te bazezi pe rezultate",
+    "p": [
+     "Notele, verificările de eligibilitate, rezumatele, ciornele și valorile citite din documente sunt produse automat, în parte de AI. Pot fi greșite, incomplete sau depășite. Anunțurile se pot modifica după ce le-am citit, iar copia noastră a unui anunț poate rămâne în urma SEAP.",
+     "Documentația de atribuire oficială și anunțul din SEAP prevalează întotdeauna. Ești responsabil să verifici fiecare cerință, termen, cifră și document față de acestea și pentru conținutul fiecărei oferte pe care o depui."
+    ]
+   },
+   {
+    "id": "account",
+    "h": "Contul tău",
+    "list": [
+     "Folosește Licits pentru activitatea ta comercială și doar dacă ești autorizat să acționezi pentru firma ta.",
+     "Furnizează informații corecte și păstrează-le la zi.",
+     "Păstrează secrete datele de autentificare. Ești responsabil pentru activitatea din contul tău. Anunță-ne imediat dacă crezi că a fost folosit abuziv.",
+     "Nu împărți un cont între mai multe persoane și nu lăsa alții să folosească accesul tău."
+    ]
+   },
+   {
+    "id": "content",
+    "h": "Conținutul tău",
+    "p": [
+     "Păstrezi toate drepturile asupra informațiilor și fișierelor pe care le introduci în Licits. Ne dai permisiunea de a le stoca, prelucra și afișa și de a le transmite furnizorilor menționați în nota de confidențialitate, doar în măsura necesară ca să operăm Licits pentru tine.",
+     "Garantezi că ai dreptul să încarci ceea ce încarci. Dacă un document conține date personale ale altor persoane, de exemplu atestarea unui angajat, trebuie să ai voie să îl împărtășești în acest scop. Nu încărca conținut ilegal sau ceva dăunător sistemelor noastre sau altor persoane."
+    ]
+   },
+   {
+    "id": "confidentiality",
+    "h": "Confidențialitate și datele tale",
+    "p": [
+     "Tratăm informațiile companiei tale ca fiind confidențiale. Nu le arătăm altor utilizatori, nu le vindem și nu folosim documentele tale ca să antrenăm modele AI. Modul în care tratăm datele personale este descris în nota de confidențialitate, care face parte din acești termeni. Dacă firma ta are nevoie de un acord de prelucrare a datelor, cere-ni-l."
+    ]
+   },
+   {
+    "id": "use",
+    "h": "Utilizare acceptabilă",
+    "list": [
+     "Nu încerca să strici, să testezi agresiv sau să suprasolicitezi Licits și nu încerca să accesezi date care nu sunt ale tale.",
+     "Nu copia, nu revinde și nu face inginerie inversă serviciului și nu colecta masiv datele lui cu instrumente automate.",
+     "Nu folosi Licits ca să încalci legea sau să induci în eroare o autoritate contractantă.",
+     "Nu folosi serviciul în moduri care dăunează altora sau pilotului."
+    ],
+    "p2": [
+     "Putem suspenda accesul dacă aceste reguli sunt încălcate sau dacă serviciul este pus în pericol."
+    ]
+   },
+   {
+    "id": "pilot",
+    "h": "Statutul de pilot și disponibilitatea",
+    "p": [
+     "Licits este oferit ca pilot în acces anticipat, așa cum este și cum este disponibil. Funcțiile, limitele și sursele de date se pot schimba, iar serviciul poate fi întrerupt sau oprit. Putem încheia pilotul sau orice cont cu preaviz, atunci când putem oferi unul. Dacă oprim serviciul, poți cere datele tale înainte să fie șterse."
+    ]
+   },
+   {
+    "id": "fees",
+    "h": "Tarife",
+    "p": [
+     "Accesul în perioada pilot, inclusiv perioada gratuită pentru persoanele de pe lista de așteptare, este gratuit, dacă nu convenim altfel în scris. Planurile plătite vor fi oferite mai târziu, iar tu le vei accepta înainte să fii taxat. Prețurile de pe pagina de prețuri nu includ TVA."
+    ]
+   },
+   {
+    "id": "ip",
+    "h": "Drepturile noastre",
+    "p": [
+     "Software-ul, designul și marca Licits ne aparțin. Acești termeni îți dau dreptul de a folosi serviciul, nu de a deține vreo parte din el. Dacă ne trimiți feedback, îl putem folosi fără să îți datorăm ceva."
+    ]
+   },
+   {
+    "id": "liability",
+    "h": "Răspundere",
+    "p": [
+     "Nimic din acești termeni nu limitează răspunderea care nu poate fi limitată prin lege, inclusiv răspunderea pentru intenție sau culpă gravă ori pentru deces sau vătămare corporală.",
+     "Sub rezerva acestui lucru și în măsura în care legea permite, nu răspundem pentru pierderi indirecte sau subsecvente și nici pentru profit nerealizat, licitații pierdute sau contracte pierdute, iar răspunderea noastră totală pentru orice pretenție este limitată la tarifele plătite de tine în cele 12 luni dinaintea evenimentului care a cauzat-o. Pentru că pilotul este gratuit, îl folosești pe propriul risc și nu garantăm că este corect, complet sau potrivit pentru un anumit scop."
+    ]
+   },
+   {
+    "id": "end",
+    "h": "Încetarea utilizării",
+    "p": [
+     "Poți înceta oricând să folosești Licits și ne poți cere să îți ștergem contul și datele, așa cum se arată în nota de confidențialitate. Putem suspenda sau închide accesul tău dacă încalci acești termeni. Prevederile care prin natura lor trebuie să continue, precum cele despre răspundere și conținutul tău, rămân valabile și după aceea."
+    ]
+   },
+   {
+    "id": "law",
+    "h": "Legea aplicabilă",
+    "p": [
+     "Acești termeni sunt guvernați de legea română, iar instanțele române sunt competente, cu excepția cazului în care legea imperativă prevede altfel. Termenii sunt disponibili în română și engleză. Dacă versiunile diferă, prevalează versiunea în limba română."
+    ]
+   },
+   {
+    "id": "changes",
+    "h": "Modificarea termenilor",
+    "p": [
+     "Putem actualiza acești termeni pe măsură ce pilotul se dezvoltă. Schimbăm data de la început și anunțăm utilizatorii înregistrați prin email înainte ca o modificare importantă să intre în vigoare. Dacă continui să folosești Licits după modificare, accepți noii termeni."
+    ]
+   },
+   {
+    "id": "contact",
+    "h": "Contact",
+    "p": [
+     "Întrebările despre acești termeni merg la adresa de mai jos sau prin pagina de contact."
+    ]
+   }
+  ]
+ }
+}

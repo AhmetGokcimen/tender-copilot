@@ -365,12 +365,6 @@
     "formInvalid": "Add a subject, a valid email and a message.",
     "formError": "Couldn't send your message. Please try again in a moment."
   },
-  "legal": {
-    "privacyTitle": "Privacy notice",
-    "termsTitle": "Terms of use",
-    "stubBody": "The full legal text is being prepared, as Licits is currently an early-access pilot. In short: your company data is used only to operate the product for you, and you can ask for it to be deleted at any time.",
-    "contactLine": "Questions about privacy or terms? Contact us and we'll answer directly."
-  },
   "opportunities": {
     "title": "AI-Recommended Opportunities",
     "algoBadge": "Algorithm v3.8.1",
