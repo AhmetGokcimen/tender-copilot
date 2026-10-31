@@ -1,0 +1,42 @@
+name: Licits Social Publisher
+
+on:
+  schedule:
+    # 08:45 Europe/Bucharest is 06:45 UTC in winter and 05:45 UTC in summer. Both are listed;
+    # scripts/social-publisher.mjs ignores the run that falls before 08:45 local time and a
+    # published entry is never posted twice.
+    - cron: "45 5 * * *"
+    - cron: "45 6 * * *"
+  workflow_dispatch:
+    inputs:
+      target_date:
+        description: "Force-publish the entry for this date (YYYY-MM-DD) instead of today. Leave blank for normal behavior."
+        required: false
+        type: string
+
+concurrency:
+  group: social-publisher
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Publish scheduled post
+        env:
+          META_PAGE_ACCESS_TOKEN: ${{ secrets.META_PAGE_ACCESS_TOKEN }}
+          META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
+          TARGET_DATE: ${{ inputs.target_date }}
+        run: node scripts/social-publisher.mjs
+      - name: Commit updated schedule status
+        if: always()
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Social post status updated"
+          file_pattern: "social/schedule.json"
