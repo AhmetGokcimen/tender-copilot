@@ -10,8 +10,10 @@ export function AssistantFab() {
   const open = useAssistantStore((s) => s.open);
   const setOpen = useAssistantStore((s) => s.setOpen);
   const pathname = usePathname();
-  // The marketing landing page keeps a single call to action: the waitlist.
-  if (open || pathname === '/') return null;
+  // Marketing pages (landing, pricing, resources, contact, login) have no
+  // assistant: it needs the signed-in product, and the landing page keeps a
+  // single call to action, the waitlist.
+  if (open || !/^\/(app|onboarding)(\/|$)/.test(pathname)) return null;
   return (
     <button
       type="button"

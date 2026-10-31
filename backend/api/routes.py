@@ -492,9 +492,9 @@ def get_company_evidence(
 
 @router.post("/tenders/sync/romania", response_model=list[Tender], tags=["tenders"])
 async def sync_romania_tenders(
-    cpv_codes: list[str] | None = Query(default=None),
-    keywords: list[str] | None = Query(default=None),
-    days: int = 30,
+    cpv_codes: list[str] | None = Query(default=None, max_length=20),
+    keywords: list[str] | None = Query(default=None, max_length=20),
+    days: int = Query(default=30, ge=1, le=60),
     session: Session = Depends(get_session),
 ) -> list[Tender]:
     adapter = RomaniaSeapAdapter()

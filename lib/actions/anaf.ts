@@ -1,5 +1,7 @@
 'use server';
 
+import { signedIn } from '@/lib/server-auth';
+
 /**
  * Company lookup by CUI from ANAF's public web services, for onboarding:
  * - PlatitorTvaRest (v9): legal name, address, county, main CAEN code,
@@ -48,7 +50,8 @@ async function getJson(url: string, init?: RequestInit): Promise<unknown | null>
 const str = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : null);
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export async function lookupCompany(rawCui: string, years: number[]): Promise<AnafResult> {
+export async function lookupCompany(rawCui: string, years: number[], accessToken: string | null): Promise<AnafResult> {
+  if (!(await signedIn(accessToken))) return { status: 'unavailable' };
   const digits = String(rawCui ?? '').toUpperCase().replace(/^RO/, '').replace(/\D/g, '');
   if (digits.length < 2 || digits.length > 10) return { status: 'invalid' };
   const cui = Number(digits);

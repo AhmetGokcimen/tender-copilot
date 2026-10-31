@@ -5,9 +5,23 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
-    // The signed-in product and auth screens are never indexed.
     return [
       {
+        // Baseline browser protections on every response. A full
+        // Content-Security-Policy is left out on purpose: the site loads
+        // Google Analytics and fonts, and a policy needs testing against
+        // them first. `frame-ancestors` alone stops other sites framing us.
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()' },
+        ],
+      },
+      {
+        // The signed-in product and auth screens are never indexed.
         source: '/:locale(en|ro)/:area(app|auth|onboarding)/:path*',
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
       },
