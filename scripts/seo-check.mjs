@@ -10,7 +10,7 @@ const slugs = [
   'common-mistakes-first-time-bidders',
   'tender-consultant-vs-software',
 ];
-const paths = ['', '/pricing', '/about', '/contact', '/resources', ...slugs.map((s) => `/resources/${s}`)];
+const paths = ['', '/pricing', '/about', '/contact', '/privacy', '/terms', '/resources', ...slugs.map((s) => `/resources/${s}`)];
 let bad = 0;
 const fail = (url, msg) => {
   bad++;

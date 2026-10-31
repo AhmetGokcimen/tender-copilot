@@ -1,0 +1,394 @@
+{
+ "en": {
+  "title": "Privacy notice",
+  "description": "How Licits collects, uses and protects personal data and confidential company data, who it is shared with, and the rights you have.",
+  "updated": "2026-10-31",
+  "intro": "Licits helps Romanian construction companies find and prepare public tenders. To do that we handle company information, and some personal data. This notice explains what we collect, why, where it goes and what you can do about it. Licits is an early-access pilot, and this notice describes how the pilot works today.",
+  "sections": [
+   {
+    "id": "operator",
+    "h": "Who is responsible",
+    "p": [
+     "The controller of the personal data described here is the operator of Licits. You can reach us at the email address below or through the contact page. Privacy questions and requests all go to the same place."
+    ]
+   },
+   {
+    "id": "scope",
+    "h": "What this notice covers",
+    "p": [
+     "It covers visitors to licits.com, people on the waitlist, people who write to us, and pilot users and their companies.",
+     "Most company data, such as turnover, authorizations and references, is business information rather than personal data. We protect it the same way and treat it as confidential. Personal data is information about a person: your email and name, and any names or numbers of individuals that appear in documents you upload, such as an attestation issued to an employee."
+    ]
+   },
+   {
+    "id": "data",
+    "h": "What we collect, why, and for how long",
+    "rows": [
+     {
+      "t": "Waitlist",
+      "d": "Your email address, the page language, which form you used, and the time.",
+      "w": "To tell you when your access is ready and to start your free trial.",
+      "b": "Your consent, given when you submit the form (Art. 6(1)(a) GDPR). You can withdraw it at any time.",
+      "k": "Until you ask us to remove it or access is offered. We review the list at least once a year and delete entries we no longer need."
+     },
+     {
+      "t": "Contact form",
+      "d": "The subject, your email address, your message, the page language, and whether the email was sent.",
+      "w": "To answer you.",
+      "b": "Our legitimate interest in answering enquiries, or steps you ask for before a contract (Art. 6(1)(f) and (b)).",
+      "k": "While we deal with your request, then up to 12 months."
+     },
+     {
+      "t": "Your account",
+      "d": "Your email address, your name and your sign-in details. Passwords are never stored in plain text: our authentication provider keeps only a hash.",
+      "w": "To give you access and keep your account secure.",
+      "b": "Performing our agreement with you (Art. 6(1)(b)).",
+      "k": "While your account is open."
+     },
+     {
+      "t": "Company profile",
+      "d": "What you enter or confirm: company name, CUI, address and county, CAEN codes, trades, regions, turnover by year, capacity, guarantee and credit limits, SEAP and e-signature readiness, staff counts by role, past contracts and references, and your notification choices.",
+      "w": "To check tenders against your company and to prepare offers.",
+      "b": "Performing our agreement with you (Art. 6(1)(b)).",
+      "k": "While your account is open."
+     },
+     {
+      "t": "Uploaded documents",
+      "d": "Files you upload, such as certificates, authorizations, balance sheets and reference documents, and the facts read from them. They can include names of individuals.",
+      "w": "To fill in your profile and prepare documents for tenders.",
+      "b": "Performing our agreement with you (Art. 6(1)(b)).",
+      "k": "Until you delete them or your account is closed."
+     },
+     {
+      "t": "Technical data",
+      "d": "IP address, browser type, pages requested and error details, held in the logs of our hosting and database providers.",
+      "w": "To run the site, keep it secure and fix faults.",
+      "b": "Our legitimate interest in a secure, working service (Art. 6(1)(f)).",
+      "k": "For the short periods set by those providers."
+     },
+     {
+      "t": "Browser storage",
+      "d": "Your sign-in session and interface choices, such as language and sidebar state, kept in your browser's local storage and in a language cookie.",
+      "w": "To keep you signed in and remember your language.",
+      "b": "Strictly necessary to provide the service you asked for, so no consent is needed.",
+      "k": "Until you sign out or clear your browser data; the language cookie lasts up to a year."
+     }
+    ],
+    "p": [
+     "We do not use advertising or tracking cookies, and we do not run analytics on this site."
+    ]
+   },
+   {
+    "id": "confidential",
+    "h": "Confidential business data",
+    "p": [
+     "Companies share information here that they would not want competitors to see: turnover, credit lines, contracts and certificates. We treat all of it as confidential."
+    ],
+    "list": [
+     "Only you, and people you authorize, can see your company's data. One company's data is never shown to another.",
+     "Access is enforced in the database itself, row by row, not only in the application.",
+     "Uploaded documents are kept in a private store. They are not reachable by a public link.",
+     "We access your data only when it is needed to run, secure or support the service, or when you ask us to.",
+     "We do not sell your data, we do not use it for advertising, and we do not use your documents to train AI models.",
+     "Accounts are created by invitation only."
+    ]
+   },
+   {
+    "id": "ai",
+    "h": "AI features",
+    "p": [
+     "Some features use an AI model: reading an uploaded document, reading your company website to suggest trades, summarising tenders, and answering questions in the assistant. When you use them, the content needed for that request is sent to the AI provider, Meta Platforms, through its API. That can be the text or image of a document, the text of your public website, or your question together with the text visible on the page.",
+     "We send only what a request needs. Results are suggestions: every value read from a document is shown to you to confirm before it is saved. You can always enter information by hand instead. How the provider handles API inputs is set by its own terms, which you can read on its website. Please do not upload documents containing personal data that your company has no reason to share."
+    ]
+   },
+   {
+    "id": "recipients",
+    "h": "Who we share data with",
+    "p": [
+     "We use a small number of providers to run Licits. They process data on our behalf, for the purposes in this notice:"
+    ],
+    "list": [
+     "Supabase: database, sign-in and file storage. The project is hosted in the EU (Ireland).",
+     "Vercel: hosting of the website and server functions.",
+     "Cloudflare: domain name service for licits.com, and traffic filtering if it is switched on.",
+     "Meta Platforms: the AI model described above.",
+     "FormSubmit: forwards contact-form messages to our inbox. Your browser sends the message to FormSubmit, which emails it to us.",
+     "Google: the icon font is loaded from Google Fonts, so your IP address is sent to Google when a page loads.",
+     "ANAF: when you enter a CUI, the CUI is sent to ANAF's public service to look up the company's registration details."
+    ],
+    "p2": [
+     "Tender notices come from SEAP, where they are public. We do not sell personal data or share it for advertising. We may disclose data when the law requires it or to protect our rights."
+    ]
+   },
+   {
+    "id": "transfers",
+    "h": "Transfers outside the EU and EEA",
+    "p": [
+     "Some of these providers, such as Vercel, Meta and Google, are based in or may process data in countries outside the EU and EEA. Where that happens, the transfer relies on an adequacy decision, such as the EU-US Data Privacy Framework, or on the standard contractual clauses approved by the European Commission, as offered by each provider."
+    ]
+   },
+   {
+    "id": "security",
+    "h": "How we protect data",
+    "list": [
+     "Data is encrypted in transit with HTTPS, and our database and file storage providers encrypt it at rest.",
+     "Each company can read only its own rows, enforced by database rules.",
+     "Server secrets are kept on the server and never in the website code.",
+     "Access for our own team is limited to what the work needs."
+    ],
+    "p2": [
+     "No system is perfectly secure. If a breach is likely to put people's rights at risk, we will notify the data protection authority within 72 hours and tell the people affected without undue delay."
+    ]
+   },
+   {
+    "id": "retention",
+    "h": "Keeping and deleting data",
+    "p": [
+     "Write to us to close your account and we will delete your account, company profile, documents and files without undue delay and within one month. Copies held in provider backups expire on the providers' schedule. We keep only what the law requires us to keep, such as accounting records once paid plans exist."
+    ]
+   },
+   {
+    "id": "rights",
+    "h": "Your rights",
+    "p": [
+     "Under the GDPR you can ask us to:"
+    ],
+    "list": [
+     "give you access to your personal data and a copy of it;",
+     "correct data that is wrong;",
+     "delete your data;",
+     "restrict how we use it;",
+     "give you your data in a portable format;",
+     "stop processing that is based on our legitimate interest, and withdraw consent you gave, at any time."
+    ],
+    "p2": [
+     "To use a right, write to us. We may ask you to confirm who you are, and we reply within one month. You can also complain to the Romanian data protection authority, the Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP), at www.dataprotection.ro, or to the authority in your own country."
+    ]
+   },
+   {
+    "id": "automated",
+    "h": "Automated results",
+    "p": [
+     "Licits scores tenders and checks eligibility automatically. These results are decision support and have no legal effect on you. Each check shows its reason, you decide whether to bid, and you submit any offer yourself on SEAP."
+    ]
+   },
+   {
+    "id": "children",
+    "h": "Children",
+    "p": [
+     "Licits is a business service and is not meant for anyone under 18."
+    ]
+   },
+   {
+    "id": "changes",
+    "h": "Changes to this notice",
+    "p": [
+     "When this notice changes we update the date at the top. If a change matters for how we use your data, we tell registered users by email before it takes effect."
+    ]
+   },
+   {
+    "id": "contact",
+    "h": "Contact",
+    "p": [
+     "Questions, requests and complaints about your data go to the address below, or through the contact page."
+    ]
+   }
+  ]
+ },
+ "ro": {
+  "title": "Notă de confidențialitate",
+  "description": "Cum colectează, folosește și protejează Licits datele personale și datele confidențiale ale companiilor, cu cine le împarte și ce drepturi ai.",
+  "updated": "2026-10-31",
+  "intro": "Licits ajută firmele de construcții din România să găsească și să pregătească licitații publice. Pentru asta, prelucrăm informații despre companii și unele date personale. Această notă explică ce colectăm, de ce, unde ajung datele și ce poți face în legătură cu ele. Licits este un pilot în acces anticipat, iar nota descrie cum funcționează pilotul astăzi.",
+  "sections": [
+   {
+    "id": "operator",
+    "h": "Cine este responsabil",
+    "p": [
+     "Operatorul datelor personale descrise aici este operatorul Licits. Ne poți scrie la adresa de email de mai jos sau prin pagina de contact. Toate întrebările și cererile privind confidențialitatea ajung în același loc."
+    ]
+   },
+   {
+    "id": "scope",
+    "h": "Ce acoperă această notă",
+    "p": [
+     "Acoperă vizitatorii licits.com, persoanele de pe lista de așteptare, persoanele care ne scriu, utilizatorii pilot și companiile lor.",
+     "Cele mai multe date ale companiilor, precum cifra de afaceri, autorizațiile și referințele, sunt informații comerciale, nu date personale. Le protejăm la fel și le tratăm ca fiind confidențiale. Datele personale sunt informațiile despre o persoană: emailul și numele tău, precum și orice nume sau numere ale unor persoane care apar în documentele încărcate, de exemplu o atestare emisă pe numele unui angajat."
+    ]
+   },
+   {
+    "id": "data",
+    "h": "Ce colectăm, de ce și cât timp păstrăm",
+    "rows": [
+     {
+      "t": "Lista de așteptare",
+      "d": "Adresa ta de email, limba paginii, formularul folosit și momentul înscrierii.",
+      "w": "Ca să te anunțăm când accesul tău este gata și să începem perioada gratuită.",
+      "b": "Consimțământul tău, dat la trimiterea formularului (art. 6 alin. (1) lit. a) GDPR). Îl poți retrage oricând.",
+      "k": "Până ceri eliminarea ta sau ți se oferă acces. Verificăm lista cel puțin o dată pe an și ștergem intrările de care nu mai avem nevoie."
+     },
+     {
+      "t": "Formularul de contact",
+      "d": "Subiectul, adresa ta de email, mesajul, limba paginii și dacă emailul a fost trimis.",
+      "w": "Ca să îți răspundem.",
+      "b": "Interesul nostru legitim de a răspunde solicitărilor sau pașii ceruți de tine înainte de un contract (art. 6 alin. (1) lit. f) și b)).",
+      "k": "Cât tratăm solicitarea, apoi cel mult 12 luni."
+     },
+     {
+      "t": "Contul tău",
+      "d": "Adresa de email, numele și datele de autentificare. Parolele nu sunt stocate în clar: furnizorul nostru de autentificare păstrează doar un hash.",
+      "w": "Ca să îți dăm acces și să păstrăm contul în siguranță.",
+      "b": "Executarea contractului cu tine (art. 6 alin. (1) lit. b)).",
+      "k": "Cât timp contul este deschis."
+     },
+     {
+      "t": "Profilul companiei",
+      "d": "Ceea ce introduci sau confirmi: denumirea firmei, CUI, adresa și județul, coduri CAEN, meserii, regiuni, cifra de afaceri pe ani, capacitate, plafoane de garanții și credit, pregătirea pentru SEAP și semnătura electronică, numărul de angajați pe roluri, contracte și referințe anterioare și opțiunile de notificare.",
+      "w": "Ca să verificăm licitațiile față de firma ta și să pregătim oferte.",
+      "b": "Executarea contractului cu tine (art. 6 alin. (1) lit. b)).",
+      "k": "Cât timp contul este deschis."
+     },
+     {
+      "t": "Documente încărcate",
+      "d": "Fișierele încărcate de tine, precum certificate, autorizații, bilanțuri și documente de referință, și faptele citite din ele. Pot conține nume de persoane.",
+      "w": "Ca să completăm profilul și să pregătim documente pentru licitații.",
+      "b": "Executarea contractului cu tine (art. 6 alin. (1) lit. b)).",
+      "k": "Până le ștergi sau până se închide contul."
+     },
+     {
+      "t": "Date tehnice",
+      "d": "Adresa IP, tipul de browser, paginile cerute și detalii despre erori, păstrate în jurnalele furnizorilor noștri de găzduire și de bază de date.",
+      "w": "Ca să rulăm site-ul, să îl ținem în siguranță și să remediem defecțiuni.",
+      "b": "Interesul nostru legitim pentru un serviciu sigur și funcțional (art. 6 alin. (1) lit. f)).",
+      "k": "Perioadele scurte stabilite de acești furnizori."
+     },
+     {
+      "t": "Stocarea în browser",
+      "d": "Sesiunea de autentificare și opțiunile de interfață, precum limba și starea barei laterale, păstrate în stocarea locală a browserului și într-un cookie de limbă.",
+      "w": "Ca să rămâi autentificat și să ne amintim limba.",
+      "b": "Strict necesare pentru serviciul cerut de tine, deci nu este nevoie de consimțământ.",
+      "k": "Până te deconectezi sau ștergi datele browserului; cookie-ul de limbă durează până la un an."
+     }
+    ],
+    "p": [
+     "Nu folosim cookie-uri de publicitate sau de urmărire și nu rulăm analize (analytics) pe acest site."
+    ]
+   },
+   {
+    "id": "confidential",
+    "h": "Date comerciale confidențiale",
+    "p": [
+     "Companiile împărtășesc aici informații pe care nu ar vrea să le vadă concurenții: cifra de afaceri, liniile de credit, contractele și certificatele. Le tratăm pe toate ca fiind confidențiale."
+    ],
+    "list": [
+     "Doar tu și persoanele pe care le autorizezi puteți vedea datele companiei tale. Datele unei companii nu sunt arătate niciodată alteia.",
+     "Accesul este impus chiar în baza de date, rând cu rând, nu doar în aplicație.",
+     "Documentele încărcate sunt păstrate într-un spațiu privat. Nu pot fi accesate printr-un link public.",
+     "Accesăm datele tale doar când este necesar ca să operăm, să securizăm sau să susținem serviciul sau când ne ceri tu.",
+     "Nu îți vindem datele, nu le folosim pentru publicitate și nu folosim documentele tale ca să antrenăm modele de inteligență artificială.",
+     "Conturile se creează doar pe bază de invitație."
+    ]
+   },
+   {
+    "id": "ai",
+    "h": "Funcții AI",
+    "p": [
+     "Unele funcții folosesc un model de inteligență artificială: citirea unui document încărcat, citirea site-ului firmei tale pentru a sugera meseriile, rezumarea licitațiilor și răspunsurile asistentului. Când le folosești, conținutul necesar pentru acea cerere este trimis furnizorului AI, Meta Platforms, prin API-ul său. Poate fi textul sau imaginea unui document, textul site-ului tău public sau întrebarea ta împreună cu textul vizibil pe pagină.",
+     "Trimitem doar ce are nevoie o cerere. Rezultatele sunt sugestii: fiecare valoare citită dintr-un document îți este arătată spre confirmare înainte de a fi salvată. Poți oricând introduce informațiile manual. Modul în care furnizorul tratează datele primite prin API este stabilit de propriii lui termeni, pe care îi poți citi pe site-ul lui. Te rugăm să nu încarci documente cu date personale pe care firma ta nu are motiv să le împărtășească."
+    ]
+   },
+   {
+    "id": "recipients",
+    "h": "Cu cine împărtășim datele",
+    "p": [
+     "Folosim un număr mic de furnizori ca să rulăm Licits. Ei prelucrează datele în numele nostru, pentru scopurile din această notă:"
+    ],
+    "list": [
+     "Supabase: baza de date, autentificarea și stocarea fișierelor. Proiectul este găzduit în UE (Irlanda).",
+     "Vercel: găzduirea site-ului și a funcțiilor de server.",
+     "Cloudflare: serviciul de nume de domeniu pentru licits.com și filtrarea traficului, dacă este activată.",
+     "Meta Platforms: modelul AI descris mai sus.",
+     "FormSubmit: transmite mesajele din formularul de contact în căsuța noastră. Browserul tău trimite mesajul către FormSubmit, care ni-l trimite prin email.",
+     "Google: fontul de pictograme se încarcă din Google Fonts, deci adresa ta IP este trimisă către Google când se încarcă o pagină.",
+     "ANAF: când introduci un CUI, acesta este trimis serviciului public al ANAF pentru a obține datele de înregistrare ale firmei."
+    ],
+    "p2": [
+     "Anunțurile de licitație provin din SEAP, unde sunt publice. Nu vindem date personale și nu le împărtășim pentru publicitate. Putem dezvălui date când legea o cere sau pentru a ne apăra drepturile."
+    ]
+   },
+   {
+    "id": "transfers",
+    "h": "Transferuri în afara UE și SEE",
+    "p": [
+     "Unii dintre acești furnizori, precum Vercel, Meta și Google, au sediul sau pot prelucra date în țări din afara UE și SEE. Când se întâmplă asta, transferul se bazează pe o decizie de adecvare, precum Cadrul UE-SUA privind confidențialitatea datelor, sau pe clauzele contractuale standard aprobate de Comisia Europeană, așa cum le oferă fiecare furnizor."
+    ]
+   },
+   {
+    "id": "security",
+    "h": "Cum protejăm datele",
+    "list": [
+     "Datele sunt criptate în tranzit prin HTTPS, iar furnizorii noștri de bază de date și stocare le criptează la repaus.",
+     "Fiecare companie poate citi doar propriile rânduri, prin reguli impuse în baza de date.",
+     "Secretele serverului sunt păstrate pe server și niciodată în codul site-ului.",
+     "Accesul echipei noastre este limitat la ce necesită munca."
+    ],
+    "p2": [
+     "Niciun sistem nu este perfect sigur. Dacă o încălcare a securității poate pune în pericol drepturile persoanelor, vom notifica autoritatea de protecție a datelor în 72 de ore și vom informa persoanele afectate fără întârzieri nejustificate."
+    ]
+   },
+   {
+    "id": "retention",
+    "h": "Păstrarea și ștergerea datelor",
+    "p": [
+     "Scrie-ne ca să îți închidem contul și vom șterge contul, profilul companiei, documentele și fișierele fără întârzieri nejustificate și în cel mult o lună. Copiile din backup-urile furnizorilor expiră conform programului acestora. Păstrăm doar ce ne obligă legea să păstrăm, cum ar fi evidențele contabile după ce vor exista planuri plătite."
+    ]
+   },
+   {
+    "id": "rights",
+    "h": "Drepturile tale",
+    "p": [
+     "Conform GDPR, ne poți cere:"
+    ],
+    "list": [
+     "acces la datele tale personale și o copie a lor;",
+     "corectarea datelor greșite;",
+     "ștergerea datelor;",
+     "restricționarea utilizării lor;",
+     "primirea datelor într-un format portabil;",
+     "încetarea prelucrării bazate pe interesul nostru legitim și retragerea oricând a consimțământului dat."
+    ],
+    "p2": [
+     "Ca să îți exerciți un drept, scrie-ne. Îți putem cere să îți confirmi identitatea și răspundem în cel mult o lună. Poți depune și o plângere la Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP), la www.dataprotection.ro, sau la autoritatea din țara ta."
+    ]
+   },
+   {
+    "id": "automated",
+    "h": "Rezultate automate",
+    "p": [
+     "Licits notează licitațiile și verifică eligibilitatea automat. Aceste rezultate sunt un sprijin pentru decizie și nu produc efecte juridice asupra ta. Fiecare verificare își arată motivul, tu decizi dacă depui ofertă, iar oferta o depui singur în SEAP."
+    ]
+   },
+   {
+    "id": "children",
+    "h": "Minori",
+    "p": [
+     "Licits este un serviciu pentru firme și nu este destinat persoanelor sub 18 ani."
+    ]
+   },
+   {
+    "id": "changes",
+    "h": "Modificările acestei note",
+    "p": [
+     "Când nota se schimbă, actualizăm data de la început. Dacă o modificare contează pentru modul în care folosim datele tale, anunțăm utilizatorii înregistrați prin email înainte să intre în vigoare."
+    ]
+   },
+   {
+    "id": "contact",
+    "h": "Contact",
+    "p": [
+     "Întrebările, cererile și plângerile privind datele tale merg la adresa de mai jos sau prin pagina de contact."
+    ]
+   }
+  ]
+ }
+}

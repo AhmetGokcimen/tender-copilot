@@ -35,6 +35,8 @@ export function llmsIndex(): string {
     `- [Full text of all guides](${SITE_URL}/llms-full.txt): every guide in English and Romanian, in one file`,
     `- [Sitemap](${SITE_URL}/sitemap.xml)`,
     `- [Contact](${pageUrl('en', '/contact')})`,
+    `- [Privacy notice](${pageUrl('en', '/privacy')}) / [Notă de confidențialitate](${pageUrl('ro', '/privacy')})`,
+    `- [Terms of use](${pageUrl('en', '/terms')}) / [Termeni de utilizare](${pageUrl('ro', '/terms')})`,
     '',
   ];
   return lines.join('\n');
