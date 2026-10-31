@@ -1,6 +1,9 @@
 from typing import Literal
 
+from datetime import datetime
+
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Response
+from pydantic import BaseModel
 from sqlalchemy import String, cast
 from sqlmodel import Session, func, select
 
@@ -77,6 +80,7 @@ from backend.db import (
     upsert_tender_title,
     upsert_tenders,
 )
+from backend.models.award import Award
 from backend.models.company import CompanyProfile
 from backend.models.tender import SourceSystem, Tender
 from backend.models.user import User
@@ -231,6 +235,56 @@ def get_authority_history(
     if not tender:
         raise HTTPException(status_code=404, detail="Tender not found")
     return AuthorityHistory(**authority_history(session, tender))
+
+
+class WonContract(BaseModel):
+    title: str
+    contracting_authority: str | None
+    cpv_codes: list[str]
+    value: float | None
+    currency: str | None
+    awarded_on: datetime | None
+    url: str | None
+
+
+@router.get("/awards/won", response_model=list[WonContract], tags=["companies"])
+def awards_won(
+    cui: str = Query(min_length=2, max_length=14),
+    limit: int = Query(default=30, ge=1, le=100),
+    session: Session = Depends(get_session),
+) -> list[WonContract]:
+    """Contracts SEAP shows as awarded to a company (matched on its CUI), newest
+    first. Public notice data, so it is not company-scoped; auth only gates the
+    caller. Used to prefill past experience in onboarding."""
+    digits = "".join(ch for ch in cui if ch.isdigit())
+    if not 2 <= len(digits) <= 10:
+        raise HTTPException(status_code=422, detail="Invalid CUI")
+    rows = session.exec(
+        select(Award)
+        .where(cast(Award.winner_cif, String).contains(digits))  # type: ignore[arg-type]
+        .order_by(Award.award_date.desc())  # type: ignore[union-attr]
+        .limit(limit * 4)
+    ).all()
+    out: list[WonContract] = []
+    for a in rows:
+        # The substring match is a prefilter; "RO 2816464" and "2816464" are the
+        # same company but 12816464 is not.
+        if "".join(ch for ch in (a.winner_cif or "") if ch.isdigit()) != digits:
+            continue
+        out.append(
+            WonContract(
+                title=a.title.strip()[:300],
+                contracting_authority=a.contracting_authority,
+                cpv_codes=list(a.cpv_codes or []),
+                value=a.contract_value,
+                currency=a.currency,
+                awarded_on=a.contract_date or a.award_date,
+                url=a.source_url,
+            )
+        )
+        if len(out) >= limit:
+            break
+    return out
 
 
 @router.patch(

@@ -36,6 +36,7 @@ import {
   YesNo,
 } from '@/components/onboarding/profile-fields';
 import { lookupCompany } from '@/lib/actions/anaf';
+import { fetchWonContracts, type WonContract } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { scanCompanySite } from '@/lib/actions/site-scan';
 import { TRADES, workByCpv, type Lang } from '@/lib/construction';
@@ -43,12 +44,15 @@ import {
   credentialState,
   emptyCompany,
   loadCompanyData,
+  newId,
   profileStrength,
   saveCompany,
+  saveContracts,
   saveCredentials,
   saveTurnover,
   turnoverYears,
   type CompanyData,
+  type Contract,
   type Credential,
 } from '@/lib/company-data';
 import { applyScannedDocument } from '@/lib/apply-document';
@@ -93,6 +97,27 @@ const emptyData = (): CompanyData => ({
   staff: {},
   documents: [],
 });
+
+/** A SEAP award as an experience row: works by CPV division 45, supplies 03/09/14-44, else services. */
+function contractFromAward(a: WonContract): Contract {
+  const div = Number((a.cpv_codes[0] ?? '').slice(0, 2));
+  return {
+    id: newId(),
+    kind: div === 45 ? 'works' : div >= 3 && div <= 44 ? 'supplies' : 'services',
+    title: a.title,
+    client: a.contracting_authority,
+    country: 'RO',
+    trades: [],
+    cpv_codes: a.cpv_codes,
+    value: a.value,
+    currency: a.currency ?? 'RON',
+    end_year: a.awarded_on ? new Date(a.awarded_on).getFullYear() : null,
+    completion_certificate: null,
+    role: 'lead',
+    share_pct: null,
+    document_id: null,
+  };
+}
 
 type AgentView = {
   kind: 'anaf' | 'site';
@@ -176,13 +201,20 @@ export default function OnboardingPage() {
       return;
     }
     const co = res.company;
+    const won = await fetchWonContracts(cui).catch(() => [] as WonContract[]);
     setData((d) => {
       if (!d) return d;
+      const known = new Set(d.contracts.map((k) => `${k.title}|${k.client ?? ''}`));
+      const contracts = [
+        ...d.contracts,
+        ...won.map(contractFromAward).filter((k) => !known.has(`${k.title}|${k.client ?? ''}`)),
+      ];
       const turnover = d.turnover.filter((r) => !res.turnover.some((x) => x.year === r.year));
       for (const x of res.turnover) turnover.push({ year: x.year, amount: x.amount, currency: 'RON', source: 'anaf' });
       return {
         ...d,
         turnover,
+        contracts,
         company: {
           ...d.company,
           name: co.name || d.company.name,
@@ -202,9 +234,12 @@ export default function OnboardingPage() {
     if (co.vatPayer !== null) facts.push({ label: t('anafVat'), value: co.vatPayer ? tp('yes') : tp('no') });
     if (co.active !== null)
       facts.push({ label: t('anafActive'), value: co.active ? tp('yes') : tp('no'), tone: co.active ? 'ok' : 'risk' });
+    if (co.eInvoice !== null)
+      facts.push({ label: t('anafEInvoice'), value: co.eInvoice ? tp('yes') : tp('no'), tone: co.eInvoice ? 'ok' : 'risk' });
+    facts.push({ label: t('anafContracts'), value: String(won.length) });
     for (const x of res.turnover)
       facts.push({ label: `${t('anafTurnover')} ${x.year}`, value: `${groupDigits(String(Math.round(x.amount)))} RON` });
-    setAgent({ kind: 'anaf', subject: cui, running: false, facts, note: t('anafNote') });
+    setAgent({ kind: 'anaf', subject: cui, running: false, facts, note: t(won.length ? 'anafNoteContracts' : 'anafNote') });
   };
 
   const runSite = async (site: string) => {
@@ -271,6 +306,7 @@ export default function OnboardingPage() {
       }
       const id = await saveCompany(companyId, { ...c });
       if (!companyId) setCompanyId(id);
+      if (step === 0 && data.contracts.length) await saveContracts(id, data.contracts);
       if (step === 3) await saveTurnover(id, data.turnover.filter((r) => r.amount > 0));
       if (step === 4) await saveCredentials(id, data.credentials);
       const site = (c.website ?? '').trim();

@@ -146,3 +146,23 @@ def test_feed_leaves_renewal_null(api: TestClient) -> None:
     items = api.get("/api/tenders", headers=_auth()).json()
     assert items, "feed unexpectedly empty"
     assert all(t["renewal_pattern"] is None for t in items)
+
+
+def test_awards_won_matches_cui_exactly(api: TestClient) -> None:
+    from backend.db import engine
+
+    def won(eid: str, cif: str, day: int) -> Award:
+        return Award(
+            source_system=SourceSystem.ROMANIA_SEAP, external_id=eid, country_code="RO", title=f"W {eid}",
+            contracting_authority=AUTH, cpv_codes=["45233120"], contract_value=10.0, currency="RON",
+            award_date=datetime(2026, 9, day, tzinfo=UTC), winner_cif=cif,
+        )
+
+    with Session(engine) as session:
+        session.add_all([won("w1", "RO 2816464", 1), won("w2", "2816464", 2), won("w3", "12816464", 3)])
+        session.commit()
+    assert api.get("/api/awards/won?cui=2816464").status_code == 401
+    res = api.get("/api/awards/won?cui=RO2816464", headers=_auth())
+    assert res.status_code == 200, res.text
+    assert [r["title"] for r in res.json()] == ["W w2", "W w1"]  # newest first, 12816464 excluded
+    assert api.get("/api/awards/won?cui=ab", headers=_auth()).status_code == 422
