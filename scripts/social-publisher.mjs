@@ -90,6 +90,23 @@ async function publishCarousel(entry) {
   return mediaId;
 }
 
+// Posts nothing. Checks that the token reaches the account, that the account may publish
+// and that every image still scheduled can be fetched. Run it from the workflow with verify=true.
+async function verify(schedule) {
+  const account = await graph('GET', IG_USER_ID, { fields: 'username,media_count' });
+  console.log(`Token reaches @${account.username} (${account.media_count} posts so far).`);
+
+  const limit = await graph('GET', `${IG_USER_ID}/content_publishing_limit`, { fields: 'quota_usage,config' });
+  const { quota_usage: used, config } = limit.data?.[0] || {};
+  console.log(`Publishing quota: ${used ?? '?'} of ${config?.quota_total ?? '?'} used in the last 24 hours.`);
+
+  for (const entry of schedule.filter((e) => e.instagramStatus !== 'published')) {
+    await assertReachable(entry.mediaUrls);
+    console.log(`${entry.date} ${entry.folder}: ${entry.mediaUrls.length} images reachable, caption ${entry.caption.length} characters.`);
+  }
+  console.log('Verify finished. Nothing was published.');
+}
+
 async function main() {
   if (!ACCESS_TOKEN || !IG_USER_ID) {
     console.error('FATAL: META_PAGE_ACCESS_TOKEN and META_IG_USER_ID must both be set.');
@@ -97,6 +114,10 @@ async function main() {
   }
 
   const schedule = JSON.parse(fs.readFileSync(SCHEDULE_PATH, 'utf8'));
+  if (process.env.VERIFY === 'true') {
+    await verify(schedule);
+    return;
+  }
   const now = bucharestNow();
   const forced = Boolean(process.env.TARGET_DATE);
   const today = process.env.TARGET_DATE || now.date;
