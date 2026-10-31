@@ -36,7 +36,7 @@ Run `node scripts/seo-check.mjs http://localhost:3000` against a running build. 
 
 ## Next steps
 
-- Verify the domain in Google Search Console and Bing Webmaster Tools, submit `https://licits.com/sitemap.xml`.
+- Google Search Console is verified (domain property) and the sitemap is submitted. Verify Bing Webmaster Tools too. After a deploy that adds pages, run `node scripts/indexnow.mjs`; the IndexNow key file lives in `public/`.
 - Have a procurement lawyer or consultant review the guides before they are promoted. Add a named reviewer and the date.
 - Add `sameAs` links to the Organization once the LinkedIn, Instagram and X profiles exist.
 - Add guides on: exclusion grounds, guarantees and letters of guarantee, contestations and deadlines, subcontracting and associations, reading a caiet de sarcini, and one guide per procedure type. Verify each figure against the legislation first.
