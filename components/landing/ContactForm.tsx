@@ -3,6 +3,7 @@
 import { useId, useState, useTransition } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { sendContact } from '@/lib/actions/contact';
+import { emailContact } from '@/lib/contact-config';
 import { INPUT, LABEL } from '@/components/ui/form';
 
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
@@ -30,6 +31,15 @@ export function ContactForm() {
     }
     startTransition(async () => {
       try {
+        // The browser emails the message (FormSubmit refuses servers); the server
+        // action saves it together with the outcome.
+        const bot = String(data.get('company_website') ?? '').trim() !== '';
+        const mailStatus = bot ? '' : await emailContact({
+          subject: String(data.get('subject') ?? '').trim(),
+          email: String(data.get('email') ?? '').trim(),
+          message: String(data.get('message') ?? '').trim(),
+        });
+        data.set('mail_status', mailStatus);
         const res = await sendContact(data);
         setState(res.status === 'ok' ? 'done' : res.status);
       } catch {
