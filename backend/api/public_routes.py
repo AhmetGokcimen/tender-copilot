@@ -41,11 +41,12 @@ def _aware(dt: datetime) -> datetime:
 @router.get("/public/map-tenders", response_model=list[MapTender])
 def map_tenders(
     response: Response,
-    hours: int = Query(default=24, ge=1, le=48),
+    hours: int = Query(default=24 * 30, ge=1, le=24 * 60),
     session: Session = Depends(get_session),
 ) -> list[MapTender]:
-    """The newest open construction notice (CPV 45) of each county, published
-    in the last `hours`. Notices drop out once they are older than that."""
+    """The newest open construction notice (CPV 45) of each county. A county
+    keeps its notice until a newer one replaces it or its deadline passes, so
+    quiet days (weekends) do not empty the map; `hours` only bounds the lookback."""
     response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=600"
     now = datetime.now(UTC)
     since = now - timedelta(hours=hours)

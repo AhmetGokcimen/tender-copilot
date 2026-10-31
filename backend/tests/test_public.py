@@ -1,4 +1,4 @@
-"""Public map feed: no auth, newest construction notice per county, last 24h only."""
+"""Public map feed: no auth, newest open construction notice per county, kept until replaced."""
 
 from datetime import UTC, datetime, timedelta
 
@@ -25,7 +25,8 @@ def test_map_tenders_is_public_and_filters(api: TestClient) -> None:
         s.add_all([
             _t("new-iasi", county="Iasi", age_h=2),
             _t("old-iasi", county="Iași", age_h=1),  # newer, same county after accent folding
-            _t("stale", county="Cluj", age_h=30),
+            _t("weekend", county="Cluj", age_h=30),  # older than a day, still the newest for its county
+            _t("ancient", county="Sibiu", age_h=24 * 45),  # beyond the lookback
             _t("it", cpv="30200000", county="Bacau"),
             _t("closed", county="Dolj", deadline_h=-1),
             _t("nourl", county="Arad", url=False),
@@ -35,5 +36,5 @@ def test_map_tenders_is_public_and_filters(api: TestClient) -> None:
     r = api.get("/api/public/map-tenders")  # no Authorization header
     assert r.status_code == 200
     assert "s-maxage" in r.headers["cache-control"]
-    assert [t["id"] for t in r.json()] == ["old-iasi"]
+    assert [t["id"] for t in r.json()] == ["old-iasi", "weekend"]
     assert r.json()[0]["url"] == "https://e-licitatie.ro/old-iasi"
