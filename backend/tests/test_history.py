@@ -166,3 +166,50 @@ def test_awards_won_matches_cui_exactly(api: TestClient) -> None:
     assert res.status_code == 200, res.text
     assert [r["title"] for r in res.json()] == ["W w2", "W w1"]  # newest first, 12816464 excluded
     assert api.get("/api/awards/won?cui=ab", headers=_auth()).status_code == 422
+
+
+def _winner_setup(monkeypatch, limit: int = 10) -> None:
+    from backend.core import winners
+    from backend.core.config import settings
+    from backend.db import engine
+
+    monkeypatch.setattr(settings, "past_winners_monthly_limit", limit)
+    monkeypatch.setattr(winners, "anaf_balance", lambda cui, year: {"turnover": 5e6, "net_profit": 1e5, "employees": 12} if year == datetime.now(UTC).year - 1 else None)
+    with Session(engine) as session:
+        for i in range(7):
+            session.add(Award(
+                source_system=SourceSystem.ROMANIA_SEAP, external_id=f"pw{i}", country_code="RO", title=f"PW {i}",
+                contracting_authority=AUTH, cpv_codes=["45233120"], contract_value=100.0 + i, currency="RON",
+                award_date=datetime(2026, 1, 1 + i, tzinfo=UTC), winner_name=f"Firma {i % 2}", winner_cif=f"RO 100{i % 2}0",
+            ))
+        for eid in ("pt1", "pt2"):
+            session.add(_tender(eid, datetime(2026, 9, 1, tzinfo=UTC)))
+        empty = _tender("pt-empty", datetime(2026, 9, 1, tzinfo=UTC))
+        empty.contracting_authority = "Nobody - No awards"
+        session.add(empty)
+        session.commit()
+
+
+def test_past_winners_returns_last_five_and_charges_once(api: TestClient, monkeypatch) -> None:
+    _winner_setup(monkeypatch)
+    assert api.post("/api/tenders/pt1/past-winners").status_code == 401
+    res = api.post("/api/tenders/pt1/past-winners", headers=_auth())
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert [i["title"] for i in body["items"]] == ["PW 6", "PW 5", "PW 4", "PW 3", "PW 2"]  # newest five
+    assert body["items"][0]["figures"] == {"year": datetime.now(UTC).year - 1, "turnover": 5e6, "net_profit": 1e5, "employees": 12}
+    assert body["charged"] is True and body["quota"] == {"used": 1, "limit": 10}
+    again = api.post("/api/tenders/pt1/past-winners", headers=_auth()).json()
+    assert again["charged"] is False and again["quota"]["used"] == 1  # same tender again is free
+    api.post("/api/tenders/pt2/past-winners", headers=_auth())
+    assert api.get("/api/usage/past-winners", headers=_auth()).json() == {"used": 2, "limit": 10}
+
+
+def test_past_winners_stops_at_the_limit_and_skips_empty(api: TestClient, monkeypatch) -> None:
+    _winner_setup(monkeypatch, limit=1)
+    empty = api.post("/api/tenders/pt-empty/past-winners", headers=_auth()).json()
+    assert empty["items"] == [] and empty["charged"] is False and empty["quota"]["used"] == 0
+    assert api.post("/api/tenders/pt1/past-winners", headers=_auth()).status_code == 200
+    assert api.post("/api/tenders/pt2/past-winners", headers=_auth()).status_code == 429
+    assert api.post("/api/tenders/pt1/past-winners", headers=_auth()).status_code == 200  # already paid for
+    assert api.post("/api/tenders/missing/past-winners", headers=_auth()).status_code == 404
