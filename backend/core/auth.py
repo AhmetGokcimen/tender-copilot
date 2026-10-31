@@ -32,6 +32,13 @@ def jwt_secret_unsafe() -> bool:
     return settings.jwt_secret == DEFAULT_JWT_SECRET and bool(os.environ.get("VERCEL"))
 
 
+def demo_login_enabled() -> bool:
+    """The demo login gives every visitor the same shared user (and the
+    company data under it). It is for local runs: a deployed API refuses it,
+    and refuses demo tokens already issued, unless ENABLE_DEMO_LOGIN is set."""
+    return not os.environ.get("VERCEL") or settings.enable_demo_login
+
+
 def _signing_secret() -> str:
     if jwt_secret_unsafe():
         raise HTTPException(status_code=503, detail="JWT_SECRET is not configured on this deployment")
@@ -78,6 +85,8 @@ def decode_access_token(token: str) -> CurrentUser:
         if jwt_secret_unsafe():
             raise jwt.InvalidKeyError("JWT_SECRET is not configured on this deployment")
         payload = jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
+        if payload.get("provider") == "demo" and not demo_login_enabled():
+            raise jwt.InvalidTokenError("Demo login is disabled on this deployment")
         return CurrentUser(
             sub=payload["sub"], email=payload["email"], name=payload["name"],
             provider=payload["provider"],

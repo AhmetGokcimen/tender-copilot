@@ -47,6 +47,20 @@ def test_demo_login_redirects_with_long_lived_token(api: TestClient) -> None:
     assert user.sub == "demo"
 
 
+def test_demo_login_is_refused_on_a_deployed_api(api: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    demo = _token(sub="demo", provider="demo")
+    assert api.get("/api/companies", headers={"Authorization": f"Bearer {demo}"}).status_code == 200
+
+    monkeypatch.setenv("VERCEL", "1")
+    assert api.get("/api/auth/demo").status_code == 404
+    # A demo token minted earlier stops working too, while real logins still do.
+    assert api.get("/api/companies", headers={"Authorization": f"Bearer {demo}"}).status_code == 401
+    assert api.get("/api/companies", headers={"Authorization": f"Bearer {_token()}"}).status_code == 200
+
+    monkeypatch.setattr(settings, "enable_demo_login", True)
+    assert api.get("/api/auth/demo").status_code in (302, 307)
+
+
 def test_me_returns_current_user(api: TestClient) -> None:
     res = api.get("/api/auth/me", headers={"Authorization": f"Bearer {_token()}"})
     assert res.status_code == 200
@@ -130,16 +144,16 @@ def test_google_login_needs_client_id(api: TestClient, monkeypatch: pytest.Monke
 
 def test_default_jwt_secret_is_refused_on_vercel(api: TestClient, monkeypatch) -> None:
     """The default secret is public (it is in the repo): a deployed API must not issue or accept tokens signed with it."""
-    from backend.core.auth import DEFAULT_JWT_SECRET, create_demo_token
+    from backend.core.auth import DEFAULT_JWT_SECRET
     from backend.core.config import settings
 
-    token = create_demo_token()
+    token = _token()
     assert api.get("/api/tenders", headers={"Authorization": f"Bearer {token}"}).status_code == 200
 
     monkeypatch.setenv("VERCEL", "1")
     monkeypatch.setattr(settings, "jwt_secret", DEFAULT_JWT_SECRET)
-    assert api.get("/api/auth/demo", follow_redirects=False).status_code == 503
+    assert api.get("/api/auth/google/login", follow_redirects=False).status_code == 503
     assert api.get("/api/tenders", headers={"Authorization": f"Bearer {token}"}).status_code == 401
 
     monkeypatch.setattr(settings, "jwt_secret", "a-long-random-secret-set-on-the-deployment-0123456789")
-    assert api.get("/api/auth/demo", follow_redirects=False).status_code in (302, 307)
+    assert api.get("/api/auth/google/login", follow_redirects=False).status_code in (302, 307)

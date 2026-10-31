@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     # accepting Supabase tokens.
     supabase_url: str = "https://goqnsooohsohbfpshszh.supabase.co"
     supabase_jwt_secret: str = ""
+    # The one-click demo login hands every visitor the same shared user, so a
+    # deployed API (Vercel) refuses it unless this is set (see core.auth).
+    enable_demo_login: bool = False
     # Google OAuth 2.0 (authorization code flow). Empty = Google login
     # disabled (the /auth/demo login still works).
     google_client_id: str = ""

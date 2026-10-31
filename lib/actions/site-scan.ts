@@ -3,6 +3,7 @@
 import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
 import { TRADES } from '@/lib/construction';
+import { signedIn } from '@/lib/server-auth';
 
 /**
  * Website agent for onboarding. Reads the company's site server-side (the
@@ -296,7 +297,12 @@ async function matchWithModel(text: string, lang: 'en' | 'ro'): Promise<{ summar
 /* Entry point                                                         */
 /* ------------------------------------------------------------------ */
 
-export async function scanCompanySite(rawUrl: string, lang: 'en' | 'ro' = 'en'): Promise<ScanResult> {
+export async function scanCompanySite(
+  rawUrl: string,
+  lang: 'en' | 'ro' = 'en',
+  accessToken: string | null = null,
+): Promise<ScanResult> {
+  if (!(await signedIn(accessToken))) return { status: 'unreachable' };
   const start = await safeUrl(String(rawUrl ?? '').trim().slice(0, 300));
   if (!start) return { status: 'invalid' };
 
