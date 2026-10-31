@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { Geist_Mono, Schibsted_Grotesk } from 'next/font/google';
@@ -39,6 +40,9 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  // Paths the locale middleware skips (anything with a dot, like /.env or
+  // /package.json) land here with a made-up locale: answer 404, not the home page.
+  if (!routing.locales.includes(locale as (typeof routing.locales)[number])) notFound();
   setRequestLocale(locale);
   const messages = await getMessages();
 

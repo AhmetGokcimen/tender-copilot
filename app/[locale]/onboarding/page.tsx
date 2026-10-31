@@ -36,6 +36,7 @@ import {
   YesNo,
 } from '@/components/onboarding/profile-fields';
 import { lookupCompany } from '@/lib/actions/anaf';
+import { getToken } from '@/lib/auth';
 import { scanCompanySite } from '@/lib/actions/site-scan';
 import { TRADES, workByCpv, type Lang } from '@/lib/construction';
 import {
@@ -168,7 +169,7 @@ export default function OnboardingPage() {
     const cui = (c.cui ?? '').trim();
     setAgent({ kind: 'anaf', subject: cui, running: true, facts: [] });
     const started = Date.now();
-    const res = await lookupCompany(cui, YEARS).catch(() => ({ status: 'unavailable' as const }));
+    const res = await lookupCompany(cui, YEARS, getToken()).catch(() => ({ status: 'unavailable' as const }));
     await new Promise((r) => setTimeout(r, Math.max(0, 2400 - (Date.now() - started))));
     if (res.status !== 'ok') {
       setAgent({ kind: 'anaf', subject: cui, running: false, facts: [], error: t(`anafFail_${res.status}`) });
@@ -211,7 +212,7 @@ export default function OnboardingPage() {
     setAgent({ kind: 'site', subject: host, running: true, facts: [] });
     setScannedSite(site);
     const started = Date.now();
-    const result = await scanCompanySite(site, locale).catch(() => ({ status: 'unreachable' as const }));
+    const result = await scanCompanySite(site, locale, getToken()).catch(() => ({ status: 'unreachable' as const }));
     await new Promise((r) => setTimeout(r, Math.max(0, 2600 - (Date.now() - started))));
     if (result.status !== 'ok' || result.picks.length === 0) {
       const reason = result.status === 'ok' ? 'none' : result.status;

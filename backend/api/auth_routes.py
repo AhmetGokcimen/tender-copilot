@@ -13,6 +13,7 @@ from backend.core.auth import (
     create_access_token,
     create_demo_token,
     create_oauth_state,
+    demo_login_enabled,
     exchange_code_for_tokens,
     fetch_google_userinfo,
     frontend_token_redirect,
@@ -72,7 +73,10 @@ async def google_callback(
 @router.get("/auth/demo")
 def demo_login(session: Session = Depends(get_session)) -> RedirectResponse:
     """Zero-friction demo entry: mints the fixed demo user's long-lived
-    token and hands it to the frontend — no Google account needed."""
+    token and hands it to the frontend — no Google account needed. Local
+    runs only: a deployed API answers 404 (see core.auth.demo_login_enabled)."""
+    if not demo_login_enabled():
+        raise HTTPException(status_code=404, detail="Not Found")
     get_or_create_user(session, subject=DEMO_USER["sub"], email=DEMO_USER["email"], name=DEMO_USER["name"], provider="demo")
     return RedirectResponse(frontend_token_redirect(create_demo_token()))
 

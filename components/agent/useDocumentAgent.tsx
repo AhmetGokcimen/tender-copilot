@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { AgentStage, type AgentFact } from '@/components/agent/AgentStage';
 import { scanDocument, type ScannedDocument } from '@/lib/actions/document-scan';
+import { getToken } from '@/lib/auth';
 import { addDocument, credentialState, updateDocument } from '@/lib/company-data';
 import { groupDigits } from '@/components/onboarding/steps';
 
@@ -69,6 +70,7 @@ export function useDocumentAgent(companyId: string | null, locale: string) {
     }
     const form = new FormData();
     form.set('file', file);
+    form.set('access_token', getToken() ?? '');
     const result = await scanDocument(form).catch(() => ({ status: 'unreadable' as const }));
     await new Promise((r) => setTimeout(r, Math.max(0, 2400 - (Date.now() - started))));
     if (result.status !== 'ok') {

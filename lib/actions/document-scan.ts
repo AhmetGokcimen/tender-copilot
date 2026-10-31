@@ -1,6 +1,7 @@
 'use server';
 
 import { extractText, getDocumentProxy } from 'unpdf';
+import { signedIn } from '@/lib/server-auth';
 
 /**
  * Document agent: reads an uploaded certificate, authorization, balance
@@ -286,6 +287,8 @@ const FIELD_ORDER = ['doc_type', 'issuer', 'number', 'holder', 'holder_cui', 'ty
 /* ------------------------------------------------------------------ */
 
 export async function scanDocument(form: FormData): Promise<DocumentScanResult> {
+  // The signed-in browser sends its Supabase access token with the file.
+  if (!(await signedIn(form.get('access_token')))) return { status: 'unreadable' };
   const file = form.get('file');
   if (!(file instanceof File)) return { status: 'unsupported' };
   if (file.size > MAX_BYTES) return { status: 'too_large' };
