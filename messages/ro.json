@@ -923,5 +923,13 @@
     "home": "Acasă",
     "readIn": "Citește acest ghid în engleză",
     "all": "Toate ghidurile"
+  },
+  "consent": {
+    "title": "Cookie-uri pentru statistici",
+    "text": "Am dori să folosim Google Analytics pentru a număra vizitele și a vedea ce pagini ajută. Setează cookie-uri doar dacă accepți. Refuzul nu schimbă nimic altceva pe site.",
+    "more": "Nota de confidențialitate",
+    "accept": "Accept",
+    "reject": "Refuz",
+    "settings": "Setări cookie"
   }
 }

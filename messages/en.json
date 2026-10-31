@@ -923,5 +923,13 @@
     "home": "Home",
     "readIn": "Read this guide in Romanian",
     "all": "All guides"
+  },
+  "consent": {
+    "title": "Cookies for visitor statistics",
+    "text": "We would like to use Google Analytics to count visits and see which pages help. It sets cookies only if you accept. Refusing changes nothing else on the site.",
+    "more": "Privacy notice",
+    "accept": "Accept",
+    "reject": "Reject",
+    "settings": "Cookie settings"
   }
 }
