@@ -23,6 +23,8 @@ export type AnafCompany = {
   foundedYear: number | null;
   vatPayer: boolean | null;
   active: boolean | null;
+  /** Registered in RO e-Factura (the national e-invoicing register). */
+  eInvoice: boolean | null;
 };
 export type AnafTurnover = { year: number; amount: number };
 export type AnafResult =
@@ -79,6 +81,7 @@ export async function lookupCompany(rawCui: string, years: number[], accessToken
     vatPayer: typeof found.inregistrare_scop_Tva?.scpTVA === 'boolean' ? (found.inregistrare_scop_Tva.scpTVA as boolean) : null,
     active:
       typeof found.stare_inactiv?.statusInactivi === 'boolean' ? !(found.stare_inactiv.statusInactivi as boolean) : null,
+    eInvoice: typeof general.statusRO_e_Factura === 'boolean' ? (general.statusRO_e_Factura as boolean) : null,
   };
 
   const turnover: AnafTurnover[] = [];

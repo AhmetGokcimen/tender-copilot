@@ -116,6 +116,23 @@ export async function fetchTender(externalId: string): Promise<TenderWithState> 
   return get<TenderWithState>(`/tenders/${encodeURIComponent(externalId)}`);
 }
 
+/** A contract SEAP shows as awarded to a company (public notice data). */
+export type WonContract = {
+  title: string;
+  contracting_authority: string | null;
+  cpv_codes: string[];
+  value: number | null;
+  currency: string | null;
+  awarded_on: string | null;
+  url: string | null;
+};
+
+/** Contracts awarded to this CUI in SEAP, newest first. Empty in mock mode. */
+export async function fetchWonContracts(cui: string): Promise<WonContract[]> {
+  if (USE_MOCK) return [];
+  return get<WonContract[]>(`/awards/won?cui=${encodeURIComponent(cui)}`);
+}
+
 export async function fetchCompany(): Promise<CompanyProfile> {
   if (USE_MOCK) {
     await delay(150);
