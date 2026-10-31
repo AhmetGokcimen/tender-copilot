@@ -126,3 +126,20 @@ def test_google_login_needs_client_id(api: TestClient, monkeypatch: pytest.Monke
     monkeypatch.setattr(settings, "google_client_id", "")
     assert api.get("/api/auth/google/login").status_code == 501
     assert auth.google_redirect_uri().endswith("/api/auth/google/callback")
+
+
+def test_default_jwt_secret_is_refused_on_vercel(api: TestClient, monkeypatch) -> None:
+    """The default secret is public (it is in the repo): a deployed API must not issue or accept tokens signed with it."""
+    from backend.core.auth import DEFAULT_JWT_SECRET, create_demo_token
+    from backend.core.config import settings
+
+    token = create_demo_token()
+    assert api.get("/api/tenders", headers={"Authorization": f"Bearer {token}"}).status_code == 200
+
+    monkeypatch.setenv("VERCEL", "1")
+    monkeypatch.setattr(settings, "jwt_secret", DEFAULT_JWT_SECRET)
+    assert api.get("/api/auth/demo", follow_redirects=False).status_code == 503
+    assert api.get("/api/tenders", headers={"Authorization": f"Bearer {token}"}).status_code == 401
+
+    monkeypatch.setattr(settings, "jwt_secret", "a-long-random-secret-set-on-the-deployment-0123456789")
+    assert api.get("/api/auth/demo", follow_redirects=False).status_code in (302, 307)
