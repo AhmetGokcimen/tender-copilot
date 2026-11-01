@@ -9,7 +9,7 @@ from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends, Query, Response
 from pydantic import BaseModel
-from sqlmodel import Session, select
+from sqlmodel import Session, or_, select
 
 from backend.db import get_session
 from backend.models.tender import Tender
@@ -53,6 +53,14 @@ def map_tenders(
     rows = session.exec(
         select(Tender)
         .where(Tender.publication_date >= since)  # type: ignore[arg-type]
+        .where(Tender.county.is_not(None))  # type: ignore[union-attr]
+        .where(Tender.source_url.is_not(None))  # type: ignore[union-attr]
+        .where(
+            or_(
+                Tender.submission_deadline.is_(None),  # type: ignore[union-attr]
+                Tender.submission_deadline >= now,  # type: ignore[arg-type]
+            )
+        )
         .order_by(Tender.publication_date.desc())  # type: ignore[union-attr]
     ).all()
     newest: dict[str, MapTender] = {}

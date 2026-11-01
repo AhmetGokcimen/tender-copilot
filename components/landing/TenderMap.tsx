@@ -34,10 +34,11 @@ const REFRESH_MS = 10 * 60 * 1000;
 
 /** How many cards show at once, and how often the next one appears. */
 const VISIBLE_WIDE = 4;
-const VISIBLE_NARROW = 2;
-const STEP_MS = 3200;
-/** Notices start once the map is this much in focus (0..1). */
+const VISIBLE_NARROW = 3;
+const STEP_MS = 1500;
+/** Notices start once the map is this much in focus (0..1), and stop below FOCUS_OFF. */
 const FOCUS_ON = 0.8;
+const FOCUS_OFF = 0.55;
 
 /** Brand dot colors across the map, west (forest) to east (gold). */
 const STOPS: [number, number, number][] = [
@@ -95,16 +96,31 @@ export function TenderMap({ focus }: { focus: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const focusRef = useRef(focus);
   focusRef.current = focus;
-  const active = focus >= FOCUS_ON;
+  // Hysteresis: phones resize the viewport as the address bar slides away, which
+  // jitters `focus`; without a gap the notices would restart again and again.
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    setActive((on) => (on ? focus >= FOCUS_OFF : focus >= FOCUS_ON));
+  }, [focus]);
   const [shown, setShown] = useState<number[]>([]);
   const [fetched, setFetched] = useState<Notice[]>([]);
 
-  // Live notices from the public feed. A failure just leaves the map bare.
+  // Live notices from the public feed. A failed load keeps what is already on
+  // the map and retries soon (mobile networks drop), instead of waiting for the
+  // next regular refresh.
   useEffect(() => {
     let dead = false;
-    const load = () =>
-      fetch(`${API}/public/map-tenders`)
-        .then((r) => (r.ok ? (r.json() as Promise<ApiTender[]>) : []))
+    let retry = 0;
+    let timer = 0;
+    const load = () => {
+      window.clearTimeout(timer);
+      const ctl = new AbortController();
+      const abort = window.setTimeout(() => ctl.abort(), 15000);
+      fetch(`${API}/public/map-tenders`, { signal: ctl.signal })
+        .then((r) => {
+          if (!r.ok) throw new Error(String(r.status));
+          return r.json() as Promise<ApiTender[]>;
+        })
         .then((rows) => {
           if (dead) return;
           const out: Notice[] = [];
@@ -114,14 +130,29 @@ export function TenderMap({ focus }: { focus: number }) {
               out.push({ id: t.id, x: c.x, y: c.y, city: c.city, title: t.title, value: t.value, url: t.url, publishedAt: Date.parse(t.published_at) });
             }
           }
+          retry = 0;
           setFetched(out);
+          timer = window.setTimeout(load, REFRESH_MS);
         })
-        .catch(() => {});
+        .catch(() => {
+          if (dead) return;
+          retry += 1;
+          timer = window.setTimeout(load, Math.min(30000, 2000 * 2 ** retry));
+        })
+        .finally(() => window.clearTimeout(abort));
+    };
+    // Coming back to the tab or regaining signal: refresh right away if the map is still bare.
+    const wake = () => {
+      if (document.visibilityState === 'visible' && retry > 0) load();
+    };
     load();
-    const id = window.setInterval(load, REFRESH_MS);
+    document.addEventListener('visibilitychange', wake);
+    window.addEventListener('online', wake);
     return () => {
       dead = true;
-      window.clearInterval(id);
+      window.clearTimeout(timer);
+      document.removeEventListener('visibilitychange', wake);
+      window.removeEventListener('online', wake);
     };
   }, []);
 
@@ -148,12 +179,25 @@ export function TenderMap({ focus }: { focus: number }) {
     let last = 0;
     let visible = true;
 
+    let ready = false;
     const layout = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      // A hidden or not-yet-laid-out canvas is 0 wide, and drawing it throws.
+      if (!w || !h) {
+        ready = false;
+        return;
+      }
+      const pw = Math.round(w * dpr);
+      const ph = Math.round(h * dpr);
+      // Phones nudge the viewport as the address bar slides; re-making the
+      // canvas for a pixel or two would blank it for a frame.
+      if (ready && Math.abs(pw - canvas.width) < 3 && Math.abs(ph - canvas.height) < 3) return;
+      ready = true;
       scale = (w / 1000) * dpr;
-      canvas.width = base.width = Math.round(w * dpr);
-      canvas.height = base.height = Math.round(canvas.clientHeight * dpr);
+      canvas.width = base.width = pw;
+      canvas.height = base.height = ph;
       const b = base.getContext('2d')!;
       for (const d of dots) {
         if (d.tw && !still) continue;
@@ -166,6 +210,7 @@ export function TenderMap({ focus }: { focus: number }) {
     };
 
     const draw = (now: number) => {
+      if (!ready) return;
       const f = focusRef.current;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       // Faint behind the hero, full strength once in focus.
