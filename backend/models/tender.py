@@ -60,6 +60,7 @@ class Tender(SQLModel, table=True):
     # AI output intrinsic to the tender (see module docstring) — never
     # overwritten by a re-fetch.
     ai_title_simplified: str | None = None
+    summary_en: str | None = None  # 1-2 sentence English summary of what is bought
     extracted_requirements: dict | None = Field(default=None, sa_column=Column(JSON))
     extraction_confidence: str | None = None  # "high" | "medium" | "low" | "failed"
 

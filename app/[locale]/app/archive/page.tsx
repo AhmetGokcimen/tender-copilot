@@ -1,14 +1,14 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { useEvidence, useTenders } from '@/lib/queries';
 import { usePipelineStore } from '@/stores/usePipelineStore';
 import { EmptyState } from '@/components/EmptyState';
 import { Icon } from '@/components/Icon';
 import type { EvidenceDocument } from '@/lib/types';
-import { daysUntil, formatDate, formatRON } from '@/lib/format';
+import { daysUntil, formatDate, formatRON, tenderTitle } from '@/lib/format';
 
 function DocStatus({ doc }: { doc: EvidenceDocument }) {
   const t = useTranslations('archive');
@@ -38,6 +38,7 @@ const TH = 'px-space-md py-space-sm text-left font-label-sm text-label-sm upperc
 const TD = 'px-space-md py-space-sm font-body-md text-body-md text-on-surface';
 
 export default function ArchivePage() {
+  const locale = useLocale();
   const t = useTranslations('archive');
   const { data: tenders } = useTenders();
   const { data: evidence } = useEvidence();
@@ -89,7 +90,7 @@ export default function ArchivePage() {
                       <td className={`${TD} tnum font-code-sm`}>{r.external_id}</td>
                       <td className={TD}>
                         <Link href={`/app/tenders/${r.external_id}`} className="hover:underline">
-                          {r.state.ai_title_simplified ?? r.title}
+                          {tenderTitle(r, locale)}
                         </Link>
                       </td>
                       <td className={TD}>{r.authority}</td>

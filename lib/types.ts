@@ -135,7 +135,10 @@ export interface TenderState {
   score: number | null; // 0-100 AI match score
   score_reasons: string[];
   ai_summary: string | null;
+  /** English title (Romanian users see the original). */
   ai_title_simplified: string | null;
+  /** English summary of what is bought; made on first view. */
+  summary_en?: string | null;
   extracted_requirements: string[];
   eligible: boolean | null; // null = uncertain, never guessed
   /**
