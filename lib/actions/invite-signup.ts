@@ -28,6 +28,17 @@ export async function createInvitedAccount(input: {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceKey) return { status: 'not_configured' };
 
+  // The auth.users trigger only lets an e-mail through that is on this
+  // short-lived allowlist, which only the service role can write (Supabase
+  // sets app_metadata after the insert, too late for the trigger to see it).
+  const allow = await fetch(`${SUPABASE_URL}/rest/v1/rpc/allow_invited_email`, {
+    method: 'POST',
+    headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_email: email }),
+    cache: 'no-store',
+  }).catch(() => null);
+  if (!allow?.ok) return { status: 'error' };
+
   const res = await fetch(`${SUPABASE_URL}/auth/v1/admin/users`, {
     method: 'POST',
     headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, 'Content-Type': 'application/json' },
@@ -35,8 +46,7 @@ export async function createInvitedAccount(input: {
       email,
       password,
       email_confirm: true,
-      // Checked by the auth.users trigger (supabase/migrations): only
-      // invited accounts may be created.
+      // Kept for the record; the trigger's real gate is the allowlist above.
       app_metadata: { invited: true },
       user_metadata: {
         name: String(input.name ?? '').trim().slice(0, 120),
