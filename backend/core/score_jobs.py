@@ -12,11 +12,12 @@ from datetime import UTC, datetime
 from sqlmodel import Session, func, select
 
 from backend.core.scoring import evaluate
-from backend.db import engine, upsert_score
+from backend.db import engine, insert_scores, upsert_score
 from backend.models.company import CompanyProfile
 from backend.models.ocr_job import ACTIVE_JOB_STATUSES
 from backend.models.score_job import ScoreJob
 from backend.models.tender import Tender
+from backend.models.user_tender_state import UserTenderState
 
 BATCH_SIZE = 100
 
@@ -127,3 +128,59 @@ def run_score_job(job_id: int, *, batch_size: int = BATCH_SIZE) -> None:
         job.updated_at = datetime.now(UTC)
         session.add(job)
         session.commit()
+
+
+LAZY_SCORE_CAP = 3000
+
+
+def score_unscored(
+    session: Session,
+    company: CompanyProfile,
+    tenders: list[Tender],
+    states: dict[tuple, UserTenderState],
+) -> None:
+    """Score, on the spot, the tenders this company has no state for yet, and
+    add the new rows to `states`. Scoring is a cheap rule check (no AI), so
+    the feed and the detail page never show an empty score just because no
+    scoring job ran (new company, or tenders synced since the last job)."""
+    rows = []
+    for tender in tenders:
+        key = (tender.source_system, tender.external_id)
+        existing = states.get(key)
+        if existing is not None and existing.score is not None:
+            continue
+        if len(rows) >= LAZY_SCORE_CAP:
+            break
+        result = evaluate(tender, company)
+        rows.append(
+            {
+                "tender_source_system": tender.source_system,
+                "tender_external_id": tender.external_id,
+                "company_id": company.id,
+                "score": result.score,
+                "reasons": result.reasons,
+            }
+        )
+    if not rows:
+        return
+    # Rows that exist without a score get it through the normal upsert; new ones in bulk.
+    fresh = [r for r in rows if (r["tender_source_system"], r["tender_external_id"]) not in states]
+    for r in rows:
+        if r in fresh:
+            continue
+        upsert_score(
+            session,
+            tender_source_system=r["tender_source_system"],
+            tender_external_id=r["tender_external_id"],
+            company_id=r["company_id"],
+            score=r["score"],
+            reasons=r["reasons"],
+        )
+    insert_scores(session, fresh)
+    for state in session.exec(
+        select(UserTenderState).where(
+            UserTenderState.company_id == company.id,
+            UserTenderState.tender_external_id.in_([r["tender_external_id"] for r in rows]),
+        )
+    ).all():
+        states[(state.tender_source_system, state.tender_external_id)] = state

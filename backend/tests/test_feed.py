@@ -156,7 +156,9 @@ def test_feed_matches_frontend_shape_exactly(seed: TestClient) -> None:
     assert last["county"] == ""
     assert last["procedure_type"] == "open"
     assert last["state"]["status"] == "new"
-    assert last["state"]["score"] is None
+    # No scoring job ran for this tender, so the feed scored it on the spot.
+    assert last["state"]["score"] == 0
+    assert last["state"]["score_reasons"]
     assert last["state"]["extracted_requirements"] == []
 
 
@@ -191,7 +193,7 @@ def test_feed_detail_and_company_scope(seed: TestClient) -> None:
         me = session.exec(select(User).where(User.subject == "u")).one()
         link_user_company(session, me.id, 2)
     scoped = seed.get("/api/tenders/1001?company_id=2", headers=_auth()).json()
-    assert scoped["state"]["score"] is None  # second company never scored it
+    assert scoped["state"]["score"] == 0  # scored on the spot for the second company, not the first one's 92
 
 
 def test_company_and_evidence(seed: TestClient) -> None:

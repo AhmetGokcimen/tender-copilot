@@ -291,6 +291,34 @@ def upsert_score(
     session.commit()
 
 
+def insert_scores(session: Session, rows: list[dict]) -> None:
+    """Bulk-insert first-time scores (tender_source_system, tender_external_id,
+    company_id, score, reasons). Existing state rows are left alone, so a
+    concurrent request or an earlier AI/eligibility result is never overwritten."""
+    if not rows:
+        return
+    table = UserTenderState.__table__
+    now = datetime.now(UTC)
+    values = [
+        {
+            **_USER_TENDER_STATE_DEFAULTS,
+            "tender_source_system": r["tender_source_system"],
+            "tender_external_id": r["tender_external_id"],
+            "company_id": r["company_id"],
+            "score": r["score"],
+            "score_reasons": r["reasons"],
+            "updated_at": now,
+        }
+        for r in rows
+    ]
+    for i in range(0, len(values), 500):
+        stmt = _insert_stmt(table).values(values[i : i + 500]).on_conflict_do_nothing(
+            index_elements=["tender_source_system", "tender_external_id", "company_id"]
+        )
+        session.execute(stmt)
+    session.commit()
+
+
 def upsert_ai_justification(
     session: Session,
     *,
