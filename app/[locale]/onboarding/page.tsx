@@ -307,6 +307,10 @@ export default function OnboardingPage() {
       const id = await saveCompany(companyId, { ...c });
       if (!companyId) setCompanyId(id);
       if (step === 0 && data.contracts.length) await saveContracts(id, data.contracts);
+      // Turnover filled from ANAF is kept now, so it is still there after a reload.
+      if (step === 0 && data.turnover.some((r) => r.amount > 0)) {
+        await saveTurnover(id, data.turnover.filter((r) => r.amount > 0));
+      }
       if (step === 3) await saveTurnover(id, data.turnover.filter((r) => r.amount > 0));
       if (step === 4) await saveCredentials(id, data.credentials);
       const site = (c.website ?? '').trim();
@@ -449,8 +453,8 @@ export default function OnboardingPage() {
                     className={`${INPUT} tnum`}
                   />
                 </label>
-                <div className="flex flex-col gap-1">
-                  <span className="font-label-md text-label-md font-semibold text-on-surface">{t('caenSecondaryLabel')}</span>
+                <div className={LABEL}>
+                  {t('caenSecondaryLabel')}
                   <ChipInput
                     values={c.caen_secondary}
                     onChange={(v) =>

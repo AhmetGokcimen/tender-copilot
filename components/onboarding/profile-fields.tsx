@@ -9,6 +9,7 @@ import { CERTS, TRADES, certsFor, type Lang } from '@/lib/construction';
 import { COUNTIES, eurRon, toRon } from '@/lib/fx';
 import { credentialState, newId, type Credential, type TurnoverYear } from '@/lib/company-data';
 import { MoneyInput, groupDigits } from '@/components/onboarding/steps';
+import { RegionMap } from '@/components/onboarding/RegionMap';
 
 export function FieldLabel({ children, htmlFor }: { children: React.ReactNode; htmlFor?: string }) {
   return (
@@ -157,6 +158,7 @@ export function RegionPicker({ value, onChange }: { value: string[]; onChange: (
           );
         })}
       </div>
+      <RegionMap value={value} onChange={onChange} />
     </div>
   );
 }
