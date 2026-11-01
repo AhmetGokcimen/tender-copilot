@@ -2,6 +2,9 @@ import { Sidebar } from '@/components/Sidebar';
 import { BlueprintGrid } from '@/components/BlueprintGrid';
 import { RequireOnboarding } from '@/components/RequireOnboarding';
 import { LanguageToggle } from '@/components/i18n/LanguageToggle';
+import { AssistantFab } from '@/components/assistant/AssistantFab';
+import { AssistantPanel } from '@/components/assistant/AssistantPanel';
+import { AssistantTooltip } from '@/components/assistant/AssistantTooltip';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -16,6 +19,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <RequireOnboarding>{children}</RequireOnboarding>
         </main>
       </div>
+      <AssistantFab />
+      <AssistantPanel />
+      <AssistantTooltip />
     </div>
   );
 }
