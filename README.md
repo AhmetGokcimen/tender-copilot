@@ -124,9 +124,27 @@ Growth is the plan most small contractors need. Each line carries a **?** with a
 
 Access is **invite-only** during the beta: public sign-ups are off, and accounts are created through a server action that registers the invited e-mail on a short-lived allowlist the database checks before it creates the user. Company data is protected by row-level security so one company can never read another's.
 
+## How well can it do? Validation
+
+We checked this in two ways, kept apart on purpose. Full write-up: **[docs/VALIDATION.md](docs/VALIDATION.md)**.
+
+**Measured on real SEAP data** (30 days of awards to 28 Oct 2026)
+- 538 different companies won awards; in construction works, **137 different winners** and a median of 3 offers per award, so competition is thin.
+- Only **14% of construction awards are under 5 million RON**, so the small-contractor segment is narrower than it looks.
+- **Matching back-test:** hiding one past win per company and rebuilding the profile from the rest, the tender the company actually won ranked in the **top 5% in 67% of cases** (27 cases, 16 companies; chance would be 5%). In a third of cases the score was zero because the company had moved to a new CPV code. Small sample, a signal rather than proof. Run it with `backend/scripts/backtest_matching.py`.
+
+**Simulated with [MiroFish](https://github.com/666ghj/MiroFish)** (61 invented archetypes, 10 rounds; exploratory, predicts nothing)
+- Small contractors under 1 million RON adopt first; larger firms watch and wait for proof.
+- Accuracy of the eligibility checks becomes the public argument, and consultants split into "multiplier" and "threat" camps.
+- Plan choice follows risk, not price: start on the entry plan, upgrade after a real submission.
+- Seed and full report: [docs/validation/](docs/validation/).
+
 ## Status
 
 Live and in invite-only beta. Honest list of what is not finished:
+
+- **Source-linked eligibility** (next): show the paragraph of the tender documents behind each requirement verdict, and include it in the core paid plan. The simulation named missing traceability as the main trust risk.
+- **Related-CPV matching:** scoring only matches exact main CPV codes, which cost the back-test a third of its cases.
 
 - **E-mail alerts** for renewing buyers are shown as *coming soon* and not built yet.
 - **Billing** is not built. Until it is, every account sees the top plan; only the past-winner quota is enforced today, the other plan limits are not.
