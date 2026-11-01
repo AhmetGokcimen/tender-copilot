@@ -11,6 +11,7 @@ Neither function writes anything and neither touches UserTenderState.
 
 from datetime import UTC, datetime
 from itertools import pairwise
+from statistics import median
 
 from sqlmodel import Session, select
 
@@ -149,4 +150,45 @@ def renewal_pattern(session: Session, tender: Tender) -> dict | None:
         "avg_interval_days": round(mean_gap, 1),
         "next_expected_date": expected,
         "note": basis_note,
+    }
+
+
+# Fewer comparable awards than this and a price range is noise.
+MIN_AWARDS_FOR_PRICE = 3
+
+
+def price_range(session: Session, tender: Tender) -> dict | None:
+    """How far below (or above) the buyer's own estimate this buyer's recent
+    comparable contracts were awarded, as percentages of the initial estimate.
+
+    "Comparable" is tighter than the renewal grouping: same buyer and the same
+    first four CPV digits (a school and a road never share a range). Percentages
+    of the estimate are used, not absolute amounts, because scope differs between
+    contracts. Purely descriptive of past awards; fewer than MIN_AWARDS_FOR_PRICE
+    usable awards returns None.
+    """
+    authority = tender.contracting_authority
+    cpv = (tender.cpv_codes[0] if tender.cpv_codes else "") or ""
+    prefix = cpv[:4]
+    if not authority or len(prefix) < 4:
+        return None
+    rows = session.exec(select(Award).where(Award.contracting_authority == authority)).all()
+    deltas = sorted(
+        (a.contract_value / a.estimated_initial_value - 1) * 100
+        for a in rows
+        if a.cpv_codes
+        and str(a.cpv_codes[0]).startswith(prefix)
+        and a.contract_value
+        and a.estimated_initial_value
+        and a.contract_value > 0
+        and a.estimated_initial_value > 0
+    )
+    if len(deltas) < MIN_AWARDS_FOR_PRICE:
+        return None
+    return {
+        "sample_size": len(deltas),
+        "low_pct": round(deltas[0], 1),
+        "median_pct": round(median(deltas), 1),
+        "high_pct": round(deltas[-1], 1),
+        "cpv_prefix": prefix,
     }

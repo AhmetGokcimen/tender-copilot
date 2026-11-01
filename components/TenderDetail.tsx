@@ -12,6 +12,8 @@ import { EligibilityChip } from './EligibilityChip';
 import { AuthorizationNotice } from './AuthorizationNotice';
 import { EmptyState } from './EmptyState';
 import { TenderDocs } from './TenderDocs';
+import { PastWinners } from './PastWinners';
+import { RenewalCard } from './RenewalCard';
 import { daysUntil, formatDate, formatDaysLeft, formatRON } from '@/lib/format';
 
 function Timeline({ pub, clar, sub }: { pub: string | null; clar: string | null; sub: string | null }) {
@@ -341,6 +343,10 @@ export function TenderDetail({ externalId }: { externalId: string }) {
               </a>
             )}
           </section>
+
+          <RenewalCard key={`r-${tender.external_id}`} externalId={tender.external_id} />
+
+          <PastWinners key={tender.external_id} externalId={tender.external_id} />
 
           <section className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
             <h2 className="mb-space-sm font-headline-sm text-headline-sm text-on-surface">{t('documents')}</h2>

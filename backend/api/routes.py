@@ -52,7 +52,9 @@ from backend.core.caiet_jobs import (
 )
 from backend.core.country_requirements import get_country_requirements
 from backend.core.eligibility import run_numeric_checks
-from backend.core.history import authority_history, renewal_pattern
+from backend.core import winners as winners_core
+from backend.core.history import authority_history, price_range, renewal_pattern
+from backend.core.plans import allows, user_plan
 from backend.core.lookups import (
     COUNTRIES,
     INDUSTRIES,
@@ -235,6 +237,156 @@ def get_authority_history(
     if not tender:
         raise HTTPException(status_code=404, detail="Tender not found")
     return AuthorityHistory(**authority_history(session, tender))
+
+
+class PriceRange(BaseModel):
+    """Past awards of this buyer for comparable work, as % of its own estimate
+    (negative = awarded below the estimate). Descriptive history, not advice."""
+
+    sample_size: int
+    low_pct: float
+    median_pct: float
+    high_pct: float
+    cpv_prefix: str
+
+
+class RenewalInfo(BaseModel):
+    renewal: RenewalPattern | None
+    price_range: PriceRange | None
+    price_locked: bool  # the plan does not include the price range
+
+
+@router.get("/tenders/{external_id}/renewal", response_model=RenewalInfo, tags=["tenders"])
+def get_renewal(
+    external_id: str,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> RenewalInfo:
+    """Whether this buyer re-tenders the same kind of work on a rhythm, and
+    (Professional plan) the spread of its past award prices against estimate."""
+    plan = user_plan(user)
+    if not allows(plan, "renewal"):
+        raise HTTPException(status_code=403, detail="Renewal detection is not part of this plan")
+    tender = session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    pattern = renewal_pattern(session, tender)
+    unlocked = allows(plan, "renewal_price")
+    rng = price_range(session, tender) if unlocked and pattern and pattern["detected"] else None
+    return RenewalInfo(
+        renewal=RenewalPattern(**pattern) if pattern else None,
+        price_range=PriceRange(**rng) if rng else None,
+        price_locked=not unlocked,
+    )
+
+
+class Quota(BaseModel):
+    used: int
+    limit: int
+
+
+class WinnerFigures(BaseModel):
+    year: int
+    turnover: float | None
+    net_profit: float | None
+    employees: int | None
+
+
+class PastWinner(BaseModel):
+    title: str
+    awarded_on: datetime | None
+    value: float | None
+    currency: str | None
+    winner_name: str | None
+    winner_cui: str | None
+    url: str | None
+    figures: WinnerFigures | None
+
+
+class TopWinner(BaseModel):
+    name: str
+    wins: int
+    total_value: float
+
+
+class WinnersSummary(BaseModel):
+    """The buyer's whole award history in this CPV division, not just the last five."""
+
+    count: int
+    total_value: float | None
+    top: list[TopWinner]
+
+
+class PastWinners(BaseModel):
+    authority: str | None
+    summary: WinnersSummary | None
+    items: list[PastWinner]
+    quota: Quota
+    charged: bool
+
+
+@router.get("/usage/past-winners", response_model=Quota, tags=["tenders"])
+def past_winners_quota(
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> Quota:
+    return Quota(**winners_core.quota(session, user.id))  # type: ignore[arg-type]
+
+
+@router.post("/tenders/{external_id}/past-winners", response_model=PastWinners, tags=["tenders"])
+def past_winners(
+    external_id: str,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> PastWinners:
+    """Who won this buyer's last few contracts in the same CPV division, with
+    each winner's latest ANAF turnover, profit and headcount. Costs one unit of
+    the monthly quota per distinct tender (a repeat lookup is free); nothing is
+    charged when there is nothing to show."""
+    tender = session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    uid = user.id  # type: ignore[assignment]
+    awards = winners_core.past_awards(session, tender)
+    paid = winners_core.already_used(session, uid, external_id)
+    state = winners_core.quota(session, uid)
+    if awards and not paid and state["used"] >= state["limit"]:
+        raise HTTPException(status_code=429, detail="Monthly past-winners limit reached")
+    if awards and not paid:
+        winners_core.charge(session, uid, external_id)
+        state = winners_core.quota(session, uid)
+    items: list[PastWinner] = []
+    seen: dict[int, dict | None] = {}
+    for a in awards:
+        cui = winners_core.cui_digits(a.winner_cif)
+        if cui is not None and cui not in seen:
+            seen[cui] = winners_core.financials(session, cui)
+        fig = seen.get(cui) if cui is not None else None
+        items.append(
+            PastWinner(
+                title=a.title.strip()[:300],
+                awarded_on=a.contract_date or a.award_date,
+                value=a.contract_value,
+                currency=a.currency,
+                winner_name=a.winner_name,
+                winner_cui=str(cui) if cui is not None else None,
+                url=a.source_url,
+                figures=WinnerFigures(**fig) if fig else None,
+            )
+        )
+    hist = authority_history(session, tender)["awards"] if awards else None
+    summary = (
+        WinnersSummary(
+            count=hist["count"],
+            total_value=hist["total_value"],
+            top=[TopWinner(**w) for w in hist["winners"] if w["name"] != "(unparsed)"],
+        )
+        if hist
+        else None
+    )
+    return PastWinners(
+        authority=tender.contracting_authority, summary=summary, items=items, quota=Quota(**state), charged=bool(awards and not paid)
+    )
 
 
 class WonContract(BaseModel):

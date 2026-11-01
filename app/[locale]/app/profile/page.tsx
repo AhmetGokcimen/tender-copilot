@@ -33,6 +33,7 @@ import {
   saveTurnover,
   type CompanyData,
   type Contract,
+  documentDownloadUrl,
 } from '@/lib/company-data';
 import { syncLegacyProfile } from '@/lib/legacy-profile';
 
@@ -430,6 +431,18 @@ export default function ProfilePage() {
                         </p>
                       </div>
                       {x.expires_on !== undefined && <ValidityBadge expires={x.expires_on ?? null} />}
+                      <button
+                        type="button"
+                        aria-label={t('download')}
+                        title={t('download')}
+                        onClick={async () => {
+                          const url = await documentDownloadUrl(doc).catch(() => null);
+                          if (url) window.open(url, '_blank', 'noopener');
+                        }}
+                        className="rounded-full p-1 text-muted hover:bg-sunk hover:text-ink"
+                      >
+                        <Icon name="download" size="sm" />
+                      </button>
                       <button
                         type="button"
                         aria-label={t('remove')}

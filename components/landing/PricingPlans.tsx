@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { buttonClass } from '../ui/Button';
+import { InfoTip } from './InfoTip';
 
 type Tier = {
   id: 'start' | 'growth' | 'pro';
@@ -14,33 +15,25 @@ const TIERS: Tier[] = [
   {
     id: 'start',
     price: 199,
-    has: ['fFeed', 'fFiltersStd', 'fElig30', 'fOcr5', 'fDrafts2', 'fLookups5', 'fUsers2'],
-    lacks: ['fAuth', 'fRenewal'],
+    has: ['fFeed', 'fFilters', 'fElig30', 'fOcrUnl', 'fDrafts2', 'fLookups5', 'fVault', 'fUsers1'],
+    lacks: ['fRenewal'],
   },
   {
     id: 'growth',
     price: 349,
-    has: ['fFeed', 'fFiltersWide', 'fElig100', 'fOcr30', 'fDrafts10', 'fLookups25', 'fWinners', 'fAuth', 'fUsers5'],
-    lacks: ['fRenewal'],
+    has: ['fFeed', 'fFilters', 'fElig100', 'fOcrUnl', 'fDrafts10', 'fLookups25', 'fVault', 'fRenewal', 'fRenewalAlerts', 'fUsers3'],
+    lacks: ['fRenewalPrice'],
   },
   {
     id: 'pro',
     price: 499,
-    has: [
-      'fFeed',
-      'fFiltersAll',
-      'fEligUnl',
-      'fOcrUnl',
-      'fDraftsUnl',
-      'fLookups100',
-      'fWinnersTrend',
-      'fRenewal',
-      'fAuth',
-      'fUsers10',
-    ],
+    has: ['fFeed', 'fFilters', 'fEligUnl', 'fOcrUnl', 'fDraftsUnl', 'fLookups100', 'fVault', 'fRenewal', 'fRenewalAlerts', 'fRenewalPrice', 'fUsers5'],
     lacks: [],
   },
 ];
+
+/** Lines still being built; the card says so next to them. */
+const SOON = new Set(['fRenewalAlerts']);
 
 /**
  * Three plans priced by the value each delivers. Growth covers what most
@@ -83,19 +76,32 @@ export function PricingPlans({ heading = true }: { heading?: boolean }) {
               </p>
                             <ul className="mt-6 grid flex-1 content-start gap-2.5 text-[14px] leading-[21px]">
                 {tier.has.map((k) => (
-                  <li key={k} className="flex gap-2.5">
+                  <li key={k} className="relative flex gap-2.5">
                     <span aria-hidden className={featured ? 'text-ribbon-4' : 'text-eligible'}>
                       ✓
                     </span>
-                    {t(k)}
+                    <span>
+                      {t(k)}
+                      {SOON.has(k) && (
+                        <span className={`ml-1.5 rounded-pill px-1.5 py-px text-[11px] font-medium ${featured ? 'bg-on-night/15 text-on-night' : 'bg-indigo-soft text-indigo-text'}`}>
+                          {t('soon')}
+                        </span>
+                      )}
+                      <InfoTip id={`tip-${tier.id}-${k}`} label={t('whatIsThis', { feature: t(k) })} dark={featured}>
+                        {t(`tip_${k}`)}
+                      </InfoTip>
+                    </span>
                   </li>
                 ))}
                 {tier.lacks.map((k) => (
-                  <li key={k} className={`flex gap-2.5 line-through ${featured ? 'text-on-night/40' : 'text-muted/70'}`}>
+                  <li key={k} className={`relative flex gap-2.5 line-through ${featured ? 'text-on-night/40' : 'text-muted/70'}`}>
                     <span aria-hidden>-</span>
                     <span>
                       <span className="sr-only">{t('notIncluded')}: </span>
                       {t(k)}
+                      <InfoTip id={`tip-${tier.id}-${k}`} label={t('whatIsThis', { feature: t(k) })} dark={featured}>
+                        {t(`tip_${k}`)}
+                      </InfoTip>
                     </span>
                   </li>
                 ))}

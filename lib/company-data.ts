@@ -389,3 +389,13 @@ export function profileStrength(d: CompanyData): { pct: number; missing: string[
   const pct = checks.reduce((s, [, w, ok]) => s + (ok ? w : 0), 0);
   return { pct, missing: checks.filter(([, , ok]) => !ok).map(([k]) => k) };
 }
+
+/** A short-lived link to a stored company document, for downloading it again. Null in mock mode (nothing is stored). */
+export async function documentDownloadUrl(doc: CompanyDocument): Promise<string | null> {
+  if (USE_MOCK) return null;
+  const { data, error } = await supabase()
+    .storage.from('company-documents')
+    .createSignedUrl(doc.storage_path, 60, { download: doc.file_name });
+  fail(error);
+  return data?.signedUrl ?? null;
+}
