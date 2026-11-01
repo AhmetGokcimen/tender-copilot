@@ -109,7 +109,7 @@ export function AgentStage({
         </div>
 
         {/* What the agent is doing and what it found */}
-        <div className="flex min-w-0 flex-col gap-4 p-5 sm:p-6">
+        <div className="flex max-h-[calc(100dvh-2rem)] min-w-0 flex-col gap-4 overflow-y-auto p-5 sm:p-6">
           <div className="flex items-center gap-3">
             <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-soft text-indigo-text">
               <Icon name={icon} size="md" />
@@ -147,7 +147,7 @@ export function AgentStage({
           {!running && facts.length > 0 && (
             <dl className="flex flex-col divide-y divide-line rounded-[10px] border border-line">
               {facts.slice(0, shown).map((f) => (
-                <div key={f.label} className="chip-in flex items-baseline justify-between gap-3 px-3 py-2">
+                <div key={f.label} className="chip-in flex items-baseline justify-between gap-3 px-3 py-1.5">
                   <dt className="shrink-0 text-[12.5px] text-muted">{f.label}</dt>
                   <dd
                     className={clsx(
