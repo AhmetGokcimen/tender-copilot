@@ -126,11 +126,25 @@ export function TenderDetail({ externalId }: { externalId: string }) {
     [t('deadline'), `${formatDate(tender.submission_deadline)} · ${formatDaysLeft(tender.submission_deadline)}`],
   ];
 
-  const docs = [
-    { name: 'Caiet de sarcini (Specifications).pdf', size: '2.4 MB' },
-    { name: 'Contract draft.pdf', size: '310 KB' },
-    { name: 'DUAE template.xml', size: '18 KB' },
-  ];
+  // Until the documents are analysed there are no extracted requirements, matches or eligibility.
+  const analysed =
+    tender.state.eligible !== null ||
+    tender.state.extracted_requirements.length > 0 ||
+    tender.state.matched_requirements.length > 0 ||
+    tender.state.unmet_requirements.length > 0;
+
+  const summary =
+    tender.state.ai_summary ??
+    (tender.raw_description && tender.raw_description.trim() !== tender.title.trim() ? tender.raw_description : null) ??
+    [
+      t('summaryLead', { authority: tender.authority, county: tender.county, procedure: tp(tender.procedure_type) }),
+      tender.estimated_value !== null ? t('summaryValue', { value: formatRON(tender.estimated_value) }) : null,
+      tender.submission_deadline
+        ? t('summaryDue', { date: formatDate(tender.submission_deadline), left: formatDaysLeft(tender.submission_deadline) })
+        : null,
+    ]
+      .filter(Boolean)
+      .join(' ');
 
   return (
     <div className="flex flex-col gap-space-lg">
@@ -148,7 +162,9 @@ export function TenderDetail({ externalId }: { externalId: string }) {
         <h1 className="font-headline-lg text-headline-lg tracking-tight text-on-surface">
           {tender.state.ai_title_simplified ?? tender.title}
         </h1>
-        <p className="font-body-md text-body-md text-on-surface-variant">{tender.title}</p>
+        {tender.state.ai_title_simplified && tender.state.ai_title_simplified !== tender.title && (
+          <p className="font-body-md text-body-md text-on-surface-variant">{tender.title}</p>
+        )}
       </header>
 
       <div
@@ -180,7 +196,7 @@ export function TenderDetail({ externalId }: { externalId: string }) {
         <div className="flex flex-col gap-space-lg lg:col-span-8">
           <section className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
             <h2 className="mb-space-sm font-headline-sm text-headline-sm text-on-surface">{t('summary')}</h2>
-            <p className="font-body-lg text-body-lg text-on-surface">{tender.state.ai_summary ?? tender.raw_description ?? '—'}</p>
+            <p className="font-body-lg text-body-lg text-on-surface">{summary}</p>
           </section>
 
           <section className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
@@ -208,14 +224,16 @@ export function TenderDetail({ externalId }: { externalId: string }) {
               <h2 className="font-headline-sm text-headline-sm text-on-surface">{t('eligibility')}</h2>
               <EligibilityChip eligible={tender.state.eligible} label={eligibilityLabel} />
             </div>
-            <p className="mb-space-md font-body-md text-body-md text-on-surface">
-              <span className="font-semibold">{t('justification')}: </span>
-              {tender.state.eligibility_justification ?? '—'}
-            </p>
             <AuthorizationNotice
               status={tender.state.country_authorization_status}
               country={tender.country_code}
             />
+            {analysed ? (
+              <>
+            <p className="mb-space-md font-body-md text-body-md text-on-surface">
+              <span className="font-semibold">{t('justification')}: </span>
+              {tender.state.eligibility_justification ?? '—'}
+            </p>
             <div className="mb-space-md flex flex-col gap-space-xs rounded-lg bg-surface-container-low p-space-sm">
               <span className="font-label-md text-label-md font-semibold uppercase text-on-surface-variant">
                 {t('missingDocs')}
@@ -273,8 +291,22 @@ export function TenderDetail({ externalId }: { externalId: string }) {
                 </ul>
               </div>
             </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-start gap-space-sm">
+                <p className="font-body-md text-body-md text-on-surface-variant">{t('notAnalysed')}</p>
+                <button
+                  type="button"
+                  onClick={() => setTab('docs')}
+                  className="rounded-pill border border-outline-variant px-space-md py-1.5 font-label-md text-label-md text-on-surface hover:bg-surface-container-low"
+                >
+                  {t('openDocs')}
+                </button>
+              </div>
+            )}
           </section>
 
+          {tender.state.extracted_requirements.length > 0 && (
           <section
             data-assistant="requirements-card"
             className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm"
@@ -284,9 +316,9 @@ export function TenderDetail({ externalId }: { externalId: string }) {
               {tender.state.extracted_requirements.map((r) => (
                 <li key={r}>{r}</li>
               ))}
-              {tender.state.extracted_requirements.length === 0 && <li>—</li>}
             </ul>
           </section>
+          )}
         </div>
 
         <div className="flex flex-col gap-space-md lg:col-span-4">
@@ -347,28 +379,6 @@ export function TenderDetail({ externalId }: { externalId: string }) {
           <RenewalCard key={`r-${tender.external_id}`} externalId={tender.external_id} />
 
           <PastWinners key={tender.external_id} externalId={tender.external_id} />
-
-          <section className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
-            <h2 className="mb-space-sm font-headline-sm text-headline-sm text-on-surface">{t('documents')}</h2>
-            <ul className="flex flex-col">
-              {docs.map((d) => (
-                <li key={d.name} className="border-b border-surface-container-low py-space-xs last:border-0">
-                  <a
-                    href={tender.source_url ?? '#'}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group flex items-center gap-space-sm"
-                  >
-                    <Icon name="description" size="sm" className="text-on-surface-variant" />
-                    <span className="min-w-0 flex-1 truncate font-body-md text-body-md text-on-surface group-hover:underline">
-                      {d.name}
-                    </span>
-                    <span className="tnum font-code-sm text-code-sm text-on-surface-variant">{d.size}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </section>
         </div>
       </div>
       )}

@@ -165,6 +165,7 @@ def list_tenders(
             select(UserTenderState).where(UserTenderState.company_id == company.id)
         ).all():
             states[(state.tender_source_system, state.tender_external_id)] = state
+        score_jobs.score_unscored(session, company, tenders, states)
         auth_map = authorization_status_map(session, company.id)
 
     items = [
@@ -209,6 +210,10 @@ def get_tender(
                 UserTenderState.tender_external_id == tender.external_id,
             )
         ).first()
+        if state is None or state.score is None:
+            by_key = {(tender.source_system, tender.external_id): state} if state else {}
+            score_jobs.score_unscored(session, company, [tender], by_key)
+            state = by_key.get((tender.source_system, tender.external_id))
         auth_map = authorization_status_map(session, company.id)
     renewal = renewal_pattern(session, tender)
     return TenderFeedItem.from_triple(

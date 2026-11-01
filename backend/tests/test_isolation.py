@@ -92,12 +92,13 @@ def test_cross_company_writes_are_forbidden(two_tenants: TestClient) -> None:
 def test_states_never_leak_across_tenants(two_tenants: TestClient) -> None:
     api = two_tenants
     (item,) = api.get("/api/tenders", headers=_auth("a")).json()
-    assert item["state"]["score"] is None  # B's score=90 stays invisible
+    assert item["state"]["score"] == 0  # A is scored on the spot; B's score=90 stays invisible
     assert item["state"]["status"] == "new"
     res = api.patch(
         "/api/tenders/1001/status", json={"status": "applied"}, headers=_auth("a")
     )
-    assert res.status_code == 404  # A never scored it; B's row untouched
+    assert res.status_code == 200  # A's own row (scored on the spot) can be tracked
+    assert res.json()["state"]["status"] == "applied"
     mine = api.get("/api/tenders/1001", headers=_auth("b")).json()
     assert (mine["state"]["score"], mine["state"]["status"]) == (90, "reviewing")
 
