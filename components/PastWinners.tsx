@@ -73,7 +73,23 @@ export function PastWinners({ externalId }: { externalId: string }) {
       )}
       {result && result.items.length > 0 && (
         <>
-          <ul className="mt-space-sm flex flex-col">
+          {result.summary && result.summary.count > 0 && (
+            <div className="mt-space-sm rounded-lg bg-surface-container-low p-space-sm">
+              <p className="font-body-sm text-body-sm text-on-surface">
+                {t('summary', { count: result.summary.count, value: ron(result.summary.total_value) })}
+              </p>
+              {result.summary.top.length > 0 && (
+                <p className="mt-space-xs font-body-sm text-body-sm text-on-surface-variant">
+                  {result.summary.top
+                    .slice(0, 3)
+                    .map((w) => `${w.name} (${w.wins})`)
+                    .join(' · ')}
+                </p>
+              )}
+            </div>
+          )}
+          <h3 className="mt-space-sm font-label-md text-label-md font-semibold text-on-surface">{t('lastFive')}</h3>
+          <ul className="flex flex-col">
             {result.items.map((w, i) => (
               <li key={`${w.title}-${i}`} className="border-b border-surface-container-low py-space-sm last:border-0">
                 <p className="font-body-md text-body-md font-medium text-on-surface">{w.winner_name ?? '—'}</p>

@@ -13,6 +13,7 @@ import { AuthorizationNotice } from './AuthorizationNotice';
 import { EmptyState } from './EmptyState';
 import { TenderDocs } from './TenderDocs';
 import { PastWinners } from './PastWinners';
+import { RenewalCard } from './RenewalCard';
 import { daysUntil, formatDate, formatDaysLeft, formatRON } from '@/lib/format';
 
 function Timeline({ pub, clar, sub }: { pub: string | null; clar: string | null; sub: string | null }) {
@@ -342,6 +343,8 @@ export function TenderDetail({ externalId }: { externalId: string }) {
               </a>
             )}
           </section>
+
+          <RenewalCard key={`r-${tender.external_id}`} externalId={tender.external_id} />
 
           <PastWinners key={tender.external_id} externalId={tender.external_id} />
 

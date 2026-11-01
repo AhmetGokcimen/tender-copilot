@@ -53,7 +53,8 @@ from backend.core.caiet_jobs import (
 from backend.core.country_requirements import get_country_requirements
 from backend.core.eligibility import run_numeric_checks
 from backend.core import winners as winners_core
-from backend.core.history import authority_history, renewal_pattern
+from backend.core.history import authority_history, price_range, renewal_pattern
+from backend.core.plans import allows, user_plan
 from backend.core.lookups import (
     COUNTRIES,
     INDUSTRIES,
@@ -238,6 +239,47 @@ def get_authority_history(
     return AuthorityHistory(**authority_history(session, tender))
 
 
+class PriceRange(BaseModel):
+    """Past awards of this buyer for comparable work, as % of its own estimate
+    (negative = awarded below the estimate). Descriptive history, not advice."""
+
+    sample_size: int
+    low_pct: float
+    median_pct: float
+    high_pct: float
+    cpv_prefix: str
+
+
+class RenewalInfo(BaseModel):
+    renewal: RenewalPattern | None
+    price_range: PriceRange | None
+    price_locked: bool  # the plan does not include the price range
+
+
+@router.get("/tenders/{external_id}/renewal", response_model=RenewalInfo, tags=["tenders"])
+def get_renewal(
+    external_id: str,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> RenewalInfo:
+    """Whether this buyer re-tenders the same kind of work on a rhythm, and
+    (Professional plan) the spread of its past award prices against estimate."""
+    plan = user_plan(user)
+    if not allows(plan, "renewal"):
+        raise HTTPException(status_code=403, detail="Renewal detection is not part of this plan")
+    tender = session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    pattern = renewal_pattern(session, tender)
+    unlocked = allows(plan, "renewal_price")
+    rng = price_range(session, tender) if unlocked and pattern and pattern["detected"] else None
+    return RenewalInfo(
+        renewal=RenewalPattern(**pattern) if pattern else None,
+        price_range=PriceRange(**rng) if rng else None,
+        price_locked=not unlocked,
+    )
+
+
 class Quota(BaseModel):
     used: int
     limit: int
@@ -261,8 +303,23 @@ class PastWinner(BaseModel):
     figures: WinnerFigures | None
 
 
+class TopWinner(BaseModel):
+    name: str
+    wins: int
+    total_value: float
+
+
+class WinnersSummary(BaseModel):
+    """The buyer's whole award history in this CPV division, not just the last five."""
+
+    count: int
+    total_value: float | None
+    top: list[TopWinner]
+
+
 class PastWinners(BaseModel):
     authority: str | None
+    summary: WinnersSummary | None
     items: list[PastWinner]
     quota: Quota
     charged: bool
@@ -317,8 +374,18 @@ def past_winners(
                 figures=WinnerFigures(**fig) if fig else None,
             )
         )
+    hist = authority_history(session, tender)["awards"] if awards else None
+    summary = (
+        WinnersSummary(
+            count=hist["count"],
+            total_value=hist["total_value"],
+            top=[TopWinner(**w) for w in hist["winners"] if w["name"] != "(unparsed)"],
+        )
+        if hist
+        else None
+    )
     return PastWinners(
-        authority=tender.contracting_authority, items=items, quota=Quota(**state), charged=bool(awards and not paid)
+        authority=tender.contracting_authority, summary=summary, items=items, quota=Quota(**state), charged=bool(awards and not paid)
     )
 
 

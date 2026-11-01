@@ -213,3 +213,53 @@ def test_past_winners_stops_at_the_limit_and_skips_empty(api: TestClient, monkey
     assert api.post("/api/tenders/pt2/past-winners", headers=_auth()).status_code == 429
     assert api.post("/api/tenders/pt1/past-winners", headers=_auth()).status_code == 200  # already paid for
     assert api.post("/api/tenders/missing/past-winners", headers=_auth()).status_code == 404
+
+
+def _priced(eid: str, initial: float, final: float, cpv: str = "45233120") -> Award:
+    return Award(
+        source_system=SourceSystem.ROMANIA_SEAP, external_id=eid, country_code="RO", title=f"P {eid}",
+        contracting_authority=AUTH, cpv_codes=[cpv], estimated_initial_value=initial, contract_value=final,
+        currency="RON", award_date=datetime(2026, 3, 1, tzinfo=UTC), winner_name="ACME SRL", winner_cif="RO1",
+    )
+
+
+def test_renewal_endpoint_adds_price_range_for_pro(api: TestClient, monkeypatch) -> None:
+    from backend.core.config import settings
+    from backend.db import engine
+
+    with Session(engine) as session:
+        _seed_periodic(session)
+        session.add_all([
+            _priced("pr1", 1000.0, 900.0),   # -10 %
+            _priced("pr2", 2000.0, 1700.0),  # -15 %
+            _priced("pr3", 500.0, 510.0),    # +2 %
+            _priced("pr-other", 1000.0, 100.0, cpv="45310000"),  # other CPV class: excluded
+        ])
+        session.commit()
+    assert api.get("/api/tenders/p3/renewal").status_code == 401
+    body = api.get("/api/tenders/p3/renewal", headers=_auth()).json()
+    assert body["renewal"]["detected"] is True and body["price_locked"] is False
+    assert body["price_range"] == {"sample_size": 3, "low_pct": -15.0, "median_pct": -10.0, "high_pct": 2.0, "cpv_prefix": "4523"}
+    monkeypatch.setattr(settings, "default_plan", "growth")
+    growth = api.get("/api/tenders/p3/renewal", headers=_auth()).json()
+    assert growth["renewal"]["detected"] is True and growth["price_range"] is None and growth["price_locked"] is True
+    monkeypatch.setattr(settings, "default_plan", "start")
+    assert api.get("/api/tenders/p3/renewal", headers=_auth()).status_code == 403
+    assert api.get("/api/tenders/missing/renewal", headers=_auth()).status_code in (403, 404)
+
+
+def test_price_range_needs_enough_comparable_awards(api: TestClient) -> None:
+    from backend.db import engine
+
+    with Session(engine) as session:
+        _seed_periodic(session)
+        session.add_all([_priced("pr1", 1000.0, 900.0), _priced("pr2", 2000.0, 1700.0)])
+        session.commit()
+    assert api.get("/api/tenders/p3/renewal", headers=_auth()).json()["price_range"] is None
+
+
+def test_past_winners_includes_whole_history_summary(api: TestClient, monkeypatch) -> None:
+    _winner_setup(monkeypatch)
+    body = api.post("/api/tenders/pt1/past-winners", headers=_auth()).json()
+    assert body["summary"]["count"] == 7
+    assert body["summary"]["top"][0]["wins"] >= body["summary"]["top"][-1]["wins"]

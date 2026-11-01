@@ -127,7 +127,37 @@ export type PastWinner = {
   figures: { year: number; turnover: number | null; net_profit: number | null; employees: number | null } | null;
 };
 export type Quota = { used: number; limit: number };
-export type PastWinnersResult = { authority: string | null; items: PastWinner[]; quota: Quota; charged: boolean };
+export type WinnersSummary = {
+  count: number;
+  total_value: number | null;
+  top: { name: string; wins: number; total_value: number }[];
+};
+export type PastWinnersResult = {
+  authority: string | null;
+  summary: WinnersSummary | null;
+  items: PastWinner[];
+  quota: Quota;
+  charged: boolean;
+};
+
+export type RenewalInfo = {
+  renewal: {
+    detected: boolean;
+    confidence: 'high' | 'medium' | 'low' | null;
+    prior_count: number;
+    avg_interval_days: number | null;
+    next_expected_date: string | null;
+    note: string;
+  } | null;
+  price_range: { sample_size: number; low_pct: number; median_pct: number; high_pct: number; cpv_prefix: string } | null;
+  price_locked: boolean;
+};
+
+/** Renewal rhythm (and, on the Professional plan, the past price spread) for a tender's buyer. */
+export async function fetchRenewal(externalId: string): Promise<RenewalInfo> {
+  if (USE_MOCK) return { renewal: null, price_range: null, price_locked: false };
+  return get<RenewalInfo>(`/tenders/${encodeURIComponent(externalId)}/renewal`);
+}
 
 export async function fetchPastWinnersQuota(): Promise<Quota> {
   if (USE_MOCK) return { used: 0, limit: 10 };
@@ -136,7 +166,7 @@ export async function fetchPastWinnersQuota(): Promise<Quota> {
 
 /** Past winners of the tender's buyer. Spends one unit of the monthly quota the first time per tender. */
 export async function lookupPastWinners(externalId: string): Promise<PastWinnersResult> {
-  if (USE_MOCK) return { authority: null, items: [], quota: { used: 0, limit: 10 }, charged: false };
+  if (USE_MOCK) return { authority: null, summary: null, items: [], quota: { used: 0, limit: 10 }, charged: false };
   return post<PastWinnersResult>(`/tenders/${encodeURIComponent(externalId)}/past-winners`, {});
 }
 

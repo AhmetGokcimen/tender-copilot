@@ -40,6 +40,8 @@ class Settings(BaseSettings):
     # Past-winners lookups one user may run per calendar month (each distinct
     # tender costs one). Plans can raise this later; for now it is one number.
     past_winners_monthly_limit: int = 10
+    # Plan every user gets until billing exists (see core.plans). Pre-launch: all features on.
+    default_plan: str = "pro"
     # Google OAuth 2.0 (authorization code flow). Empty = Google login
     # disabled (the /auth/demo login still works).
     google_client_id: str = ""
