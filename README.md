@@ -1,374 +1,159 @@
-# Licits (Tender Copilot)
+<div align="center">
 
-AI copilot that monitors public procurement systems and helps SMEs find and
-respond to tenders they're actually eligible for. Built for the Meta Global
-AI Developer Hackathon (submission deadline: 2026-11-04, 21:00 ET).
+# Licits
 
-One repo, one deploy: the Next.js frontend lives at the repo root and the
-FastAPI backend ships as a single Python serverless function behind the
-same origin (`/api/*`) on Vercel. No CORS in production.
+**Public tenders, read for you.**
 
-## Repo layout
+Licits watches Romania's public procurement system (SEAP / SICAP), tells small and mid-sized contractors which open tenders they can really win, and prepares the paperwork.
 
-```
-tender-copilot/
-├── app/            Next.js App Router (locale-prefixed pages)
-├── components/     React components (+ landing/)
-├── lib/            frontend: types (backend mirror), api client, hooks, mock data
-├── stores/         zustand stores (filters, pipeline, company, generator, ...)
-├── messages/       next-intl UI strings (en.json, ...)
-├── i18n/           next-intl routing config
-├── middleware.ts   locale routing (its matcher never touches /api)
-├── backend/        FastAPI app: adapters, DB, AI layer (import as backend.*)
-├── api/
-│   └── index.py    Vercel entrypoint: re-exports backend.main:app (only file here)
-├── vercel.json     /api/* → Python function rewrite + bundle excludes
-├── requirements.txt  Python runtime deps (Vercel installs these; dev tools in requirements-dev.txt)
-├── ruff.toml         ruff config
-├── .python-version   pins the Vercel Python runtime (3.12)
-├── package.json      Next.js deps
-├── API_CHANGES.md    the single changelog (backend + frontend history merged)
-└── backend/openapi.json  versioned API contract snapshot
-```
+[licits.com](https://licits.com) · English and Romanian · invite-only beta
 
-The frontend talks to the backend only through relative `/api/*` calls —
-same origin in production; local `next dev` proxies `/api` to the uvicorn
-backend (see `next.config.mjs`). Nothing in `backend/` assumes anything
-about how the frontend is built.
+</div>
 
-## Architecture: multi-country from day one
+<p align="center">
+  <img src="public/product/dashboard-en.webp" alt="The Licits dashboard: open tenders ranked by how well they fit your company" width="860" />
+</p>
 
-Only Romania's SEAP/SICAP (`e-licitatie.ro`) is implemented for the
-hackathon, but nothing in the core logic is Romania-specific:
+---
 
-- Every `Tender` row carries `country_code` and `source_system`
-  ([backend/models/tender.py](backend/models/tender.py)).
-- Each country/source is a separate **adapter** implementing
-  `TenderSourceAdapter` ([backend/adapters/base.py](backend/adapters/base.py)).
-  Source-specific auth and request format are isolated inside the
-  adapter — the first implementation is
-  [backend/adapters/romania_seap/adapter.py](backend/adapters/romania_seap/adapter.py).
-- Pre-filter/scoring, the AI layer, and eligibility matching operate only on
-  the normalized `Tender`/`CompanyProfile` models, so they stay
-  country-agnostic. CPV codes are EU-wide standard and used as the universal
-  categorization key.
-- Adding a new country = writing one new adapter module. Nothing in
-  `backend/core/`, `backend/models/`, or `backend/api/` needs to change.
+## The problem
 
-```
-backend/
-  adapters/          # one module per country/source
-    base.py          # TenderSourceAdapter interface
-    romania_seap/     # first implementation (e-licitatie.ro)
-  core/              # config + country-agnostic pre-filter/scoring
-  models/            # SQLModel tables: Tender, CompanyProfile, UserTenderState
-  ai/                # Meta AI model client (summarization, extraction)
-  db.py              # engine/session + the upsert that keeps AI fields safe
-  api/               # REST endpoints consumed by the frontend
+Every day hundreds of public tenders are published in Romania. For a small contractor the work is not winning them, it is **finding the few that fit, working out whether the company is even allowed to bid, and then assembling a pile of documents** (offer, DUAE, certificates, references) before a hard deadline. Most firms do this by hand, in Romanian, from a portal that was not built for searching.
+
+Licits does the reading and the first draft. **The company always makes the decision**: Licits shows its reasoning, flags what is unclear and never submits anything for you.
+
+## What it does
+
+| | |
+|---|---|
+| **Finds** | Pulls every open tender from SEAP several times a day and ranks them against your company's work, region and size. |
+| **Explains** | A plain-language English or Romanian title and summary for each notice, with the reference codes kept intact. |
+| **Checks** | Reads the tender's requirements and compares them with your turnover, experience and certificates, one requirement at a time: met, not met, or unclear. |
+| **Prepares** | Drafts the technical offer and the DUAE (the European single procurement document) from your profile and the tender. |
+| **Tracks** | A pipeline board for the tenders you follow, from review to applied. |
+| **Researches** | Shows who the buyer awarded similar contracts to, and how their finances look. |
+
+## From sign-up to a working profile in minutes
+
+Most tools make you type your company in. Licits **reads it from official sources** and asks you to confirm.
+
+```mermaid
+flowchart LR
+    A[Enter your CUI] --> B[ANAF register<br/>name, address, CAEN, VAT, e-Factura]
+    A --> C[ANAF balance sheets<br/>last 3 years of turnover]
+    A --> D[SEAP awards<br/>contracts you already won]
+    E[Your website] --> F[Site reader<br/>what you build → CPV codes]
+    G[Upload certificates,<br/>balance sheets] --> H[Document reader<br/>fills credentials and figures]
+    B & C & D & F & H --> I[Profile you review<br/>and confirm]
 ```
 
-## Storage
+The onboarding has seven short steps, and each can be completed from what Licits already found:
 
-SQLite to start (zero setup, file-based — no separate service to stand up
-during a 9-day hackathon), via SQLModel so moving to Postgres later is just
-changing `DATABASE_URL`. The default points at `backend/data/app.db`,
-anchored to the backend directory (not the cwd), so running from the repo
-root keeps using the same file.
+1. **Company.** Type the CUI and press *Fill from ANAF*. Licits fetches the legal name, registered address, county, main CAEN code, VAT and e-Factura status, and the net turnover for the last three filed years. It also looks up the contracts SEAP shows as awarded to that CUI and adds them as your reference contracts. Add your website and an agent reads your services and projects pages to pick the matching work.
+2. **Your works.** Trades and work types (CPV codes). Pre-selected from your website; solar, electrical, roads, buildings, water, HVAC and more are covered, with the certificates each trade usually needs.
+3. **Where and how.** Counties you can work in (pick from the list or click the map), whether you bid alone, in a consortium or as a subcontractor, your largest contract and how many projects you can run at once.
+4. **Turnover.** Pre-filled from ANAF; you can correct it or upload a balance sheet and let the document reader take the figure.
+5. **Authorizations.** ISO, ANRE, ISCIR and other certificates. Upload the file and the document reader fills in the type, number and validity dates.
+6. **SEAP and team.** SEAP registration, e-signature, staff by role, bank guarantee capacity and insurance.
+7. **Review and confirm.**
 
-`Tender` (raw, adapter-written) and `UserTenderState` (AI output: score,
-summary, eligibility verdict, per company) are **separate tables on
-purpose**. The previous JSON-file system had a real bug where re-seeing a
-tender wiped its AI fields, because the whole record got overwritten on
-every re-fetch. Here, `backend.db.upsert_tenders` does a SQL
-`INSERT ... ON CONFLICT (source_system, external_id) DO UPDATE` that only
-ever touches `Tender`'s own columns — it cannot reach `UserTenderState`,
-so that bug class is now structurally impossible, not just avoided by
-convention.
+Progress is saved after every step. The same profile powers matching, eligibility checks and the generated drafts, and you can edit all of it later on the Profile page, including downloading the documents you stored.
 
-## Scoring
+> **What is a CAEN code, and what is CPV?** CAEN is the company's registered activity code (what it is *allowed* to do). CPV is the tender's code for *what is being bought*. To bid, the work in the CPV has to fit your CAEN codes.
 
-`backend/core/scoring.py` ranks a tender against a `CompanyProfile` (CPV match tier
--> value/capacity ratio bands -> deadline penalty -> AI-worth-it threshold),
-carried over from a validated single-company prototype's logic, rewritten
-from scratch against the normalized models. It never drops a tender —
-a 0 score with a reason is the signal, same principle as the AI layer:
-justify, don't silently decide.
+## Inside the app
 
-## AI layer
+**Opportunities.** The feed of open tenders, scored against your profile, with filters for work type (CPV), county, value and deadline. Titles and summaries are in your language.
 
-`backend/ai/client.py` talks to `api.meta.ai`'s Responses API — confirmed live
-2026-10-26, and *not* the OpenAI-compatible chat/completions shape other
-Meta/Llama endpoints use: `POST {base_url}/responses` with `{model,
-instructions, input: [...], text: {format: {...}}}`; the reply text is
-nested in `output[].content[].text` on the item where `type == "message"`
-(there's also a `"reasoning"` item in there to skip past). Override via
-`META_API_BASE_URL`/`META_MODEL` if a different gateway is ever needed.
-Three jobs, each told to justify rather than decide and to flag what it's
-unsure of rather than invent it:
+**Tender analysis.** One page per tender: a summary, the procedure timeline (published, clarification deadline, submission deadline), the executive data sheet, your match score and the reasons behind it, and the eligibility analysis. Until the tender documents are read, the page says so instead of guessing.
 
-- `summarize_justification` — 2-3 sentence fit explanation for one tender
-  + one company profile.
-- `simplify_title` — rewrites a tender title in plain language, preserving
-  project codes and place names (never translated/dropped).
-- `extract_requirements` — pulls turnover/experience/certification/
-  guarantee requirements out of specification text into a typed schema
-  (`ExtractedRequirements`). JSON-schema-constrained, retried up to 3
-  times on invalid JSON; if it still fails, returns
-  `extraction_confidence="failed"` with the raw output attached instead of
-  raising — nothing crashes because the model misbehaved once.
+**Eligibility analysis.** Turnover and experience are compared with plain arithmetic, not left to a language model. The model only reasons about what needs judgment (free-text certificate requirements) and always writes *why*, never a bare verdict. Where the data does not say, the answer is "unclear, check this".
 
-Now wired to real text: `RomaniaSeapAdapter.fetch_eligibility_text` calls
-SEAP's `GetSection3View` detail endpoint (confirmed live, see below) and
-concatenates the exclusion/registration, economic/financial, and
-technical/professional criteria fields — SEAP's equivalent of an EU
-notice's Section III, and the closest thing to real specification text
-the list endpoint doesn't carry. `POST /api/tenders/romania/{id}/extract`
-fetches it and runs it through `extract_requirements`.
+**Document preparation.** Reads the tender file (scanned PDFs included) and assembles a first draft of the offer and the DUAE from your profile and company archive. You review, edit, ask the assistant to revise a passage, and export. Nothing is submitted for you.
 
-`extracted_requirements` and `ai_title_simplified` live on `Tender` itself,
-not `UserTenderState` — they don't depend on which company is looking, so
-keeping them per-company would mean redoing the same AI call for every
-company that scores the tender. `backend.db.upsert_tenders`'s `ON CONFLICT DO
-UPDATE` explicitly excludes both columns, so a re-fetch still can't wipe
-them — same no-clobber guarantee as the Tender/UserTenderState split,
-just applied within this one table too. Verified: synced → extracted →
-re-synced → extraction still there.
+**Past winners.** One button on a tender shows who the same buyer awarded its last five contracts of this kind to, how much it awarded overall, and each winner's latest turnover, profit and headcount from ANAF. It runs on a monthly quota; opening the same tender again is free.
 
-## Eligibility-comparison engine
+**Renewal detection.** When a buyer re-tenders the same kind of work on a rhythm, Licits flags it and estimates when the next notice is due. On the top plan it also shows the price range of the buyer's past awards for comparable work, as a percentage of its own estimate. This is descriptive history, not a bidding recommendation.
 
-`backend/core/eligibility.py` + `backend.ai.client.compare_eligibility` turn one tender's
-`extracted_requirements` into a concrete verdict against a `CompanyProfile`
-(`UserTenderState.eligible`: `True`/`False`/`None`). Split in two on
-purpose:
+**Pipeline.** A kanban board for the tenders you follow: new, reviewing, applied, rejected.
 
-- Turnover and similar-experience-value comparisons are plain arithmetic
-  in `backend/core/eligibility.py`, not left to the model — removes an easy
-  source of LLM arithmetic error.
-- The AI layer takes those results as given facts and only reasons about
-  what genuinely needs judgment: matching free-text certification
-  requirements, and writing the justification. Told explicitly not to
-  default to `eligible=None` just to avoid committing, but also never to
-  invent a company capability it wasn't given.
+**Archive.** A document vault for your certificates and references, with signed downloads.
 
-Caught and fixed one real bug this way: the extraction model was
-returning the source text's own currency word ("lei") instead of an ISO
-code, which silently broke the deterministic value comparison (treated
-as a currency mismatch instead of a match). Fixed by requiring ISO 4217
-codes in `EXTRACT_SYSTEM_PROMPT` and re-verified.
+**Assistant.** A chat bubble inside the app that knows which screen you are on and helps with the tender, your profile and the drafts.
 
-`POST /api/companies/{id}/tenders/romania/{id}/eligibility` runs it for
-one tender/company pair (requires `/extract` to have run first).
+**Live map.** The landing page shows the newest open construction notice for each county seat on a dotted map of Romania, linked to the official notice.
+
+## Plans
+
+Prices are in RON per month, excluding VAT. New users get the first two weeks free.
+
+| | **Start** · 199 | **Growth** · 349 | **Pro** · 499 |
+|---|:---:|:---:|:---:|
+| SEAP feed with plain titles and summaries | ✓ | ✓ | ✓ |
+| All filters | ✓ | ✓ | ✓ |
+| Eligibility checks per month | 30 | 100 | unlimited |
+| Scanned PDF reading | unlimited | unlimited | unlimited |
+| Offer and DUAE drafts per month | 2 | 10 | unlimited |
+| Past-winner lookups per month | 5 | 25 | 100 |
+| Document vault with downloads | ✓ | ✓ | ✓ |
+| Renewal detection | | ✓ | ✓ |
+| E-mail alerts for renewing buyers | | ✓ *(coming soon)* | ✓ *(coming soon)* |
+| Past price range on renewing work | | | ✓ |
+| Users | 1 | 3 | 5 |
+
+Growth is the plan most small contractors need. Each line carries a **?** with a plain-language explanation on the pricing page.
+
+## Principles
+
+- **Justify, never silently decide.** Every score, verdict and summary comes with its reason. A low score is a signal, not a hidden filter, and unclear stays "unclear".
+- **Official sources first.** Company data comes from ANAF and SEAP, public registers, so you confirm instead of typing.
+- **Numbers by arithmetic, judgment by model.** Comparisons that have a right answer are computed. The model handles wording and the genuinely ambiguous.
+- **You stay in control.** Licits prepares drafts. It never submits an offer, and it states plainly what it could not verify.
+- **Built to cross borders.** Every tender carries a country and source; each source is one adapter. Romania is first, and nothing in scoring, AI or eligibility is Romania-specific.
+
+## Under the hood
+
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js (App Router), TypeScript, Tailwind, `next-intl` (EN/RO), TanStack Query, zustand |
+| Backend | FastAPI (Python), SQLModel, one serverless function behind the same origin at `/api` |
+| Data | Supabase: Postgres, Auth (invite-only), Row Level Security, Storage for documents |
+| AI | Meta AI Responses API for summaries, titles, requirement extraction, eligibility reasoning and page transcription |
+| Sources | SEAP / SICAP tenders and awards, ANAF VAT register and balance sheets (public web services) |
+| Hosting | Vercel; a GitHub Actions job syncs SEAP every six hours |
+
+Access is **invite-only** during the beta: public sign-ups are off, and accounts are created through a server action that registers the invited e-mail on a short-lived allowlist the database checks before it creates the user. Company data is protected by row-level security so one company can never read another's.
 
 ## Status
 
-Done: storage layer, Romania SEAP adapter (verified live), the detail/
-eligibility-text fetch, scoring, the AI layer, and the eligibility-
-comparison engine, plus REST endpoints tying them all together.
+Live and in invite-only beta. Honest list of what is not finished:
 
-The SEAP adapter's endpoints, headers, and response field names are
-confirmed working, tested live against `e-licitatie.ro` (not guessed) —
-e.g. `fetch_tenders(cpv_codes=["45310000"], days=30)` returned 119 real,
-currently-open tenders with correct titles/values/deadlines/links, and
-`fetch_eligibility_text` pulled ~19KB of real Section III criteria text
-for one of them (including a real "4,000,000 RON cumulative similar
-experience" style requirement).
+- **E-mail alerts** for renewing buyers are shown as *coming soon* and not built yet.
+- **Billing** is not built. Until it is, every account sees the top plan; only the past-winner quota is enforced today, the other plan limits are not.
+- **Renewal and price-range wording** should get a lawyer's review before wide release.
 
-**Tested against the real Meta AI API** (2026-10-26, `muse-wonder-1.0`),
-on 5 real synced tenders + 3 real SEAP Section III extractions:
-- Title simplification: correctly preserved every project/reference code
-  (`ATR 7010240912508`, `M-24-B278/M-23-B060`) and place name, translated
-  only the descriptive parts.
-- Justifications: grounded in the actual tender's CPV/value/deadline,
-  consistently flagged unstated things (experience threshold, turnover,
-  certifications) as "unclear, verify yourself" instead of guessing —
-  never made a go/no-go call itself.
-- Extraction: every number it returned was checked against the raw
-  Section III text and matched exactly (e.g. "cumulated value ≥
-  1,049,852.57 lei" — verified present verbatim in source). Correctly
-  told apart a cumulative-experience-value figure from an annual-turnover
-  figure (a real place a simpler extractor could conflate the two) in two
-  separate tenders, and correctly flagged a tender with two different
-  experience lookback windows (5y works / 3y services) as worth a second
-  look instead of silently picking one. No fabricated requirements found
-  in this sample.
-- Eligibility verdicts (3 real tenders, 2 company profiles — one strong,
-  one weak): produced `True`, `False`, and `None` verdicts correctly,
-  including a `None` for a tender with a real second sub-requirement
-  (a photovoltaic-specific lot) the given company data genuinely couldn't
-  confirm either way — not a lazy default, a correct "can't tell."
+## Run it locally
 
-## API
-
-Full schema: [backend/openapi.json](backend/openapi.json) (static snapshot —
-regenerate with the command below after changing any route) or the live,
-always-current `GET /openapi.json` / interactive `GET /docs` once the
-server is running. Change history: [API_CHANGES.md](API_CHANGES.md).
-
-```
-GET   /api/tenders                        list stored tenders, paginated
-      ?country_code=&cpv_code=&limit=&offset=
-POST  /api/tenders/sync/romania           fetch from SEAP, upsert into storage
-      ?cpv_codes=45310000&days=30
-POST  /api/tenders/romania/{id}/extract   fetch real SEAP eligibility text,
-                                           run it through AI extraction
-
-POST  /api/companies                      create a company profile
-GET   /api/companies                      list company profiles
-GET   /api/companies/{id}                 get one company profile
-PATCH /api/companies/{id}                 update a company profile (full object)
-
-GET   /api/companies/{id}/tenders         the frontend's main feed: every
-      ?status=&eligible=&min_score=       tender scored for this company,
-      &limit=&offset=                     with score/AI/eligibility + user
-                                           status/note flattened in, paginated
-PATCH /api/companies/{id}/tenders/romania/{id}
-                                           set status (new/reviewing/applied/
-                                           rejected/ignored) and/or a note —
-                                           the only writer of those two fields
-
-POST  /api/companies/{id}/score           score all stored tenders for a company
-POST  /api/companies/{id}/enrich          AI-justify the highest-scoring,
-      ?limit=20&language=en               not-yet-enriched tenders for a company
-POST  /api/companies/{id}/tenders/romania/{id}/eligibility
-                                           compare extracted requirements
-                                           against the company profile
-```
-
-Typical frontend flow for one company: create company -> sync tenders ->
-score -> poll `GET /{id}/tenders` for the feed -> `/enrich` and, per
-tender, `/extract` + `/eligibility` to fill in the AI columns -> user
-edits status/note via the `PATCH .../tenders/romania/{id}` call.
-
-## Auth and CORS
-
-JWT auth: every `/api/*` call except `/api/auth/*` needs an
-`Authorization: Bearer <JWT>` header — mint one via `GET /api/auth/demo`
-(one click) or the Google OAuth flow (`/api/auth/google/login`). Data is
-multi-tenant: every login owns its companies via onboarding. See
-[API_CHANGES.md](API_CHANGES.md) for the auth history.
-
-CORS: production is same-origin (frontend + API on one Vercel deployment),
-so browsers never trigger CORS there. The `CORSMiddleware` in
-`backend/main.py` is KEPT for the local two-process dev flow
-(`next dev` on :3000 + `uvicorn` on :8000), where cross-origin calls still
-happen when the dev proxy is bypassed. `ALLOWED_ORIGINS` defaults to
-`http://localhost:3000`.
-
-## Setup (local dev)
-
-Prerequisites: Python 3.14 (see `.python-version`), Node 20+.
+Setup, environment variables, the API reference and deploy notes are in the **[development guide](docs/DEVELOPMENT.md)**; the API contract is [`backend/openapi.json`](backend/openapi.json) and the change history is in [`API_CHANGES.md`](API_CHANGES.md).
 
 ```bash
-# from the repo root
-python -m venv backend/.venv
-backend/.venv/Scripts/activate   # Windows (elsewhere: source backend/.venv/bin/activate)
-pip install -r requirements-dev.txt
-cp .env.example .env     # fill in META_API_KEY etc.
 npm install
-
-# terminal 1 — API on :8000
-uvicorn backend.main:app --reload
-
-# terminal 2 — web on :3000 (/api proxied to :8000 in dev)
-npm run dev
+npm run dev          # web on :3000
+uvicorn backend.main:app --reload   # API on :8000
 ```
 
-Open `http://localhost:3000` in a browser (redirects to `/en`). Mock mode
-is the default (`NEXT_PUBLIC_USE_MOCK=true`); set
-`NEXT_PUBLIC_USE_MOCK=false` in `.env` to hit the real API (same-origin
-`/api`, no extra config needed).
+## Repository layout
 
-Interactive API docs: `http://localhost:8000/docs`. Regenerate the static
-contract snapshot after changing a route:
-
-```bash
-python -c "import json, backend.main as m; json.dump(m.app.openapi(), open('backend/openapi.json', 'w', encoding='utf-8'), indent=2, ensure_ascii=False)"
+```
+app/          Next.js pages (locale-prefixed): landing, onboarding, app, auth, legal
+components/   UI, including landing/, onboarding/, assistant/, agent/
+lib/          API client, onboarding and company data, ANAF and site-scan actions
+backend/      FastAPI: SEAP adapter, scoring, eligibility, AI client, winners, renewal
+supabase/     SQL migrations (schema, row-level security, invite allowlist)
+messages/     UI strings, en.json and ro.json
+docs/         development guide
 ```
 
-Operator scripts (from the root): `python -m backend.scripts.migrate_demo`
-(backup-first demo reset), `python -m backend.scripts.backfill_initial`
-(one-shot history backfill).
+---
 
-Alternative: `vercel dev` (Vercel CLI) serves the Next.js app and the
-Python function together the way production does. The two-process flow
-above is the verified default; `vercel dev` is documented but was not
-re-verified after this restructure.
-
-## Frontend
-
-Next.js (App Router) + TypeScript + Tailwind. English UI, Romanian-ready via
-`next-intl` (add `messages/ro.json` + `'ro'` in `i18n/routing.ts` — no
-component changes needed).
-
-Mock vs real API: default is mock mode (`NEXT_PUBLIC_USE_MOCK=true`): all
-data comes from `lib/mock-data.ts`, shaped exactly like the backend JSON
-(`lib/types.ts` mirrors `backend/models/*`). Set
-`NEXT_PUBLIC_USE_MOCK=false` to call the real backend — same-origin, no URL
-config needed. Only `lib/api.ts` (and `lib/assistant-api.ts`) branch on
-the flag.
-
-- `app/[locale]/page.tsx` — public landing page (`/`); sections in `components/landing/`
-- `app/[locale]/app/` — dashboard: `/app` opportunities, `/app/tenders/[id]` analysis,
-  `/app/pipeline` kanban, `/app/generator` DUAE drafts, `/app/archive`, `/app/settings`
-- `components/` — Sidebar, TenderCard, KanbanBoard, TenderDetail, chips, KPI cards
-- `lib/` — types (backend mirror), api client, react-query hooks, mock data,
-  draft templates, formatting
-- `stores/` — zustand: filters, pipeline (persisted), company (persisted), generator (persisted)
-- `messages/en.json` — all UI strings; `i18n/` — next-intl routing config
-
-## Deploy (Vercel)
-
-Single Vercel project from this repo: Next.js is auto-detected at the root,
-`api/index.py` becomes the Python function, `vercel.json` routes `/api/*`
-to it. No build-command / output-directory overrides needed.
-
-Environment variables to set in the Vercel project (see `.env.example`):
-required: `META_API_KEY`, `JWT_SECRET` (long random — the default is
-dev-only), `SYNC_SECRET` (must equal the `SYNC_TOKEN` repo secret for the
-Actions sync workflow), `FRONTEND_URL` + `BACKEND_URL` (both = the deployed
-origin, e.g. `https://ofera.vercel.app`), `NEXT_PUBLIC_USE_MOCK=false`.
-Optional: `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` (Google login; without
-them only demo login works), `META_API_BASE_URL`/`META_MODEL` (gateway
-override), `ALLOWED_ORIGINS` (same-origin production never triggers CORS;
-harmless to set to the deployed origin).
-
-Still open / next steps (not part of this restructure):
-
-- `DATABASE_URL` is SQLite by default, which doesn't work on Vercel
-  (read-only filesystem, no persistence across invocations). The Supabase
-  (Postgres) migration is the planned follow-up — until then, a production
-  deploy needs `DATABASE_URL` pointed at Postgres.
-- Function timeout: long endpoints (sync, score/enrich jobs) can exceed
-  serverless limits — the sync workflow's `max_seconds` should fit the
-  plan's `maxDuration` (no `maxDuration` is set in `vercel.json` because
-  the cap is plan-dependent).
-- Lifespan/shutdown: only 500ms on Vercel; the async job patterns
-  (extract-caiet, score) already persist progress per batch and resume via
-  re-POST, which is the serverless-safe shape — see API_CHANGES.md.
-- Cron: Vercel crons run on production only; the GitHub Actions
-  `sync-tenders.yml` workflow stays as the sync trigger (no `crons` in
-  `vercel.json`).
-
-## Research note: website-to-API tooling
-
-SEAP already exposes a usable JSON API, so this isn't needed yet. Kept here
-for when we add a country whose procurement portal requires scraping.
-Findings as of 2026-10-26:
-
-| Tool | Stars | Last push | Notes |
-|---|---|---|---|
-| [ishandutta2007/Awesome-Website-To-API](https://github.com/ishandutta2007/Awesome-Website-To-API) | 8 | 2026-07 | Curated list, not a tool itself. Points to Scrapy, Colly, Apify as the actual implementations. |
-| [Aditya8840/browse2api](https://github.com/Aditya8840/browse2api) | 7 | 2026-03 | Small TypeScript project, low activity/adoption — risky to depend on for a hackathon. |
-| [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | ~196k | daily | Turns any site/URL into clean structured markdown/JSON via an API; handles JS-rendering and some anti-bot out of the box. Hosted or self-host. Best default if a future country needs scraping. |
-| [apify/crawlee](https://github.com/apify/crawlee) | ~26k | daily | Node/TS crawling framework (Playwright/Cheerio/HTTP), proxy rotation, headless mode — more control than Firecrawl but more setup. |
-| [ScrapeGraphAI/Scrapegraph-ai](https://github.com/ScrapeGraphAI/Scrapegraph-ai) | ~32k | active | LLM-driven scraping pipelines (describe what you want extracted instead of writing selectors) — good fit if a portal's HTML is messy/inconsistent. |
-
-**Recommendation:** skip the two repos you linked (too small, unmaintained
-relative to alternatives) and reach for **Firecrawl** first if/when a future
-country adapter needs real scraping — it's actively maintained, has a
-hosted API (fast to integrate under hackathon time pressure), and already
-handles JS rendering + basic anti-bot. Fall back to **Crawlee** only if a
-site needs custom interaction (logins, pagination clicks) Firecrawl can't
-handle. Keep the scraping call behind that country's adapter class either
-way — core logic never needs to know whether a source was a clean JSON API
-or a scraper.
+<sub>Licits is a decision-support tool. Scores, summaries and drafts are aids; the company is responsible for checking them against the official tender documents before bidding.</sub>
