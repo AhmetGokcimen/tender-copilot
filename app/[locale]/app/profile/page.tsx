@@ -37,7 +37,7 @@ import {
 } from '@/lib/company-data';
 import { syncLegacyProfile } from '@/lib/legacy-profile';
 
-const SECTIONS = ['contracts', 'guarantees', 'staff', 'workload', 'exclusion', 'preferences', 'documents'] as const;
+const SECTIONS = ['company', 'contracts', 'guarantees', 'staff', 'workload', 'exclusion', 'preferences', 'documents'] as const;
 
 function Card({ id, title, hint, children }: { id: string; title: string; hint?: string; children: React.ReactNode }) {
   return (
@@ -254,6 +254,25 @@ export default function ProfilePage() {
         </aside>
 
         <div className="flex min-w-0 flex-col gap-space-lg">
+          <Card id="company" title={t('section_company')} hint={t('companyHint')}>
+            <dl className="grid grid-cols-1 gap-x-space-lg gap-y-space-sm sm:grid-cols-2">
+              {(
+                [
+                  [t('companyName'), c.name],
+                  ['CUI', c.cui],
+                  [t('companyAddress'), [c.address, c.county].filter(Boolean).join(' · ')],
+                  [t('companyCaen'), [c.caen_main, ...c.caen_secondary].filter(Boolean).join(', ')],
+                  [t('companyFounded'), c.founded_year ? String(c.founded_year) : ''],
+                  [t('companyWebsite'), c.website],
+                ] as [string, string | null][]
+              ).map(([label, value]) => (
+                <div key={label} className="flex min-w-0 flex-col gap-0.5">
+                  <dt className="text-[12.5px] text-muted">{label}</dt>
+                  <dd className="break-words text-[14px] text-ink">{value || '—'}</dd>
+                </div>
+              ))}
+            </dl>
+          </Card>
           <Card id="contracts" title={t('section_contracts')} hint={t('contractsHint')}>
             {data.contracts.map((k) => (
               <ContractRow
