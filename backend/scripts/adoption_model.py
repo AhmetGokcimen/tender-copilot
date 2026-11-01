@@ -218,6 +218,117 @@ def fan_svg(paid: np.ndarray) -> str:
     )
 
 
+DRIVER_LABELS = {
+    "trial_to_paid": "Trial to paid conversion",
+    "market_size": "Market size",
+    "p": "Innovation rate (p)",
+    "reachable_share": "Share who would pay",
+    "q": "Imitation rate (q)",
+    "churn": "Monthly churn",
+}
+
+
+def summary_svg(paid: np.ndarray, summary: dict, inp: dict) -> str:
+    """One-page picture of the result: headline numbers, fan chart, what drives it."""
+    w, h = 1200, 830
+    ink, muted, line, blue, red = "#1f2328", "#57606a", "#d0d7de", "#0969da", "#cf222e"
+    n = lambda v: f"{v:,.0f}"
+    k = lambda v: f"{v / 1000:,.0f}k" if v >= 10_000 else n(v)
+    m12, m36 = summary["month_12"], summary["month_36"]
+    mk = summary["market_size_p10_p50_p90"]
+
+    tiles = [
+        (n(mk[1]), "firms that could ever pay", f"range {n(mk[0])} to {n(mk[2])}"),
+        (n(m12["paid_customers"][1]), "paying customers, month 12",
+         f"range {n(m12['paid_customers'][0])} to {n(m12['paid_customers'][2])}"),
+        (n(m36["paid_customers"][1]), "paying customers, month 36",
+         f"range {n(m36['paid_customers'][0])} to {n(m36['paid_customers'][2])}"),
+        (f"{k(m36['arr_ron'][1])} RON", "yearly revenue, month 36",
+         f"range {k(m36['arr_ron'][0])} to {k(m36['arr_ron'][2])}"),
+    ]
+    tile_w, gap = 265, 20
+    out = []
+    for i, (big, label, rng_txt) in enumerate(tiles):
+        x0 = 40 + i * (tile_w + gap)
+        out.append(
+            f'<rect x="{x0}" y="110" width="{tile_w}" height="118" rx="10" fill="#f6f8fa" stroke="{line}"/>'
+            f'<text x="{x0 + 18}" y="160" font-size="38" font-weight="700" fill="{blue}">{big}</text>'
+            f'<text x="{x0 + 18}" y="188" font-size="15" fill="{ink}">{label}</text>'
+            f'<text x="{x0 + 18}" y="210" font-size="13" fill="{muted}">{rng_txt}</text>'
+        )
+
+    # fan chart, left
+    cx, cy, cw, ch = 90, 300, 640, 360
+    lo, md, hi = (np.percentile(paid, q, axis=1) for q in (10, 50, 90))
+    ymax = float(np.ceil(hi.max() / 100) * 100) or 100.0
+    px = lambda t: cx + cw * t / MONTHS
+    py = lambda v: cy + ch * (1 - v / ymax)
+    out.append(f'<text x="40" y="272" font-size="18" font-weight="700" fill="{ink}">Paying customers over time</text>')
+    for v in np.linspace(0, ymax, 5):
+        out.append(
+            f'<line x1="{cx}" x2="{cx + cw}" y1="{py(v):.1f}" y2="{py(v):.1f}" stroke="{line}"/>'
+            f'<text x="{cx - 10}" y="{py(v) + 4:.1f}" text-anchor="end" font-size="12" fill="{muted}">{int(v)}</text>'
+        )
+    for t in range(0, MONTHS + 1, 6):
+        out.append(f'<text x="{px(t):.1f}" y="{cy + ch + 22}" text-anchor="middle" font-size="12" fill="{muted}">{t}</text>')
+    out.append(f'<text x="{cx + cw / 2}" y="{cy + ch + 44}" text-anchor="middle" font-size="13" fill="{muted}">Months after launch</text>')
+    band = " ".join(f"{px(t):.1f},{py(hi[t]):.1f}" for t in range(MONTHS + 1))
+    band += " " + " ".join(f"{px(t):.1f},{py(lo[t]):.1f}" for t in range(MONTHS, -1, -1))
+    out.append(f'<polygon points="{band}" fill="{blue}" fill-opacity="0.16"/>')
+    out.append(
+        f'<polyline points="{" ".join(f"{px(t):.1f},{py(md[t]):.1f}" for t in range(MONTHS + 1))}" '
+        f'fill="none" stroke="{blue}" stroke-width="3"/>'
+    )
+    for t in (12, 36):
+        out.append(
+            f'<circle cx="{px(t):.1f}" cy="{py(md[t]):.1f}" r="5" fill="{blue}"/>'
+            f'<text x="{px(t) - 8:.1f}" y="{py(md[t]) - 12:.1f}" text-anchor="end" font-size="13" font-weight="700" fill="{ink}">{md[t]:.0f}</text>'
+        )
+    out.append(
+        f'<text x="{cx + 12}" y="{cy + 18}" font-size="13" fill="{muted}">Line = median, shaded band = 10th to 90th percentile of 5,000 runs</text>'
+    )
+
+    # drivers, right
+    dx, dy = 800, 300
+    out.append(f'<text x="{dx}" y="272" font-size="18" font-weight="700" fill="{ink}">What moves the answer</text>')
+    corr = summary["rank_correlation_with_paid_at_24"]
+    rows = [(DRIVER_LABELS[key], corr[key]) for key in DRIVER_LABELS]
+    rows.sort(key=lambda r: -abs(r[1]))
+    for i, (label, c) in enumerate(rows):
+        y0 = dy + i * 52
+        bw = 150 * abs(c) / 0.7
+        colour = blue if c >= 0 else red
+        out.append(
+            f'<text x="{dx}" y="{y0 + 14}" font-size="14" fill="{ink}">{label}</text>'
+            f'<rect x="{dx}" y="{y0 + 22}" width="{bw:.0f}" height="12" rx="3" fill="{colour}"/>'
+            f'<text x="{dx + bw + 8:.0f}" y="{y0 + 33}" font-size="13" fill="{muted}">{c:+.2f}</text>'
+        )
+    out.append(
+        f'<text x="{dx}" y="{dy + 6 * 52 + 12}" font-size="12" fill="{muted}">Rank correlation with customers at month 24.</text>'
+        f'<text x="{dx}" y="{dy + 6 * 52 + 30}" font-size="12" fill="{muted}">Conversion and "share who would pay"</text>'
+        f'<text x="{dx}" y="{dy + 6 * 52 + 46}" font-size="12" fill="{muted}">are assumptions, not data.</text>'
+    )
+
+    winners = inp["winner_sample"]
+    measured = (
+        f"Measured: {n(inp['awards_in_window'])} construction awards ({inp['window'][0]} to {inp['window'][1]}), "
+        f"winners read from {winners['awards']} of them."
+    )
+    assumed = "Assumed: Bass rates, trial conversion, churn, plan mix, and the share of firms that would ever pay."
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" font-family="Segoe UI, Helvetica, Arial, sans-serif">'
+        f'<rect width="{w}" height="{h}" fill="#ffffff"/>'
+        f'<text x="40" y="52" font-size="30" font-weight="700" fill="{ink}">How many firms could pay for Licits?</text>'
+        f'<text x="40" y="80" font-size="16" fill="{muted}">Bass adoption model on real SEAP data. Construction works only, Romania, list prices 199 / 349 / 499 RON a month.</text>'
+        f'{"".join(out)}'
+        f'<line x1="40" x2="{w - 40}" y1="{h - 66}" y2="{h - 66}" stroke="{line}"/>'
+        f'<text x="40" y="{h - 44}" font-size="12" fill="{muted}">{measured}</text>'
+        f'<text x="40" y="{h - 27}" font-size="12" fill="{muted}">{assumed}</text>'
+        f'<text x="40" y="{h - 10}" font-size="12" fill="{muted}">A planning range, not a sales forecast. Details: docs/ADOPTION_MODEL.md</text>'
+        "</svg>"
+    )
+
+
 def main() -> None:
     rng = np.random.default_rng(SEED)
     awards, winners = load()
@@ -230,6 +341,7 @@ def main() -> None:
     (OUT / "adoption_inputs.json").write_text(json.dumps(public, indent=2), encoding="utf-8")
     (OUT / "adoption_results.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     (OUT / "adoption_fan.svg").write_text(fan_svg(res["paid"]), encoding="utf-8")
+    (OUT / "adoption_summary.svg").write_text(summary_svg(res["paid"], summary, public), encoding="utf-8")
     print(json.dumps({"inputs": public, "results": summary}, indent=2))
 
 

@@ -2,7 +2,7 @@
 
 A Bass diffusion model whose market is **measured from a year of SEAP construction awards**, run 5,000 times with its behavioural inputs drawn from stated ranges. The output is a band, not a number. Code: [`backend/scripts/adoption_model.py`](../backend/scripts/adoption_model.py), data collection: [`collect_seap_market.py`](../backend/scripts/collect_seap_market.py), tests: [`test_adoption_model.py`](../backend/tests/test_adoption_model.py).
 
-![Paying customers, median and 10-90% band](validation/adoption_fan.svg)
+![Adoption forecast summary](validation/adoption_summary.svg)
 
 ## Result
 
