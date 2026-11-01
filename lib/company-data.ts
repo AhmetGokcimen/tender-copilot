@@ -243,9 +243,12 @@ export async function saveCompany(id: string | null, patch: Partial<Company>): P
   }
   const sb = supabase();
   if (!id) {
-    const { data, error } = await sb.from('companies').insert(fields).select('id').single();
+    // No RETURNING: the read policy needs the membership row that an AFTER INSERT
+    // trigger adds, so reading the row back inside the insert is refused.
+    const newCompanyId = crypto.randomUUID();
+    const { error } = await sb.from('companies').insert({ ...fields, id: newCompanyId });
     fail(error);
-    return (data as { id: string }).id;
+    return newCompanyId;
   }
   const { error } = await sb.from('companies').update(fields).eq('id', id);
   fail(error);
