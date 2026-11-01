@@ -16,7 +16,7 @@ Source: the Licits database, filled by the SEAP sync. 3,756 tenders (14 Aug to 2
 - 538 different companies won at least one award, 771 awards in total.
 - Construction works (CPV 45): 176 awards with a named winner, **137 different winners**; only 24 of them won more than once in the month.
 - About 490 to 550 new construction tenders are published each month.
-- Median construction award about 35 million RON (lower quartile about 12 million). **Only 14% are under 5 million RON**, so the small-contractor segment is narrower than it looks.
+- Correction: a first look at these 30 days suggested a median of 35 million RON and 14% of awards under 5 million RON. The sync that filled the database is capped per run, so that sample was biased toward big awards. On a full year of construction awards ([adoption model](ADOPTION_MODEL.md)) the median is 20 million RON, **34% are under 5 million RON** and 13% under 1 million.
 - Median offers received is 3, and 23% of construction awards had a single bidder.
 - Arithmetic, not a forecast: 100 paying customers on Growth (349 RON a month) are 418,800 RON a year.
 
@@ -49,4 +49,4 @@ How far to trust it: agents are a model's idea of contractors, not measurements,
 
 ## Conclusion
 
-The real data supports the premise: there are enough distinct winners each month to be a market, competition is thin enough that better preparation matters, and the matching engine puts the tender a company actually won near the top far more often than chance. The weakest points are the narrow small-contract segment (14% of awards under 5 million RON), matching on exact CPV codes, and the trust that has to be earned through verifiable accuracy. The simulation points to the same last issue from the market side, which is why source-linked eligibility results are the next item on the to-do list in the README.
+The real data supports the premise: there are enough distinct winners each month to be a market, competition is thin enough that better preparation matters, and the matching engine puts the tender a company actually won near the top far more often than chance. The weakest points are matching on exact CPV codes, the small number of firms that would plausibly pay (see the [adoption model](ADOPTION_MODEL.md)), and the trust that has to be earned through verifiable accuracy. The simulation points to the same last issue from the market side, which is why source-linked eligibility results are the next item on the to-do list in the README.
