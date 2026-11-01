@@ -6,9 +6,6 @@ import { Geist_Mono, Schibsted_Grotesk } from 'next/font/google';
 import { routing } from '@/i18n/routing';
 import { PAGE_META, SITE_URL, toLang } from '@/lib/seo';
 import { QueryProvider } from '@/components/QueryProvider';
-import { AssistantFab } from '@/components/assistant/AssistantFab';
-import { AssistantPanel } from '@/components/assistant/AssistantPanel';
-import { AssistantTooltip } from '@/components/assistant/AssistantTooltip';
 import { CookieConsent } from '@/components/CookieConsent';
 import '../globals.css';
 
@@ -60,9 +57,6 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <QueryProvider>
             {children}
-            <AssistantFab />
-            <AssistantPanel />
-            <AssistantTooltip />
             <CookieConsent />
           </QueryProvider>
         </NextIntlClientProvider>
