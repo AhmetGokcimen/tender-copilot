@@ -1,0 +1,97 @@
+{
+  "market_size_p10_p50_p90": [
+    181,
+    420,
+    798
+  ],
+  "month_6": {
+    "paid_customers": [
+      2,
+      6,
+      20
+    ],
+    "mrr_ron": [
+      526,
+      1872,
+      6303
+    ],
+    "arr_ron": [
+      6312,
+      22464,
+      75636
+    ]
+  },
+  "month_12": {
+    "paid_customers": [
+      4,
+      16,
+      56
+    ],
+    "mrr_ron": [
+      1270,
+      4771,
+      16914
+    ],
+    "arr_ron": [
+      15240,
+      57252,
+      202968
+    ]
+  },
+  "month_24": {
+    "paid_customers": [
+      9,
+      40,
+      152
+    ],
+    "mrr_ron": [
+      2754,
+      12183,
+      46689
+    ],
+    "arr_ron": [
+      33048,
+      146196,
+      560268
+    ]
+  },
+  "month_36": {
+    "paid_customers": [
+      15,
+      70,
+      270
+    ],
+    "mrr_ron": [
+      4352,
+      21334,
+      82867
+    ],
+    "arr_ron": [
+      52224,
+      256008,
+      994404
+    ]
+  },
+  "penetration_of_market_at_36": [
+    0.044,
+    0.178,
+    0.557
+  ],
+  "p_at_least_100_paid_at_12": 0.022,
+  "p_at_least_100_paid_at_24": 0.197,
+  "rank_correlation_with_paid_at_24": {
+    "trial_to_paid": 0.63,
+    "market_size": 0.5,
+    "p": 0.46,
+    "reachable_share": 0.45,
+    "q": 0.22,
+    "value_cap_ron": 0.16,
+    "bidder_multiplier": 0.14,
+    "churn": -0.13,
+    "winners_per_year": 0.01,
+    "invites_start": 0.01,
+    "invite_growth": 0.01,
+    "open_month": -0.01,
+    "arpu": 0.01
+  }
+}

@@ -3,3 +3,4 @@ uvicorn[standard]>=0.34
 pytest>=8.3
 pytest-asyncio>=0.25
 ruff>=0.8
+numpy>=2.0  # adoption model only; kept out of requirements.txt to keep the Vercel bundle small

@@ -130,8 +130,16 @@ We checked this in two ways, kept apart on purpose. Full write-up: **[docs/VALID
 
 **Measured on real SEAP data** (30 days of awards to 28 Oct 2026)
 - 538 different companies won awards; in construction works, **137 different winners** and a median of 3 offers per award, so competition is thin.
-- Only **14% of construction awards are under 5 million RON**, so the small-contractor segment is narrower than it looks.
+- On a full year of awards, **34% of construction contracts are under 5 million RON** and the median is 20 million RON (a first 30-day sample had suggested 14%; it was capped and biased, so the year replaces it).
 - **Matching back-test:** hiding one past win per company and rebuilding the profile from the rest, the tender the company actually won ranked in the **top 5% in 67% of cases** (27 cases, 16 companies; chance would be 5%). In a third of cases the score was zero because the company had moved to a new CPV code. Small sample, a signal rather than proof. Run it with `backend/scripts/backtest_matching.py`.
+
+**Adoption forecast** ([docs/ADOPTION_MODEL.md](docs/ADOPTION_MODEL.md)): a Bass diffusion model on a year of SEAP construction awards (2,686 awards, winners from 517 sampled notices), run 5,000 times. In construction alone, about 420 firms could ever pay (181 to 798); the median path reaches **16 paying customers after 12 months and 70 after 36** (about 57k and 256k RON a year), with a wide band. Real beta data on trial-to-paid and churn will narrow it more than any further modelling.
+
+<p align="center">
+  <img src="docs/validation/adoption_summary.svg" alt="Adoption forecast: about 420 firms could ever pay, median 16 paying customers at month 12 and 70 at month 36, with the 10 to 90 percent band and the inputs that drive it" width="860" />
+</p>
+
+The picture as files: [SVG](docs/validation/adoption_summary.svg) (sharp at any size) and [PNG](docs/validation/adoption_summary.png) (for slides). Numbers behind it: [results](docs/validation/adoption_results.json) and [inputs](docs/validation/adoption_inputs.json); the full method is in [docs/ADOPTION_MODEL.md](docs/ADOPTION_MODEL.md).
 
 **Simulated with [MiroFish](https://github.com/666ghj/MiroFish)** (61 invented archetypes, 10 rounds; exploratory, predicts nothing)
 - Small contractors under 1 million RON adopt first; larger firms watch and wait for proof.
