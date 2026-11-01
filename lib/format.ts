@@ -51,3 +51,8 @@ export function scoreTone(score: number | null): 'high' | 'mid' | 'low' | 'poor'
   if (score >= 50) return 'low';
   return 'poor';
 }
+
+/** English UI: the plain English title when one exists; Romanian UI: the notice's own title. */
+export function tenderTitle(t: { title: string; state: { ai_title_simplified: string | null } }, locale: string): string {
+  return locale === 'en' ? (t.state.ai_title_simplified ?? t.title) : t.title;
+}

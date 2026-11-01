@@ -16,6 +16,7 @@ from sqlmodel import Session
 
 from backend.api.schemas import SyncReport
 from backend.core.config import settings
+from backend.core import translate
 from backend.core.errors import error_summary
 from backend.core.sync import (
     AWARDS_KEY,
@@ -112,6 +113,21 @@ async def sync_tenders(
     )
 
 
+@router.post("/internal/translate-tenders", tags=["internal"])
+async def translate_tenders(
+    limit: int = Query(default=40, le=300),
+    max_seconds: float = Query(default=150, le=600),
+    x_sync_token: str | None = Header(default=None),
+    session: Session = Depends(get_session),
+) -> dict:
+    """English titles/summaries for tenders that have none (deadline-nearest first)."""
+    if not settings.sync_secret:
+        raise HTTPException(status_code=503, detail="Sync not configured")
+    if not _token_ok(x_sync_token):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    return await translate.translate_pending(session, limit=limit, max_seconds=max_seconds)
+
+
 @router.get("/internal/diagnostics", tags=["internal"])
 def diagnostics(x_sync_token: str | None = Header(default=None)) -> dict:
     """Deployment check for the sync job (same X-Sync-Token): which database
@@ -128,6 +144,7 @@ def diagnostics(x_sync_token: str | None = Header(default=None)) -> dict:
     out: dict = {
         "dialect": engine.dialect.name,
         "database_url_set": bool(os.environ.get("DATABASE_URL")),
+        "ai_key_set": translate.enabled(),
         # False means JWT_SECRET is missing on this deployment: session tokens are refused.
         "jwt_secret_ok": not jwt_secret_unsafe(),
     }

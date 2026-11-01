@@ -14,7 +14,7 @@ import {
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { clsx } from 'clsx';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Icon } from './Icon';
 import { MatchChip } from './MatchChip';
@@ -25,7 +25,7 @@ import {
   type KanbanColumn,
   type TenderWithState,
 } from '@/lib/types';
-import { formatDaysLeft, formatRON } from '@/lib/format';
+import { formatDaysLeft, formatRON, tenderTitle } from '@/lib/format';
 import { usePipelineStore } from '@/stores/usePipelineStore';
 
 const COLUMNS: KanbanColumn[] = ['new', 'preparing', 'submitted', 'archived'];
@@ -43,6 +43,7 @@ function KanbanCard({
   tender: TenderWithState;
   overlay?: boolean;
 }) {
+  const locale = useLocale();
   const t = useTranslations('kanban');
   const untrack = usePipelineStore((s) => s.untrack);
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -81,7 +82,7 @@ function KanbanCard({
         onPointerDown={(e) => e.stopPropagation()}
         className="line-clamp-2 font-headline-sm text-body-md font-semibold leading-snug text-on-surface hover:underline"
       >
-        {tender.state.ai_title_simplified ?? tender.title}
+        {tenderTitle(tender, locale)}
       </Link>
       <p className="truncate font-body-sm text-body-sm text-on-surface-variant">{tender.authority}</p>
       <div className="flex items-center justify-between border-t border-surface-container-low pt-space-xs">

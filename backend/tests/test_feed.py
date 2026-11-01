@@ -17,7 +17,7 @@ TENDER_KEYS = {
     "clarification_deadline", "state", "renewal_pattern",
 }
 STATE_KEYS = {
-    "score", "score_reasons", "ai_summary", "ai_title_simplified",
+    "score", "score_reasons", "ai_summary", "ai_title_simplified", "summary_en",
     "extracted_requirements", "eligible", "country_authorization_status",
     "matched_requirements", "unmet_requirements", "missing_documents",
     "eligibility_justification", "status",
@@ -227,3 +227,31 @@ def test_status_patch_updates_state(seed: TestClient) -> None:
 
 def test_feed_needs_auth(seed: TestClient) -> None:
     assert seed.get("/api/tenders").status_code == 401
+
+
+def test_translate_makes_english_title_and_summary_once(seed: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    from backend.ai.client import MetaAIClient
+    from backend.core.config import settings
+
+    calls: list[str] = []
+
+    async def fake(self, title: str, description: str | None):  # noqa: ANN001
+        calls.append(title)
+        return "Catering framework (EN)", "Food service for public institutions."
+
+    monkeypatch.setattr(MetaAIClient, "translate_tender", fake)
+    monkeypatch.setattr(settings, "meta_api_key", "test-key")
+
+    first = seed.post("/api/tenders/1003/translate", headers=_auth()).json()
+    assert first["state"]["ai_title_simplified"] == "Catering framework (EN)"
+    assert first["state"]["summary_en"] == "Food service for public institutions."
+    seed.post("/api/tenders/1003/translate", headers=_auth())
+    assert calls == ["Catering framework"]  # kept, not asked again
+
+
+def test_translate_without_key_leaves_fields_empty(seed: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    from backend.core.config import settings
+
+    monkeypatch.setattr(settings, "meta_api_key", "")
+    out = seed.post("/api/tenders/1003/translate", headers=_auth()).json()
+    assert out["state"]["summary_en"] is None

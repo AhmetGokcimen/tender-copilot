@@ -116,6 +116,12 @@ export async function fetchTender(externalId: string): Promise<TenderWithState> 
   return get<TenderWithState>(`/tenders/${encodeURIComponent(externalId)}`);
 }
 
+/** Asks for the English title and summary (made once, then kept). */
+export async function translateTender(externalId: string): Promise<TenderWithState> {
+  if (USE_MOCK) return fetchTender(externalId);
+  return post<TenderWithState>(`/tenders/${encodeURIComponent(externalId)}/translate`, {});
+}
+
 export type PastWinner = {
   title: string;
   awarded_on: string | null;

@@ -36,7 +36,7 @@ from backend.api.schemas import (
     TenderWithState,
     TenderWithStatePage,
 )
-from backend.core import score_jobs
+from backend.core import score_jobs, translate
 from backend.core.authorizations import (
     authorization_status_map,
     ensure_authorization_rows,
@@ -223,6 +223,22 @@ def get_tender(
         auth_map.get(tender.country_code),
         RenewalPattern(**renewal) if renewal else None,
     )
+
+
+@router.post("/tenders/{external_id}/translate", response_model=TenderFeedItem, tags=["tenders"])
+async def translate_tender(
+    external_id: str,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> TenderFeedItem:
+    """English title + summary for one tender, made on first request and kept.
+    Returns the tender as the detail endpoint does; fields stay empty when
+    the AI key is missing or the model fails (the page then falls back)."""
+    tender = session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    await translate.translate_one(session, tender)
+    return get_tender(external_id, None, session, user)
 
 
 @router.get(

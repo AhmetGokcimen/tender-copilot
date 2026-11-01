@@ -52,6 +52,17 @@ speaker instantly understands what the work is. Rules:
 they're quoted.
 - Output only the rewritten title, nothing else."""
 
+TRANSLATE_SYSTEM_PROMPT = """\
+You receive a Romanian public-tender title and, sometimes, a description. \
+Reply with ONLY a JSON object: {{"title": "...", "summary": "..."}}.
+- "title": the title in plain English so a foreign contractor instantly \
+understands the work. Keep every project/reference code verbatim, never \
+translate street/village/company/institution names, and localise only \
+well-known places (e.g. "București" -> "Bucharest").
+- "summary": one or two plain English sentences saying what is being bought \
+or built and, if the text says so, where. Use only what the given text \
+states; never invent a quantity, price, date or requirement."""
+
 EXTRACT_SYSTEM_PROMPT = """\
 Extract structured eligibility requirements from the given public-tender \
 specification text. Only extract what the text literally states — do not \
@@ -176,6 +187,22 @@ class MetaAIClient:
     async def simplify_title(self, title: str, *, language: str = "en") -> str:
         system_prompt = SIMPLIFY_TITLE_SYSTEM_PROMPT.format(language=language)
         return (await self._chat(system_prompt, title)).strip()
+
+    async def translate_tender(self, title: str, description: str | None) -> tuple[str, str] | None:
+        """English title + short summary, or None when the model's answer is unusable."""
+        user_message = f"Title: {title}"
+        if description:
+            user_message += f"\n\nDescription: {description[:1500]}"
+        for _ in range(2):
+            raw = await self._chat(TRANSLATE_SYSTEM_PROMPT, user_message, json_mode=True)
+            try:
+                data = json.loads(raw)
+                title_en, summary = str(data["title"]).strip(), str(data["summary"]).strip()
+            except (json.JSONDecodeError, KeyError, TypeError):
+                continue
+            if title_en and summary:
+                return title_en, summary
+        return None
 
     async def ocr_image(self, png_bytes: bytes, *, hint: str = "Transcribe this page:") -> str:
         """Transcribe one rendered page image via the model's vision input.

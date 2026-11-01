@@ -151,6 +151,7 @@ class TenderFeedState(BaseModel):
     score_reasons: list[str]
     ai_summary: str | None
     ai_title_simplified: str | None
+    summary_en: str | None
     extracted_requirements: list[str]
     eligible: bool | None
     # Separate dimension from `eligible`: the company's self-declared
@@ -230,6 +231,7 @@ class TenderFeedItem(BaseModel):
                 score_reasons=state.score_reasons if state else [],
                 ai_summary=state.ai_summary if state else None,
                 ai_title_simplified=tender.ai_title_simplified,
+                summary_en=tender.summary_en,
                 extracted_requirements=summarize_requirements(
                     tender.extracted_requirements
                 ),

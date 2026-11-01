@@ -1,10 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useQueryClient } from '@tanstack/react-query';
 import { clsx } from 'clsx';
 import { Link } from '@/i18n/routing';
-import { useTender } from '@/lib/queries';
+import { useTender, qk } from '@/lib/queries';
+import { translateTender } from '@/lib/api';
 import { usePipelineStore } from '@/stores/usePipelineStore';
 import { Icon } from './Icon';
 import { MatchChip } from './MatchChip';
@@ -14,7 +16,7 @@ import { EmptyState } from './EmptyState';
 import { TenderDocs } from './TenderDocs';
 import { PastWinners } from './PastWinners';
 import { RenewalCard } from './RenewalCard';
-import { daysUntil, formatDate, formatDaysLeft, formatRON } from '@/lib/format';
+import { daysUntil, formatDate, formatDaysLeft, formatRON, tenderTitle } from '@/lib/format';
 
 function Timeline({ pub, clar, sub }: { pub: string | null; clar: string | null; sub: string | null }) {
   const t = useTranslations('analysis');
@@ -71,7 +73,22 @@ export function TenderDetail({ externalId }: { externalId: string }) {
   const t = useTranslations('analysis');
   const tp = useTranslations('procedures');
   const tc = useTranslations('common');
+  const locale = useLocale();
+  const queryClient = useQueryClient();
   const { data: tender, isLoading, isError, error, refetch } = useTender(externalId);
+
+  // English UI: ask once for the English title and summary, then keep them.
+  const needsEnglish = locale === 'en' && !!tender && !tender.state.summary_en;
+  useEffect(() => {
+    if (!needsEnglish) return;
+    let dead = false;
+    translateTender(externalId)
+      .then((fresh) => !dead && fresh.state.summary_en && queryClient.setQueryData(qk.tender(externalId), fresh))
+      .catch(() => undefined);
+    return () => {
+      dead = true;
+    };
+  }, [needsEnglish, externalId, queryClient]);
   const statuses = usePipelineStore((s) => s.statuses);
   const setStatus = usePipelineStore((s) => s.setStatus);
   const untrack = usePipelineStore((s) => s.untrack);
@@ -134,6 +151,7 @@ export function TenderDetail({ externalId }: { externalId: string }) {
     tender.state.unmet_requirements.length > 0;
 
   const summary =
+    (locale === 'en' ? tender.state.summary_en : null) ??
     tender.state.ai_summary ??
     (tender.raw_description && tender.raw_description.trim() !== tender.title.trim() ? tender.raw_description : null) ??
     [
@@ -160,9 +178,9 @@ export function TenderDetail({ externalId }: { externalId: string }) {
           <span className="tnum font-code-sm text-code-sm text-on-surface-variant">{tender.external_id}</span>
         </div>
         <h1 className="font-headline-lg text-headline-lg tracking-tight text-on-surface">
-          {tender.state.ai_title_simplified ?? tender.title}
+          {tenderTitle(tender, locale)}
         </h1>
-        {tender.state.ai_title_simplified && tender.state.ai_title_simplified !== tender.title && (
+        {locale === 'en' && tender.state.ai_title_simplified && tender.state.ai_title_simplified !== tender.title && (
           <p className="font-body-md text-body-md text-on-surface-variant">{tender.title}</p>
         )}
       </header>

@@ -1,16 +1,17 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { clsx } from 'clsx';
 import { Link } from '@/i18n/routing';
 import { Icon } from './Icon';
 import { MatchChip } from './MatchChip';
 import { EligibilityChip } from './EligibilityChip';
 import type { TenderWithState } from '@/lib/types';
-import { formatDate, formatDaysLeft, formatRON } from '@/lib/format';
+import { formatDate, formatDaysLeft, formatRON, tenderTitle } from '@/lib/format';
 import { usePipelineStore } from '@/stores/usePipelineStore';
 
 export function TenderCard({ tender }: { tender: TenderWithState }) {
+  const locale = useLocale();
   const t = useTranslations('opportunities');
   const ta = useTranslations('analysis');
   const tp = useTranslations('procedures');
@@ -47,7 +48,7 @@ export function TenderCard({ tender }: { tender: TenderWithState }) {
             href={`/app/tenders/${tender.external_id}`}
             className="font-headline-sm text-headline-sm text-on-surface hover:underline"
           >
-            {tender.state.ai_title_simplified ?? tender.title}
+            {tenderTitle(tender, locale)}
           </Link>
           <p className="line-clamp-1 font-body-sm text-body-sm text-on-surface-variant">
             {tender.title}
