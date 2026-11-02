@@ -45,7 +45,40 @@
     "legal": "Consilier juridic",
     "writer": "Redactor ofertă",
     "risk": "Evaluator de risc",
-    "generatedBy": "Generat de"
+    "generatedBy": "Generat de",
+    "failed": "nu a putut finaliza, această parte rămâne de completat de tine",
+    "doneSpec": "a citit licitația și a numerotat {n} cerințe, {m} documente de depus",
+    "doneEligibility": "a verificat profilul: {n} din {m} cerințe confirmate",
+    "doneLegal": "a pregătit {n} declarații și a semnalat {m} clauze contractuale",
+    "doneWriter": "a scris metodologia în {n} pași și un tabel de conformitate de {m} rânduri",
+    "doneRisk": "a listat {n} riscuri și {m} elemente lipsă înainte de depunere",
+    "activity_spec": [
+      "Descarcă dosarul licitației",
+      "Citește caietul de sarcini și anunțul",
+      "Numerotează fiecare cerință",
+      "Listează documentele de depus"
+    ],
+    "activity_eligibility": [
+      "Compară cifra de afaceri și experiența cu criteriile",
+      "Verifică certificatele față de cerințe",
+      "Stabilește ce e îndeplinit, neclar sau lipsă"
+    ],
+    "activity_legal": [
+      "Citește motivele de excludere și condițiile contractuale",
+      "Redactează declarațiile pentru ofertă",
+      "Marchează clauzele care afectează prețul"
+    ],
+    "activity_writer": [
+      "Scrie înțelegerea cerinței",
+      "Redactează metodologia pas cu pas",
+      "Construiește graficul și tabelul de conformitate",
+      "Listează articolele de preț pentru oferta financiară"
+    ],
+    "activity_risk": [
+      "Cântărește ce poate compromite oferta",
+      "Caută lacune în dosar",
+      "Scrie verdictul înainte de depunere"
+    ]
   },
   "assistant": {
     "title": "Asistent AI",

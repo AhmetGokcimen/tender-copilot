@@ -289,3 +289,39 @@ def test_brief_is_built_once_and_kept(seed: TestClient, monkeypatch: pytest.Monk
     assert sorted(calls) == ["English", "Romanian"]  # kept, not rebuilt
     feed = seed.get("/api/tenders", headers=_auth()).json()
     assert all(item["brief"] is None for item in feed)  # detail only
+
+
+def test_bid_agents_run_in_order_and_spec_is_kept(seed: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    import json as _json
+
+    from backend.ai.client import MetaAIClient
+    from backend.core import agents as agents_core
+    from backend.core.config import settings
+
+    seen: list[str] = []
+
+    async def fake_chat(self, system: str, user: str, **_kw):  # noqa: ANN001
+        if "Spec Analyst" in system:
+            seen.append("spec")
+            return _json.dumps({"items": [{"ref": "R1", "text": "Experienta similara 2 lucrari", "category": "qualification"}]})
+        if "Eligibility Checker" in system:
+            seen.append("eligibility")
+            assert "R1" in user  # reads the kept spec
+            return _json.dumps({"rows": [{"ref": "R1", "requirement": "x", "status": "unclear"}], "summary": "ok"})
+        seen.append("other")
+        return "{}"
+
+    async def fake_source(adapter, tender, ai):  # noqa: ANN001
+        return "notice text", False
+
+    monkeypatch.setattr(MetaAIClient, "_chat", fake_chat)
+    monkeypatch.setattr(agents_core, "gather_source", fake_source)
+    monkeypatch.setattr(settings, "meta_api_key", "test-key")
+
+    spec = seed.post("/api/tenders/1003/agents/spec", json={}, headers=_auth()).json()
+    assert spec["output"]["items"][0]["ref"] == "R1"
+    seed.post("/api/tenders/1003/agents/spec", json={}, headers=_auth())
+    assert seen.count("spec") == 1  # tender-wide, read once
+    elig = seed.post("/api/tenders/1003/agents/eligibility", json={"evidence": ["ISO 9001"]}, headers=_auth()).json()
+    assert elig["output"]["rows"][0]["status"] == "unclear"
+    assert seed.post("/api/tenders/1003/agents/nope", json={}, headers=_auth()).status_code == 404

@@ -613,3 +613,19 @@
     animation: none;
   }
 }
+
+/* Agent workbench: an indeterminate bar for the agent that is working, and a
+   soft pulse on its dots. Frozen under reduced motion by the global rule. */
+@keyframes agent-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(260%); }
+}
+.agent-bar {
+  width: 38%;
+  animation: agent-bar 1.6s ease-in-out infinite;
+}
+@keyframes agent-dot {
+  0%, 80%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+.agent-dot { animation: agent-dot 1.2s ease-in-out infinite; }

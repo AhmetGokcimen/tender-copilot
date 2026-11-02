@@ -52,6 +52,24 @@ async def _notice_text(adapter: RomaniaSeapAdapter, tender: Tender) -> str:
     return "\n".join(p for p in parts if p)
 
 
+async def gather_source(
+    adapter: RomaniaSeapAdapter, tender: Tender, ai: MetaAIClient
+) -> tuple[str, bool]:
+    """Notice text plus, when the dossier has one, the specification text.
+    Returns (source text, whether documents were read)."""
+    notice = await _notice_text(adapter, tender)
+    documents = ""
+    if tender.notice_type_id is not None:
+        try:
+            documents = await asyncio.wait_for(_caiet_text(adapter, tender, ai), DOCS_BUDGET_SECONDS)
+        except TimeoutError:
+            documents = ""
+    source = notice
+    if documents.strip():
+        source = f"{notice}\n\n--- Specification documents ---\n{documents}"
+    return source[:MAX_SOURCE_CHARS], bool(documents.strip())
+
+
 async def make_brief(
     session: Session,
     tender: Tender,
@@ -66,17 +84,7 @@ async def make_brief(
         return False
     ai = ai or MetaAIClient()
     adapter = adapter or RomaniaSeapAdapter()
-    notice = await _notice_text(adapter, tender)
-    documents = ""
-    if tender.notice_type_id is not None:
-        try:
-            documents = await asyncio.wait_for(_caiet_text(adapter, tender, ai), DOCS_BUDGET_SECONDS)
-        except TimeoutError:
-            documents = ""
-    source = notice
-    if documents.strip():
-        source = f"{notice}\n\n--- Specification documents ---\n{documents}"
-    source = source[:MAX_SOURCE_CHARS]
+    source, from_documents = await gather_source(adapter, tender, ai)
     try:
         en, ro = await asyncio.gather(
             ai.build_brief(source, language="English"), ai.build_brief(source, language="Romanian")
@@ -88,7 +96,7 @@ async def make_brief(
     tender.brief = {
         "en": en.model_dump(),
         "ro": ro.model_dump(),
-        "source": "documents" if documents.strip() else "notice",
+        "source": "documents" if from_documents else "notice",
         "generated_at": datetime.now(UTC).isoformat(),
     }
     session.add(tender)

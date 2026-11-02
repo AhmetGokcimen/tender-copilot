@@ -1,19 +1,22 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { clsx } from 'clsx';
 import { pdf } from '@react-pdf/renderer';
 import { useEvidence } from '@/lib/queries';
 import { useCompanyStore } from '@/stores/useCompanyStore';
 import { outputKey, useGeneratorStore, type DocType } from '@/stores/useGeneratorStore';
 import { useAssistantStore } from '@/stores/useAssistantStore';
-import { DOC_TITLES, buildDraftSections, draftFrontMatter, mockDelay } from '@/lib/draft-template';
+import { DOC_TITLES, buildDraftSections, draftFrontMatter } from '@/lib/draft-template';
+import { runBidAgent } from '@/lib/api';
+import { agentSummary, type AgentOutputs } from '@/lib/agents';
 import { sectionsToTiptap, tiptapToMarkdown } from '@/lib/doc-convert';
 import { DraftPdfDocument, draftFileName } from '@/components/DraftPdf';
 import type { AgentId, AgentState, TenderWithState } from '@/lib/types';
 import { Icon } from './Icon';
 import { AgentStrip, AGENT_ORDER } from './AgentStrip';
+import { AgentWorkbench, type AgentLogEntry } from './AgentWorkbench';
 import { CheckboxRow } from './CheckboxRow';
 import { DocList } from './DocList';
 import { DocEditor } from './DocEditor';
@@ -74,6 +77,9 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
   const [selectedEvidence, setSelectedEvidence] = useState<string[] | null>(null);
   const [agentStates, setAgentStates] = useState<Record<AgentId, AgentState>>(IDLE_AGENTS);
   const [openKey, setOpenKey] = useState<string | null>(null);
+  const [agentLog, setAgentLog] = useState<AgentLogEntry[]>([]);
+  const tAgents = useTranslations('agents');
+  const language = useLocale() === 'ro' ? 'ro' : 'en';
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
   const runRef = useRef(0);
@@ -112,9 +118,39 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
     setGenerating(true);
     setCopied(false);
     setAgentStates({ ...IDLE_AGENTS });
+    setAgentLog([]);
+    const outputs: AgentOutputs = {};
+    const evidenceNames = usedEvidence.map((e) => `${e.name} (${e.type})`);
+    // Each agent does its own model call, in order, and hands its result on.
+    for (const agent of AGENT_ORDER) {
+      if (runRef.current !== run) return;
+      setAgentStates((s) => ({ ...s, [agent]: 'active' }));
+      const started = Date.now();
+      let output: unknown = null;
+      try {
+        const context: Record<string, unknown> = {};
+        for (const k of ['eligibility', 'legal', 'writer'] as const) if (outputs[k]) context[k] = outputs[k];
+        output = (await runBidAgent(tender.external_id, agent, { evidence: evidenceNames, context, language })).output;
+      } catch {
+        output = null;
+      }
+      if (runRef.current !== run) return;
+      (outputs as Record<string, unknown>)[agent] = output;
+      const summary = output ? agentSummary(agent, outputs) : null;
+      setAgentStates((s) => ({ ...s, [agent]: output ? 'done' : 'failed' }));
+      setAgentLog((l) => [
+        ...l,
+        {
+          agent,
+          ms: Date.now() - started,
+          failed: !output,
+          text: summary ? tAgents(summary.key, { n: summary.n, m: summary.m ?? 0 }) : tAgents('failed'),
+        },
+      ]);
+    }
     const now = new Date().toISOString();
     for (const d of enabledDocs) {
-      const sections = buildDraftSections(tender, profile, usedEvidence, d);
+      const sections = buildDraftSections(tender, profile, usedEvidence, d, outputs);
       setDoc({
         key: outputKey(tender.external_id, d),
         doc: d,
@@ -128,13 +164,6 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
       });
     }
     setOpenKey(outputKey(tender.external_id, enabledDocs[0]));
-    for (const agent of AGENT_ORDER) {
-      if (runRef.current !== run) return;
-      setAgentStates((s) => ({ ...s, [agent]: 'active' }));
-      await mockDelay(600);
-      if (runRef.current !== run) return;
-      setAgentStates((s) => ({ ...s, [agent]: 'done' }));
-    }
     setGenerating(false);
   };
 
@@ -293,6 +322,7 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
               <AgentStrip states={agentStates} />
             </div>
           )}
+          <AgentWorkbench states={agentStates} log={agentLog} />
           <div className="flex items-center gap-space-sm">
             <span className="shrink-0 font-label-md text-label-md font-semibold uppercase text-on-surface-variant">
               {t('completeness')}

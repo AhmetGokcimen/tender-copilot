@@ -128,6 +128,19 @@ export async function briefTender(externalId: string): Promise<TenderWithState> 
   return post<TenderWithState>(`/tenders/${encodeURIComponent(externalId)}/brief`, {});
 }
 
+/** Runs one bid-preparation agent; `output` is null when the model could not produce one. */
+export async function runBidAgent(
+  externalId: string,
+  agent: string,
+  body: { evidence: string[]; context: Record<string, unknown>; language: string },
+): Promise<{ agent: string; output: unknown | null }> {
+  if (USE_MOCK) return { agent, output: null };
+  return post<{ agent: string; output: unknown | null }>(
+    `/tenders/${encodeURIComponent(externalId)}/agents/${agent}`,
+    body,
+  );
+}
+
 export type PastWinner = {
   title: string;
   awarded_on: string | null;
