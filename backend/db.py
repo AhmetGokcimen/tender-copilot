@@ -133,6 +133,7 @@ _TENDER_UPSERT_EXCLUDED_COLUMNS = (
     # Tender-intrinsic AI output: never clobbered by a re-fetch from the
     # adapter. See models.tender's docstring.
     "ai_title_simplified", "extracted_requirements", "extraction_confidence",
+    "summary_en", "brief",
 )
 
 

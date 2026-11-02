@@ -3,36 +3,41 @@
 import { memo, useMemo, useState } from 'react';
 import { clsx } from 'clsx';
 import { ROMANIA_GRID, ROMANIA_MASK } from '@/lib/romania-mask';
-import { CITIES, countyKey } from '@/lib/ro-cities';
+import { DOT_COUNTY } from '@/lib/romania-counties';
+import { COUNTIES } from '@/lib/fx';
+import { countyKey } from '@/lib/ro-cities';
 
 type Cell = { x: number; y: number; county: string };
 
 /**
- * Splits the dotted map of Romania into counties by giving each dot to the
- * nearest county seat. The borders are approximate (there are no county
- * outlines in the dot grid), which is enough to find a county by eye.
+ * Gives each dot of the map its county, from real county borders (see
+ * scripts/gen-romania-counties.js), and the short border segments between
+ * dots of different counties so the outlines can be drawn.
  */
-function buildCells(): Cell[] {
-  const { cols, rows, step, width, height } = ROMANIA_GRID;
+function buildMap(): { cells: Cell[]; borders: string } {
+  const { cols, rows, step } = ROMANIA_GRID;
   const bytes = Uint8Array.from(atob(ROMANIA_MASK), (ch) => ch.charCodeAt(0));
-  const seats = CITIES.map((c) => ({ county: c.county, x: (c.x / 100) * width, y: (c.y / 100) * height }));
   const cells: Cell[] = [];
-  for (let i = 0; i < cols * rows; i++) {
+  const at = new Map<number, string>();
+  for (let i = 0, n = 0; i < cols * rows; i++) {
     if (!(bytes[i >> 3] & (1 << (i & 7)))) continue;
+    const county = COUNTIES[DOT_COUNTY.charCodeAt(n++) - 48];
+    cells.push({ x: step / 2 + (i % cols) * step, y: step / 2 + Math.floor(i / cols) * step, county });
+    at.set(i, county);
+  }
+  const h = step / 2;
+  let borders = '';
+  for (let i = 0; i < cols * rows; i++) {
+    const c = at.get(i);
+    if (!c) continue;
     const x = step / 2 + (i % cols) * step;
     const y = step / 2 + Math.floor(i / cols) * step;
-    let best = seats[0];
-    let bestD = Infinity;
-    for (const s of seats) {
-      const d = (s.x - x) ** 2 + (s.y - y) ** 2;
-      if (d < bestD) {
-        bestD = d;
-        best = s;
-      }
-    }
-    cells.push({ x, y, county: best.county });
+    const right = (i % cols) < cols - 1 ? at.get(i + 1) : undefined;
+    const down = at.get(i + cols);
+    if (right && right !== c) borders += `M${x + h} ${y - h}V${y + h}`;
+    if (down && down !== c) borders += `M${x - h} ${y + h}H${x + h}`;
   }
-  return cells;
+  return { cells, borders };
 }
 
 const FILL = { on: 'fill-indigo', hot: 'fill-indigo/55', all: 'fill-indigo/25', off: 'fill-line-strong/35' };
@@ -52,7 +57,7 @@ const CountyDots = memo(function CountyDots({
   return (
     <g className={clsx('cursor-pointer transition-colors', FILL[state])} onMouseEnter={onEnter} onClick={onClick}>
       {dots.map((d) => (
-        <circle key={`${d.x}-${d.y}`} cx={d.x} cy={d.y} r={4.4} />
+        <circle key={`${d.x}-${d.y}`} cx={d.x} cy={d.y} r={3.9} />
       ))}
     </g>
   );
@@ -64,15 +69,16 @@ const CountyDots = memo(function CountyDots({
  * With nothing picked the whole country is lightly filled.
  */
 export function RegionMap({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
-  const groups = useMemo(() => {
+  const { groups, borders } = useMemo(() => {
+    const { cells, borders } = buildMap();
     const by = new Map<string, Cell[]>();
-    for (const c of buildCells()) by.set(c.county, [...(by.get(c.county) ?? []), c]);
-    return [...by.entries()];
+    for (const c of cells) by.set(c.county, [...(by.get(c.county) ?? []), c]);
+    return { groups: [...by.entries()], borders };
   }, []);
   const [hover, setHover] = useState<string | null>(null);
   const picked = useMemo(() => new Set(value.map(countyKey)), [value]);
   const all = value.length === 0;
-  const names = useMemo(() => new Map(CITIES.map((c) => [countyKey(c.county), c.county])), []);
+  const names = useMemo(() => new Map(COUNTIES.map((c) => [countyKey(c), c])), []);
 
   const toggle = (county: string) => {
     const k = countyKey(county);
@@ -101,6 +107,7 @@ export function RegionMap({ value, onChange }: { value: string[]; onChange: (v: 
             />
           );
         })}
+        <path d={borders} className="pointer-events-none stroke-ink/25" strokeWidth={1.2} strokeLinecap="round" fill="none" />
       </svg>
       <p className="h-5 text-[13px] text-ink-2" aria-live="polite">
         {hover ? names.get(hover) : ''}

@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { clsx } from 'clsx';
 import { Link } from '@/i18n/routing';
 import { useTender, qk } from '@/lib/queries';
-import { translateTender } from '@/lib/api';
+import { briefTender, translateTender } from '@/lib/api';
 import { usePipelineStore } from '@/stores/usePipelineStore';
 import { Icon } from './Icon';
 import { MatchChip } from './MatchChip';
@@ -15,6 +15,7 @@ import { AuthorizationNotice } from './AuthorizationNotice';
 import { EmptyState } from './EmptyState';
 import { TenderDocs } from './TenderDocs';
 import { PastWinners } from './PastWinners';
+import { TenderBriefView } from './TenderBrief';
 import { RenewalCard } from './RenewalCard';
 import { daysUntil, formatDate, formatDaysLeft, formatRON, tenderTitle } from '@/lib/format';
 
@@ -89,6 +90,24 @@ export function TenderDetail({ externalId }: { externalId: string }) {
       dead = true;
     };
   }, [needsEnglish, externalId, queryClient]);
+  // The detailed brief is read from the notice and its documents once, then kept.
+  const needsBrief = !!tender && !tender.brief;
+  const [briefState, setBriefState] = useState<'idle' | 'loading' | 'failed'>('idle');
+  useEffect(() => {
+    if (!needsBrief) return;
+    let dead = false;
+    setBriefState('loading');
+    briefTender(externalId)
+      .then((fresh) => {
+        if (dead) return;
+        if (fresh.brief) queryClient.setQueryData(qk.tender(externalId), fresh);
+        else setBriefState('failed');
+      })
+      .catch(() => !dead && setBriefState('failed'));
+    return () => {
+      dead = true;
+    };
+  }, [needsBrief, externalId, queryClient]);
   const statuses = usePipelineStore((s) => s.statuses);
   const setStatus = usePipelineStore((s) => s.setStatus);
   const untrack = usePipelineStore((s) => s.untrack);
@@ -214,7 +233,22 @@ export function TenderDetail({ externalId }: { externalId: string }) {
         <div className="flex flex-col gap-space-lg lg:col-span-8">
           <section className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
             <h2 className="mb-space-sm font-headline-sm text-headline-sm text-on-surface">{t('summary')}</h2>
-            <p className="font-body-lg text-body-lg text-on-surface">{summary}</p>
+            {tender.brief ? (
+              <TenderBriefView
+                brief={locale === 'ro' ? tender.brief.ro : tender.brief.en}
+                fromDocuments={tender.brief.source === 'documents'}
+              />
+            ) : (
+              <>
+                <p className="font-body-lg text-body-lg text-on-surface">{summary}</p>
+                {briefState === 'loading' && (
+                  <p className="mt-space-sm flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant" aria-live="polite">
+                    <Icon name="progress_activity" size="xs" className="animate-spin" />
+                    {t('briefReading')}
+                  </p>
+                )}
+              </>
+            )}
           </section>
 
           <section className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">

@@ -200,6 +200,8 @@ class TenderFeedItem(BaseModel):
     clarification_deadline: datetime | None
     state: TenderFeedState
     renewal_pattern: RenewalPattern | None = None
+    # Detail only (kept out of the feed to keep it small).
+    brief: dict | None = None
 
     @classmethod
     def from_triple(
@@ -209,6 +211,7 @@ class TenderFeedItem(BaseModel):
         company: CompanyProfile | None,
         authorization_status: str | None = None,
         renewal_pattern: RenewalPattern | None = None,
+        brief: dict | None = None,
     ) -> "TenderFeedItem":
         return cls(
             source_system=tender.source_system,
@@ -248,6 +251,7 @@ class TenderFeedItem(BaseModel):
                 status=state.status if state else "new",
             ),
             renewal_pattern=renewal_pattern,
+            brief=brief,
         )
 
 

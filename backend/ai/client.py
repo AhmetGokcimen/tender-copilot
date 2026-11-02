@@ -92,6 +92,24 @@ original language (usually Romanian), line breaks, numbers, and units. \
 Do not translate, summarize, or add anything that isn't there. If the \
 page contains no readable text, output nothing."""
 
+BRIEF_SYSTEM_PROMPT = """\
+You brief a contractor who is deciding whether to bid on a public tender \
+worth a lot of money. You get the notice and, when available, text of its \
+specification documents (caiet de sarcini, fisa de date). Write the brief \
+in {language}. Be concrete and specific so they can judge the job without \
+reading the files: name the actual work, quantities, capacities, materials, \
+standards, phases and constraints exactly as the text gives them.
+
+Hard rules: use ONLY what the text states. Never invent or round a number, \
+date, quantity or requirement. If something a bidder would want to know is \
+not in the text, list it under "not_stated" instead of guessing. Keep \
+project/reference codes, street, village and institution names verbatim. \
+Keep every item to one short sentence. No marketing language.
+
+Respond with ONLY a JSON object matching this schema, no other text:
+
+{schema}"""
+
 COMPARE_ELIGIBILITY_SYSTEM_PROMPT = """\
 You are a public-procurement eligibility checker for an SME. You are \
 given the tender's extracted requirements, some already-computed numeric \
@@ -131,6 +149,23 @@ class ExtractedRequirements(BaseModel):
     uncertain_points: list[str] = []
     extraction_confidence: str = "medium"  # "high" | "medium" | "low" | "failed"
     raw_model_output: str | None = None
+
+
+class BriefCondition(BaseModel):
+    label: str
+    value: str
+
+
+class TenderBrief(BaseModel):
+    """Plain-language read of what a tender asks for; an empty field means
+    the source text does not say."""
+
+    overview: str = ""  # 2-4 sentences: what is built/bought, where, for whom
+    scope: list[str] = []  # work items / deliverables with quantities and capacities
+    method: list[str] = []  # how: technical solutions, standards, materials, phases
+    conditions: list[BriefCondition] = []  # duration, place, warranty, payment, guarantee, award criterion, lots
+    watch_outs: list[str] = []  # what to check before committing: risks, tight dates, penalties
+    not_stated: list[str] = []  # what a bidder would want to know that the text omits
 
 
 class EligibilityVerdict(BaseModel):
@@ -202,6 +237,20 @@ class MetaAIClient:
                 continue
             if title_en and summary:
                 return title_en, summary
+        return None
+
+    async def build_brief(self, source_text: str, *, language: str = "English") -> TenderBrief | None:
+        """Structured brief from notice/specification text, or None when the answer is unusable."""
+        schema = json.dumps(TenderBrief.model_json_schema())
+        system_prompt = BRIEF_SYSTEM_PROMPT.format(language=language, schema=schema)
+        for _ in range(2):
+            raw = await self._chat(system_prompt, source_text, json_mode=True)
+            try:
+                brief = TenderBrief.model_validate(json.loads(raw))
+            except (json.JSONDecodeError, ValidationError):
+                continue
+            if brief.overview.strip():
+                return brief
         return None
 
     async def ocr_image(self, png_bytes: bytes, *, hint: str = "Transcribe this page:") -> str:

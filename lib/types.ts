@@ -156,8 +156,26 @@ export interface TenderState {
 }
 
 /** Joined shape the API returns per company (GET /api/tenders?company_id=…). */
+export interface TenderBriefText {
+  overview: string;
+  scope: string[];
+  method: string[];
+  conditions: { label: string; value: string }[];
+  watch_outs: string[];
+  not_stated: string[];
+}
+
+/** Detailed read of the notice and its documents, in both UI languages. */
+export interface TenderBrief {
+  en: TenderBriefText;
+  ro: TenderBriefText;
+  source: 'documents' | 'notice';
+}
+
 export interface TenderWithState extends Tender {
   state: TenderState;
+  /** Detail only; null until the brief has been made. */
+  brief?: TenderBrief | null;
 }
 
 export interface EvidenceDocument {
