@@ -38,6 +38,17 @@ function NodeGlyph({ state }: { state: AgentState }) {
       </span>
     );
   }
+  if (state === 'failed') {
+    return (
+      <span
+        aria-hidden
+        className="flex items-center justify-center rounded-full bg-error text-[11px] font-bold leading-none text-white"
+        style={{ width: dim, height: dim }}
+      >
+        !
+      </span>
+    );
+  }
   if (state === 'active') {
     return (
       <svg width={dim} height={dim} viewBox="0 0 20 20" aria-hidden className="block">
@@ -112,7 +123,7 @@ export function AgentStrip({ states }: { states: Record<AgentId, AgentState> }) 
                   <span
                     className={clsx(
                       'absolute inset-0 origin-left bg-navy transition-transform duration-500 ease-linear',
-                      state === 'done' ? 'scale-x-100' : 'scale-x-0',
+                      state === 'done' || state === 'failed' ? 'scale-x-100' : 'scale-x-0',
                     )}
                   />
                 </span>

@@ -210,7 +210,7 @@ export const tenderKey = (t: Pick<Tender, 'source_system' | 'external_id'>): str
 /** Specialist AI agents behind the draft generator (display order). */
 export type AgentId = 'spec' | 'eligibility' | 'legal' | 'writer' | 'risk';
 
-export type AgentState = 'pending' | 'active' | 'done';
+export type AgentState = 'pending' | 'active' | 'done' | 'failed';
 
 /** One generated draft section, attributed to the agent that wrote it. */
 export interface DraftSection {

@@ -66,6 +66,8 @@ class Tender(SQLModel, table=True):
     # Detailed read of the notice and its documents, per language:
     # {"en": {...}, "ro": {...}, "source": "documents"|"notice", "generated_at": iso}
     brief: dict | None = Field(default=None, sa_column=Column(JSON))
+    # Numbered requirements read from the notice + specification (spec agent).
+    spec: dict | None = Field(default=None, sa_column=Column(JSON))
 
     first_seen_at: datetime = Field(default_factory=_utcnow)
     last_seen_at: datetime = Field(default_factory=_utcnow)

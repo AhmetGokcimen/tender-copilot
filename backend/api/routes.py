@@ -36,6 +36,7 @@ from backend.api.schemas import (
     TenderWithState,
     TenderWithStatePage,
 )
+from backend.core import agents as agents_core
 from backend.core import brief as brief_core
 from backend.core import score_jobs, translate
 from backend.core.authorizations import (
@@ -225,6 +226,42 @@ def get_tender(
         RenewalPattern(**renewal) if renewal else None,
         tender.brief,
     )
+
+
+class AgentRequest(BaseModel):
+    company_id: int | None = None
+    evidence: list[str] = []  # names of the evidence documents the company attached
+    context: dict = {}  # outputs of earlier agents, passed along by the screen
+    language: str = "en"  # UI language for the internal reviews
+
+
+@router.post("/tenders/{external_id}/agents/{agent}", tags=["tenders"])
+async def run_bid_agent(
+    external_id: str,
+    agent: str,
+    body: AgentRequest,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> dict:
+    """Run one of the five bid-preparation agents (spec, eligibility, legal,
+    writer, risk) and return its structured output. `spec` is tender-wide and
+    kept; the others are made for the caller's company on every run."""
+    if agent not in agents_core.AGENTS:
+        raise HTTPException(status_code=404, detail="Unknown agent")
+    tender = session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    company = _resolve_company(session, user, body.company_id)
+    output = await agents_core.run_agent(
+        session,
+        agent,
+        tender,
+        company,
+        evidence=body.evidence[:40],
+        context=body.context,
+        language=body.language,
+    )
+    return {"agent": agent, "output": output}
 
 
 @router.post("/tenders/{external_id}/brief", response_model=TenderFeedItem, tags=["tenders"])
