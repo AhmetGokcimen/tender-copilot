@@ -34,3 +34,4 @@ Thumbs.db
 
 # Frontend design exports (handled by the separate frontend tool/repo)
 *.zip
+/.local/
