@@ -122,6 +122,12 @@ export async function translateTender(externalId: string): Promise<TenderWithSta
   return post<TenderWithState>(`/tenders/${encodeURIComponent(externalId)}/translate`, {});
 }
 
+/** Asks for the detailed brief (scope, method, conditions); slow the first time, then kept. */
+export async function briefTender(externalId: string): Promise<TenderWithState> {
+  if (USE_MOCK) return fetchTender(externalId);
+  return post<TenderWithState>(`/tenders/${encodeURIComponent(externalId)}/brief`, {});
+}
+
 export type PastWinner = {
   title: string;
   awarded_on: string | null;

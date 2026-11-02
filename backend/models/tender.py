@@ -63,6 +63,9 @@ class Tender(SQLModel, table=True):
     summary_en: str | None = None  # 1-2 sentence English summary of what is bought
     extracted_requirements: dict | None = Field(default=None, sa_column=Column(JSON))
     extraction_confidence: str | None = None  # "high" | "medium" | "low" | "failed"
+    # Detailed read of the notice and its documents, per language:
+    # {"en": {...}, "ro": {...}, "source": "documents"|"notice", "generated_at": iso}
+    brief: dict | None = Field(default=None, sa_column=Column(JSON))
 
     first_seen_at: datetime = Field(default_factory=_utcnow)
     last_seen_at: datetime = Field(default_factory=_utcnow)

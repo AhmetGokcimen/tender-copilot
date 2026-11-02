@@ -36,6 +36,7 @@ from backend.api.schemas import (
     TenderWithState,
     TenderWithStatePage,
 )
+from backend.core import brief as brief_core
 from backend.core import score_jobs, translate
 from backend.core.authorizations import (
     authorization_status_map,
@@ -222,7 +223,25 @@ def get_tender(
         company,
         auth_map.get(tender.country_code),
         RenewalPattern(**renewal) if renewal else None,
+        tender.brief,
     )
+
+
+@router.post("/tenders/{external_id}/brief", response_model=TenderFeedItem, tags=["tenders"])
+async def brief_tender(
+    external_id: str,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> TenderFeedItem:
+    """Detailed brief of one tender (scope, method, conditions, watch-outs),
+    read from the notice and its specification once and kept. Slow on the
+    first request; the field stays empty if the AI key is missing or the
+    model fails."""
+    tender = session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    await brief_core.make_brief(session, tender)
+    return get_tender(external_id, None, session, user)
 
 
 @router.post("/tenders/{external_id}/translate", response_model=TenderFeedItem, tags=["tenders"])

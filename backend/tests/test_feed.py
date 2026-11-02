@@ -14,7 +14,7 @@ TENDER_KEYS = {
     "source_system", "external_id", "country_code", "title", "cpv_codes",
     "estimated_value", "currency", "publication_date", "submission_deadline",
     "raw_description", "source_url", "authority", "county", "procedure_type",
-    "clarification_deadline", "state", "renewal_pattern",
+    "clarification_deadline", "state", "renewal_pattern", "brief",
 }
 STATE_KEYS = {
     "score", "score_reasons", "ai_summary", "ai_title_simplified", "summary_en",
@@ -255,3 +255,37 @@ def test_translate_without_key_leaves_fields_empty(seed: TestClient, monkeypatch
     monkeypatch.setattr(settings, "meta_api_key", "")
     out = seed.post("/api/tenders/1003/translate", headers=_auth()).json()
     assert out["state"]["summary_en"] is None
+
+
+def test_brief_is_built_once_and_kept(seed: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    from backend.adapters.romania_seap.adapter import RomaniaSeapAdapter
+    from backend.ai.client import MetaAIClient, TenderBrief
+    from backend.core.config import settings
+
+    calls: list[str] = []
+
+    async def fake_brief(self, text: str, *, language: str = "English"):  # noqa: ANN001
+        calls.append(language)
+        return TenderBrief(overview=f"Overview in {language}", scope=["Install 120 kWp PV"])
+
+    async def no_caiet(self, external_id, notice_type_id):  # noqa: ANN001
+        return None
+
+    async def no_text(self, external_id, notice_type_id):  # noqa: ANN001
+        return "Technical ability:\nSimilar works"
+
+    monkeypatch.setattr(MetaAIClient, "build_brief", fake_brief)
+    monkeypatch.setattr(RomaniaSeapAdapter, "fetch_caiet_pdf", no_caiet)
+    monkeypatch.setattr(RomaniaSeapAdapter, "fetch_eligibility_text", no_text)
+    monkeypatch.setattr(settings, "meta_api_key", "test-key")
+
+    before = seed.get("/api/tenders/1003", headers=_auth()).json()
+    assert before["brief"] is None
+    out = seed.post("/api/tenders/1003/brief", headers=_auth()).json()
+    assert out["brief"]["en"]["overview"] == "Overview in English"
+    assert out["brief"]["ro"]["scope"] == ["Install 120 kWp PV"]
+    assert out["brief"]["source"] == "notice"
+    seed.post("/api/tenders/1003/brief", headers=_auth())
+    assert sorted(calls) == ["English", "Romanian"]  # kept, not rebuilt
+    feed = seed.get("/api/tenders", headers=_auth()).json()
+    assert all(item["brief"] is None for item in feed)  # detail only

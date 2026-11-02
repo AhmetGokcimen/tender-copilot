@@ -201,8 +201,8 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
         <h2 className="font-headline-sm text-headline-sm text-on-surface">{ta('docsTitle')}</h2>
         <p className="font-body-md text-body-md text-on-surface-variant">{ta('docsHint')}</p>
       </div>
-      <div className="mt-space-md grid grid-cols-1 items-start gap-space-md lg:grid-cols-12">
-        <div className="flex flex-col gap-space-md lg:col-span-4">
+      <div className="mt-space-md flex flex-col gap-space-md">
+        <div className="grid grid-cols-1 items-start gap-space-md rounded-lg border border-outline-variant bg-surface-depth p-space-md md:grid-cols-2">
           <fieldset className="flex flex-col gap-space-xs" disabled={generating}>
             <legend className="font-label-md text-label-md font-semibold text-on-surface">
               {t('docTypes')}
@@ -272,12 +272,14 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
               </ul>
             )}
           </div>
+        </div>
+        <div className="flex flex-col gap-space-sm">
           <button
             type="button"
             data-assistant="docs-generate"
             onClick={generate}
             disabled={enabledDocs.length === 0 || generating}
-            className="flex h-10 items-center justify-center gap-space-xs rounded-pill bg-indigo px-space-md font-label-md text-label-md text-on-indigo transition-colors hover:bg-indigo-deep disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 items-center justify-center gap-space-xs self-start rounded-pill bg-indigo px-space-lg font-label-md text-label-md text-on-indigo transition-colors hover:bg-indigo-deep disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Icon
               name={generating ? 'progress_activity' : 'auto_awesome'}
@@ -286,8 +288,6 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
             />
             {generating ? t('generating') : tenderDocs.length > 0 ? t('regenerate') : t('generate')}
           </button>
-        </div>
-        <div className="flex flex-col gap-space-sm lg:col-span-8">
           {(generating || tenderDocs.length > 0) && (
             <div className="rounded-lg border border-outline-variant bg-surface-depth px-space-md py-space-sm">
               <AgentStrip states={agentStates} />
