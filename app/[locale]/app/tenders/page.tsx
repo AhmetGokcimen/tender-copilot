@@ -28,7 +28,7 @@ export default function TrackedTendersPage() {
 
   return (
     <div className="flex flex-col gap-space-lg">
-      <header className="flex max-w-3xl flex-col gap-1">
+      <header data-assistant="analysis-header" className="flex max-w-3xl flex-col gap-1">
         <h1 className="font-headline-lg text-headline-lg tracking-tight text-on-surface">
           {t('indexTitle')}
         </h1>
@@ -49,7 +49,7 @@ export default function TrackedTendersPage() {
           }
         />
       ) : (
-        <div className="flex flex-col gap-space-md">
+        <div data-assistant="analysis-list" className="flex flex-col gap-space-md">
           {tracked.map((x) => (
             <TenderCard key={x.external_id} tender={x} />
           ))}

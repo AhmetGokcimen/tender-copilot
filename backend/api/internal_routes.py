@@ -19,6 +19,7 @@ from backend.models.ai_usage import AiUsage
 from backend.api.schemas import SyncReport
 from backend.core.config import settings
 from backend.core import brief as brief_core
+from backend.core import mail as mail_core
 from backend.core import reminders as reminders_core
 from backend.core import translate
 from backend.core.errors import error_summary
@@ -147,6 +148,27 @@ async def brief_tenders(
     return await brief_core.brief_pending(session, limit=limit, max_seconds=max_seconds)
 
 
+@router.post("/internal/send-test-email", tags=["internal"])
+async def send_test_email(
+    to: str = Query(min_length=5, max_length=200),
+    x_sync_token: str | None = Header(default=None),
+) -> dict:
+    """Send one test message to check the mail setup (SMTP or Resend)."""
+    if not settings.sync_secret:
+        raise HTTPException(status_code=503, detail="Sync not configured")
+    if not _token_ok(x_sync_token):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    from backend.core import mail
+
+    result = await mail.send_email(
+        to,
+        "Licits test e-mail",
+        "If you can read this, deadline reminders can reach you.\n\n"
+        "Dacă citești asta, memento-urile de termen îți pot ajunge.",
+    )
+    return {"transport": mail.transport(), "result": result}
+
+
 @router.post("/internal/send-reminders", tags=["internal"])
 async def send_reminders(
     dry_run: bool = Query(default=False),
@@ -218,7 +240,7 @@ def diagnostics(x_sync_token: str | None = Header(default=None)) -> dict:
         "dialect": engine.dialect.name,
         "database_url_set": bool(os.environ.get("DATABASE_URL")),
         "ai_key_set": translate.enabled(),
-        "mail_key_set": bool(settings.resend_api_key),
+        "mail_transport": mail_core.transport(),
         # False means JWT_SECRET is missing on this deployment: session tokens are refused.
         "jwt_secret_ok": not jwt_secret_unsafe(),
     }

@@ -414,7 +414,7 @@ export default function OnboardingPage() {
                     data-assistant="ob-cui"
                     className={`${INPUT} tnum !w-56`}
                   />
-                  <button
+                  <button data-assistant="ob-anaf"
                     type="button"
                     disabled={!cuiValid(c.cui ?? '')}
                     onClick={runAnaf}
@@ -439,7 +439,7 @@ export default function OnboardingPage() {
               <div className="grid grid-cols-1 gap-space-md sm:grid-cols-2">
                 <label className={LABEL}>
                   {t('repLabel')}
-                  <input
+                  <input data-assistant="ob-rep-name"
                     value={c.legal_rep_name ?? ''}
                     onChange={(e) => set({ legal_rep_name: e.target.value || null })}
                     placeholder={t('repPlaceholder')}
@@ -467,7 +467,7 @@ export default function OnboardingPage() {
               <div className="grid grid-cols-1 gap-space-md sm:grid-cols-[180px_minmax(0,1fr)]">
                 <label className={LABEL}>
                   {t('caenMainLabel')}
-                  <input
+                  <input data-assistant="ob-caen"
                     value={c.caen_main ?? ''}
                     onChange={(e) => set({ caen_main: e.target.value.replace(/\D/g, '').slice(0, 4) || null })}
                     placeholder="4120"
@@ -488,7 +488,7 @@ export default function OnboardingPage() {
               <Help>{t('caenHint')}</Help>
               <label className={LABEL}>
                 {t('websiteLabel')}
-                <input
+                <input data-assistant="ob-website"
                   type="url"
                   inputMode="url"
                   value={c.website ?? ''}

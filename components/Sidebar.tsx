@@ -141,7 +141,7 @@ export function Sidebar() {
               {total > 0 ? `${used}/${total}` : '–'}
             </span>
           ) : (
-            <div className="rounded bg-surface-container-lowest p-space-sm shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+            <div data-assistant="nav-quota" className="rounded bg-surface-container-lowest p-space-sm shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
               <div className="mb-space-xs flex items-center justify-between">
                 <span className="whitespace-nowrap font-label-sm text-label-sm font-semibold uppercase text-on-surface-variant">
                   {t('quotaTitle')}

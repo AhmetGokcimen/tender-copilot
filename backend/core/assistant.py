@@ -14,68 +14,172 @@ from pydantic import BaseModel, ValidationError
 from backend.ai.client import MetaAIClient
 from backend.core.translate import enabled
 
-# path pattern -> title, what the page is for, and the elements the assistant can point at.
+# path pattern -> title, what the page is for, what to tell users about it, and the
+# elements the assistant can point at.
 SITE_MAP: dict[str, dict] = {
     "/app": {
         "title": "Opportunities (the tender feed)",
         "keywords": ["opportunit", "feed", "fırsat", "firsat", "ihale listesi", "oportunit", "home", "ana sayfa", "dashboard"],
+        "help": [
+            "Shows open public tenders from SEAP, ranked by how well they match the company (match score 0-100).",
+            "Search by words, open Filters to narrow by county, procedure, minimum value, CPV code, minimum match score or only eligible tenders, and sort by match, deadline or value.",
+            "Each card has the title (English or Romanian), score, deadline and a Track button that adds it to the Bidding pipeline. Click the title to open the tender.",
+            "Export saves the shown tenders as a spreadsheet file. Refresh reloads the feed (new tenders are synced every 6 hours).",
+        ],
         "hooks": {
+            "feed-header": "the page title and the summary figures",
             "filters-search": "the search box for tenders",
-            "feed-filters": "the Filters button (county, procedure, value, minimum match, eligibility)",
+            "feed-filters": "the Filters button (opens the filter panel)",
+            "filter-county": "the County filter (inside the filter panel)",
+            "filter-procedure": "the Procedure type filter (inside the filter panel)",
+            "filter-value": "the minimum value filter (inside the filter panel)",
+            "filter-cpv": "the CPV code filter (inside the filter panel)",
+            "filter-score": "the minimum match score slider (inside the filter panel)",
+            "feed-sort": "the Sort control (match, deadline, value)",
+            "feed-export": "the Export button",
             "feed-refresh": "the refresh button",
-            "tender-card": "a tender card (title, match score, deadline, track button)",
+            "tender-card": "a tender card (title, match score, deadline, Track button)",
         },
     },
     "/app/tenders": {
-        "title": "Tender analysis (list of tenders to analyse)",
-        "keywords": ["analysis", "analiz", "analiză"],
-        "hooks": {},
+        "title": "Tender analysis (the tenders the company follows, with their analysis)",
+        "keywords": ["analysis", "analiz", "analiză", "analiza"],
+        "help": ["Lists the tenders being tracked with score and eligibility; open one for the full analysis."],
+        "hooks": {"analysis-header": "the page title", "analysis-list": "the list of tracked tenders"},
     },
     "/app/tenders/{id}": {
-        "title": "One tender: summary, timeline, eligibility, match score, document preparation",
+        "title": "One tender: summary, timeline, eligibility, match score, past winners, document preparation",
         "keywords": [],
+        "help": [
+            "Overview tab: a plain-language brief of the work (what it is, how it is done, key conditions, what to check, what the notice does not say), the procedure timeline, the data sheet, the match score with reasons, the eligibility analysis, past winners and renewal history.",
+            "The match score is rule-based: it compares the tender's CPV code, value and county with the company profile. It is not a prediction of winning.",
+            "Eligibility is checked requirement by requirement as met, not met or unclear; it appears after the tender documents are analysed in Document preparation.",
+            "Past winners shows who the same buyer awarded similar contracts to, with their latest financial figures; it uses a monthly quota (shown in the sidebar).",
+            "Track tender adds it to the Bidding pipeline. View on SEAP opens the official notice.",
+            "Document preparation tab: tick the documents (technical offer, financial offer, DUAE) and sources, press Generate. Five agents read the tender, check the company, review legal points, write the offer and assess risks; then a dialog asks for the company's declarations and prices. Afterwards: edit, PDF preview, review notes, download all PDFs or one ZIP with certificates and a checklist.",
+            "Documents are drafts in Romanian; the company must check them and sign with its qualified electronic signature before submitting in SEAP.",
+        ],
         "hooks": {
+            "tender-header": "the tender title, score and status chips",
+            "tender-tabs": "the Overview / Document preparation tabs",
+            "tender-summary": "the summary / brief of the work",
+            "tender-timeline": "the procedure timeline (published, clarification deadline, submission deadline)",
+            "tender-datasheet": "the executive data sheet (authority, procedure, CPV, value, dates)",
             "score-card": "the match score and why",
             "eligibility-card": "the eligibility analysis",
             "unmet-box": "requirements that are not met",
             "requirements-card": "matched requirements",
             "tender-track": "the Track tender button (adds it to the pipeline)",
             "tender-generate": "the Generate documents button",
-            "docs-generate": "the Generate button inside Document preparation (open with ?tab=docs)",
+            "tender-seap-link": "the View on SEAP link",
+            "tender-past-winners": "the Past winners card",
+            "tender-renewal": "the renewal history card",
+            "generate-output": "the whole Document preparation section (?tab=docs)",
+            "docs-types": "the documents to generate (open with ?tab=docs)",
+            "docs-sources": "the evidence documents used as sources (?tab=docs)",
+            "docs-generate": "the Generate button inside Document preparation (?tab=docs)",
+            "docs-agents": "the five agents and their progress (?tab=docs)",
+            "docs-completeness": "the draft completeness bar (?tab=docs)",
+            "docs-review": "the review notes: requirement checks, risks, what is missing (?tab=docs)",
+            "docs-download": "the download buttons: all PDFs or the full ZIP package (?tab=docs)",
+            "docs-view-toggle": "the Edit / PDF preview switch (?tab=docs)",
             "workspace-docs": "the list of generated documents (?tab=docs)",
             "workspace-editor": "the document editor (?tab=docs)",
             "workspace-ask-ai": "the Ask AI to edit button (?tab=docs)",
         },
     },
     "/app/pipeline": {
-        "title": "Bidding pipeline (kanban of tracked tenders: New, Preparing, Submitted, Archived)",
+        "title": "Bidding pipeline (kanban of tracked tenders)",
         "keywords": ["pipeline", "kanban", "bidding", "takip", "başvuru", "basvuru", "pipe"],
-        "hooks": {"pipeline-board": "the kanban board"},
+        "help": [
+            "Four columns: New, Preparing, Submitted, Archived. Drag a card between columns to change its status; the x on a card stops tracking it.",
+            "Deadline reminder e-mails are sent for tenders in Preparing, as many days before the deadline as the profile says.",
+        ],
+        "hooks": {
+            "pipeline-header": "the page title",
+            "pipeline-board": "the whole kanban board",
+            "pipeline-col-new": "the New column",
+            "pipeline-col-preparing": "the Preparing column (reminders are sent for these)",
+            "pipeline-col-submitted": "the Submitted column",
+            "pipeline-col-archived": "the Archived column",
+        },
     },
     "/app/archive": {
-        "title": "Archive (document vault: certificates, references, past tenders)",
+        "title": "Archive (submitted tenders and the document vault)",
         "keywords": ["archive", "arşiv", "arsiv", "arhiv", "vault", "belge", "documents"],
-        "hooks": {},
+        "help": [
+            "Results: tenders the company submitted and whether they were awarded.",
+            "Certificates and documents: the vault of the company's certificates, references and balance sheets. Add a document with the button; its details are read automatically.",
+        ],
+        "hooks": {
+            "archive-header": "the page title",
+            "archive-results": "the table of submitted tenders and results",
+            "archive-certificates": "the certificates and documents vault",
+            "archive-add": "the button that adds a certificate or document",
+        },
     },
     "/app/profile": {
         "title": "Company profile (what the company is, can do and has)",
         "keywords": ["profile", "profil", "şirket", "sirket", "company", "companie"],
+        "help": [
+            "The profile drives matching, eligibility checks and the generated documents. Fill it as completely as you can; the strength bar shows what is missing.",
+            "Company: legal details from ANAF, the legal representative and role (who signs offers) and the signature image placed on PDFs. The picture does not replace the qualified electronic signature SEAP requires.",
+            "Reference contracts, guarantees and financial capacity, staff by role, workload, exclusion declarations, preferences and uploaded certificates each have their own section.",
+            "Preferences: choose e-mail reminders for tenders you follow and how many days before the deadline to be reminded; the Save button stores everything.",
+        ],
         "hooks": {
             "profile-company": "company details, legal representative and signature",
+            "profile-rep-name": "the legal representative's name",
+            "profile-rep-role": "the legal representative's role",
+            "profile-signature": "the signature image upload",
             "profile-contracts": "reference contracts",
             "profile-guarantees": "guarantee and financial capacity",
             "profile-staff": "staff by role",
             "profile-workload": "workload",
-            "profile-exclusion": "exclusion declarations",
-            "profile-preferences": "notification and reminder settings (e-mail reminders before a deadline)",
+            "profile-exclusion": "exclusion declarations (tax debt, insolvency, terminated contracts)",
+            "profile-preferences": "notification, reminder and other preferences",
+            "profile-reminder-lead": "how many days before a deadline to be reminded by e-mail",
             "profile-documents": "uploaded certificates and documents",
-            "profile-signature": "the signature image used on documents",
+            "profile-save": "the Save button",
         },
     },
     "/app/settings": {
-        "title": "Settings (account, plan, usage)",
+        "title": "Settings (basic profile fields, matching keywords, country authorizations)",
         "keywords": ["settings", "ayar", "setări", "setari", "plan", "account", "hesap"],
-        "hooks": {},
+        "help": [
+            "Quick edit of company name, CUI, capacity and certifications, plus the CPV codes used for matching and the keywords that exclude a tender.",
+            "Authorizations: whether the company is registered to bid in a country.",
+        ],
+        "hooks": {
+            "settings-header": "the page title",
+            "settings-onboarding": "the reminder to finish onboarding",
+            "settings-profile": "the basic company fields",
+            "settings-matching": "the CPV codes and blacklist keywords used for matching",
+            "settings-authorizations": "country authorizations",
+            "settings-save": "the Save button",
+        },
+    },
+    "/onboarding": {
+        "title": "Onboarding wizard (seven steps that build the company profile)",
+        "keywords": ["onboarding", "kurulum", "başlangıç", "baslangic"],
+        "help": [
+            "Step 1 Company: type the CUI and press Fill from ANAF to get the name, address, county, CAEN, VAT and turnover, and your past SEAP awards; add the website so it can be scanned for the right CPV codes; add the legal representative.",
+            "Step 2 Your works (CPV), step 3 where and how (counties on a map, roles, capacity), step 4 turnover, step 5 authorizations and certificates, step 6 SEAP and team, step 7 review.",
+            "CAEN is the company's registered activity code; CPV is the code of what a tender buys. To bid, the CPV work has to fit the CAEN codes.",
+            "Progress is saved after each step.",
+        ],
+        "hooks": {
+            "ob-progress": "the progress bar of the steps",
+            "ob-cui": "the CUI field (step 1)",
+            "ob-anaf": "the Fill from ANAF button (step 1)",
+            "ob-name": "the company name field (step 1)",
+            "ob-rep-name": "the legal representative field (step 1)",
+            "ob-caen": "the main CAEN code field (step 1)",
+            "ob-website": "the website field, scanned for CPV codes (step 1)",
+            "ob-cpv-search": "the CPV code search (step 2)",
+            "ob-back": "the Back button",
+            "ob-next": "the Continue button",
+        },
     },
 }
 
@@ -87,6 +191,7 @@ NAV_HOOKS = {
     "nav-profile": "sidebar link: Profile",
     "nav-settings": "sidebar link: Settings",
     "nav-collapse": "the small round button that collapses the sidebar",
+    "nav-quota": "the monthly past-winner lookups used",
 }
 
 _AGENTS = ("spec", "eligibility", "legal", "writer", "risk")
@@ -128,6 +233,8 @@ def _page_key(path: str) -> str | None:
     clean = path.split("?")[0].rstrip("/") or "/"
     if re.fullmatch(r"/app/tenders/[^/]+", clean):
         return "/app/tenders/{id}"
+    if clean.startswith("/onboarding"):
+        return "/onboarding"
     return clean if clean in SITE_MAP else None
 
 
@@ -155,6 +262,8 @@ def _site_map_text() -> str:
     lines = []
     for path, page in SITE_MAP.items():
         lines.append(f"- {path}: {page['title']}")
+        for fact in page.get("help", []):
+            lines.append(f"    . {fact}")
         for hook, what in page["hooks"].items():
             lines.append(f"    * {hook}: {what}")
     lines.append("- On every page: " + ", ".join(NAV_HOOKS))
@@ -180,6 +289,7 @@ Respond with ONLY a JSON object:
 "agent": one of {agents}, "revision": null | {{"target": string, "before": string, "after": string}}}}
 
 Rules:
+- Answer how-the-app-works questions from the facts (lines starting with ".") under each page, even for a page the user is not on; do not invent details beyond them.
 - When the user asks to go somewhere or to be shown something, set navigate_to to a \
 page path from the list above (use /app/tenders/{{id}} only if a tender is open; add \
 ?tab=docs for the document preparation tab) and highlight_hook to ONE hook from that \

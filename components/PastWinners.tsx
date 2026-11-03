@@ -36,7 +36,7 @@ export function PastWinners({ externalId }: { externalId: string }) {
   };
 
   return (
-    <section className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
+    <section data-assistant="tender-past-winners" className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
       <h2 className="mb-space-xs font-headline-sm text-headline-sm text-on-surface">{t('title')}</h2>
       {!result && <p className="mb-space-sm font-body-sm text-body-sm text-on-surface-variant">{t('intro')}</p>}
 

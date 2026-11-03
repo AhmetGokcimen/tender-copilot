@@ -66,3 +66,22 @@ def test_shorter_lead_time_waits(api: TestClient) -> None:
         people = [{"user_id": uid, "email": "b@x.ro", "name": "B", "company": "Co", "lead": 1}]
         out = asyncio.run(reminders.send_deadline_reminders(session, send=fake_send, people=people))
     assert out["sent"] == 0 and sent == []  # t1 is 2 days away, lead is 1
+
+
+def test_smtp_wins_when_configured(monkeypatch) -> None:  # noqa: ANN001
+    from backend.core import mail
+    from backend.core.config import settings
+
+    monkeypatch.setattr(settings, "resend_api_key", "")
+    monkeypatch.setattr(settings, "smtp_user", "")
+    monkeypatch.setattr(settings, "smtp_password", "")
+    assert mail.transport() is None
+    assert asyncio.run(mail.send_email("a@x.ro", "s", "t")) == "not_configured"
+    monkeypatch.setattr(settings, "resend_api_key", "k")
+    assert mail.transport() == "resend"
+    monkeypatch.setattr(settings, "smtp_user", "me@gmail.com")
+    monkeypatch.setattr(settings, "smtp_password", "app-password")
+    assert mail.transport() == "smtp"
+    sent = {}
+    monkeypatch.setattr(mail, "_send_smtp", lambda to, subject, text, html: sent.update(to=to) or "sent")
+    assert asyncio.run(mail.send_email("a@x.ro", "s", "t")) == "sent" and sent["to"] == "a@x.ro"

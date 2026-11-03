@@ -161,7 +161,7 @@ export default function OpportunitiesPage() {
 
   return (
     <div className="flex flex-col gap-space-xl">
-      <header className="flex flex-col gap-space-md">
+      <header data-assistant="feed-header" className="flex flex-col gap-space-md">
         <div className="flex flex-col justify-between gap-space-md lg:flex-row lg:items-center">
           <div className="flex max-w-3xl flex-col gap-1">
             <div className="flex items-center gap-space-sm">
@@ -182,7 +182,7 @@ export default function OpportunitiesPage() {
               <span>{t('refresh')}</span>
             </button>
             <div className="relative">
-              <button
+              <button data-assistant="feed-export"
                 type="button"
                 title={t('export')}
                 onClick={() => setExportOpen((v) => !v)}
@@ -284,7 +284,7 @@ export default function OpportunitiesPage() {
                 <div className="grid grid-cols-1 gap-space-md sm:grid-cols-2">
                   <div className="flex flex-col gap-space-xs">
                     <label htmlFor="f-county" className={LABEL}>{t('region')}</label>
-                    <select id="f-county" className={INPUT_COMPACT} value={f.county} onChange={(e) => f.set({ county: e.target.value })}>
+                    <select data-assistant="filter-county" id="f-county" className={INPUT_COMPACT} value={f.county} onChange={(e) => f.set({ county: e.target.value })}>
                       <option value="">{tc('all')}</option>
                       {counties.map((c) => (
                         <option key={c} value={c}>{c}</option>
@@ -293,7 +293,7 @@ export default function OpportunitiesPage() {
                   </div>
                   <div className="flex flex-col gap-space-xs">
                     <label htmlFor="f-proc" className={LABEL}>{t('procedure')}</label>
-                    <select id="f-proc" className={INPUT_COMPACT} value={f.procedure} onChange={(e) => f.set({ procedure: e.target.value as ProcedureType | '' })}>
+                    <select data-assistant="filter-procedure" id="f-proc" className={INPUT_COMPACT} value={f.procedure} onChange={(e) => f.set({ procedure: e.target.value as ProcedureType | '' })}>
                       {PROCEDURES.map((p) => (
                         <option key={p || 'all'} value={p}>{p === '' ? '—' : tp(p)}</option>
                       ))}
@@ -301,18 +301,18 @@ export default function OpportunitiesPage() {
                   </div>
                   <div className="flex flex-col gap-space-xs">
                     <label htmlFor="f-value" className={LABEL}>{t('minValue')}</label>
-                    <input id="f-value" type="number" min={0} step={50000} className={`${INPUT_COMPACT} tnum`} placeholder="0" value={f.minValue ?? ''} onChange={(e) => f.set({ minValue: e.target.value === '' ? null : Number(e.target.value) })} />
+                    <input data-assistant="filter-value" id="f-value" type="number" min={0} step={50000} className={`${INPUT_COMPACT} tnum`} placeholder="0" value={f.minValue ?? ''} onChange={(e) => f.set({ minValue: e.target.value === '' ? null : Number(e.target.value) })} />
                   </div>
                   <div className="flex flex-col gap-space-xs">
                     <label htmlFor="f-cpv" className={LABEL}>{t('cpv')}</label>
-                    <input id="f-cpv" className={`${INPUT_COMPACT} tnum font-code-sm`} placeholder={t('cpvPlaceholder')} value={f.cpv} onChange={(e) => f.set({ cpv: e.target.value })} />
+                    <input data-assistant="filter-cpv" id="f-cpv" className={`${INPUT_COMPACT} tnum font-code-sm`} placeholder={t('cpvPlaceholder')} value={f.cpv} onChange={(e) => f.set({ cpv: e.target.value })} />
                   </div>
                   <div className="flex flex-col gap-space-xs">
                     <label htmlFor="f-score" className={`${LABEL} flex items-center justify-between`}>
                       <span>{t('minScore')}</span>
                       <span className="tnum font-code-sm text-code-sm text-navy">{f.minScore}%</span>
                     </label>
-                    <input id="f-score" type="range" min={0} max={100} step={5} value={f.minScore} onChange={(e) => f.set({ minScore: Number(e.target.value) })} className="w-full accent-accent" />
+                    <input data-assistant="filter-score" id="f-score" type="range" min={0} max={100} step={5} value={f.minScore} onChange={(e) => f.set({ minScore: Number(e.target.value) })} className="w-full accent-accent" />
                   </div>
                   <div className="flex items-end">
                     <CheckboxRow
@@ -353,7 +353,7 @@ export default function OpportunitiesPage() {
             </p>
             <div className="flex items-center gap-space-xs">
               <label htmlFor="sort" className="font-label-md text-label-md text-on-surface-variant">{t('sortBy')}</label>
-              <select id="sort" value={f.sort} onChange={(e) => f.set({ sort: e.target.value as 'match' | 'deadline' | 'value' })} className="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm font-body-md text-body-md text-on-surface outline-none focus:border-navy">
+              <select data-assistant="feed-sort" id="sort" value={f.sort} onChange={(e) => f.set({ sort: e.target.value as 'match' | 'deadline' | 'value' })} className="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm font-body-md text-body-md text-on-surface outline-none focus:border-navy">
                 <option value="match">{t('sortMatch')}</option>
                 <option value="deadline">{t('sortDeadline')}</option>
                 <option value="value">{t('sortValue')}</option>

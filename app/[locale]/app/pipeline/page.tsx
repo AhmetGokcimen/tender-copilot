@@ -25,7 +25,7 @@ export default function PipelinePage() {
 
   return (
     <div className="flex flex-col gap-space-lg">
-      <header className="flex flex-col justify-between gap-space-md lg:flex-row lg:items-center">
+      <header data-assistant="pipeline-header" className="flex flex-col justify-between gap-space-md lg:flex-row lg:items-center">
         <div className="flex max-w-3xl flex-col gap-1">
           <h1 className="font-headline-lg text-headline-lg tracking-tight text-on-surface">
             {t('title')}

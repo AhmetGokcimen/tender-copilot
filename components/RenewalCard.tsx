@@ -22,7 +22,7 @@ export function RenewalCard({ externalId }: { externalId: string }) {
   const p = data?.price_range;
 
   return (
-    <section className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
+    <section data-assistant="tender-renewal" className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
       <h2 className="mb-space-xs flex items-center gap-space-xs font-headline-sm text-headline-sm text-on-surface">
         <Icon name="autorenew" size="sm" />
         {t('title')}

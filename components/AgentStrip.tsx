@@ -111,7 +111,7 @@ export function AgentStrip({ states }: { states: Record<AgentId, AgentState> }) 
 
   return (
     <div className="thin-scroll w-full overflow-x-auto">
-      <ol className="grid min-w-[440px] grid-cols-5" aria-label="Agent pipeline">
+      <ol data-assistant="docs-agents" className="grid min-w-[440px] grid-cols-5" aria-label="Agent pipeline">
         {AGENT_ORDER.map((agent, i) => {
           const state = states[agent];
           const started = startsRef.current[agent];
