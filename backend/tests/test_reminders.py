@@ -1,12 +1,14 @@
 """Deadline reminders: due tenders are e-mailed once, only for tracked ones."""
 
 import asyncio
+
+from fastapi.testclient import TestClient
 from datetime import UTC, datetime, timedelta
 
 from sqlmodel import Session
 
 from backend.core import reminders
-from backend.db import engine, init_db
+from backend.db import engine
 from backend.models.company import CompanyProfile
 from backend.models.tender import SourceSystem, Tender
 from backend.models.user import User
@@ -34,8 +36,7 @@ def _seed(session: Session, tag: str = "a") -> int:
     return user.id
 
 
-def test_reminds_once_for_tracked_tenders_inside_the_lead_time() -> None:
-    init_db()
+def test_reminds_once_for_tracked_tenders_inside_the_lead_time(api: TestClient) -> None:
     sent: list[tuple[str, str, str]] = []
 
     async def fake_send(to, subject, text, html):  # noqa: ANN001
@@ -53,8 +54,7 @@ def test_reminds_once_for_tracked_tenders_inside_the_lead_time() -> None:
     assert "r12" not in text and "r13" not in text and "r14" not in text  # too far, not tracked, already applied
 
 
-def test_shorter_lead_time_waits() -> None:
-    init_db()
+def test_shorter_lead_time_waits(api: TestClient) -> None:
     sent: list[str] = []
 
     async def fake_send(to, subject, text, html):  # noqa: ANN001
