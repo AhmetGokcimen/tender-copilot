@@ -208,7 +208,7 @@ async def _run(ai: MetaAIClient, agent: str, system_extra: dict, user_message: s
     schema = json.dumps(model.model_json_schema())
     system = (PROMPTS[agent].format(**system_extra) + COMMON_RULES).replace("{schema}", schema)
     for _ in range(2):
-        raw = await ai._chat(system, user_message, json_mode=True)  # noqa: SLF001
+        raw = await ai._chat(system, user_message, json_mode=True, purpose=f"agent:{agent}")  # noqa: SLF001
         try:
             return model.model_validate(json.loads(raw))
         except (json.JSONDecodeError, ValidationError):
