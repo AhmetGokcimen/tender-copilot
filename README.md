@@ -97,6 +97,7 @@ Prices are in RON per month, excluding VAT. New users get the first two weeks fr
 | Scanned PDF reading | unlimited | unlimited | unlimited |
 | Offer and DUAE drafts per month | 2 | 10 | unlimited |
 | Past-winner lookups per month | 5 | 25 | 100 |
+| AI assistant and API calls per day (read only) | 100 | 1,000 | 5,000 |
 | Document vault with downloads | ✓ | ✓ | ✓ |
 | Renewal detection | | ✓ | ✓ |
 | E-mail alerts for renewing buyers | | ✓ *(coming soon)* | ✓ *(coming soon)* |

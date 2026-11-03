@@ -7,13 +7,14 @@ import { Navbar } from '@/components/landing/Navbar';
 import { Hero } from '@/components/landing/Hero';
 import { ProductShowcase } from '@/components/landing/ProductShowcase';
 import { ProductBento } from '@/components/landing/ProductBento';
+import { AssistantConnect } from '@/components/landing/AssistantConnect';
 import { AudienceBlock } from '@/components/landing/AudienceBlock';
 import { Faq } from '@/components/landing/Faq';
 import { ClosingCta } from '@/components/landing/ClosingCta';
 import { Footer } from '@/components/landing/Footer';
 
 /** Same order as the visible FAQ. */
-const FAQ_ORDER = [1, 2, 6, 3, 4, 5] as const;
+const FAQ_ORDER = [1, 2, 6, 7, 3, 4, 5] as const;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -35,6 +36,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         <Hero />
         <ProductShowcase />
         <ProductBento />
+        <AssistantConnect />
         <AudienceBlock />
         <Faq />
         <ClosingCta />

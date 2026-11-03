@@ -15,14 +15,16 @@ import json
 import logging
 from collections.abc import Callable
 from typing import Annotated, Any, Literal
+from urllib.parse import urlsplit
 
-from fastapi import APIRouter, Body, Depends, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from sqlmodel import Session
 
 from backend.core import tender_api
 from backend.core.api_keys import ApiPrincipal, authenticate
+from backend.core.config import settings
 from backend.db import get_session
 
 _log = logging.getLogger(__name__)
@@ -171,13 +173,31 @@ def _schema(model: type[BaseModel]) -> dict:
     return schema
 
 
+# Human-readable names shown by clients and required by connector directories.
+TITLES = {
+    "get_my_filters": "Show my saved filters",
+    "recommend_tenders": "Recommend the best tenders",
+    "search_tenders": "Search tenders",
+    "get_tender": "Open a tender",
+    "upcoming_deadlines": "Show upcoming deadlines",
+    "my_pipeline": "Show my tender board",
+}
+
+
 def _tool_list() -> list[dict]:
     return [
         {
             "name": name,
+            "title": TITLES[name],
             "description": description,
             "inputSchema": _schema(model),
-            "annotations": {"readOnlyHint": True, "destructiveHint": False, "openWorldHint": False},
+            "annotations": {
+                "title": TITLES[name],
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
+            },
         }
         for name, (description, model, _) in TOOLS.items()
     ]
@@ -248,7 +268,32 @@ def _handle(message: Any, session: Session, principal: ApiPrincipal) -> dict | N
     return {"jsonrpc": "2.0", "id": msg_id, "result": result}
 
 
-@router.post("/mcp")
+# Browsers send an Origin header; the MCP spec wants servers to refuse origins they
+# do not know (DNS rebinding). Requests with no Origin (servers, CLIs, desktop apps)
+# are not browser requests and pass.
+ALLOWED_ORIGIN_SUFFIXES = (
+    "claude.ai", "claude.com", "anthropic.com", "chatgpt.com", "openai.com", "cursor.com", "licits.com",
+)
+LOCAL_HOSTS = {"localhost", "127.0.0.1", "[::1]"}  # MCP Inspector and local dev tools
+
+
+def _origin_allowed(origin: str, own_host: str) -> bool:
+    host = (urlsplit(origin).hostname or "").lower()
+    if not host:
+        return False
+    if host == own_host.split(":")[0].lower() or host in LOCAL_HOSTS:
+        return True
+    extra = tuple(h.strip().lower() for h in settings.mcp_allowed_origins.split(",") if h.strip())
+    return any(host == d or host.endswith("." + d) for d in ALLOWED_ORIGIN_SUFFIXES + extra)
+
+
+def check_origin(request: Request) -> None:
+    origin = request.headers.get("origin")
+    if origin and not _origin_allowed(origin, request.headers.get("host", "")):
+        raise HTTPException(status_code=403, detail="Origin not allowed")
+
+
+@router.post("/mcp", dependencies=[Depends(check_origin)])
 def mcp_endpoint(
     payload: Annotated[Any, Body()],
     principal: ApiPrincipal = Depends(authenticate),

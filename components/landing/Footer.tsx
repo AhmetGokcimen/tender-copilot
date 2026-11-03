@@ -69,6 +69,9 @@ export function Footer() {
           <Link href="/resources" className={LINK}>
             {t('footerResources')}
           </Link>
+          <Link href="/docs/mcp" className={LINK}>
+            {t('footerAssistant')}
+          </Link>
         </nav>
         <nav aria-label={t('footerCompany')} className="flex flex-col gap-2.5">
           <span className={HEAD}>{t('footerCompany')}</span>

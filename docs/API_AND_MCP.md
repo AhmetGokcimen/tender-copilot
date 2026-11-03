@@ -119,6 +119,10 @@ Rules enforced (`backend/core/oauth.py`):
 
 Routing: `vercel.json` sends `/.well-known/*` to the Python function, like `/api/*`. The consent page is `app/[locale]/auth/authorize/page.tsx`; the URLs in the discovery documents are built from the request host (or `X-Forwarded-Host`), so previews and production each advertise their own address.
 
+## Connector directory
+
+Listing in Claude's connectors directory is prepared in [CONNECTOR_SUBMISSION.md](CONNECTOR_SUBMISSION.md): requirement status, what only the owner can do, and paste-ready form text.
+
 ## Security notes
 
 - **Prompt injection.** Tender titles, descriptions and authority names are third-party text that an assistant will read. Every MCP result carries a `notice` saying so, the server `instructions` repeat it, and no tool can write anything, so an injected instruction has nothing to act on.

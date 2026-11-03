@@ -68,6 +68,9 @@ class Settings(BaseSettings):
     # Shared secret for POST /internal/sync-tenders (X-Sync-Token header),
     # separate from user JWT auth. Empty = the endpoint refuses with 503.
     sync_secret: str = ""
+    # Extra browser origins (comma-separated hosts) allowed to call /api/mcp, on top of the
+    # built-in list in api/mcp_routes.py. Only matters for browser-based MCP clients.
+    mcp_allowed_origins: str = ""
 
 
 settings = Settings()

@@ -12,7 +12,7 @@ export const toLang = (locale: string): Lang => (locale === 'ro' ? 'ro' : 'en');
 export const pageUrl = (locale: string, path = '') => `${SITE_URL}/${locale}${path}`;
 
 /** Pages that search engines and AI crawlers may index. */
-export const PUBLIC_PATHS = ['', '/pricing', '/about', '/contact', '/resources', '/privacy', '/terms'] as const;
+export const PUBLIC_PATHS = ['', '/pricing', '/about', '/contact', '/resources', '/docs/mcp', '/privacy', '/terms'] as const;
 
 const SITE_NAME = 'Licits';
 
@@ -52,6 +52,18 @@ export const PAGE_META: Record<string, Record<Lang, { title: string; description
       title: 'Despre Licits | Lucrările publice merg la firmele care le văd primele',
       description:
         'Licits este construit pentru firmele de construcții din România. Citește fiecare anunț SEAP de lucrări, verifică eligibilitatea și redactează oferta, fără să depună niciodată în locul tău.',
+    },
+  },
+  '/docs/mcp': {
+    en: {
+      title: 'Connect Claude, ChatGPT or Cursor to Licits | Docs',
+      description:
+        'Connect your AI assistant to Licits over MCP or the read-only API. It reads your saved filters and the open SEAP notices and answers from them. Setup for Claude, ChatGPT, Claude Code and Cursor.',
+    },
+    ro: {
+      title: 'Conectează Claude, ChatGPT sau Cursor la Licits | Documentație',
+      description:
+        'Conectează-ți asistentul AI la Licits prin MCP sau API-ul doar pentru citire. Îți citește filtrele salvate și anunțurile SEAP deschise și răspunde pe baza lor. Configurare pentru Claude, ChatGPT, Claude Code și Cursor.',
     },
   },
   '/contact': {
