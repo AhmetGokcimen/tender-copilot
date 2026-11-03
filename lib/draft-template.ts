@@ -22,6 +22,7 @@
 import type { CompanyProfile, DraftSection, EvidenceDocument, TenderWithState } from './types';
 import type { DocType } from '@/stores/useGeneratorStore';
 import type { AgentOutputs } from './agents';
+import { computePricing, parseNumber, type BidInputs } from './bid-inputs';
 
 export const DOC_TITLES: Record<DocType, string> = {
   technical: 'Technical offer',
@@ -36,8 +37,12 @@ export const DOC_TITLES_RO: Record<DocType, string> = {
   duae: 'DOCUMENTUL UNIC DE ACHIZIȚIE EUROPEAN (DUAE)',
 };
 
-/** VAT rate in force for public works and supplies in Romania (standard rate since 1 August 2025). */
-export const VAT_RATE = 0.21;
+/** What the draft builders need beyond the agents' output: the company's own answers and the VAT rate in force. */
+export interface DraftContext {
+  agents: AgentOutputs;
+  inputs?: BidInputs;
+  vatRate: number;
+}
 
 const BLANK = '[de completat]';
 const DOTS = '………………';
@@ -104,19 +109,27 @@ function identityTable(tender: TenderWithState, company: CompanyProfile): string
   );
 }
 
-function signature(company: CompanyProfile): string {
+function signature(company: CompanyProfile, inputs?: BidInputs): string {
+  const who = inputs?.repName.trim()
+    ? `${inputs.repName.trim()}${inputs.repRole.trim() ? `, ${inputs.repRole.trim()}` : ''}`
+    : null;
   return table(
-    ['Data completării', `Ofertant: ${company.name} (semnătura autorizată și ștampila)`],
+    ['Data completării', `Ofertant: ${company.name}${who ? `, reprezentant: ${who}` : ''} (semnătura autorizată și ștampila)`],
     [[DOTS, DOTS]],
   );
 }
+
+const answer = (v: 'applies' | 'not_applies' | null) => (v === 'applies' ? 'DA' : v === 'not_applies' ? 'NU' : BLANK);
+const yesNo = (v: 'yes' | 'no' | null) => (v === 'yes' ? 'DA' : v === 'no' ? 'NU' : BLANK);
+const SIZE_RO = { micro: 'microîntreprindere', small: 'întreprindere mică', medium: 'întreprindere mijlocie', large: 'întreprindere mare' } as const;
 
 function technicalOffer(
   tender: TenderWithState,
   company: CompanyProfile,
   evidence: EvidenceDocument[],
-  a: AgentOutputs,
+  ctx: DraftContext,
 ): DraftSection[] {
+  const a = ctx.agents;
   const w = a.writer;
   const spec = a.spec;
   const brief = tender.brief?.ro;
@@ -181,7 +194,7 @@ function technicalOffer(
         declarations.length > 0
           ? declarations
           : [
-              `Oferta este valabilă ${DOTS} zile de la data limită de depunere (${roDate(tender.submission_deadline)}), conform documentației de atribuire.`,
+              `Oferta este valabilă ${ctx.inputs?.validityDays.trim() || DOTS} zile de la data limită de depunere (${roDate(tender.submission_deadline)}), conform documentației de atribuire.`,
               'Respectăm obligațiile din domeniul mediului, social și al muncii (art. 51 din Legea nr. 98/2016).',
             ],
       ),
@@ -191,19 +204,30 @@ function technicalOffer(
       title: `${sections.length + 3}. Anexe`,
       body: bullets(evidence.map((e) => `${e.name} (${e.type})`)),
     },
-    { agent: 'writer', title: 'Semnătura', body: signature(company) },
+    { agent: 'writer', title: 'Semnătura', body: signature(company, ctx.inputs) },
   );
   return sections;
 }
 
-function financialOffer(tender: TenderWithState, company: CompanyProfile, a: AgentOutputs): DraftSection[] {
+function financialOffer(tender: TenderWithState, company: CompanyProfile, ctx: DraftContext): DraftSection[] {
+  const a = ctx.agents;
   const spec = a.spec;
   const items = a.writer?.price_items ?? [];
+  const pricing = computePricing(items, ctx.inputs?.prices ?? {}, ctx.vatRate);
+  const num = (n: number | null) => (n === null ? DOTS : new Intl.NumberFormat('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n));
   const rows =
     items.length > 0
-      ? items.map((it, i) => [String(i + 1), it.description, it.unit || 'buc', it.quantity || BLANK, DOTS, DOTS])
+      ? items.map((it, i) => [
+          String(i + 1),
+          it.description,
+          it.unit || 'buc',
+          it.quantity || BLANK,
+          num(pricing.lines[i]?.unit ?? null),
+          num(pricing.lines[i]?.value ?? null),
+        ])
       : (spec?.deliverables ?? []).map((d, i) => [String(i + 1), d, BLANK, BLANK, DOTS, DOTS]);
-  const vatPct = Math.round(VAT_RATE * 100);
+  const vatPct = Number((ctx.vatRate * 100).toFixed(2));
+  const sum = pricing.complete;
 
   const centralizer = [
     rows.length > 0
@@ -216,26 +240,28 @@ function financialOffer(tender: TenderWithState, company: CompanyProfile, a: Age
     table(
       ['Sinteză', 'Valoare (lei)'],
       [
-        ['**TOTAL fără TVA**', DOTS],
-        [`TVA (${vatPct}%)`, DOTS],
-        ['**TOTAL cu TVA**', DOTS],
+        ['**TOTAL fără TVA**', sum ? num(pricing.subtotal) : DOTS],
+        [`TVA (${vatPct}%)`, sum ? num(pricing.vat) : DOTS],
+        ['**TOTAL cu TVA**', sum ? num(pricing.total) : DOTS],
       ],
     ),
     '',
     tender.estimated_value !== null
       ? `Notă: valoarea estimată de autoritatea contractantă este de ${roMoney(tender.estimated_value, tender.currency === 'EUR' ? 'EUR' : 'lei')}, fără TVA. Prețul ofertat nu o poate depăși.`
       : 'Notă: autoritatea contractantă nu a publicat o valoare estimată.',
-    'Notă: prețurile unitare și totalurile se introduc de operatorul economic; Licits nu propune prețuri.',
+    sum
+      ? 'Notă: prețurile au fost introduse de operatorul economic; verificați-le înainte de depunere.'
+      : 'Notă: prețurile unitare și totalurile se introduc de operatorul economic.',
   ].join('\n');
 
   const letter = [
     `Către: **${tender.authority}**`,
     '',
-    `Examinând documentația de atribuire, subsemnații, reprezentanți ai ofertantului **${company.name}** (CUI ${company.cui}), ne oferim ca, în conformitate cu prevederile și cerințele cuprinse în documentația de atribuire, să executăm / furnizăm „${tenderTitle(tender)}” pentru suma de ${DOTS} lei, fără TVA, la care se adaugă TVA în valoare de ${DOTS} lei (${vatPct}%).`,
+    `Examinând documentația de atribuire, subsemnații, reprezentanți ai ofertantului **${company.name}** (CUI ${company.cui}), ne oferim ca, în conformitate cu prevederile și cerințele cuprinse în documentația de atribuire, să executăm / furnizăm „${tenderTitle(tender)}” pentru suma de ${sum ? num(pricing.subtotal) : DOTS} lei, fără TVA, la care se adaugă TVA în valoare de ${sum ? num(pricing.vat) : DOTS} lei (${vatPct}%).`,
     '',
     `Ne angajăm să respectăm termenul de execuție${spec?.duration ? ` de ${spec.duration}` : ` ${BLANK}`}, conform propunerii tehnice și graficului de execuție.`,
     '',
-    `Ne angajăm să menținem această ofertă valabilă pentru o durată de ${DOTS} zile de la data limită de depunere a ofertelor (${roDate(tender.submission_deadline)}) și ea va rămâne obligatorie pentru noi, putând fi acceptată oricând înainte de expirarea perioadei de valabilitate.`,
+    `Ne angajăm să menținem această ofertă valabilă pentru o durată de ${ctx.inputs?.validityDays.trim() || DOTS} zile de la data limită de depunere a ofertelor (${roDate(tender.submission_deadline)}) și ea va rămâne obligatorie pentru noi, putând fi acceptată oricând înainte de expirarea perioadei de valabilitate.`,
     '',
     'Până la încheierea și semnarea contractului de achiziție publică, această ofertă, împreună cu comunicarea transmisă de dumneavoastră prin care oferta noastră este stabilită câștigătoare, vor constitui un contract angajant între noi.',
     '',
@@ -268,12 +294,14 @@ function financialOffer(tender: TenderWithState, company: CompanyProfile, a: Age
           : []),
       ].join('\n'),
     },
-    { agent: 'writer', title: 'Semnătura', body: signature(company) },
+    { agent: 'writer', title: 'Semnătura', body: signature(company, ctx.inputs) },
   ];
 }
 
-function duae(tender: TenderWithState, company: CompanyProfile, a: AgentOutputs): DraftSection[] {
-  const confirm = 'NU (de confirmat de operator)';
+function duae(tender: TenderWithState, company: CompanyProfile, ctx: DraftContext): DraftSection[] {
+  const a = ctx.agents;
+  const inp = ctx.inputs;
+  const ex = inp?.exclusion ?? { A: null, B: null, C: null, D: null };
   const notes = a.legal?.exclusion_notes ?? [];
   const reqs = (a.spec?.items ?? []).filter((i) => i.category === 'qualification');
   const turnover =
@@ -313,25 +341,28 @@ function duae(tender: TenderWithState, company: CompanyProfile, a: AgentOutputs)
           [
             ['Denumire', company.name],
             ['Număr de identificare fiscală (CUI)', company.cui],
-            ['Adresa sediului social', BLANK],
+            ['Adresa sediului social', inp?.address.trim() || BLANK],
             ['Persoană de contact, telefon, e-mail', BLANK],
             ['Adresa de internet', company.website ?? BLANK],
-            ['Operatorul este microîntreprindere, întreprindere mică sau mijlocie?', BLANK],
-            ['Participă în grup cu alți operatori economici?', 'NU (de confirmat de operator)'],
+            ['Dimensiunea operatorului economic', inp?.size ? SIZE_RO[inp.size] : BLANK],
+            ['Participă în grup cu alți operatori economici?', BLANK],
           ],
         ),
         '',
         '**B. Informații privind reprezentanții operatorului economic**',
         '',
-        table(['Nume și funcție', 'Date de contact', 'Calitatea de reprezentare'], [[BLANK, BLANK, BLANK]]),
+        table(
+          ['Nume și funcție', 'Date de contact', 'Calitatea de reprezentare'],
+          [[inp?.repName.trim() ? `${inp.repName.trim()}${inp.repRole.trim() ? `, ${inp.repRole.trim()}` : ''}` : BLANK, BLANK, inp?.repName.trim() ? 'Reprezentant legal / mandatat' : BLANK]],
+        ),
         '',
         '**C. Informații privind recurgerea la capacitățile altor entități**',
         '',
-        'Operatorul economic recurge la capacitățile altor entități pentru îndeplinirea criteriilor de selecție: NU (de confirmat de operator).',
+        `Operatorul economic recurge la capacitățile altor entități pentru îndeplinirea criteriilor de selecție: ${yesNo(inp?.otherEntities ?? null)}.`,
         '',
         '**D. Informații privind subcontractanții**',
         '',
-        'Operatorul economic intenționează să subcontracteze o parte din contract: NU (de confirmat de operator). În caz contrar se completează denumirea și partea subcontractată.',
+        `Operatorul economic intenționează să subcontracteze o parte din contract: ${yesNo(inp?.subcontract ?? null)}.${inp?.subcontract === 'yes' ? ` ${inp.subcontractNote.trim() || 'Se completează denumirea și partea subcontractată.'}` : ''}`,
       ].join('\n'),
     },
     {
@@ -341,14 +372,16 @@ function duae(tender: TenderWithState, company: CompanyProfile, a: AgentOutputs)
         table(
           ['Secțiunea', 'Motiv de excludere (Legea nr. 98/2016)', 'Răspuns'],
           [
-            ['A', 'Motive legate de condamnări penale: participarea la o organizație criminală, corupție, fraudă, infracțiuni teroriste, spălare de bani, trafic de persoane (art. 164)', confirm],
-            ['B', 'Motive legate de plata impozitelor, taxelor și contribuțiilor de asigurări sociale (art. 165–166)', confirm],
-            ['C', 'Motive legate de insolvență, conflict de interese sau abateri profesionale (art. 167)', confirm],
-            ['D', 'Alte motive de excludere prevăzute de legislația națională', confirm],
+            ['A', 'Motive legate de condamnări penale: participarea la o organizație criminală, corupție, fraudă, infracțiuni teroriste, spălare de bani, trafic de persoane (art. 164)', answer(ex.A)],
+            ['B', 'Motive legate de plata impozitelor, taxelor și contribuțiilor de asigurări sociale (art. 165–166)', answer(ex.B)],
+            ['C', 'Motive legate de insolvență, conflict de interese sau abateri profesionale (art. 167)', answer(ex.C)],
+            ['D', 'Alte motive de excludere prevăzute de legislația națională', answer(ex.D)],
           ],
         ),
         '',
-        'Răspunsurile de mai sus sunt o propunere. Doar operatorul economic poate declara că motivele de excludere nu se aplică; verificați fiecare înainte de semnare.',
+        inp?.confirmed
+          ? 'Răspunsurile de mai sus au fost date de operatorul economic prin reprezentantul său; verificați-le înainte de semnare.'
+          : 'Doar operatorul economic poate declara că motivele de excludere nu se aplică. Câmpurile marcate [de completat] rămân de completat de el.',
         ...(notes.length > 0 ? ['', 'Puncte de confirmat semnalate de agentul juridic:', '', bullets(notes)] : []),
       ].join('\n'),
     },
@@ -394,7 +427,7 @@ function duae(tender: TenderWithState, company: CompanyProfile, a: AgentOutputs)
         '',
         'În completarea electronică din SEAP se folosește formularul DUAE al autorității; acest document este un proiect de pregătire a răspunsurilor.',
         '',
-        signature(company),
+        signature(company, inp),
       ].join('\n'),
     },
   ];
@@ -405,15 +438,15 @@ export function buildDraftSections(
   company: CompanyProfile,
   evidence: EvidenceDocument[],
   doc: DocType,
-  agents: AgentOutputs = {},
+  ctx: DraftContext = { agents: {}, vatRate: 0.21 },
 ): DraftSection[] {
   switch (doc) {
     case 'technical':
-      return technicalOffer(tender, company, evidence, agents);
+      return technicalOffer(tender, company, evidence, ctx);
     case 'financial':
-      return financialOffer(tender, company, agents);
+      return financialOffer(tender, company, ctx);
     case 'duae':
-      return duae(tender, company, agents);
+      return duae(tender, company, ctx);
   }
 }
 

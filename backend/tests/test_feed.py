@@ -325,3 +325,44 @@ def test_bid_agents_run_in_order_and_spec_is_kept(seed: TestClient, monkeypatch:
     elig = seed.post("/api/tenders/1003/agents/eligibility", json={"evidence": ["ISO 9001"]}, headers=_auth()).json()
     assert elig["output"]["rows"][0]["status"] == "unclear"
     assert seed.post("/api/tenders/1003/agents/nope", json={}, headers=_auth()).status_code == 404
+
+
+def test_vat_follows_the_dated_table(seed: TestClient) -> None:
+    from datetime import date
+
+    from backend.core.tax import vat_rate_on
+
+    assert vat_rate_on(date(2025, 7, 31))[0] == 0.19
+    assert vat_rate_on(date(2025, 8, 1))[0] == 0.21
+    body = seed.get("/api/public/vat").json()  # public, no auth
+    assert body["rate"] == vat_rate_on()[0]
+
+
+def test_price_hint_is_locked_or_descriptive(seed: TestClient) -> None:
+    out = seed.get("/api/tenders/1003/price-hint", headers=_auth())
+    assert out.status_code == 200
+    body = out.json()
+    assert set(body) == {"buyer", "market", "locked"}
+
+
+def test_brief_pending_only_briefs_open_construction(seed: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    import asyncio
+
+    from sqlmodel import Session
+
+    from backend.core import brief as brief_core
+    from backend.core.config import settings
+    from backend.db import engine
+
+    made: list[str] = []
+
+    async def fake_make(session, tender, **_kw):  # noqa: ANN001
+        made.append(tender.external_id)
+        return True
+
+    monkeypatch.setattr(brief_core, "make_brief", fake_make)
+    monkeypatch.setattr(settings, "meta_api_key", "test-key")
+    with Session(engine) as session:
+        out = asyncio.run(brief_core.brief_pending(session, limit=5, max_seconds=30))
+    assert out["enabled"] is True
+    assert out["briefed"] == len(made)

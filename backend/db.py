@@ -93,22 +93,37 @@ def init_db() -> None:
     if _schema:
         with engine.begin() as conn:
             conn.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{_schema}"'))
-    SQLModel.metadata.create_all(engine)
-    _add_missing_columns()
+    existing = _existing_columns()
+    wanted = {t.name for t in SQLModel.metadata.sorted_tables}
+    if not wanted <= {table for table, _ in existing}:
+        SQLModel.metadata.create_all(engine)
+        existing = _existing_columns()
+    _add_missing_columns(existing)
 
 
-def _add_missing_columns() -> None:
+def _existing_columns() -> set[tuple[str, str]]:
+    """(table, column) of everything already in the schema, in ONE query: a
+    cold start used to run an inspection query per table, and every one of
+    them crossed the network to the database."""
+    if _schema:
+        sql = text("select table_name, column_name from information_schema.columns where table_schema = :s")
+        with engine.connect() as conn:
+            return {(r[0], r[1]) for r in conn.execute(sql, {"s": _schema})}
+    insp = inspect(engine)
+    return {(t, c["name"]) for t in insp.get_table_names() for c in insp.get_columns(t)}
+
+
+def _add_missing_columns(existing: set[tuple[str, str]]) -> None:
     """create_all never alters existing tables, so columns added to a
     model later are appended here (nullable, no default). Enough for this
     project's additive changes; a real migration tool can replace it."""
-    insp = inspect(engine)
+    tables = {t for t, _ in existing}
     with engine.begin() as conn:
         for table in SQLModel.metadata.sorted_tables:
-            if not insp.has_table(table.name, schema=_schema):
+            if table.name not in tables:
                 continue
-            existing = {c["name"] for c in insp.get_columns(table.name, schema=_schema)}
             for column in table.columns:
-                if column.name in existing:
+                if (table.name, column.name) in existing:
                     continue
                 ddl = column.type.compile(dialect=engine.dialect)
                 qualified = f'"{_schema}"."{table.name}"' if _schema else f'"{table.name}"'

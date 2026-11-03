@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { clsx } from 'clsx';
 import { Link } from '@/i18n/routing';
@@ -9,6 +10,12 @@ import { EligibilityChip } from './EligibilityChip';
 import type { TenderWithState } from '@/lib/types';
 import { formatDate, formatDaysLeft, formatRON, tenderTitle } from '@/lib/format';
 import { usePipelineStore } from '@/stores/usePipelineStore';
+import { useQueryClient } from '@tanstack/react-query';
+import { briefTender } from '@/lib/api';
+import { qk } from '@/lib/queries';
+
+/** Tenders whose brief was already requested from a hover this session. */
+const warmed = new Set<string>();
 
 export function TenderCard({ tender }: { tender: TenderWithState }) {
   const locale = useLocale();
@@ -19,6 +26,21 @@ export function TenderCard({ tender }: { tender: TenderWithState }) {
   const statuses = usePipelineStore((s) => s.statuses);
   const setStatus = usePipelineStore((s) => s.setStatus);
   const untrack = usePipelineStore((s) => s.untrack);
+
+  const queryClient = useQueryClient();
+  // Someone looking at a relevant tender is likely to open it: start reading it
+  // now, so the detailed brief is usually ready by the time the page opens.
+  const warmTimer = useRef<number | undefined>(undefined);
+  const warm = () => {
+    if ((tender.state.score ?? 0) < 50 || warmed.has(tender.external_id)) return;
+    warmTimer.current = window.setTimeout(() => {
+      warmed.add(tender.external_id);
+      briefTender(tender.external_id)
+        .then((fresh) => fresh.brief && queryClient.setQueryData(qk.tender(tender.external_id), fresh))
+        .catch(() => warmed.delete(tender.external_id));
+    }, 450);
+  };
+  const cool = () => window.clearTimeout(warmTimer.current);
 
   const override = statuses[tender.external_id];
   const tracked = override !== undefined || tender.state.status !== 'new';
@@ -33,6 +55,9 @@ export function TenderCard({ tender }: { tender: TenderWithState }) {
   return (
     <article
       data-assistant="tender-card"
+      onPointerEnter={warm}
+      onPointerLeave={cool}
+      onFocus={warm}
       className="rounded-xl border border-outline-variant bg-surface-container-lowest p-space-lg shadow-sm transition-colors hover:border-outline"
     >
       <div className="flex flex-col gap-space-md lg:flex-row lg:items-start lg:justify-between">

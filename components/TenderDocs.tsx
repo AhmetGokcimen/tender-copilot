@@ -4,7 +4,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { clsx } from 'clsx';
 import { pdf } from '@react-pdf/renderer';
-import { useEvidence } from '@/lib/queries';
+import { FALLBACK_VAT, useEvidence, useVat } from '@/lib/queries';
+import { BidInputsDialog } from './BidInputsDialog';
+import type { BidInputs } from '@/lib/bid-inputs';
 import { useCompanyStore } from '@/stores/useCompanyStore';
 import { outputKey, useGeneratorStore, type DocType } from '@/stores/useGeneratorStore';
 import { useAssistantStore } from '@/stores/useAssistantStore';
@@ -78,6 +80,9 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
   const [agentStates, setAgentStates] = useState<Record<AgentId, AgentState>>(IDLE_AGENTS);
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [agentLog, setAgentLog] = useState<AgentLogEntry[]>([]);
+  const { data: vat } = useVat();
+  const vatRate = vat?.rate ?? FALLBACK_VAT;
+  const [ask, setAsk] = useState<{ items: NonNullable<AgentOutputs['writer']>['price_items']; done: (v: BidInputs | null) => void } | null>(null);
   const tAgents = useTranslations('agents');
   const language = useLocale() === 'ro' ? 'ro' : 'en';
   const [copied, setCopied] = useState(false);
@@ -148,9 +153,15 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
         },
       ]);
     }
+    // Only the company can state its declarations and prices: ask before the documents are made.
+    const inputs = await new Promise<BidInputs | null>((resolve) =>
+      setAsk({ items: outputs.writer?.price_items ?? [], done: resolve }),
+    );
+    setAsk(null);
+    if (runRef.current !== run) return;
     const now = new Date().toISOString();
     for (const d of enabledDocs) {
-      const sections = buildDraftSections(tender, profile, usedEvidence, d, outputs);
+      const sections = buildDraftSections(tender, profile, usedEvidence, d, { agents: outputs, inputs: inputs ?? undefined, vatRate });
       setDoc({
         key: outputKey(tender.external_id, d),
         doc: d,
@@ -221,6 +232,16 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
       : [];
 
   return (
+    <>
+    {ask && (
+      <BidInputsDialog
+        tender={tender}
+        items={ask.items}
+        vatRate={vatRate}
+        onSubmit={(v) => ask.done(v)}
+        onSkip={() => ask.done(null)}
+      />
+    )}
     <section
       id="tender-documents"
       data-assistant="generate-output"
@@ -371,6 +392,7 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
         </div>
       </div>
     </section>
+    </>
   );
 }
 

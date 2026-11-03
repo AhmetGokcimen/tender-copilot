@@ -5,6 +5,9 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/routing';
 import { loadCompanyData } from '@/lib/company-data';
 import { useSession } from '@/lib/session';
+import { useQueryClient } from '@tanstack/react-query';
+import { fetchTenders } from '@/lib/api';
+import { qk } from '@/lib/queries';
 
 /**
  * Wraps the /app shell: signed-out users go to login, users who have not
@@ -18,10 +21,13 @@ export function RequireOnboarding({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const session = useSession();
   const [done, setDone] = useState<boolean | null>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (session.status === 'out') router.replace('/auth/login');
     if (session.status !== 'in') return;
+    // Start the feed request now, in parallel with the profile check, instead of after it.
+    void queryClient.prefetchQuery({ queryKey: qk.tenders, queryFn: fetchTenders });
     loadCompanyData()
       .then((d) => {
         const ok = Boolean(d?.company.onboarding_completed_at);
@@ -29,7 +35,7 @@ export function RequireOnboarding({ children }: { children: React.ReactNode }) {
         if (!ok) router.replace('/onboarding');
       })
       .catch(() => setDone(true));
-  }, [session.status, router]);
+  }, [session.status, router, queryClient]);
 
   if (session.status !== 'in' || !done) {
     return (

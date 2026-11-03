@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, Query, Response
 from pydantic import BaseModel
 from sqlmodel import Session, or_, select
 
+from backend.core.tax import SOURCE_NOTE, vat_rate_on
 from backend.db import get_session
 from backend.models.tender import Tender
 
@@ -36,6 +37,20 @@ def _county_key(county: str) -> str:
 
 def _aware(dt: datetime) -> datetime:
     return dt if dt.tzinfo else dt.replace(tzinfo=UTC)
+
+
+class VatInfo(BaseModel):
+    rate: float
+    effective_from: str
+    source: str
+
+
+@router.get("/public/vat", response_model=VatInfo)
+def vat_info(response: Response) -> VatInfo:
+    """The standard VAT rate in force today (kept in core/tax.py)."""
+    response.headers["Cache-Control"] = "public, s-maxage=3600, stale-while-revalidate=86400"
+    rate, since = vat_rate_on()
+    return VatInfo(rate=rate, effective_from=since.isoformat(), source=SOURCE_NOTE)
 
 
 @router.get("/public/map-tenders", response_model=list[MapTender])

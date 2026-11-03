@@ -55,7 +55,7 @@ from backend.core.caiet_jobs import (
 from backend.core.country_requirements import get_country_requirements
 from backend.core.eligibility import run_numeric_checks
 from backend.core import winners as winners_core
-from backend.core.history import authority_history, price_range, renewal_pattern
+from backend.core.history import authority_history, market_price_range, price_range, renewal_pattern
 from backend.core.plans import allows, user_plan
 from backend.core.lookups import (
     COUNTRIES,
@@ -325,6 +325,35 @@ class PriceRange(BaseModel):
     median_pct: float
     high_pct: float
     cpv_prefix: str
+
+
+class PriceHint(BaseModel):
+    buyer: PriceRange | None  # this buyer's own past awards for comparable work
+    market: PriceRange | None  # all buyers, same kind of work (used when the buyer has too few)
+    locked: bool  # the plan does not include price history
+
+
+@router.get("/tenders/{external_id}/price-hint", response_model=PriceHint, tags=["tenders"])
+def get_price_hint(
+    external_id: str,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
+) -> PriceHint:
+    """Past award prices for comparable work as % of the buyer's estimate.
+    Public award history only; descriptive, never a bid recommendation."""
+    plan = user_plan(user)
+    if not allows(plan, "renewal_price"):
+        return PriceHint(buyer=None, market=None, locked=True)
+    tender = session.get(Tender, (SourceSystem.ROMANIA_SEAP, external_id))
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    own = price_range(session, tender)
+    market = market_price_range(session, tender) if own is None else None
+    return PriceHint(
+        buyer=PriceRange(**own) if own else None,
+        market=PriceRange(**market) if market else None,
+        locked=False,
+    )
 
 
 class RenewalInfo(BaseModel):
