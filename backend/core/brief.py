@@ -19,6 +19,8 @@ from backend.core.translate import enabled
 from backend.models.tender import Tender
 
 MAX_SOURCE_CHARS = 45_000
+# Pre-reading only covers tenders some registered company scores at least this high.
+PREBRIEF_MIN_SCORE = 50
 OCR_PAGES = 6
 DOCS_BUDGET_SECONDS = 100.0
 
@@ -72,8 +74,8 @@ async def gather_source(
 
 async def brief_pending(session: Session, *, limit: int, max_seconds: float) -> dict:
     """Pre-make briefs for the tenders worth it: open construction notices
-    (CPV 45) without one, those the registered companies score highest first,
-    then nearest deadline. A small cap keeps AI cost predictable; the rest is
+    (CPV 45) without one that a registered company scores at least
+    PREBRIEF_MIN_SCORE on, highest first, then nearest deadline. A small cap keeps AI cost predictable; the rest is
     made on demand when someone opens or hovers a tender."""
     import time
 
@@ -100,7 +102,8 @@ async def brief_pending(session: Session, *, limit: int, max_seconds: float) -> 
         .where(
             (Tender.submission_deadline.is_(None)) | (Tender.submission_deadline >= now)  # type: ignore[union-attr]
         )
-        .order_by(best.c.top.desc().nullslast(), Tender.submission_deadline.asc())
+        .where(best.c.top >= PREBRIEF_MIN_SCORE)
+        .order_by(best.c.top.desc(), Tender.submission_deadline.asc())
         .limit(400)
     ).all()
     ai = MetaAIClient()
