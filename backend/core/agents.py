@@ -23,6 +23,7 @@ from sqlmodel import Session
 
 from backend.adapters.romania_seap.adapter import RomaniaSeapAdapter
 from backend.ai.client import MetaAIClient, build_company_summary, build_tender_summary
+from backend.ai.safety import clean_output
 from backend.core.brief import gather_source
 from backend.core.translate import enabled
 from backend.models.company import CompanyProfile
@@ -211,7 +212,7 @@ async def _run(ai: MetaAIClient, agent: str, system_extra: dict, user_message: s
     for _ in range(2):
         raw = await ai._chat(system, user_message, json_mode=True, purpose=f"agent:{agent}")  # noqa: SLF001
         try:
-            return model.model_validate(json.loads(raw))
+            return model.model_validate(clean_output(json.loads(raw), 700))
         except (json.JSONDecodeError, ValidationError):
             continue
     return None
@@ -248,12 +249,13 @@ async def run_agent(
         if tender.spec:
             return tender.spec
         adapter = adapter or RomaniaSeapAdapter()
-        source, from_docs = await gather_source(adapter, tender, ai)
+        source, from_docs, flags = await gather_source(adapter, tender, ai)
         analysis = await _run(ai, "spec", {}, source)
         if analysis is None:
             return None
         result = analysis.model_dump()
         result["source"] = "documents" if from_docs else "notice"
+        result["flags"] = flags
         tender.spec = result
         session.add(tender)
         session.commit()
@@ -283,5 +285,14 @@ async def run_agent(
             f"Technical draft:\n{_clip(context.get('writer', ''), 4000)}"
         )
     out = await _run(ai, agent, {"language": lang}, user)
-    return out.model_dump() if out else None
+    if out is None:
+        return None
+    data = out.model_dump()
+    if agent == "eligibility":
+        # "Met" has to rest on a stated fact about the company; otherwise it stays open.
+        for row in data["rows"]:
+            if row["status"] == "met" and len(row["basis"].strip()) < 8:
+                row["status"] = "unclear"
+                row["action"] = row["action"] or "No supporting company fact was given; check this yourself."
+    return data
 

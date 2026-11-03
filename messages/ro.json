@@ -554,7 +554,8 @@
     "suggestedFor": "Recomandat pentru {procedure}",
     "resetSuggested": "Revino la recomandare",
     "documents": "Documentația licitației",
-    "notFound": "Licitația nu a fost găsită."
+    "notFound": "Licitația nu a fost găsită.",
+    "briefFlags": "Unele texte din fișierele licitației păreau instrucțiuni pentru o IA și au fost ignorate. Verifică documentele originale."
   },
   "kanban": {
     "title": "Pipeline licitații",
@@ -1139,7 +1140,8 @@
     "unclear": "Neclară",
     "level_low": "scăzut",
     "level_medium": "mediu",
-    "level_high": "ridicat"
+    "level_high": "ridicat",
+    "flags": "Unele texte din fișierele licitației păreau instrucțiuni pentru o IA și au fost eliminate înainte de citire. Tratează cu atenție analiza acestei licitații și verifică documentele originale."
   },
   "apiAccess": {
     "title": "Asistent AI și API",

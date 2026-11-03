@@ -15,6 +15,7 @@ from sqlmodel import Session
 from backend.adapters.romania_seap.adapter import RomaniaSeapAdapter
 from backend.ai.client import MetaAIClient
 from backend.ai.ocr import extract_pdf_text
+from backend.ai.safety import scan_and_redact
 from backend.core.translate import enabled
 from backend.models.tender import Tender
 
@@ -56,9 +57,10 @@ async def _notice_text(adapter: RomaniaSeapAdapter, tender: Tender) -> str:
 
 async def gather_source(
     adapter: RomaniaSeapAdapter, tender: Tender, ai: MetaAIClient
-) -> tuple[str, bool]:
-    """Notice text plus, when the dossier has one, the specification text.
-    Returns (source text, whether documents were read)."""
+) -> tuple[str, bool, list[str]]:
+    """Notice text plus, when the dossier has one, the specification text, with
+    instruction-like sentences cut out. Returns (source text, whether documents
+    were read, flags for what was cut)."""
     notice = await _notice_text(adapter, tender)
     documents = ""
     if tender.notice_type_id is not None:
@@ -69,7 +71,8 @@ async def gather_source(
     source = notice
     if documents.strip():
         source = f"{notice}\n\n--- Specification documents ---\n{documents}"
-    return source[:MAX_SOURCE_CHARS], bool(documents.strip())
+    clean, flags = scan_and_redact(source[:MAX_SOURCE_CHARS])
+    return clean, bool(documents.strip()), flags
 
 
 async def brief_pending(session: Session, *, limit: int, max_seconds: float) -> dict:
@@ -134,7 +137,7 @@ async def make_brief(
         return False
     ai = ai or MetaAIClient()
     adapter = adapter or RomaniaSeapAdapter()
-    source, from_documents = await gather_source(adapter, tender, ai)
+    source, from_documents, flags = await gather_source(adapter, tender, ai)
     try:
         en, ro = await asyncio.gather(
             ai.build_brief(source, language="English"), ai.build_brief(source, language="Romanian")
@@ -147,6 +150,7 @@ async def make_brief(
         "en": en.model_dump(),
         "ro": ro.model_dump(),
         "source": "documents" if from_documents else "notice",
+        "flags": flags,
         "generated_at": datetime.now(UTC).isoformat(),
     }
     session.add(tender)

@@ -312,7 +312,7 @@ def test_bid_agents_run_in_order_and_spec_is_kept(seed: TestClient, monkeypatch:
         return "{}"
 
     async def fake_source(adapter, tender, ai):  # noqa: ANN001
-        return "notice text", False
+        return "notice text", False, []
 
     monkeypatch.setattr(MetaAIClient, "_chat", fake_chat)
     monkeypatch.setattr(agents_core, "gather_source", fake_source)
@@ -451,3 +451,32 @@ def test_every_assistant_hook_exists_in_the_frontend() -> None:
     missing = sorted(h for page in SITE_MAP.values() for h in page["hooks"] if h not in known)
     missing += sorted(h for h in NAV_HOOKS if h not in known)
     assert missing == []
+
+
+def test_a_met_verdict_without_a_stated_basis_becomes_unclear(seed: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    import json as _json
+
+    from backend.ai.client import MetaAIClient
+    from backend.core import agents as agents_core
+    from backend.core.config import settings
+
+    async def fake_chat(self, system: str, user: str, **_kw):  # noqa: ANN001
+        if "Spec Analyst" in system:
+            return _json.dumps({"items": [{"ref": "R1", "text": "ISO", "category": "qualification"}]})
+        rows = [
+            {"ref": "R1", "requirement": "ISO", "status": "met", "basis": ""},
+            {"ref": "R2", "requirement": "Turnover", "status": "met", "basis": "Turnover 4,200,000 RON is above the 3,000,000 RON required"},
+        ]
+        return _json.dumps({"rows": rows, "summary": "<b>ok</b>"})
+
+    async def fake_source(adapter, tender, ai):  # noqa: ANN001
+        return "notice text", False, ["ignore-instructions"]
+
+    monkeypatch.setattr(MetaAIClient, "_chat", fake_chat)
+    monkeypatch.setattr(agents_core, "gather_source", fake_source)
+    monkeypatch.setattr(settings, "meta_api_key", "test-key")
+    spec = seed.post("/api/tenders/1003/agents/spec", json={}, headers=_auth()).json()
+    assert spec["output"]["flags"] == ["ignore-instructions"]
+    out = seed.post("/api/tenders/1003/agents/eligibility", json={}, headers=_auth()).json()["output"]
+    assert [r["status"] for r in out["rows"]] == ["unclear", "met"]
+    assert out["summary"] == "ok"

@@ -34,13 +34,21 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
 export function TenderBriefView({
   brief,
   fromDocuments,
+  flags = [],
 }: {
   brief: TenderBriefText;
   fromDocuments: boolean;
+  flags?: string[];
 }) {
   const t = useTranslations('analysis');
   return (
     <div className="flex flex-col gap-space-md">
+      {flags.length > 0 && (
+        <p role="alert" className="flex items-start gap-1.5 rounded-md border border-warn/40 bg-warn-bg px-space-sm py-space-xs font-body-sm text-body-sm text-warn">
+          <Icon name="warning" size="xs" className="mt-0.5 shrink-0" />
+          {t('briefFlags')}
+        </p>
+      )}
       <p className="font-body-lg text-body-lg text-on-surface">{brief.overview}</p>
       {brief.scope.length > 0 && (
         <Block title={t('briefScope')}>

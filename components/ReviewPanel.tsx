@@ -22,12 +22,17 @@ export function ReviewPanel({ outputs }: { outputs: AgentOutputs }) {
   const missing = outputs.risk?.missing_before_submission ?? [];
   const verdict = outputs.risk?.verdict ?? '';
   const flags = [...(outputs.legal?.flags ?? []), ...(outputs.legal?.exclusion_notes ?? [])];
-  if (elig.length + risks.length + missing.length + flags.length === 0 && !verdict) return null;
+  if (elig.length + risks.length + missing.length + flags.length === 0 && !verdict && !(outputs.spec?.flags?.length)) return null;
 
   return (
     <details data-assistant="docs-review" open className="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-md">
       <summary className="cursor-pointer font-label-md text-label-md font-semibold text-on-surface">{t('title')}</summary>
       <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">{t('hint')}</p>
+      {(outputs.spec?.flags?.length ?? 0) > 0 && (
+        <p role="alert" className="mt-space-xs rounded-md border border-warn/40 bg-warn-bg px-space-sm py-space-xs font-body-sm text-body-sm text-warn">
+          {t('flags')}
+        </p>
+      )}
       <div className="mt-space-sm flex flex-col gap-space-md">
         {verdict && <p className="font-body-md text-body-md text-on-surface">{verdict}</p>}
         {missing.length > 0 && (

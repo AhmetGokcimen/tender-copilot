@@ -15,6 +15,7 @@ export interface SpecAnalysis {
   lots: string;
   documents_required: string[];
   source?: 'documents' | 'notice';
+  flags?: string[];
 }
 export interface EligRow {
   ref: string;

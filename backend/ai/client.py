@@ -24,6 +24,7 @@ import httpx
 from pydantic import BaseModel, ValidationError
 from tenacity import retry, retry_if_exception_type, stop_after_attempt
 
+from backend.ai.safety import UNTRUSTED_RULE, clean_output, clean_text, wrap_untrusted
 from backend.core.config import settings
 from backend.models.company import CompanyProfile
 from backend.models.tender import Tender
@@ -221,8 +222,11 @@ class MetaAIClient:
         json_mode: bool = False,
         images: list[bytes] | None = None,
         purpose: str = "other",
+        wrap: bool = True,
     ) -> str:
-        content: list[dict] = [{"type": "input_text", "text": user_message}]
+        # Outside text goes in as marked data; every system prompt says how to treat it.
+        system_prompt = system_prompt + UNTRUSTED_RULE
+        content: list[dict] = [{"type": "input_text", "text": wrap_untrusted(user_message) if wrap else user_message}]
         for png in images or []:
             b64 = base64.b64encode(png).decode()
             content.append({"type": "input_image", "image_url": f"data:image/png;base64,{b64}"})
@@ -262,7 +266,7 @@ class MetaAIClient:
             raw = await self._chat(TRANSLATE_SYSTEM_PROMPT, user_message, json_mode=True, purpose="translate")
             try:
                 data = json.loads(raw)
-                title_en, summary = str(data["title"]).strip(), str(data["summary"]).strip()
+                title_en, summary = clean_text(str(data["title"]), 300), clean_text(str(data["summary"]), 700)
             except (json.JSONDecodeError, KeyError, TypeError):
                 continue
             if title_en and summary:
@@ -276,7 +280,7 @@ class MetaAIClient:
         for _ in range(2):
             raw = await self._chat(system_prompt, source_text, json_mode=True, purpose=f"brief:{language}")
             try:
-                brief = TenderBrief.model_validate(json.loads(raw))
+                brief = TenderBrief.model_validate(clean_output(json.loads(raw), 600))
             except (json.JSONDecodeError, ValidationError):
                 continue
             if brief.overview.strip():
@@ -298,7 +302,7 @@ class MetaAIClient:
             raw = await self._chat(system_prompt, specification_text, json_mode=True, purpose="extract")
             last_raw = raw
             try:
-                return ExtractedRequirements.model_validate(json.loads(raw))
+                return ExtractedRequirements.model_validate(clean_output(json.loads(raw), 600))
             except (json.JSONDecodeError, ValidationError):
                 continue
 
@@ -318,7 +322,7 @@ class MetaAIClient:
         for _ in range(3):
             raw = await self._chat(system_prompt, user_message, json_mode=True, purpose="compare")
             try:
-                return EligibilityVerdict.model_validate(json.loads(raw))
+                return EligibilityVerdict.model_validate(clean_output(json.loads(raw), 600))
             except (json.JSONDecodeError, ValidationError):
                 continue
 

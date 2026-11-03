@@ -1,5 +1,6 @@
 'use server';
 
+import { UNTRUSTED_RULE, cleanText, scanAndRedact, wrapUntrusted } from '@/lib/untrusted';
 import { extractText, getDocumentProxy } from 'unpdf';
 import { signedIn } from '@/lib/server-auth';
 
@@ -223,7 +224,7 @@ async function readWithModel(input: { text?: string; image?: { mime: string; b64
   if (!key) return null;
   const base = process.env.META_API_BASE_URL || 'https://api.meta.ai/v1';
   const content: Record<string, string>[] = [
-    { type: 'input_text', text: input.text ? `Document text:\n${input.text.slice(0, 30_000)}` : 'The document is the attached image.' },
+    { type: 'input_text', text: input.text ? `Document text:\n${wrapUntrusted(scanAndRedact(input.text.slice(0, 30_000)).text)}` : 'The document is the attached image.' },
   ];
   if (input.image) content.push({ type: 'input_image', image_url: `data:${input.image.mime};base64,${input.image.b64}` });
   const ctrl = new AbortController();
@@ -235,7 +236,7 @@ async function readWithModel(input: { text?: string; image?: { mime: string; b64
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: process.env.META_MODEL || 'muse-wonder-1.0',
-        instructions: SYSTEM,
+        instructions: SYSTEM + UNTRUSTED_RULE,
         input: [{ role: 'user', content }],
         reasoning: { effort: 'low' },
         text: { format: { type: 'json_object' } },
@@ -250,7 +251,7 @@ async function readWithModel(input: { text?: string; image?: { mime: string; b64
       .find((c: { type?: string }) => c.type === 'output_text')?.text;
     if (!out) return null;
     const p = JSON.parse(out);
-    const s = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, 300) : null);
+    const s = (v: unknown) => (typeof v === 'string' && v.trim() ? cleanText(v, 300) || null : null);
     const d = (v: unknown) => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null);
     const n = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
     const TYPES: DocType[] = ['anre_attestation', 'anre_gas', 'iscir', 'igsu', 'igpr', 'afer', 'iso', 'company_certificate', 'balance_sheet', 'acceptance_report', 'reference', 'rte', 'other'];

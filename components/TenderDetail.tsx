@@ -239,6 +239,7 @@ export function TenderDetail({ externalId }: { externalId: string }) {
               <TenderBriefView
                 brief={locale === 'ro' ? tender.brief.ro : tender.brief.en}
                 fromDocuments={tender.brief.source === 'documents'}
+                flags={tender.brief.flags}
               />
             ) : (
               <>
