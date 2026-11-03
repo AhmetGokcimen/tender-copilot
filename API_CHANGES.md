@@ -6,6 +6,24 @@ They are merged here, history preserved below. The versioned contract is
 
 ---
 
+# API keys, public REST API and MCP server (2026-11-03)
+
+Additive: nothing existing changed. Guide: [docs/API_AND_MCP.md](docs/API_AND_MCP.md).
+
+## New endpoints
+
+- `GET/POST /api/api-keys`, `DELETE /api/api-keys/{id}`: manage keys. Session JWT. The raw key (`ofk_…`) is in the create response only.
+- `GET /api/v1/me|profile|tenders|tenders/{id}|deadlines|pipeline`: read-only, ranked for the key owner's profile. `Authorization: Bearer ofk_…`.
+- `POST /api/mcp`: MCP server (Streamable HTTP, stateless JSON). Tools: `get_my_filters`, `recommend_tenders`, `search_tenders`, `get_tender`, `upcoming_deadlines`, `my_pipeline`. Same key header.
+
+## Behavior
+
+- Daily quota per user (start 100 / growth 1000 / pro 5000) and 60 calls/min per key; `429` + `Retry-After` beyond them. Max 5 active keys per user.
+- Keys are stored as SHA-256 only. Revoked, expired and unknown keys all answer `401`.
+- New tables `apikey`, `apikeyusage` (created by `init_db`; no migration to run).
+
+---
+
 # Restructure — Vercel monorepo (2026-10-29)
 
 One Vercel project instead of two deploy targets: Next.js at the repo root,

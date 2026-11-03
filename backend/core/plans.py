@@ -15,6 +15,16 @@ FEATURES: dict[str, frozenset[str]] = {
 }
 
 
+# API / AI-assistant calls one user's keys may make per UTC day, and how many
+# live keys they may hold. Raise per plan when billing lands.
+API_DAILY_CALLS: dict[str, int] = {"start": 100, "growth": 1000, "pro": 5000}
+API_MAX_KEYS = 5
+
+
+def api_daily_limit(plan: str) -> int:
+    return API_DAILY_CALLS.get(plan, API_DAILY_CALLS["start"])
+
+
 def user_plan(user: User) -> str:  # noqa: ARG001 - per-user plans come with billing
     return settings.default_plan if settings.default_plan in FEATURES else "start"
 

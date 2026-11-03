@@ -7,8 +7,11 @@ from sqlmodel import Session
 
 from backend.api.auth_routes import router as auth_router
 from backend.api.internal_routes import router as internal_router
+from backend.api.key_routes import router as key_router
+from backend.api.mcp_routes import router as mcp_router
 from backend.api.public_routes import router as public_router
 from backend.api.routes import router as api_router
+from backend.api.v1_routes import router as v1_router
 from backend.core.caiet_jobs import reap_stale_jobs
 from backend.core.config import settings
 from backend.core.errors import error_summary
@@ -26,6 +29,9 @@ app = FastAPI(
         "(one click) or /api/auth/google/login. Data is multi-tenant: every "
         "login owns its companies via onboarding. POST /internal/sync-tenders "
         "is the cron-triggered incremental sync (X-Sync-Token, not JWT). "
+        "/api/v1/* (read-only REST) and /api/mcp (MCP server for AI assistants) "
+        "take an API key instead: `Authorization: Bearer ofk_…`, created under "
+        "/api/api-keys. "
         "Breaking changes vs 0.5.0 are listed in API_CHANGES.md."
     ),
 )
@@ -42,6 +48,10 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/api")
 app.include_router(public_router, prefix="/api")
 app.include_router(api_router, prefix="/api")
+app.include_router(key_router, prefix="/api")  # session JWT: manage API keys
+# API-key auth (not the session JWT): the public read-only REST API and the MCP server.
+app.include_router(v1_router, prefix="/api")
+app.include_router(mcp_router, prefix="/api")
 app.include_router(internal_router)
 # Also under /api: on Vercel only /api/* reaches this function (vercel.json),
 # so the scheduled sync calls https://<site>/api/internal/sync-tenders.

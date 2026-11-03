@@ -1,4 +1,5 @@
 from backend.models.ai_usage import AiUsage
+from backend.models.api_key import ApiKey, ApiKeyUsage
 from backend.models.reminder_log import ReminderLog
 from backend.models.award import Award
 from backend.models.company import CompanyProfile
@@ -12,6 +13,8 @@ from backend.models.usage import FeatureUse, WinnerFinancials
 from backend.models.user_tender_state import UserTenderState
 
 __all__ = [
+    "ApiKey",
+    "ApiKeyUsage",
     "Award",
     "CompanyProfile",
     "CountryAuthorization",
