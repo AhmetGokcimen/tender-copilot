@@ -3,7 +3,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   USE_MOCK,
+  createApiKey,
   createCompany,
+  fetchApiKeys,
   fetchAuthorizations,
   fetchCompany,
   fetchCompanyOptions,
@@ -18,6 +20,7 @@ import {
   fetchVat,
   patchAuthorization,
   patchCompany,
+  revokeApiKey,
 } from './api';
 import { useAuthToken } from './auth';
 import { loadCompanyData } from './company-data';
@@ -32,6 +35,7 @@ export const qk = {
   companyOptions: ['company-options'] as const,
   onboardingStatus: ['onboarding-status'] as const,
   authorizations: ['authorizations'] as const,
+  apiKeys: ['api-keys'] as const,
   countryRequirements: (code: string) => ['country-requirements', code] as const,
 };
 
@@ -163,6 +167,35 @@ export function usePatchAuthorization() {
       void client.invalidateQueries({ queryKey: qk.authorizations });
       void client.invalidateQueries({ queryKey: qk.tenders });
       void client.invalidateQueries({ queryKey: ['tender'] });
+    },
+  });
+}
+
+export function useApiKeys() {
+  const token = useAuthToken();
+  return useQuery({
+    queryKey: qk.apiKeys,
+    queryFn: fetchApiKeys,
+    enabled: USE_MOCK || token !== null,
+  });
+}
+
+export function useCreateApiKey() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { name: string; expires_in_days?: number | null }) => createApiKey(body),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: qk.apiKeys });
+    },
+  });
+}
+
+export function useRevokeApiKey() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => revokeApiKey(id),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: qk.apiKeys });
     },
   });
 }

@@ -331,3 +331,77 @@ export async function fetchCountryRequirements(countryCode: string): Promise<Cou
   }
   return get<CountryRequirements>(`/countries/${encodeURIComponent(countryCode)}/requirements`);
 }
+
+async function del(path: string): Promise<void> {
+  const res = await fetch(`${API_URL}${path}`, {
+    method: 'DELETE',
+    cache: 'no-store',
+    headers: { ...authHeaders() },
+  });
+  if (!res.ok) await fail('DELETE', path, res);
+}
+
+/** An API key as listed: the secret itself is only returned once, when it is created. */
+export type ApiKeyInfo = {
+  id: number;
+  name: string;
+  prefix: string;
+  company_id: number | null;
+  created_at: string;
+  last_used_at: string | null;
+  expires_at: string | null;
+};
+
+export type ApiKeyList = {
+  keys: ApiKeyInfo[];
+  max_keys: number;
+  daily_limit: number;
+  used_today: number;
+};
+
+export type ApiKeyCreated = { key: ApiKeyInfo; secret: string };
+
+// Mock mode keeps keys in memory so the screen can be tried offline; they
+// authenticate nothing, the real ones come from the backend.
+let mockKeys: ApiKeyInfo[] = [];
+
+export async function fetchApiKeys(): Promise<ApiKeyList> {
+  if (USE_MOCK) {
+    await delay(150);
+    return { keys: structuredClone(mockKeys), max_keys: 5, daily_limit: 5000, used_today: 0 };
+  }
+  return get<ApiKeyList>('/api-keys');
+}
+
+export async function createApiKey(body: {
+  name: string;
+  expires_in_days?: number | null;
+}): Promise<ApiKeyCreated> {
+  if (USE_MOCK) {
+    await delay(200);
+    const secret = `ofk_demo_${Math.random().toString(36).slice(2, 14)}`;
+    const key: ApiKeyInfo = {
+      id: Date.now(),
+      name: body.name,
+      prefix: secret.slice(0, 10),
+      company_id: null,
+      created_at: new Date().toISOString(),
+      last_used_at: null,
+      expires_at: body.expires_in_days
+        ? new Date(Date.now() + body.expires_in_days * 86_400_000).toISOString()
+        : null,
+    };
+    mockKeys = [...mockKeys, key];
+    return { key, secret };
+  }
+  return post<ApiKeyCreated>('/api-keys', body);
+}
+
+export async function revokeApiKey(id: number): Promise<void> {
+  if (USE_MOCK) {
+    await delay(150);
+    mockKeys = mockKeys.filter((k) => k.id !== id);
+    return;
+  }
+  return del(`/api-keys/${id}`);
+}

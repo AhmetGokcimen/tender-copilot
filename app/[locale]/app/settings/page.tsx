@@ -6,6 +6,7 @@ import { Link } from '@/i18n/routing';
 import { useCompanyStore } from '@/stores/useCompanyStore';
 import { useAuthorizationStore } from '@/stores/useAuthorizationStore';
 import { useOnboardingStatus } from '@/lib/queries';
+import { ApiAccessSection } from '@/components/ApiAccessSection';
 import { AuthorizationsSection } from '@/components/AuthorizationsSection';
 import { Icon } from '@/components/Icon';
 import { INPUT } from '@/components/ui/form';
@@ -128,6 +129,8 @@ export default function SettingsPage() {
           Reset demo data
         </button>
       </div>
+
+      <ApiAccessSection />
     </div>
   );
 }
