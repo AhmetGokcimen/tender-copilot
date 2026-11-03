@@ -13,6 +13,7 @@ import {
   resolveVisibleTarget,
   scrollAndHighlight,
   tooltipPlacement,
+  waitForTarget,
   type TooltipPlacement,
 } from '@/lib/assistant-highlight';
 
@@ -21,6 +22,8 @@ export interface ChatMsg {
   role: 'user' | 'ai';
   text: string;
   agent?: AgentId;
+  /** Page the assistant opened for this answer. */
+  navigated?: string;
 }
 
 export interface TooltipState extends TooltipPlacement {
@@ -43,7 +46,7 @@ interface AssistantState {
   seedGreeting: (text: string) => void;
   send: (
     text: string,
-    ctx: { pathname: string; tenderId: string | null; errorText: string },
+    ctx: { pathname: string; tenderId: string | null; errorText: string; navigate: (path: string) => void },
   ) => Promise<void>;
   /** Appends a local AI note (revision confirmations) without a round-trip. */
   appendAi: (text: string) => void;
@@ -132,12 +135,14 @@ export const useAssistantStore = create<AssistantState>()(
           set((s) => ({
             messages: [
               ...s.messages,
-              { id: `${id}-r`, role: 'ai', text: res.message, agent: res.agent },
+              { id: `${id}-r`, role: 'ai', text: res.message, agent: res.agent, navigated: res.navigate_to ?? undefined },
             ],
             sending: false,
           }));
+          if (res.navigate_to) ctx.navigate(res.navigate_to);
           if (res.highlight_selector) {
-            const el = resolveVisibleTarget(res.highlight_selector);
+            // After opening another page the element appears a moment later.
+            const el = res.navigate_to ? await waitForTarget(res.highlight_selector) : resolveVisibleTarget(res.highlight_selector);
             if (el) {
               scrollAndHighlight(el);
               highlightTimer = window.setTimeout(

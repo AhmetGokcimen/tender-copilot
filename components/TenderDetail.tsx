@@ -111,7 +111,9 @@ export function TenderDetail({ externalId }: { externalId: string }) {
   const statuses = usePipelineStore((s) => s.statuses);
   const setStatus = usePipelineStore((s) => s.setStatus);
   const untrack = usePipelineStore((s) => s.untrack);
-  const [tab, setTab] = useState<'overview' | 'docs'>('overview');
+  const [tab, setTab] = useState<'overview' | 'docs'>(() =>
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('tab') === 'docs' ? 'docs' : 'overview',
+  );
 
   const tracked = useMemo(
     () => (tender ? statuses[tender.external_id] !== undefined || tender.state.status !== 'new' : false),

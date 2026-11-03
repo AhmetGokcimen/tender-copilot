@@ -106,7 +106,12 @@
     "revisionRejected": "Renunțat. Documentul a rămas neschimbat.",
     "suggestShorten": "Scurtează cel mai lung paragraf",
     "suggestNote": "Adaugă o notă despre garanție",
-    "suggestReplace": "Fă secțiunea de conformitate mai concisă"
+    "suggestReplace": "Fă secțiunea de conformitate mai concisă",
+    "subtitle": "Deschide pagini și îți arată unde sunt lucrurile",
+    "opened": "Deschis",
+    "suggestPipeline": "Du-mă la pipeline",
+    "suggestReminders": "Unde setez memento-urile de termen?",
+    "suggestSignature": "Unde adaug semnătura?"
   },
   "auth": {
     "loginTitle": "Conectează-te la Licits",

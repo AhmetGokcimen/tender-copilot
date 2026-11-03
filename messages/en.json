@@ -106,7 +106,12 @@
     "revisionRejected": "Discarded. The document is unchanged.",
     "suggestShorten": "Shorten the longest paragraph",
     "suggestNote": "Add a note about the warranty",
-    "suggestReplace": "Make the compliance section more concise"
+    "suggestReplace": "Make the compliance section more concise",
+    "subtitle": "Opens pages and shows you where things are",
+    "opened": "Opened",
+    "suggestPipeline": "Take me to my pipeline",
+    "suggestReminders": "Where do I set deadline reminders?",
+    "suggestSignature": "Where do I add my signature?"
   },
   "auth": {
     "loginTitle": "Sign in to Licits",
