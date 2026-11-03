@@ -33,7 +33,10 @@ const nextConfig = {
     // like in production. Never runs in production — Vercel routes /api
     // to the Python function via vercel.json instead.
     if (process.env.NODE_ENV === 'development') {
-      return [{ source: '/api/:path*', destination: 'http://localhost:8000/api/:path*' }];
+      return [
+        { source: '/api/:path*', destination: 'http://localhost:8000/api/:path*' },
+        { source: '/.well-known/:path*', destination: 'http://localhost:8000/.well-known/:path*' },
+      ];
     }
     return [];
   },

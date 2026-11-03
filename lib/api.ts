@@ -350,6 +350,8 @@ export type ApiKeyInfo = {
   created_at: string;
   last_used_at: string | null;
   expires_at: string | null;
+  /** An app signed in through OAuth (claude.ai, ChatGPT...), not a key the user made. */
+  connected_app?: boolean;
 };
 
 export type ApiKeyList = {
@@ -404,4 +406,25 @@ export async function revokeApiKey(id: number): Promise<void> {
     return;
   }
   return del(`/api-keys/${id}`);
+}
+
+/** Name of the app asking for access on the consent page; throws when the app or redirect address is not registered. */
+export async function fetchOAuthClient(clientId: string, redirectUri: string): Promise<{ name: string }> {
+  const q = new URLSearchParams({ client_id: clientId, redirect_uri: redirectUri });
+  return get<{ name: string }>(`/oauth/client?${q.toString()}`);
+}
+
+export type OAuthDecision = {
+  client_id: string;
+  redirect_uri: string;
+  response_type: string;
+  code_challenge: string;
+  code_challenge_method: string;
+  state: string;
+  approve: boolean;
+};
+
+/** Allow or deny the app; returns the address to send the browser to (back to the app, with a code or an error). */
+export async function decideOAuth(body: OAuthDecision): Promise<{ redirect_to: string }> {
+  return post<{ redirect_to: string }>('/oauth/authorize', body);
 }

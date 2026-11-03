@@ -7,10 +7,11 @@ import { useApiKeys, useCreateApiKey, useRevokeApiKey } from '@/lib/queries';
 import { Icon } from '@/components/Icon';
 import { INPUT } from '@/components/ui/form';
 
-type Tab = 'claudeCode' | 'desktop' | 'cursor' | 'rest';
+type Tab = 'web' | 'claudeCode' | 'desktop' | 'cursor' | 'rest';
 
-const TABS: Tab[] = ['claudeCode', 'desktop', 'cursor', 'rest'];
-const TAB_KEY: Record<Tab, 'tabClaudeCode' | 'tabDesktop' | 'tabCursor' | 'tabRest'> = {
+const TABS: Tab[] = ['web', 'claudeCode', 'desktop', 'cursor', 'rest'];
+const TAB_KEY: Record<Tab, 'tabWeb' | 'tabClaudeCode' | 'tabDesktop' | 'tabCursor' | 'tabRest'> = {
+  web: 'tabWeb',
   claudeCode: 'tabClaudeCode',
   desktop: 'tabDesktop',
   cursor: 'tabCursor',
@@ -21,6 +22,8 @@ const TAB_KEY: Record<Tab, 'tabClaudeCode' | 'tabDesktop' | 'tabCursor' | 'tabRe
 function snippet(tab: Tab, origin: string, key: string): string {
   const mcp = `${origin}/api/mcp`;
   switch (tab) {
+    case 'web':
+      return mcp;
     case 'claudeCode':
       return `claude mcp add --transport http licits ${mcp} --header "Authorization: Bearer ${key}"`;
     case 'desktop':
@@ -88,7 +91,7 @@ export function ApiAccessSection() {
   const [created, setCreated] = useState<{ id: number; secret: string } | null>(null);
   const secret = created?.secret ?? null;
   const [confirming, setConfirming] = useState<number | null>(null);
-  const [tab, setTab] = useState<Tab>('claudeCode');
+  const [tab, setTab] = useState<Tab>('web');
   const [origin, setOrigin] = useState('https://licits.com');
   const [error, setError] = useState<string | null>(null);
 
@@ -143,7 +146,10 @@ export function ApiAccessSection() {
           >
             <div className="flex min-w-0 flex-1 flex-col">
               <span className="truncate font-label-md text-label-md font-semibold text-on-surface">
-                {k.name} <span className="font-mono font-normal text-on-surface-variant">{k.prefix}…</span>
+                {k.name}{' '}
+                <span className="font-normal text-on-surface-variant">
+                  {k.connected_app ? t('connectedApp') : <span className="font-mono">{k.prefix}…</span>}
+                </span>
               </span>
               <span className="font-body-sm text-body-sm text-on-surface-variant">
                 {t('created', { date: fmt(k.created_at) })} ·{' '}
@@ -163,7 +169,7 @@ export function ApiAccessSection() {
                 }}
                 className="inline-flex h-8 items-center rounded-pill bg-error px-space-sm font-label-md text-label-md text-on-error disabled:opacity-50"
               >
-                {t('confirmRevoke')}
+                {k.connected_app ? t('confirmDisconnect') : t('confirmRevoke')}
               </button>
             ) : (
               <button
@@ -171,7 +177,7 @@ export function ApiAccessSection() {
                 onClick={() => setConfirming(k.id)}
                 className="inline-flex h-8 items-center rounded-pill border border-line-strong px-space-sm font-label-md text-label-md text-on-surface hover:bg-surface-container"
               >
-                {t('revoke')}
+                {k.connected_app ? t('disconnect') : t('revoke')}
               </button>
             )}
           </div>
@@ -255,6 +261,7 @@ export function ApiAccessSection() {
             </button>
           ))}
         </div>
+        {tab === 'web' && <p className="font-body-md text-body-md text-on-surface-variant">{t('webSteps')}</p>}
         <div className="flex items-start gap-space-sm">
           <pre className="min-w-0 flex-1 overflow-x-auto whitespace-pre-wrap break-all rounded-lg bg-surface-container p-space-md font-mono text-[12.5px] text-on-surface">
             {snippet(tab, origin, secret ?? t('yourKey'))}

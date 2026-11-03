@@ -1,7 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "regions": ["dub1"],
-  "rewrites": [{ "source": "/api/:path*", "destination": "/api/index" }],
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index" },
+    { "source": "/.well-known/:path*", "destination": "/api/index" }
+  ],
   "functions": {
     "api/index.py": {
       "excludeFiles": "backend/tests/**"

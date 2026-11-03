@@ -32,6 +32,9 @@ class ApiKey(SQLModel, table=True):
     last_used_at: datetime | None = None
     expires_at: datetime | None = None
     revoked_at: datetime | None = None
+    # Set on the row that represents an app connected through OAuth (the key
+    # string is never shown or usable); None for keys the user created.
+    oauth_client_id: str | None = None
 
 
 class ApiKeyUsage(SQLModel, table=True):

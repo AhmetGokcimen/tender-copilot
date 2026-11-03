@@ -28,9 +28,11 @@ from backend.core.plans import API_MAX_KEYS, api_daily_limit, user_plan
 from backend.db import get_session
 from backend.models.api_key import ApiKey, ApiKeyUsage
 from backend.models.company import CompanyProfile
+from backend.models.oauth import OAuthToken
 from backend.models.user import User
 
 KEY_PREFIX = "ofk_"
+ACCESS_PREFIX = "ofo_"  # OAuth access tokens (core.oauth)
 BURST_LIMIT = 60  # calls per key per BURST_WINDOW seconds
 BURST_WINDOW = 60
 
@@ -53,13 +55,20 @@ def hash_key(raw: str) -> str:
     return hashlib.sha256(raw.encode()).hexdigest()
 
 
-def active_keys(session: Session, user_id: int) -> list[ApiKey]:
+def active_keys(session: Session, user_id: int, *, include_connections: bool = True) -> list[ApiKey]:
+    """The user's live keys. With include_connections, also the rows that
+    stand for apps connected through OAuth (shown in Settings so they can be
+    disconnected; they do not count toward the key limit)."""
     now = _utcnow()
     keys = session.exec(
         select(ApiKey).where(ApiKey.user_id == user_id, ApiKey.revoked_at == None)
         .order_by(ApiKey.id)
     ).all()
-    return [k for k in keys if k.expires_at is None or _aware(k.expires_at) > now]
+    return [
+        k for k in keys
+        if (k.expires_at is None or _aware(k.expires_at) > now)
+        and (include_connections or k.oauth_client_id is None)
+    ]
 
 
 def create_key(
@@ -70,7 +79,7 @@ def create_key(
     name = name.strip()
     if not name:
         raise HTTPException(status_code=422, detail="Give the key a name")
-    if len(active_keys(session, user.id)) >= API_MAX_KEYS:
+    if len(active_keys(session, user.id, include_connections=False)) >= API_MAX_KEYS:
         raise HTTPException(
             status_code=409, detail=f"At most {API_MAX_KEYS} active keys — revoke one first"
         )
@@ -101,11 +110,22 @@ def revoke_key(session: Session, user: User, key_id: int) -> None:
         session.commit()
 
 
-def _unauthorized() -> HTTPException:
+def public_origin(request: Request) -> str:
+    """https://host the client reached us on (behind Vercel's proxy the
+    forwarded headers carry it)."""
+    proto = request.headers.get("x-forwarded-proto", request.url.scheme).split(",")[0].strip()
+    host = (request.headers.get("x-forwarded-host") or request.headers.get("host") or request.url.netloc)
+    return f"{proto}://{host.split(',')[0].strip()}"
+
+
+def _unauthorized(request: Request) -> HTTPException:
+    # resource_metadata (RFC 9728) is how an MCP client that only has the URL
+    # finds out it can sign in with OAuth instead of a key.
+    metadata = f"{public_origin(request)}/.well-known/oauth-protected-resource"
     return HTTPException(
         status_code=401,
-        detail="Missing or invalid API key — send 'Authorization: Bearer ofk_…' (create one in Settings)",
-        headers={"WWW-Authenticate": "Bearer"},
+        detail="Missing or invalid credentials — connect through OAuth, or send 'Authorization: Bearer ofk_…' (create a key in Settings)",
+        headers={"WWW-Authenticate": f'Bearer resource_metadata="{metadata}"'},
     )
 
 
@@ -178,16 +198,19 @@ def authenticate(
     session: Session = Depends(get_session),
 ) -> ApiPrincipal:
     raw = creds.credentials if creds and creds.scheme.lower() == "bearer" else None
-    if not raw or not raw.startswith(KEY_PREFIX):
-        raise _unauthorized()
-    key = session.exec(select(ApiKey).where(ApiKey.key_hash == hash_key(raw))).first()
+    if not raw or not raw.startswith((KEY_PREFIX, ACCESS_PREFIX)):
+        raise _unauthorized(request)
+    if raw.startswith(ACCESS_PREFIX):
+        key = _connection_for_access_token(session, raw)
+    else:
+        key = session.exec(select(ApiKey).where(ApiKey.key_hash == hash_key(raw))).first()
     if key is None or key.revoked_at is not None:
-        raise _unauthorized()
+        raise _unauthorized(request)
     if key.expires_at is not None and _aware(key.expires_at) <= _utcnow():
-        raise _unauthorized()
+        raise _unauthorized(request)
     user = session.get(User, key.user_id)
     if user is None:
-        raise _unauthorized()
+        raise _unauthorized(request)
 
     _check_burst(key.id)
     limit = api_daily_limit(user_plan(user))
@@ -205,6 +228,14 @@ def authenticate(
     session.commit()
     request.state.api_key_id = key.id
     return ApiPrincipal(user, key, used, limit)
+
+
+def _connection_for_access_token(session: Session, raw: str) -> ApiKey | None:
+    """The connection (ApiKey row) behind a live OAuth access token."""
+    token = session.exec(select(OAuthToken).where(OAuthToken.access_hash == hash_key(raw))).first()
+    if token is None or _aware(token.access_expires_at) <= _utcnow():
+        return None
+    return session.get(ApiKey, token.key_id)
 
 
 def _seconds_to_midnight() -> int:

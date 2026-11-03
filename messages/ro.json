@@ -1178,6 +1178,27 @@
     "tabRest": "API REST",
     "yourKey": "CHEIA_TA_API",
     "toolsTitle": "Ce poate face asistentul",
-    "tools": "Îți citește filtrele salvate, recomandă cele mai bune licitații deschise, caută după județ, cod CPV, valoare sau termen, deschide detaliile unei licitații și listează termenele și tabloul tău. Nu poate modifica nimic în contul tău."
+    "tools": "Îți citește filtrele salvate, recomandă cele mai bune licitații deschise, caută după județ, cod CPV, valoare sau termen, deschide detaliile unei licitații și listează termenele și tabloul tău. Nu poate modifica nimic în contul tău.",
+    "tabWeb": "Claude.ai / ChatGPT",
+    "webSteps": "În Claude.ai: Settings → Connectors → Add custom connector, lipește adresa de mai jos și conectează. Te autentifici în Licits și permiți accesul, fără cheie. ChatGPT: Settings → Connectors → adaugă un conector MCP personalizat cu aceeași adresă.",
+    "connectedApp": "Aplicație conectată",
+    "disconnect": "Deconectează",
+    "confirmDisconnect": "Deconectezi definitiv?"
+  },
+  "oauthConsent": {
+    "title": "Conectează un asistent",
+    "heading": "Lași {app} să îți citească licitațiile?",
+    "signedInAs": "Autentificat ca {email}",
+    "loading": "Se încarcă…",
+    "demo": "Conectarea unui asistent necesită un cont real. Autentifică-te pe site-ul live.",
+    "invalid": "Această cerere de conectare nu este validă. Începe din nou din asistentul tău.",
+    "failed": "Ceva nu a mers bine. Încearcă din nou din asistentul tău.",
+    "can1": "Să îți citească filtrele salvate și un rezumat al profilului companiei.",
+    "can2": "Să caute licitații și să le deschidă detaliile, ordonate după profilul tău.",
+    "can3": "Să îți vadă termenele și tabloul de licitații.",
+    "cannot": "Doar citire. Nu poate modifica nimic în cont, nu poate crea chei și nu trimite mesaje.",
+    "allow": "Permite",
+    "deny": "Refuză",
+    "revokeHint": "Îl poți deconecta oricând din Setări, Asistent AI și API."
   }
 }
