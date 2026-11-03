@@ -554,7 +554,8 @@
     "suggestedFor": "Suggested for {procedure}",
     "resetSuggested": "Reset to suggested",
     "documents": "Tender documents",
-    "notFound": "Tender not found."
+    "notFound": "Tender not found.",
+    "briefFlags": "Some text in the tender files looked like instructions to an AI and was ignored. Check the original documents."
   },
   "kanban": {
     "title": "Bidding pipeline",
@@ -1139,7 +1140,8 @@
     "unclear": "Unclear",
     "level_low": "low",
     "level_medium": "medium",
-    "level_high": "high"
+    "level_high": "high",
+    "flags": "Some text in the tender files looked like instructions to an AI and was cut out before reading. Treat this tender's analysis with care and check the original documents."
   },
   "apiAccess": {
     "title": "AI assistant & API",

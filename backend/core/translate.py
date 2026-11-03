@@ -11,6 +11,7 @@ import httpx
 from sqlmodel import Session, select
 
 from backend.ai.client import MetaAIClient
+from backend.ai.safety import scan_and_redact
 from backend.core.config import settings
 from backend.models.tender import Tender
 
@@ -27,7 +28,9 @@ async def translate_one(session: Session, tender: Tender, ai: MetaAIClient | Non
         return False
     ai = ai or MetaAIClient()
     try:
-        result = await ai.translate_tender(tender.title, tender.raw_description)
+        title, _ = scan_and_redact(tender.title)
+        description, _ = scan_and_redact(tender.raw_description) if tender.raw_description else (None, [])
+        result = await ai.translate_tender(title, description)
     except (httpx.HTTPError, ValueError):
         return False
     if result is None:

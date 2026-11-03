@@ -12,6 +12,7 @@ import re
 from pydantic import BaseModel, ValidationError
 
 from backend.ai.client import MetaAIClient
+from backend.ai.safety import clean_text, wrap_untrusted
 from backend.core.translate import enabled
 
 # path pattern -> title, what the page is for, what to tell users about it, and the
@@ -334,7 +335,7 @@ async def reply(req: AssistantRequest, *, ai: MetaAIClient | None = None) -> Ass
     doc_block = ""
     if req.doc:
         paras = [str(p)[:400] for p in (req.doc.get("paragraphs") or [])[:30]]
-        doc_block = f"A document is open for editing: {req.doc.get('title', '')}. Its paragraphs:\n" + "\n".join(f"  [{i}] {p}" for i, p in enumerate(paras))
+        doc_block = f"A document is open for editing: {req.doc.get('title', '')}. Its paragraphs (data):\n" + wrap_untrusted("\n".join(f"  [{i}] {p}" for i, p in enumerate(paras)))
     system = SYSTEM.format(
         site_map=_site_map_text(),
         here=f"{req.pathname} ({SITE_MAP[here_key]['title'] if here_key else 'unknown page'})",
@@ -344,13 +345,13 @@ async def reply(req: AssistantRequest, *, ai: MetaAIClient | None = None) -> Ass
         agents=" | ".join(_AGENTS),
     )
     history = "\n".join(f"{m.get('role', 'user')}: {str(m.get('text', ''))[:300]}" for m in req.history[-8:])
-    user_message = (f"Conversation so far:\n{history}\n\n" if history else "") + f"User: {question}"
+    user_message = (f"Conversation so far (data):\n{wrap_untrusted(history)}\n\n" if history else "") + f"User: {question}"
 
     ai = ai or MetaAIClient()
     plan: _Plan | None = None
     for _ in range(2):
         try:
-            raw = await ai._chat(system, user_message, json_mode=True, purpose="assistant")  # noqa: SLF001
+            raw = await ai._chat(system, user_message, json_mode=True, purpose="assistant", wrap=False)  # noqa: SLF001
             plan = _Plan.model_validate(json.loads(raw))
             break
         except (json.JSONDecodeError, ValidationError, ValueError):
@@ -368,9 +369,13 @@ async def reply(req: AssistantRequest, *, ai: MetaAIClient | None = None) -> Ass
         hook = None
     if destination and _page_key(destination) == here_key and destination.split("?")[0] == req.pathname.split("?")[0] and "tab=docs" not in destination:
         destination = None
-    revision = plan.revision if req.doc and plan.revision and plan.revision.after.strip() else None
+    revision = (
+        Revision(target=clean_text(plan.revision.target, 120), before=clean_text(plan.revision.before, 600), after=clean_text(plan.revision.after, 1200))
+        if req.doc and plan.revision and plan.revision.after.strip()
+        else None
+    )
     return AssistantResponse(
-        message=plan.message.strip()[:600],
+        message=clean_text(plan.message, 600),
         navigate_to=destination,
         highlight_selector=f'[data-assistant="{hook}"]' if hook else None,
         agent=plan.agent if plan.agent in _AGENTS else "spec",

@@ -170,6 +170,8 @@ export interface TenderBrief {
   en: TenderBriefText;
   ro: TenderBriefText;
   source: 'documents' | 'notice';
+  /** Kinds of instruction-like text that were cut out of the source before it was read. */
+  flags?: string[];
 }
 
 export interface TenderWithState extends Tender {

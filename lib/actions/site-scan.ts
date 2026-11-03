@@ -1,5 +1,6 @@
 'use server';
 
+import { UNTRUSTED_RULE, cleanText, scanAndRedact, wrapUntrusted } from '@/lib/untrusted';
 import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
 import { TRADES } from '@/lib/construction';
@@ -238,9 +239,10 @@ Rules:
 - Also write a one-sentence summary of what the company does, in the requested language.
 Answer as JSON: {"summary": string, "picks": [{"cpv": string, "evidence": string}]}`;
 
-async function matchWithModel(text: string, lang: 'en' | 'ro'): Promise<{ summary: string; picks: ScanPick[] } | null> {
+async function matchWithModel(rawText: string, lang: 'en' | 'ro'): Promise<{ summary: string; picks: ScanPick[] } | null> {
   const key = process.env.META_API_KEY;
   if (!key) return null;
+  const text = scanAndRedact(rawText).text;
   const base = process.env.META_API_BASE_URL || 'https://api.meta.ai/v1';
   const catalogue = CATALOGUE.map((c) => `${c.cpv} | ${c.trade} | ${c.label}`).join('\n');
   const ctrl = new AbortController();
@@ -252,14 +254,14 @@ async function matchWithModel(text: string, lang: 'en' | 'ro'): Promise<{ summar
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: process.env.META_MODEL || 'muse-wonder-1.0',
-        instructions: SYSTEM,
+        instructions: SYSTEM + UNTRUSTED_RULE,
         input: [
           {
             role: 'user',
             content: [
               {
                 type: 'input_text',
-                text: `Summary language: ${lang === 'ro' ? 'Romanian' : 'English'}\n\nCatalogue (cpv | trade | name):\n${catalogue}\n\nWebsite text:\n${text}`,
+                text: `Summary language: ${lang === 'ro' ? 'Romanian' : 'English'}\n\nCatalogue (cpv | trade | name):\n${catalogue}\n\nWebsite text:\n${wrapUntrusted(text)}`,
               },
             ],
           },
@@ -282,10 +284,10 @@ async function matchWithModel(text: string, lang: 'en' | 'ro'): Promise<{ summar
     for (const p of Array.isArray(parsed.picks) ? parsed.picks : []) {
       const item = typeof p.cpv === 'string' ? byCpv.get(p.cpv) : undefined;
       if (item && !picks.some((x) => x.cpv === item.cpv)) {
-        picks.push({ cpv: item.cpv, trade: item.trade, evidence: String(p.evidence ?? '').slice(0, 180) });
+        picks.push({ cpv: item.cpv, trade: item.trade, evidence: cleanText(String(p.evidence ?? ''), 180) });
       }
     }
-    return { summary: typeof parsed.summary === 'string' ? parsed.summary.slice(0, 300) : '', picks };
+    return { summary: typeof parsed.summary === 'string' ? cleanText(parsed.summary, 300) : '', picks };
   } catch {
     return null;
   } finally {
