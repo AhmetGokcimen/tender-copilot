@@ -19,6 +19,7 @@ from backend.models.ai_usage import AiUsage
 from backend.api.schemas import SyncReport
 from backend.core.config import settings
 from backend.core import brief as brief_core
+from backend.core import reminders as reminders_core
 from backend.core import translate
 from backend.core.errors import error_summary
 from backend.core.sync import (
@@ -146,6 +147,20 @@ async def brief_tenders(
     return await brief_core.brief_pending(session, limit=limit, max_seconds=max_seconds)
 
 
+@router.post("/internal/send-reminders", tags=["internal"])
+async def send_reminders(
+    dry_run: bool = Query(default=False),
+    x_sync_token: str | None = Header(default=None),
+    session: Session = Depends(get_session),
+) -> dict:
+    """E-mail deadline reminders for the tenders users track (once per tender)."""
+    if not settings.sync_secret:
+        raise HTTPException(status_code=503, detail="Sync not configured")
+    if not _token_ok(x_sync_token):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    return await reminders_core.send_deadline_reminders(session, dry_run=dry_run)
+
+
 @router.get("/internal/ai-usage", tags=["internal"])
 def ai_usage(
     days: int = Query(default=30, ge=1, le=365),
@@ -203,6 +218,7 @@ def diagnostics(x_sync_token: str | None = Header(default=None)) -> dict:
         "dialect": engine.dialect.name,
         "database_url_set": bool(os.environ.get("DATABASE_URL")),
         "ai_key_set": translate.enabled(),
+        "mail_key_set": bool(settings.resend_api_key),
         # False means JWT_SECRET is missing on this deployment: session tokens are refused.
         "jwt_secret_ok": not jwt_secret_unsafe(),
     }

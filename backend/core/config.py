@@ -17,6 +17,13 @@ class Settings(BaseSettings):
     meta_api_base_url: str = "https://api.meta.ai/v1"
     meta_model: str = "muse-wonder-1.0"
 
+    # Outgoing e-mail (deadline reminders) through Resend's HTTP API. Both stay
+    # empty until a Resend key and a verified sender domain exist; sending then
+    # reports "not configured" instead of failing.
+    resend_api_key: str = ""
+    mail_from: str = "Licits <alerts@licits.com>"
+    site_url: str = "https://licits.com"
+
     # Absolute and anchored to backend/ (not the cwd): the server now runs
     # from the repo root, so a bare ./data/... would silently create a
     # second database in the wrong place. DATABASE_URL env still overrides

@@ -218,22 +218,22 @@
   position: absolute;
   inset: -1px;
   border-radius: 9999px;
-  border: 1px solid var(--ink);
+  border: 2px solid var(--indigo);
   opacity: 0;
   pointer-events: none;
 }
 
 .match-sonar:hover::after {
-  animation: sonar-ping 150ms ease-out;
+  animation: sonar-ping 600ms ease-out;
 }
 
 @keyframes sonar-ping {
   from {
     transform: scale(1);
-    opacity: 0.7;
+    opacity: 0.9;
   }
   to {
-    transform: scale(1.5);
+    transform: scale(1.9);
     opacity: 0;
   }
 }

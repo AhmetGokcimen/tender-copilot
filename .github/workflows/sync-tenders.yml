@@ -49,6 +49,16 @@ jobs:
         env:
           SYNC_URL: ${{ secrets.SYNC_URL }}
           SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
+      - name: E-mail deadline reminders
+        # Best effort. Does nothing until RESEND_API_KEY is set on the server.
+        continue-on-error: true
+        run: |
+          curl -sS -L --post301 --post302 --post303 -X POST \
+            "$SYNC_URL/internal/send-reminders" \
+            -H "X-Sync-Token: $SYNC_TOKEN" --max-time 120; echo
+        env:
+          SYNC_URL: ${{ secrets.SYNC_URL }}
+          SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
       - name: Pre-read the most relevant open tenders
         # Best effort: detailed briefs for a few high-scoring construction tenders per run; the rest are made on demand.
         continue-on-error: true
