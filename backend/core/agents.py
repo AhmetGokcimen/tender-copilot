@@ -130,8 +130,9 @@ COMMON_RULES = """\
 Rules that apply to everything you write:
 - Use ONLY facts given in the input. Never invent a quantity, date, price, \
 name, certificate, staff number, reference project or capability. If the \
-input does not say, put it in the "not stated / to confirm" field or leave \
-the field empty.
+input does not say, leave the field empty (an empty string) or write \
+"[de completat de operator]"; never write English phrases such as \
+"not stated" or "to confirm" inside Romanian text.
 - Keep project codes, street, village and institution names verbatim.
 - Short, concrete sentences. No filler, no marketing language.
 - Respond with ONLY a JSON object matching this schema, no other text:

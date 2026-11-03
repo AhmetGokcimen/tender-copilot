@@ -11,7 +11,7 @@ import type { CompanyPatch } from '@/lib/types';
  * with are copied there. Remove once the backend reads the Supabase
  * profile directly.
  */
-export async function syncLegacyProfile(d: CompanyData): Promise<void> {
+export function legacyPatch(d: CompanyData): CompanyPatch {
   const c = d.company;
   const years = [...d.turnover].filter((r) => r.amount > 0).sort((a, b) => b.year - a.year);
   const latest = years[0];
@@ -39,6 +39,12 @@ export async function syncLegacyProfile(d: CompanyData): Promise<void> {
     subsectors: c.trades,
     target_countries: ['RO'],
   };
+  return patch;
+}
+
+export async function syncLegacyProfile(d: CompanyData): Promise<void> {
+  const c = d.company;
+  const patch = legacyPatch(d);
   try {
     await patchCompany(patch);
   } catch {

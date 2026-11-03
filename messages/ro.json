@@ -611,7 +611,13 @@
     "manageArchive": "Gestionează în Arhivă",
     "noTender": "Nicio licitație disponibilă.",
     "noTenderHint": "Fluxul nu a returnat nicio licitație pentru redactare.",
-    "pdfError": "PDF-ul nu a putut fi creat, de obicei pentru că s-a întrerupt conexiunea la încărcarea fonturilor. Verifică conexiunea și încearcă din nou Descărcarea."
+    "pdfError": "PDF-ul nu a putut fi creat, de obicei pentru că s-a întrerupt conexiunea la încărcarea fonturilor. Verifică conexiunea și încearcă din nou Descărcarea.",
+    "viewEdit": "Editare",
+    "viewPdf": "Previzualizare PDF",
+    "pdfPreview": "Previzualizare PDF",
+    "pdfBuilding": "Se construiește PDF-ul…",
+    "pdfRetry": "Încearcă din nou",
+    "pdfOpen": "Deschide PDF-ul într-o filă nouă"
   },
   "archive": {
     "title": "Arhivă și certificate",
@@ -1098,7 +1104,8 @@
     "hintDisclaimer": "Istoric descriptiv din anunțurile publice de atribuire, nu sfat sau recomandare. Prețul este decizia ta și niciun rezultat nu este garantat.",
     "confirm": "Confirm că aceste răspunsuri aparțin companiei mele și că sunt autorizat să le dau. Înțeleg că sunt date pe răspunderea companiei.",
     "skip": "Sari peste, lasă necompletat",
-    "create": "Creează documentele"
+    "create": "Creează documentele",
+    "notesTitle": "Puncte pe care consilierul juridic spune că le poți confirma doar tu"
   },
   "signature": {
     "none": "Nu există încă o imagine a semnăturii",
@@ -1108,5 +1115,19 @@
     "alt": "Semnătura",
     "error": "Imaginea nu a putut fi citită. Folosește un PNG sau JPG cu semnătura pe hârtie albă.",
     "note": "Se pune în blocul de semnătură din PDF. Este doar o imagine: pentru depunere în SEAP fișierele trebuie să poarte în continuare semnătura electronică calificată a companiei."
+  },
+  "review": {
+    "title": "De verificat înainte de depunere",
+    "hint": "Note ale agenților. Nu fac parte din documente.",
+    "missing": "Încă lipsește",
+    "requirements": "Cerințe verificate față de compania ta",
+    "risks": "Riscuri (probabilitate / impact)",
+    "legal": "Puncte juridice de confirmat",
+    "met": "Îndeplinită",
+    "not_met": "Neîndeplinită",
+    "unclear": "Neclară",
+    "level_low": "scăzut",
+    "level_medium": "mediu",
+    "level_high": "ridicat"
   }
 }
