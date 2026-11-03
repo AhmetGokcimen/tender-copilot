@@ -193,6 +193,7 @@ NAV_HOOKS = {
     "nav-settings": "sidebar link: Settings",
     "nav-collapse": "the small round button that collapses the sidebar",
     "nav-quota": "the monthly past-winner lookups used",
+    "language-toggle": "the EN | RO language switch (top right of every page)",
 }
 
 _AGENTS = ("spec", "eligibility", "legal", "writer", "risk")
@@ -283,6 +284,8 @@ point at:
 
 The user is now on: {here}
 Elements visible right now: {live}
+Other controls visible right now, each as auto-N: label (you may point at one with highlight_hook "auto-N" when the user is already on this page and no listed hook fits):
+{auto}
 {tender_line}
 {doc_block}
 Respond with ONLY a JSON object:
@@ -295,7 +298,7 @@ Rules:
 page path from the list above (use /app/tenders/{{id}} only if a tender is open; add \
 ?tab=docs for the document preparation tab) and highlight_hook to ONE hook from that \
 page's list, or null. If they are already on that page, set navigate_to to null.
-- Only use hook names that appear in the list. Never invent a path or a hook.
+- Only use hook names that appear in the lists above (page hooks or auto-N). Prefer a page hook; use auto-N for things not listed. Never invent a path or a hook.
 - "message" says what you did or the answer, e.g. what the highlighted thing is for.
 - "revision" only when a document is open and the user asks to change its text: \
 "target" is a short exact snippet of the paragraph to replace (empty to append), \
@@ -332,6 +335,14 @@ async def reply(req: AssistantRequest, *, ai: MetaAIClient | None = None) -> Ass
 
     here_key = _page_key(req.pathname)
     live = sorted({str(n.get("hook")) for n in req.dom if n.get("hook") and re.fullmatch(r"[a-z0-9-]{2,40}", str(n.get("hook")), re.I)})
+    auto_lines: list[str] = []
+    live_auto: set[int] = set()
+    for n in req.dom:
+        a = n.get("auto")
+        if isinstance(a, int) and 0 <= a < 400 and len(auto_lines) < 140:
+            label = re.sub(r"\s+", " ", str(n.get("text") or ""))[:60]
+            live_auto.add(a)
+            auto_lines.append(f"auto-{a}: {n.get('role', 'control')} \"{label}\"")
     doc_block = ""
     if req.doc:
         paras = [str(p)[:400] for p in (req.doc.get("paragraphs") or [])[:30]]
@@ -340,6 +351,7 @@ async def reply(req: AssistantRequest, *, ai: MetaAIClient | None = None) -> Ass
         site_map=_site_map_text(),
         here=f"{req.pathname} ({SITE_MAP[here_key]['title'] if here_key else 'unknown page'})",
         live=", ".join(live) or "none",
+        auto=wrap_untrusted("\n".join(auto_lines) or "none"),
         tender_line=f"A tender is open: {req.tenderId}." if req.tenderId else "No tender is open.",
         doc_block=doc_block,
         agents=" | ".join(_AGENTS),
@@ -364,6 +376,10 @@ async def reply(req: AssistantRequest, *, ai: MetaAIClient | None = None) -> Ass
     destination = _resolve_destination(plan.navigate_to, req.tenderId)
     target_path = destination or req.pathname
     hook = plan.highlight_hook if plan.highlight_hook in _hooks_for(target_path) else None
+    auto_selector: str | None = None
+    m = re.fullmatch(r"auto-(\d{1,3})", plan.highlight_hook or "")
+    if m and not destination and int(m.group(1)) in live_auto:
+        auto_selector = f'[data-assistant-auto="{int(m.group(1))}"]'
     # On the current page the live DOM is the truth: a hook that is not rendered cannot be pointed at.
     if hook and not destination and hook not in live and not hook.startswith("nav-"):
         hook = None
@@ -377,7 +393,7 @@ async def reply(req: AssistantRequest, *, ai: MetaAIClient | None = None) -> Ass
     return AssistantResponse(
         message=clean_text(plan.message, 600),
         navigate_to=destination,
-        highlight_selector=f'[data-assistant="{hook}"]' if hook else None,
+        highlight_selector=auto_selector or (f'[data-assistant="{hook}"]' if hook else None),
         agent=plan.agent if plan.agent in _AGENTS else "spec",
         revision=revision,
     )

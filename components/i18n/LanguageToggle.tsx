@@ -16,6 +16,7 @@ export function LanguageToggle({ className = '' }: { className?: string }) {
   return (
     <div
       role="group"
+      data-assistant="language-toggle"
       aria-label="Language"
       className={`inline-flex items-center rounded-pill border border-line bg-raised p-0.5 ${className}`}
     >

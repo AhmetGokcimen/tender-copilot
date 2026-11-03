@@ -15,6 +15,8 @@ export interface DomContextNode {
   role: string;
   /** Stable hook when the element carries `data-assistant`. */
   hook: string | null;
+  /** Number of the temporary label put on controls that have no stable hook. */
+  auto: number | null;
   rect: { x: number; y: number; w: number; h: number };
 }
 
@@ -48,12 +50,15 @@ function textOf(el: Element): string {
       ? el.value || el.placeholder
       : null) ??
     (el instanceof HTMLSelectElement ? el.options[el.selectedIndex]?.text : null) ??
+    el.getAttribute('title') ??
     (el.textContent ?? '');
   return labelled.replace(/\s+/g, ' ').trim().slice(0, 80);
 }
 
-export function collectDomContext(limit = 80): DomContextNode[] {
+export function collectDomContext(limit = 160): DomContextNode[] {
   if (typeof document === 'undefined') return [];
+  // Labels are temporary: renumbered on every question so they always match what is on screen now.
+  for (const old of document.querySelectorAll('[data-assistant-auto]')) old.removeAttribute('data-assistant-auto');
   const visible: { el: Element; r: DOMRect }[] = [];
   for (const el of document.querySelectorAll(CANDIDATES)) {
     if (el.closest('[data-assistant-ui]')) continue;
@@ -73,11 +78,21 @@ export function collectDomContext(limit = 80): DomContextNode[] {
     return n <= 2;
   });
   const plain = visible.filter(({ el }) => !el.getAttribute('data-assistant'));
-  return [...hooked, ...plain].slice(0, limit).map(({ el, r }) => ({
+  let next = 0;
+  return [...hooked, ...plain].slice(0, limit).map(({ el, r }) => {
+    // Controls without a hook get a number so the assistant can still point at them.
+    let auto: number | null = null;
+    if (!el.getAttribute('data-assistant') && textOf(el)) {
+      auto = next++;
+      el.setAttribute('data-assistant-auto', String(auto));
+    }
+    return {
+    auto,
     tag: el.tagName.toLowerCase(),
     text: textOf(el) || (el.querySelector('h1,h2,h3')?.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 80),
     role: roleOf(el),
     hook: el.getAttribute('data-assistant'),
     rect: { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) },
-  }));
+    };
+  });
 }
