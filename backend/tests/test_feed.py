@@ -480,3 +480,32 @@ def test_a_met_verdict_without_a_stated_basis_becomes_unclear(seed: TestClient, 
     out = seed.post("/api/tenders/1003/agents/eligibility", json={}, headers=_auth()).json()["output"]
     assert [r["status"] for r in out["rows"]] == ["unclear", "met"]
     assert out["summary"] == "ok"
+
+
+def test_assistant_can_point_at_a_numbered_control_on_the_current_page(seed: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    import json as _json
+
+    from backend.ai.client import MetaAIClient
+    from backend.core.config import settings
+
+    plans = iter([
+        {"message": "That is the Romanian button.", "navigate_to": None, "highlight_hook": "auto-3"},
+        {"message": "Made up", "navigate_to": None, "highlight_hook": "auto-99"},
+        {"message": "Elsewhere", "navigate_to": "/app/pipeline", "highlight_hook": "auto-3"},
+    ])
+    seen: dict = {}
+
+    async def fake_chat(self, system: str, user: str, **_kw):  # noqa: ANN001
+        seen["system"] = system
+        return _json.dumps(next(plans))
+
+    monkeypatch.setattr(MetaAIClient, "_chat", fake_chat)
+    monkeypatch.setattr(settings, "meta_api_key", "test-key")
+    dom = [{"auto": 3, "text": "RO", "role": "button", "hook": None}, {"auto": None, "text": "x", "role": "link", "hook": "language-toggle"}]
+    body = {"question": "where is the Romanian switch", "pathname": "/app", "tenderId": None, "dom": dom, "history": []}
+    ok = seed.post("/api/assistant/chat", json=body, headers=_auth()).json()
+    assert ok["highlight_selector"] == '[data-assistant-auto="3"]'
+    assert 'auto-3: button "RO"' in seen["system"]
+    assert seed.post("/api/assistant/chat", json=body, headers=_auth()).json()["highlight_selector"] is None  # not on screen
+    moved = seed.post("/api/assistant/chat", json=body, headers=_auth()).json()
+    assert moved["navigate_to"] == "/app/pipeline" and moved["highlight_selector"] is None  # numbers only work on the page that made them
