@@ -611,7 +611,13 @@
     "manageArchive": "Manage in Archive",
     "noTender": "No tender available.",
     "noTenderHint": "The feed returned no tenders to draft from.",
-    "pdfError": "The PDF could not be built, usually because the connection dropped while loading its fonts. Check your connection and try Download again."
+    "pdfError": "The PDF could not be built, usually because the connection dropped while loading its fonts. Check your connection and try Download again.",
+    "viewEdit": "Edit",
+    "viewPdf": "PDF preview",
+    "pdfPreview": "PDF preview",
+    "pdfBuilding": "Building the PDF…",
+    "pdfRetry": "Try again",
+    "pdfOpen": "Open the PDF in a new tab"
   },
   "archive": {
     "title": "Archive & certificates",
@@ -1098,7 +1104,8 @@
     "hintDisclaimer": "Descriptive history from public award notices, not advice or a recommendation. The price is your decision, and no result is guaranteed.",
     "confirm": "I confirm these answers are my company's own and that I am authorised to give them. I understand they are made under the company's responsibility.",
     "skip": "Skip, leave blank",
-    "create": "Create the documents"
+    "create": "Create the documents",
+    "notesTitle": "Points the legal reviewer says only you can confirm"
   },
   "signature": {
     "none": "No signature image yet",
@@ -1108,5 +1115,19 @@
     "alt": "Signature",
     "error": "Could not read that image. Use a PNG or JPG of the signature on white paper.",
     "note": "Placed on the signature block of the PDF. It is a picture only: to submit in SEAP the files must still carry your company's qualified electronic signature."
+  },
+  "review": {
+    "title": "Review before you submit",
+    "hint": "Notes from the agents. They are not part of the documents.",
+    "missing": "Still missing",
+    "requirements": "Requirements checked against your company",
+    "risks": "Risks (likelihood / impact)",
+    "legal": "Legal points to confirm",
+    "met": "Met",
+    "not_met": "Not met",
+    "unclear": "Unclear",
+    "level_low": "low",
+    "level_medium": "medium",
+    "level_high": "high"
   }
 }

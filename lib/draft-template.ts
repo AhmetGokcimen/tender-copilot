@@ -302,7 +302,6 @@ function duae(tender: TenderWithState, company: CompanyProfile, ctx: DraftContex
   const a = ctx.agents;
   const inp = ctx.inputs;
   const ex = inp?.exclusion ?? { A: null, B: null, C: null, D: null };
-  const notes = a.legal?.exclusion_notes ?? [];
   const reqs = (a.spec?.items ?? []).filter((i) => i.category === 'qualification');
   const turnover =
     company.annual_turnover !== null
@@ -382,7 +381,6 @@ function duae(tender: TenderWithState, company: CompanyProfile, ctx: DraftContex
         inp?.confirmed
           ? 'Răspunsurile de mai sus au fost date de operatorul economic prin reprezentantul său; verificați-le înainte de semnare.'
           : 'Doar operatorul economic poate declara că motivele de excludere nu se aplică. Câmpurile marcate [de completat] rămân de completat de el.',
-        ...(notes.length > 0 ? ['', 'Puncte de confirmat semnalate de agentul juridic:', '', bullets(notes)] : []),
       ].join('\n'),
     },
     {
@@ -433,6 +431,14 @@ function duae(tender: TenderWithState, company: CompanyProfile, ctx: DraftContex
   ];
 }
 
+/** The agents sometimes fall back to English for "unknown"; the submitted document must stay Romanian. */
+function scrub(text: string): string {
+  return text
+    .replace(/\b(?:not stated|not specified|unknown|n\/a)(?:\s*\/\s*to confirm)?\b/gi, BLANK)
+    .replace(/\bto be confirmed\b|\bto confirm\b/gi, BLANK)
+    .replace(/(\[de completat\][\s,.;:]*){2,}/g, `${BLANK} `);
+}
+
 export function buildDraftSections(
   tender: TenderWithState,
   company: CompanyProfile,
@@ -440,14 +446,13 @@ export function buildDraftSections(
   doc: DocType,
   ctx: DraftContext = { agents: {}, vatRate: 0.21 },
 ): DraftSection[] {
-  switch (doc) {
-    case 'technical':
-      return technicalOffer(tender, company, evidence, ctx);
-    case 'financial':
-      return financialOffer(tender, company, ctx);
-    case 'duae':
-      return duae(tender, company, ctx);
-  }
+  const sections =
+    doc === 'technical'
+      ? technicalOffer(tender, company, evidence, ctx)
+      : doc === 'financial'
+        ? financialOffer(tender, company, ctx)
+        : duae(tender, company, ctx);
+  return sections.map((s) => ({ ...s, body: scrub(s.body) }));
 }
 
 /** Plain-text rendering of sections (copy fallback). */

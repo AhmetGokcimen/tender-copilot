@@ -69,12 +69,15 @@ export function BidInputsDialog({
   tender,
   company,
   items,
+  notes,
   vatRate,
   onSubmit,
   onSkip,
 }: {
   tender: TenderWithState;
   company: Company | null;
+  /** Points the legal reviewer says only the company can confirm. */
+  notes: string[];
   items: TechnicalDraft['price_items'];
   vatRate: number;
   onSubmit: (inputs: BidInputs) => void;
@@ -160,6 +163,16 @@ export function BidInputsDialog({
             <h3 className="font-label-md text-label-md font-semibold uppercase tracking-wide text-on-surface-variant">
               {t('declTitle')}
             </h3>
+            {notes.length > 0 && (
+              <div className="rounded-md border border-outline-variant bg-surface-container/50 p-space-sm">
+                <p className="font-label-md text-label-md font-semibold text-on-surface">{t('notesTitle')}</p>
+                <ul className="mt-1 list-disc pl-5 font-body-sm text-body-sm text-on-surface-variant">
+                  {notes.map((n, i) => (
+                    <li key={i}>{n}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {(['A', 'B', 'C', 'D'] as const).map((g) => (
               <div key={g} className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between md:gap-space-md">
                 <p className="font-body-md text-body-md text-on-surface md:max-w-[60%]">{t(`ground_${g}`)}</p>

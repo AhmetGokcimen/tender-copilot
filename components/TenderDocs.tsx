@@ -6,6 +6,9 @@ import { clsx } from 'clsx';
 import { pdf } from '@react-pdf/renderer';
 import { FALLBACK_VAT, useCompanyData, useEvidence, useVat } from '@/lib/queries';
 import { BidInputsDialog } from './BidInputsDialog';
+import { PdfPreview } from './PdfPreview';
+import { ReviewPanel } from './ReviewPanel';
+import { legacyPatch } from '@/lib/legacy-profile';
 import type { BidInputs } from '@/lib/bid-inputs';
 import { useCompanyStore } from '@/stores/useCompanyStore';
 import { outputKey, useGeneratorStore, type DocType } from '@/stores/useGeneratorStore';
@@ -15,7 +18,7 @@ import { runBidAgent } from '@/lib/api';
 import { agentSummary, type AgentOutputs } from '@/lib/agents';
 import { sectionsToTiptap, tiptapToMarkdown } from '@/lib/doc-convert';
 import { DraftPdfDocument, draftFileName, loadPdfFonts } from '@/components/DraftPdf';
-import type { AgentId, AgentState, TenderWithState } from '@/lib/types';
+import type { AgentId, AgentState, CompanyProfile, TenderWithState } from '@/lib/types';
 import { Icon } from './Icon';
 import { AgentStrip, AGENT_ORDER } from './AgentStrip';
 import { AgentWorkbench, type AgentLogEntry } from './AgentWorkbench';
@@ -66,7 +69,7 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
   const ta = useTranslations('analysis');
   const tp = useTranslations('procedures');
   const { data: evidence } = useEvidence();
-  const profile = useCompanyStore((s) => s.profile);
+  const storedProfile = useCompanyStore((s) => s.profile);
   const docs = useGeneratorStore((s) => s.docs);
   const generating = useGeneratorStore((s) => s.generating);
   const setDoc = useGeneratorStore((s) => s.setDoc);
@@ -82,9 +85,16 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
   const [agentLog, setAgentLog] = useState<AgentLogEntry[]>([]);
   const { data: vat } = useVat();
   const { data: companyData } = useCompanyData();
+  // The documents carry the real company, never the demo profile kept in the browser store.
+  const profile = useMemo(
+    () => (companyData ? { ...storedProfile, ...legacyPatch(companyData) } : storedProfile),
+    [companyData, storedProfile],
+  );
+  const [review, setReview] = useState<AgentOutputs | null>(null);
+  const [view, setView] = useState<'edit' | 'pdf'>('edit');
   const [pdfError, setPdfError] = useState(false);
   const vatRate = vat?.rate ?? FALLBACK_VAT;
-  const [ask, setAsk] = useState<{ items: NonNullable<AgentOutputs['writer']>['price_items']; done: (v: BidInputs | null) => void } | null>(null);
+  const [ask, setAsk] = useState<{ items: NonNullable<AgentOutputs['writer']>['price_items']; notes: string[]; done: (v: BidInputs | null) => void } | null>(null);
   const tAgents = useTranslations('agents');
   const language = useLocale() === 'ro' ? 'ro' : 'en';
   const [copied, setCopied] = useState(false);
@@ -126,6 +136,7 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
     setCopied(false);
     setAgentStates({ ...IDLE_AGENTS });
     setAgentLog([]);
+    setReview(null);
     const outputs: AgentOutputs = {};
     const evidenceNames = usedEvidence.map((e) => `${e.name} (${e.type})`);
     // Each agent does its own model call, in order, and hands its result on.
@@ -157,7 +168,7 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
     }
     // Only the company can state its declarations and prices: ask before the documents are made.
     const inputs = await new Promise<BidInputs | null>((resolve) =>
-      setAsk({ items: outputs.writer?.price_items ?? [], done: resolve }),
+      setAsk({ items: outputs.writer?.price_items ?? [], notes: outputs.legal?.exclusion_notes ?? [], done: resolve }),
     );
     setAsk(null);
     if (runRef.current !== run) return;
@@ -177,6 +188,7 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
       });
     }
     setOpenKey(outputKey(tender.external_id, enabledDocs[0]));
+    setReview(outputs);
     setGenerating(false);
     // Fetch the PDF fonts now, while the connection is good, so the download works later.
     void loadPdfFonts().catch(() => undefined);
@@ -249,6 +261,7 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
         tender={tender}
         company={companyData?.company ?? null}
         items={ask.items}
+        notes={ask.notes}
         vatRate={vatRate}
         onSubmit={(v) => ask.done(v)}
         onSkip={() => ask.done(null)}
@@ -356,6 +369,7 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
             </div>
           )}
           <AgentWorkbench states={agentStates} log={agentLog} />
+          {review && !generating && <ReviewPanel outputs={review} />}
           {pdfError && (
             <p role="alert" className="rounded-md border border-error/40 bg-error/5 px-space-sm py-space-xs font-body-sm text-body-sm text-error">
               {t('pdfError')}
@@ -386,6 +400,10 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
             </div>
             {openDoc ? (
               <OpenDocEditor
+                view={view}
+                onView={setView}
+                profile={profile}
+                signature={companyData?.company.signature_png ?? null}
                 docKey={openDoc.key}
                 tender={tender}
                 copied={copied}
@@ -415,6 +433,10 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
 
 /** Subscribes to the open document's content + version (hooks can't be conditional). */
 function OpenDocEditor({
+  view,
+  onView,
+  profile,
+  signature,
   docKey,
   tender,
   copied,
@@ -424,6 +446,10 @@ function OpenDocEditor({
   onDownloadPdf,
   onAskAi,
 }: {
+  view: 'edit' | 'pdf';
+  onView: (v: 'edit' | 'pdf') => void;
+  profile: CompanyProfile;
+  signature: string | null;
   docKey: string;
   tender: TenderWithState;
   copied: boolean;
@@ -436,8 +462,44 @@ function OpenDocEditor({
   const doc = useGeneratorStore((s) => s.docs[docKey]);
   const contentVersion = useGeneratorStore((s) => s.contentVersion[docKey] ?? 0);
   const updateDocContent = useGeneratorStore((s) => s.updateDocContent);
+  const tg = useTranslations('generator');
   if (!doc) return null;
+  const toggle = (
+    <div role="tablist" className="mb-space-xs inline-flex self-start rounded-full bg-surface-container-high p-0.5">
+      {(['edit', 'pdf'] as const).map((id) => (
+        <button
+          key={id}
+          type="button"
+          role="tab"
+          aria-selected={view === id}
+          onClick={() => onView(id)}
+          className={clsx(
+            'h-8 rounded-full px-space-md font-label-md text-label-md transition-colors',
+            view === id ? 'bg-navy text-white shadow-sm' : 'text-on-surface-variant hover:text-on-surface',
+          )}
+        >
+          {id === 'edit' ? tg('viewEdit') : tg('viewPdf')}
+        </button>
+      ))}
+    </div>
+  );
+  if (view === 'pdf') {
+    return (
+      <div className="flex min-w-0 flex-1 flex-col">
+        {toggle}
+        <PdfPreview
+          tender={tender}
+          company={profile}
+          doc={doc.doc}
+          markdown={tiptapToMarkdown(doc.content)}
+          signature={signature}
+        />
+      </div>
+    );
+  }
   return (
+    <div className="flex min-w-0 flex-1 flex-col">
+    {toggle}
     <DocEditor
       key={doc.key}
       docKey={doc.key}
@@ -455,5 +517,6 @@ function OpenDocEditor({
       onCopy={onCopy}
       onDownloadPdf={onDownloadPdf}
     />
+    </div>
   );
 }
