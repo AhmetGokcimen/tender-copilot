@@ -61,12 +61,12 @@ export default function ArchivePage() {
 
   return (
     <div className="flex flex-col gap-space-xl">
-      <header className="flex max-w-3xl flex-col gap-1">
+      <header data-assistant="archive-header" className="flex max-w-3xl flex-col gap-1">
         <h1 className="font-headline-lg text-headline-lg tracking-tight text-on-surface">{t('title')}</h1>
         <p className="font-body-md text-body-md text-on-surface-variant">{t('subtitle')}</p>
       </header>
 
-      <section className="flex flex-col gap-space-sm">
+      <section data-assistant="archive-results" className="flex flex-col gap-space-sm">
         <h2 className="font-headline-md text-headline-md text-on-surface">{t('resultsTitle')}</h2>
         {results.length === 0 ? (
           <EmptyState icon="inbox" title={t('resultsTitle')} hint={t('emptyResults')} />
@@ -115,10 +115,10 @@ export default function ArchivePage() {
         )}
       </section>
 
-      <section className="flex flex-col gap-space-sm">
+      <section data-assistant="archive-certificates" className="flex flex-col gap-space-sm">
         <div className="flex items-center justify-between">
           <h2 className="font-headline-md text-headline-md text-on-surface">{t('certsTitle')}</h2>
-          <button
+          <button data-assistant="archive-add"
             type="button"
             onClick={() => setFormOpen((v) => !v)}
             className="inline-flex h-9 items-center gap-space-xs rounded-pill bg-indigo px-space-md font-label-md text-label-md text-on-indigo hover:bg-indigo-deep"

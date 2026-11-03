@@ -426,3 +426,28 @@ def test_assistant_without_a_model_still_opens_pages(seed: TestClient, monkeypat
     body = {"question": "pipeline sayfasını aç", "pathname": "/app", "tenderId": None, "dom": [], "history": []}
     out = seed.post("/api/assistant/chat", json=body, headers=_auth()).json()
     assert out["navigate_to"] == "/app/pipeline"
+
+
+def test_every_assistant_hook_exists_in_the_frontend() -> None:
+    """The assistant may only point at elements that carry its hook in the pages."""
+    import re
+    from pathlib import Path
+
+    from backend.core.assistant import NAV_HOOKS, SITE_MAP
+
+    root = Path(__file__).resolve().parents[2]
+    source = "\n".join(
+        p.read_text(encoding="utf-8")
+        for folder in ("app", "components")
+        for p in (root / folder).rglob("*.tsx")
+    )
+    literal = set(re.findall(r'data-assistant="([a-z0-9-]+)"', source))
+    dynamic = (
+        {f"nav-{k}" for k in ("opportunities", "analysis", "pipeline", "archive", "profile", "settings")}
+        | {f"pipeline-col-{c}" for c in ("new", "preparing", "submitted", "archived")}
+        | {f"profile-{c}" for c in ("company", "contracts", "guarantees", "staff", "workload", "exclusion", "preferences", "documents")}
+    )
+    known = literal | dynamic
+    missing = sorted(h for page in SITE_MAP.values() for h in page["hooks"] if h not in known)
+    missing += sorted(h for h in NAV_HOOKS if h not in known)
+    assert missing == []

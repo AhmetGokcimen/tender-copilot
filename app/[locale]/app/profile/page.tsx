@@ -234,7 +234,7 @@ export default function ProfilePage() {
             <Icon name="edit" size="sm" />
             {t('editBasics')}
           </Link>
-          <button type="button" onClick={save} disabled={saving} className={buttonClass()}>
+          <button data-assistant="profile-save" type="button" onClick={save} disabled={saving} className={buttonClass()}>
             <Icon name={saved ? 'check' : 'save'} size="sm" />
             {saving ? t('saving') : saved ? t('saved') : t('save')}
           </button>
@@ -276,11 +276,11 @@ export default function ProfilePage() {
             <div className="mt-space-md grid grid-cols-1 gap-space-md border-t border-line pt-space-md sm:grid-cols-2">
               <label className="flex flex-col gap-1 text-[13.5px] text-ink">
                 {t('repName')}
-                <input className={INPUT} value={c.legal_rep_name ?? ''} onChange={(e) => set({ legal_rep_name: e.target.value || null })} />
+                <input data-assistant="profile-rep-name" className={INPUT} value={c.legal_rep_name ?? ''} onChange={(e) => set({ legal_rep_name: e.target.value || null })} />
               </label>
               <label className="flex flex-col gap-1 text-[13.5px] text-ink">
                 {t('repRole')}
-                <input className={INPUT} value={c.legal_rep_role ?? ''} onChange={(e) => set({ legal_rep_role: e.target.value || null })} />
+                <input data-assistant="profile-rep-role" className={INPUT} value={c.legal_rep_role ?? ''} onChange={(e) => set({ legal_rep_role: e.target.value || null })} />
               </label>
               <div data-assistant="profile-signature" className="flex flex-col gap-1 text-[13.5px] text-ink sm:col-span-2">
                 {t('signature')}
@@ -416,7 +416,7 @@ export default function ProfilePage() {
             </div>
             <div className="flex flex-wrap items-center justify-between gap-space-sm">
               <span className="text-[14.5px] text-ink">{t('minDays')}</span>
-              <select
+              <select data-assistant="profile-reminder-lead"
                 value={c.min_days_to_deadline}
                 onChange={(e) => set({ min_days_to_deadline: Number(e.target.value) })}
                 className={`${INPUT} !w-auto`}

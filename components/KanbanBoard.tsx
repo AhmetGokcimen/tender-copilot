@@ -110,7 +110,7 @@ function KanbanColumnView({
   const { setNodeRef, isOver } = useDroppable({ id: column });
   const total = cards.reduce((s, c) => s + (c.estimated_value ?? 0), 0);
   return (
-    <div
+    <div data-assistant={`pipeline-col-${column}`}
       ref={setNodeRef}
       className={clsx(
         'flex min-h-[420px] w-72 shrink-0 flex-col gap-space-sm rounded-xl border-2 p-space-sm transition-colors lg:w-auto lg:flex-1',

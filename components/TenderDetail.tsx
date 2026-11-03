@@ -192,7 +192,7 @@ export function TenderDetail({ externalId }: { externalId: string }) {
         {t('back')}
       </Link>
 
-      <header className="flex flex-col gap-space-sm rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
+      <header data-assistant="tender-header" className="flex flex-col gap-space-sm rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
         <div className="flex flex-wrap items-center gap-space-xs">
           <MatchChip score={tender.state.score} />
           <EligibilityChip eligible={tender.state.eligible} label={eligibilityLabel} />
@@ -206,7 +206,7 @@ export function TenderDetail({ externalId }: { externalId: string }) {
         )}
       </header>
 
-      <div
+      <div data-assistant="tender-tabs"
         role="tablist"
         aria-label={t('tabsLabel')}
         className="inline-flex self-start rounded-full bg-surface-container-high p-0.5"
@@ -233,7 +233,7 @@ export function TenderDetail({ externalId }: { externalId: string }) {
       {tab === 'overview' && (
       <div className="grid grid-cols-1 items-start gap-gutter-desktop lg:grid-cols-12">
         <div className="flex flex-col gap-space-lg lg:col-span-8">
-          <section className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
+          <section data-assistant="tender-summary" className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
             <h2 className="mb-space-sm font-headline-sm text-headline-sm text-on-surface">{t('summary')}</h2>
             {tender.brief ? (
               <TenderBriefView
@@ -253,12 +253,12 @@ export function TenderDetail({ externalId }: { externalId: string }) {
             )}
           </section>
 
-          <section className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
+          <section data-assistant="tender-timeline" className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
             <h2 className="mb-space-sm font-headline-sm text-headline-sm text-on-surface">{t('timeline')}</h2>
             <Timeline pub={tender.publication_date} clar={tender.clarification_deadline} sub={tender.submission_deadline} />
           </section>
 
-          <section className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
+          <section data-assistant="tender-datasheet" className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
             <h2 className="mb-space-sm font-headline-sm text-headline-sm text-on-surface">{t('execSheet')}</h2>
             <dl>
               {rows.map(([k, v]) => (
@@ -418,7 +418,7 @@ export function TenderDetail({ externalId }: { externalId: string }) {
               {t('generateDraft')}
             </button>
             {tender.source_url && (
-              <a
+              <a data-assistant="tender-seap-link"
                 href={tender.source_url}
                 target="_blank"
                 rel="noreferrer"

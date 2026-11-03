@@ -25,7 +25,7 @@ export function ReviewPanel({ outputs }: { outputs: AgentOutputs }) {
   if (elig.length + risks.length + missing.length + flags.length === 0 && !verdict) return null;
 
   return (
-    <details open className="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-md">
+    <details data-assistant="docs-review" open className="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-md">
       <summary className="cursor-pointer font-label-md text-label-md font-semibold text-on-surface">{t('title')}</summary>
       <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">{t('hint')}</p>
       <div className="mt-space-sm flex flex-col gap-space-md">

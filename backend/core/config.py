@@ -22,6 +22,11 @@ class Settings(BaseSettings):
     # reports "not configured" instead of failing.
     resend_api_key: str = ""
     mail_from: str = "Licits <alerts@licits.com>"
+    # SMTP login of any mailbox (Gmail: smtp.gmail.com:587 + an app password).
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
     site_url: str = "https://licits.com"
 
     # Absolute and anchored to backend/ (not the cwd): the server now runs

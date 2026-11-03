@@ -47,13 +47,13 @@ export default function SettingsPage() {
 
   return (
     <div className="flex max-w-3xl flex-col gap-space-lg">
-      <header className="flex flex-col gap-1">
+      <header data-assistant="settings-header" className="flex flex-col gap-1">
         <h1 className="font-headline-lg text-headline-lg tracking-tight text-on-surface">{t('title')}</h1>
         <p className="font-body-md text-body-md text-on-surface-variant">{t('subtitle')}</p>
       </header>
 
       {obStatus && !obStatus.complete && (
-        <section className="flex items-center gap-space-md rounded-xl bg-surface-container-lowest p-space-md shadow-sm">
+        <section data-assistant="settings-onboarding" className="flex items-center gap-space-md rounded-xl bg-surface-container-lowest p-space-md shadow-sm">
           <Icon name="pending_actions" size="md" className="text-navy" />
           <div className="flex flex-1 flex-col gap-0.5">
             <h2 className="font-label-md text-label-md font-semibold text-on-surface">
@@ -70,7 +70,7 @@ export default function SettingsPage() {
         </section>
       )}
 
-      <section className="flex flex-col gap-space-md rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
+      <section data-assistant="settings-profile" className="flex flex-col gap-space-md rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
         <h2 className="font-headline-sm text-headline-sm text-on-surface">{t('profileTitle')}</h2>
         <div className="grid grid-cols-1 gap-space-md md:grid-cols-2">
           <label className="flex flex-col gap-1 font-label-md text-label-md font-semibold text-on-surface">
@@ -92,7 +92,7 @@ export default function SettingsPage() {
         </label>
       </section>
 
-      <section className="flex flex-col gap-space-md rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
+      <section data-assistant="settings-matching" className="flex flex-col gap-space-md rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
         <h2 className="font-headline-sm text-headline-sm text-on-surface">{t('matchingTitle')}</h2>
         <label className="flex flex-col gap-1 font-label-md text-label-md font-semibold text-on-surface">
           {t('cpv')}
@@ -104,10 +104,12 @@ export default function SettingsPage() {
         </label>
       </section>
 
-      <AuthorizationsSection />
+      <div data-assistant="settings-authorizations">
+        <AuthorizationsSection />
+      </div>
 
       <div className="flex items-center gap-space-md">
-        <button
+        <button data-assistant="settings-save"
           type="button"
           onClick={save}
           disabled={!draft.name.trim()}

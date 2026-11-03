@@ -358,7 +358,7 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
       </div>
       <div className="mt-space-md flex flex-col gap-space-md">
         <div className="grid grid-cols-1 items-start gap-space-md rounded-lg border border-outline-variant bg-surface-depth p-space-md md:grid-cols-2">
-          <fieldset className="flex flex-col gap-space-xs" disabled={generating}>
+          <fieldset data-assistant="docs-types" className="flex flex-col gap-space-xs" disabled={generating}>
             <legend className="font-label-md text-label-md font-semibold text-on-surface">
               {t('docTypes')}
             </legend>
@@ -387,7 +387,7 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
               )}
             </p>
           </fieldset>
-          <div className="flex flex-col gap-space-xs">
+          <div data-assistant="docs-sources" className="flex flex-col gap-space-xs">
             <span className="font-label-md text-label-md font-semibold text-on-surface">
               {t('sources')}
             </span>
@@ -444,7 +444,7 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
             {generating ? t('generating') : tenderDocs.length > 0 ? t('regenerate') : t('generate')}
           </button>
           {tenderDocs.length > 0 && !generating && (
-            <div className="flex flex-wrap items-center gap-space-sm rounded-lg border border-outline-variant bg-surface-container-lowest px-space-md py-space-sm">
+            <div data-assistant="docs-download" className="flex flex-wrap items-center gap-space-sm rounded-lg border border-outline-variant bg-surface-container-lowest px-space-md py-space-sm">
               <span className="font-label-md text-label-md font-semibold text-on-surface">{t('downloadTitle')}</span>
               <button
                 type="button"
@@ -484,7 +484,7 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
               {t('pdfError')}
             </p>
           )}
-          <div className="flex items-center gap-space-sm">
+          <div data-assistant="docs-completeness" className="flex items-center gap-space-sm">
             <span className="shrink-0 font-label-md text-label-md font-semibold uppercase text-on-surface-variant">
               {t('completeness')}
             </span>
@@ -574,7 +574,7 @@ function OpenDocEditor({
   const tg = useTranslations('generator');
   if (!doc) return null;
   const toggle = (
-    <div role="tablist" className="mb-space-xs inline-flex self-start rounded-full bg-surface-container-high p-0.5">
+    <div data-assistant="docs-view-toggle" role="tablist" className="mb-space-xs inline-flex self-start rounded-full bg-surface-container-high p-0.5">
       {(['edit', 'pdf'] as const).map((id) => (
         <button
           key={id}
