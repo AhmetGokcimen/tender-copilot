@@ -617,7 +617,12 @@
     "pdfPreview": "PDF preview",
     "pdfBuilding": "Building the PDF…",
     "pdfRetry": "Try again",
-    "pdfOpen": "Open the PDF in a new tab"
+    "pdfOpen": "Open the PDF in a new tab",
+    "downloadTitle": "Download",
+    "downloadAll": "All generated PDFs",
+    "downloadZip": "Full package (.zip)",
+    "downloadHint": "The ZIP also holds your certificates and files from the archive, and a checklist.",
+    "packError": "Could not build the download. Check your connection and try again."
   },
   "archive": {
     "title": "Archive & certificates",

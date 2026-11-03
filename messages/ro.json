@@ -617,7 +617,12 @@
     "pdfPreview": "Previzualizare PDF",
     "pdfBuilding": "Se construiește PDF-ul…",
     "pdfRetry": "Încearcă din nou",
-    "pdfOpen": "Deschide PDF-ul într-o filă nouă"
+    "pdfOpen": "Deschide PDF-ul într-o filă nouă",
+    "downloadTitle": "Descarcă",
+    "downloadAll": "Toate PDF-urile generate",
+    "downloadZip": "Dosar complet (.zip)",
+    "downloadHint": "ZIP-ul conține și certificatele și fișierele din arhivă, plus o listă de verificare.",
+    "packError": "Descărcarea nu a putut fi creată. Verifică conexiunea și încearcă din nou."
   },
   "archive": {
     "title": "Arhivă și certificate",

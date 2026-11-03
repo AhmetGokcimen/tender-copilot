@@ -7,6 +7,7 @@ import { pdf } from '@react-pdf/renderer';
 import { FALLBACK_VAT, useCompanyData, useEvidence, useVat } from '@/lib/queries';
 import { BidInputsDialog } from './BidInputsDialog';
 import { PdfPreview } from './PdfPreview';
+import { checklistText, fetchSupportFiles, safeName, saveBlob, strToU8, zipFiles, type PackageFile } from '@/lib/bid-package';
 import { ReviewPanel } from './ReviewPanel';
 import { legacyPatch } from '@/lib/legacy-profile';
 import type { BidInputs } from '@/lib/bid-inputs';
@@ -93,6 +94,8 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
   const [review, setReview] = useState<AgentOutputs | null>(null);
   const [view, setView] = useState<'edit' | 'pdf'>('edit');
   const [pdfError, setPdfError] = useState(false);
+  const [packing, setPacking] = useState<'idle' | 'all' | 'zip'>('idle');
+  const [packError, setPackError] = useState(false);
   const vatRate = vat?.rate ?? FALLBACK_VAT;
   const [ask, setAsk] = useState<{ items: NonNullable<AgentOutputs['writer']>['price_items']; notes: string[]; done: (v: BidInputs | null) => void } | null>(null);
   const tAgents = useTranslations('agents');
@@ -243,6 +246,83 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
     }
   };
 
+  /** The PDF of one generated document, as the download would be. */
+  const renderPdf = async (d: DocType): Promise<Blob | null> => {
+    const stored = docs[outputKey(tender.external_id, d)];
+    if (!stored) return null;
+    await loadPdfFonts();
+    return pdf(
+      <DraftPdfDocument
+        tender={tender}
+        company={profile}
+        doc={d}
+        markdown={tiptapToMarkdown(stored.content)}
+        signature={companyData?.company.signature_png ?? null}
+      />,
+    ).toBlob();
+  };
+
+  /** Every generated document, one PDF each. */
+  const downloadAll = async () => {
+    if (packing !== 'idle') return;
+    setPacking('all');
+    setPackError(false);
+    try {
+      for (const d of DOCS) {
+        const blob = await renderPdf(d);
+        if (!blob) continue;
+        saveBlob(blob, draftFileName(tender, profile, d));
+        await new Promise((r) => setTimeout(r, 500)); // browsers drop downloads fired back to back
+      }
+    } catch {
+      setPackError(true);
+    } finally {
+      setPacking('idle');
+    }
+  };
+
+  /** One ZIP: the PDFs, the company's archived certificates and files, and a checklist. */
+  const downloadZip = async () => {
+    if (packing !== 'idle') return;
+    setPacking('zip');
+    setPackError(false);
+    try {
+      const files: PackageFile[] = [];
+      const generated: string[] = [];
+      let n = 0;
+      for (const d of DOCS) {
+        const blob = await renderPdf(d);
+        if (!blob) continue;
+        n += 1;
+        const name = `${String(n).padStart(2, '0')}_${draftFileName(tender, profile, d)}`;
+        files.push({ path: name, data: new Uint8Array(await blob.arrayBuffer()) });
+        generated.push(name);
+      }
+      const support = await fetchSupportFiles(companyData?.documents ?? []);
+      files.push(...support.files);
+      files.push({
+        path: '00_LISTA_DOCUMENTE.txt',
+        data: strToU8(
+          checklistText({
+            tenderId: tender.external_id,
+            tenderTitle: tender.title,
+            authority: tender.authority,
+            company: profile.name,
+            generated,
+            support: support.files.map((f) => f.path.replace('Documente_suport/', '')),
+            failed: support.failed,
+            required: review?.spec?.documents_required ?? [],
+          }),
+        ),
+      });
+      saveBlob(zipFiles(files), `${safeName(tender.external_id)}_Dosar_oferta_${safeName(profile.name)}.zip`);
+    } catch {
+      setPackError(true);
+    } finally {
+      setPacking('idle');
+    }
+  };
+
   const askAi = () => {
     if (!openDoc) return;
     setDocEditTarget(openDoc.key);
@@ -363,6 +443,35 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
             />
             {generating ? t('generating') : tenderDocs.length > 0 ? t('regenerate') : t('generate')}
           </button>
+          {tenderDocs.length > 0 && !generating && (
+            <div className="flex flex-wrap items-center gap-space-sm rounded-lg border border-outline-variant bg-surface-container-lowest px-space-md py-space-sm">
+              <span className="font-label-md text-label-md font-semibold text-on-surface">{t('downloadTitle')}</span>
+              <button
+                type="button"
+                onClick={downloadAll}
+                disabled={packing !== 'idle'}
+                className="inline-flex h-9 items-center gap-1 rounded-pill border border-outline-variant px-space-sm font-label-md text-label-md text-on-surface hover:bg-surface-container disabled:opacity-50"
+              >
+                <Icon name={packing === 'all' ? 'progress_activity' : 'download'} size="sm" className={packing === 'all' ? 'animate-spin' : ''} />
+                {t('downloadAll')}
+              </button>
+              <button
+                type="button"
+                onClick={downloadZip}
+                disabled={packing !== 'idle'}
+                className="inline-flex h-9 items-center gap-1 rounded-pill bg-navy px-space-sm font-label-md text-label-md text-white hover:opacity-90 disabled:opacity-50"
+              >
+                <Icon name={packing === 'zip' ? 'progress_activity' : 'folder_zip'} size="sm" className={packing === 'zip' ? 'animate-spin' : ''} />
+                {t('downloadZip')}
+              </button>
+              <span className="font-body-sm text-body-sm text-on-surface-variant">{t('downloadHint')}</span>
+              {packError && (
+                <span role="alert" className="font-body-sm text-body-sm text-error">
+                  {t('packError')}
+                </span>
+              )}
+            </div>
+          )}
           {(generating || tenderDocs.length > 0) && (
             <div className="rounded-lg border border-outline-variant bg-surface-depth px-space-md py-space-sm">
               <AgentStrip states={agentStates} />
