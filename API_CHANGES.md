@@ -6,6 +6,19 @@ They are merged here, history preserved below. The versioned contract is
 
 ---
 
+# OAuth for the MCP server: claude.ai and ChatGPT (2026-11-03)
+
+Additive. Guide: [docs/API_AND_MCP.md](docs/API_AND_MCP.md#connecting-claudeai-and-chatgpt-oauth).
+
+- `/.well-known/oauth-protected-resource`, `/.well-known/oauth-authorization-server`: discovery. `vercel.json` now also rewrites `/.well-known/*` to the function.
+- `POST /api/oauth/register` (dynamic client registration), `GET /api/oauth/client`, `POST /api/oauth/authorize` (session JWT, used by the consent page), `POST /api/oauth/token` (`authorization_code` + PKCE, `refresh_token`).
+- `/api/mcp` and `/api/v1/*` accept OAuth access tokens (`ofo_…`) as well as keys; their `401` now carries a `WWW-Authenticate` header with `resource_metadata`.
+- `GET /api/api-keys` lists connected apps too (`connected_app: true`); they do not count toward the key limit. Deleting one disconnects the app.
+- New tables `oauthclient`, `oauthcode`, `oauthtoken`; new column `apikey.oauth_client_id` (added automatically by `init_db`).
+- New page `/{locale}/auth/authorize`.
+
+---
+
 # API keys, public REST API and MCP server (2026-11-03)
 
 Additive: nothing existing changed. Guide: [docs/API_AND_MCP.md](docs/API_AND_MCP.md).

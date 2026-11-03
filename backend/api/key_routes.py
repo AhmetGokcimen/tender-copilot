@@ -29,12 +29,14 @@ class ApiKeyView(BaseModel):
     created_at: datetime
     last_used_at: datetime | None
     expires_at: datetime | None
+    connected_app: bool = False  # an app signed in through OAuth, not a key the user made
 
     @classmethod
     def of(cls, key: ApiKey) -> "ApiKeyView":
         return cls(
             id=key.id, name=key.name, prefix=key.prefix, company_id=key.company_id,
             created_at=key.created_at, last_used_at=key.last_used_at, expires_at=key.expires_at,
+            connected_app=key.oauth_client_id is not None,
         )
 
 

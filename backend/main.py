@@ -9,6 +9,8 @@ from backend.api.auth_routes import router as auth_router
 from backend.api.internal_routes import router as internal_router
 from backend.api.key_routes import router as key_router
 from backend.api.mcp_routes import router as mcp_router
+from backend.api.oauth_routes import router as oauth_router
+from backend.api.oauth_routes import well_known_router
 from backend.api.public_routes import router as public_router
 from backend.api.routes import router as api_router
 from backend.api.v1_routes import router as v1_router
@@ -52,6 +54,9 @@ app.include_router(key_router, prefix="/api")  # session JWT: manage API keys
 # API-key auth (not the session JWT): the public read-only REST API and the MCP server.
 app.include_router(v1_router, prefix="/api")
 app.include_router(mcp_router, prefix="/api")
+# OAuth for assistants that cannot send a header (claude.ai, ChatGPT): see api/oauth_routes.py.
+app.include_router(oauth_router, prefix="/api")
+app.include_router(well_known_router)  # /.well-known/* at the site root
 app.include_router(internal_router)
 # Also under /api: on Vercel only /api/* reaches this function (vercel.json),
 # so the scheduled sync calls https://<site>/api/internal/sync-tenders.

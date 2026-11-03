@@ -20,7 +20,8 @@ Example prompts once connected:
 |---|---|---|
 | `/api/api-keys` | creating, listing, revoking keys (web app only) | the normal session JWT |
 | `/api/v1/*` | read-only REST | `Authorization: Bearer ofk_…` |
-| `/api/mcp` | MCP server | `Authorization: Bearer ofk_…` |
+| `/api/mcp` | MCP server | `Authorization: Bearer ofk_…` **or** an OAuth access token `ofo_…` |
+| `/api/oauth/*`, `/.well-known/*` | letting claude.ai / ChatGPT sign the user in | none (public endpoints, see below) |
 
 A key cannot create keys, and a session JWT is not accepted on `/api/v1` or `/api/mcp`. Keys are `ofk_` + 43 random URL-safe characters; only their SHA-256 is stored. Unknown, revoked and expired keys all return the same `401`.
 
@@ -96,6 +97,28 @@ Claude Desktop (through `mcp-remote`):
 }
 ```
 
+## Connecting claude.ai and ChatGPT (OAuth)
+
+These connectors cannot send a custom header, so the MCP server is also an OAuth 2.1 authorization server. The user adds the address `https://<site>/api/mcp` as a custom connector, signs in to Licits, clicks **Allow**, and is connected. No key to copy.
+
+What happens:
+
+1. The client calls `/api/mcp` without credentials and gets `401` with `WWW-Authenticate: Bearer resource_metadata="…/.well-known/oauth-protected-resource"`.
+2. It reads `/.well-known/oauth-protected-resource` and `/.well-known/oauth-authorization-server` (RFC 9728 / 8414).
+3. It registers itself at `POST /api/oauth/register` (dynamic client registration, public client, no secret).
+4. It sends the user's browser to `/en/auth/authorize` (the consent page). If signed out, the user logs in first and returns to the consent page. The page calls `POST /api/oauth/authorize` with the user's session and receives the redirect back to the app, carrying a one-time code.
+5. The client swaps the code (plus its PKCE verifier) at `POST /api/oauth/token` for an access token (1 hour) and a refresh token (30 days, rotating).
+
+Rules enforced (`backend/core/oauth.py`):
+
+- PKCE `S256` is mandatory; codes live 5 minutes and work once. A reused code disconnects the app.
+- Redirect addresses are exact-match against what the app registered (loopback addresses match on any port). `javascript:`, `data:`, plain `http://` to non-loopback hosts and fragments are refused at registration. An unregistered address gets a plain `400`, never a redirect.
+- Refresh tokens rotate; presenting an old one disconnects the app.
+- One read-only scope, `tenders.read`, the same reach as an API key. Registration is limited to 10 per client IP per hour.
+- Each approved app appears in Settings as a **Connected app** (it does not use up one of the 5 key slots). **Disconnect** kills its tokens at once. Calls count against the same daily quota.
+
+Routing: `vercel.json` sends `/.well-known/*` to the Python function, like `/api/*`. The consent page is `app/[locale]/auth/authorize/page.tsx`; the URLs in the discovery documents are built from the request host (or `X-Forwarded-Host`), so previews and production each advertise their own address.
+
 ## Security notes
 
 - **Prompt injection.** Tender titles, descriptions and authority names are third-party text that an assistant will read. Every MCP result carries a `notice` saying so, the server `instructions` repeat it, and no tool can write anything, so an injected instruction has nothing to act on.
@@ -113,5 +136,7 @@ Claude Desktop (through `mcp-remote`):
 | `backend/api/key_routes.py` | `/api/api-keys` (session JWT) |
 | `backend/api/v1_routes.py` | `/api/v1` |
 | `backend/api/mcp_routes.py` | `/api/mcp` |
+| `backend/core/oauth.py`, `backend/api/oauth_routes.py`, `backend/models/oauth.py` | OAuth server for claude.ai / ChatGPT |
+| `app/[locale]/auth/authorize/page.tsx` | consent page |
 | `components/ApiAccessSection.tsx` | Settings screen |
 | `backend/tests/test_api_access.py` | tests for all of the above |

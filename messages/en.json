@@ -1178,6 +1178,27 @@
     "tabRest": "REST API",
     "yourKey": "YOUR_API_KEY",
     "toolsTitle": "What the assistant can do",
-    "tools": "Read your saved filters, recommend the best open tenders, search by county, CPV code, value or deadline, open a tender's details, and list your deadlines and board. It cannot change anything in your account."
+    "tools": "Read your saved filters, recommend the best open tenders, search by county, CPV code, value or deadline, open a tender's details, and list your deadlines and board. It cannot change anything in your account.",
+    "tabWeb": "Claude.ai / ChatGPT",
+    "webSteps": "In Claude.ai: Settings → Connectors → Add custom connector, paste the address below and connect. You sign in to Licits and allow access, no key needed. ChatGPT: Settings → Connectors → add a custom MCP connector with the same address.",
+    "connectedApp": "Connected app",
+    "disconnect": "Disconnect",
+    "confirmDisconnect": "Disconnect for good?"
+  },
+  "oauthConsent": {
+    "title": "Connect an assistant",
+    "heading": "Let {app} read your tenders?",
+    "signedInAs": "Signed in as {email}",
+    "loading": "Loading…",
+    "demo": "Connecting an assistant needs a real account. Sign in to the live site.",
+    "invalid": "This connection request is not valid. Start again from your assistant.",
+    "failed": "Something went wrong. Try again from your assistant.",
+    "can1": "Read your saved filters and your company profile summary.",
+    "can2": "Search tenders and open their details, ranked for your profile.",
+    "can3": "See your deadlines and your tender board.",
+    "cannot": "Read-only. It cannot change anything in your account, create keys or send messages.",
+    "allow": "Allow",
+    "deny": "Deny",
+    "revokeHint": "You can disconnect it any time under Settings, AI assistant & API."
   }
 }

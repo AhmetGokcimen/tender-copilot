@@ -1,5 +1,6 @@
 from backend.models.ai_usage import AiUsage
 from backend.models.api_key import ApiKey, ApiKeyUsage
+from backend.models.oauth import OAuthClient, OAuthCode, OAuthToken
 from backend.models.reminder_log import ReminderLog
 from backend.models.award import Award
 from backend.models.company import CompanyProfile
@@ -18,6 +19,9 @@ __all__ = [
     "Award",
     "CompanyProfile",
     "CountryAuthorization",
+    "OAuthClient",
+    "OAuthCode",
+    "OAuthToken",
     "FeatureUse",
     "ScoreJob",
     "SourceSystem",

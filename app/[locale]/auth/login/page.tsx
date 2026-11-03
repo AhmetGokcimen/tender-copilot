@@ -6,6 +6,7 @@ import { Link, useRouter } from '@/i18n/routing';
 import { USE_MOCK } from '@/lib/api';
 import { loadCompanyData } from '@/lib/company-data';
 import { isValidEmail } from '@/lib/mock-auth';
+import { takePostLogin } from '@/lib/post-login';
 import { signIn } from '@/lib/session';
 import { Icon } from '@/components/Icon';
 import { AuthShell } from '@/components/ui/AuthShell';
@@ -31,6 +32,12 @@ export default function LoginPage() {
       setError(
         loginError === 'unknown' ? t('unknownUser') : loginError === 'network' ? t('loginNetwork') : t('wrongPassword'),
       );
+      return;
+    }
+    // Sent here by an AI assistant that wants access? Go back to its consent page.
+    const resume = takePostLogin();
+    if (resume) {
+      window.location.assign(resume);
       return;
     }
     // Finished onboarding before? Dashboard. Otherwise resume the wizard,
