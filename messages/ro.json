@@ -610,7 +610,8 @@
     "noEvidence": "Încă nu sunt atașate documente doveditoare.",
     "manageArchive": "Gestionează în Arhivă",
     "noTender": "Nicio licitație disponibilă.",
-    "noTenderHint": "Fluxul nu a returnat nicio licitație pentru redactare."
+    "noTenderHint": "Fluxul nu a returnat nicio licitație pentru redactare.",
+    "pdfError": "PDF-ul nu a putut fi creat, de obicei pentru că s-a întrerupt conexiunea la încărcarea fonturilor. Verifică conexiunea și încearcă din nou Descărcarea."
   },
   "archive": {
     "title": "Arhivă și certificate",
@@ -771,7 +772,12 @@
     "caenMainLabel": "Cod CAEN principal",
     "caenSecondaryLabel": "Alte coduri CAEN",
     "caenSecondaryPlaceholder": "ex. 4321 și apasă Enter",
-    "caenHint": "Licitațiile cer ca obiectul de activitate (CAEN) să corespundă contractului. Certificatul constatator le conține pe toate; îl poți încărca ulterior."
+    "caenHint": "Licitațiile cer ca obiectul de activitate (CAEN) să corespundă contractului. Certificatul constatator le conține pe toate; îl poți încărca ulterior.",
+    "repLabel": "Reprezentant legal",
+    "repPlaceholder": "Cine semnează ofertele",
+    "repRoleLabel": "Funcția",
+    "repRolePlaceholder": "ex. administrator",
+    "repHint": "Persoana care semnează ofertele și declarațiile. Poate fi alta decât titularul contului."
   },
   "authorization": {
     "statusNotStarted": "Neînceput",
@@ -1017,7 +1023,10 @@
     "docType_rte": "Autorizație RTE",
     "docType_other": "Alt document",
     "turnoverFootnote": "Cifra de afaceri înregistrată: {years}. O poți modifica în răspunsurile din configurare.",
-    "download": "Descarcă"
+    "download": "Descarcă",
+    "repName": "Reprezentant legal (semnează ofertele)",
+    "repRole": "Funcția",
+    "signature": "Imaginea semnăturii"
   },
   "resources": {
     "title": "Resurse",
@@ -1090,5 +1099,14 @@
     "confirm": "Confirm că aceste răspunsuri aparțin companiei mele și că sunt autorizat să le dau. Înțeleg că sunt date pe răspunderea companiei.",
     "skip": "Sari peste, lasă necompletat",
     "create": "Creează documentele"
+  },
+  "signature": {
+    "none": "Nu există încă o imagine a semnăturii",
+    "upload": "Încarcă semnătura",
+    "replace": "Înlocuiește",
+    "remove": "Șterge",
+    "alt": "Semnătura",
+    "error": "Imaginea nu a putut fi citită. Folosește un PNG sau JPG cu semnătura pe hârtie albă.",
+    "note": "Se pune în blocul de semnătură din PDF. Este doar o imagine: pentru depunere în SEAP fișierele trebuie să poarte în continuare semnătura electronică calificată a companiei."
   }
 }

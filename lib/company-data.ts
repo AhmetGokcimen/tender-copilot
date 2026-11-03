@@ -17,6 +17,11 @@ export type Company = {
   website: string | null;
   address: string | null;
   county: string | null;
+  /** Who signs the offers (may differ from the account holder). */
+  legal_rep_name: string | null;
+  legal_rep_role: string | null;
+  /** Signature picture (PNG data URL) placed on the bid documents. */
+  signature_png: string | null;
   caen_main: string | null;
   caen_secondary: string[];
   vat_payer: boolean | null;
@@ -123,6 +128,9 @@ export const emptyCompany = (id = ''): Company => ({
   website: null,
   address: null,
   county: null,
+  legal_rep_name: null,
+  legal_rep_role: null,
+  signature_png: null,
   caen_main: null,
   caen_secondary: [],
   vat_payer: null,

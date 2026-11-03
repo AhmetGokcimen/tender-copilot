@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { clsx } from 'clsx';
 import { pdf } from '@react-pdf/renderer';
-import { FALLBACK_VAT, useEvidence, useVat } from '@/lib/queries';
+import { FALLBACK_VAT, useCompanyData, useEvidence, useVat } from '@/lib/queries';
 import { BidInputsDialog } from './BidInputsDialog';
 import type { BidInputs } from '@/lib/bid-inputs';
 import { useCompanyStore } from '@/stores/useCompanyStore';
@@ -14,7 +14,7 @@ import { DOC_TITLES, buildDraftSections, draftFrontMatter } from '@/lib/draft-te
 import { runBidAgent } from '@/lib/api';
 import { agentSummary, type AgentOutputs } from '@/lib/agents';
 import { sectionsToTiptap, tiptapToMarkdown } from '@/lib/doc-convert';
-import { DraftPdfDocument, draftFileName } from '@/components/DraftPdf';
+import { DraftPdfDocument, draftFileName, loadPdfFonts } from '@/components/DraftPdf';
 import type { AgentId, AgentState, TenderWithState } from '@/lib/types';
 import { Icon } from './Icon';
 import { AgentStrip, AGENT_ORDER } from './AgentStrip';
@@ -81,6 +81,8 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [agentLog, setAgentLog] = useState<AgentLogEntry[]>([]);
   const { data: vat } = useVat();
+  const { data: companyData } = useCompanyData();
+  const [pdfError, setPdfError] = useState(false);
   const vatRate = vat?.rate ?? FALLBACK_VAT;
   const [ask, setAsk] = useState<{ items: NonNullable<AgentOutputs['writer']>['price_items']; done: (v: BidInputs | null) => void } | null>(null);
   const tAgents = useTranslations('agents');
@@ -176,6 +178,8 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
     }
     setOpenKey(outputKey(tender.external_id, enabledDocs[0]));
     setGenerating(false);
+    // Fetch the PDF fonts now, while the connection is good, so the download works later.
+    void loadPdfFonts().catch(() => undefined);
   };
 
   const toggleEvidence = (id: string) =>
@@ -200,21 +204,28 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
   const downloadPdf = async () => {
     if (!openDoc || exporting) return;
     setExporting(true);
+    setPdfError(false);
     try {
+      await loadPdfFonts();
       const blob = await pdf(
         <DraftPdfDocument
           tender={tender}
           company={profile}
           doc={openDoc.doc}
           markdown={tiptapToMarkdown(openDoc.content)}
+          signature={companyData?.company.signature_png ?? null}
         />,
       ).toBlob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = draftFileName(tender, profile, openDoc.doc);
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
+      a.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    } catch {
+      setPdfError(true);
     } finally {
       setExporting(false);
     }
@@ -236,6 +247,7 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
     {ask && (
       <BidInputsDialog
         tender={tender}
+        company={companyData?.company ?? null}
         items={ask.items}
         vatRate={vatRate}
         onSubmit={(v) => ask.done(v)}
@@ -344,6 +356,11 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
             </div>
           )}
           <AgentWorkbench states={agentStates} log={agentLog} />
+          {pdfError && (
+            <p role="alert" className="rounded-md border border-error/40 bg-error/5 px-space-sm py-space-xs font-body-sm text-body-sm text-error">
+              {t('pdfError')}
+            </p>
+          )}
           <div className="flex items-center gap-space-sm">
             <span className="shrink-0 font-label-md text-label-md font-semibold uppercase text-on-surface-variant">
               {t('completeness')}

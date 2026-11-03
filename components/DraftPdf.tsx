@@ -9,25 +9,59 @@
  * Text is set in Noto Sans (subset in /public/fonts): the built-in PDF fonts
  * have no glyphs for ș, ț and ă, which official Romanian text needs.
  */
-import { Document, Font, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
+import { Document, Font, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import type { CompanyProfile, TenderWithState } from '@/lib/types';
 import type { DocType } from '@/stores/useGeneratorStore';
 import { DOC_TITLES_RO, roDate } from '@/lib/draft-template';
 
-// In the browser the fonts are fetched from /fonts; a Node render (tests) reads them from disk.
-const FONT_DIR = typeof window === 'undefined' ? `${process.cwd()}/public/fonts` : '/fonts';
+const FONT_FILES = [
+  { file: 'NotoSans-Regular.ttf', fontWeight: 400 as const },
+  { file: 'NotoSans-Bold.ttf', fontWeight: 700 as const },
+  { file: 'NotoSans-Italic.ttf', fontWeight: 400 as const, fontStyle: 'italic' as const },
+  { file: 'NotoSans-ItalicBold.ttf', fontWeight: 700 as const, fontStyle: 'italic' as const },
+];
 
-Font.register({
-  family: 'NotoSans',
-  fonts: [
-    { src: `${FONT_DIR}/NotoSans-Regular.ttf`, fontWeight: 400 },
-    { src: `${FONT_DIR}/NotoSans-Bold.ttf`, fontWeight: 700 },
-    { src: `${FONT_DIR}/NotoSans-Italic.ttf`, fontWeight: 400, fontStyle: 'italic' },
-    { src: `${FONT_DIR}/NotoSans-ItalicBold.ttf`, fontWeight: 700, fontStyle: 'italic' },
-  ],
-});
-// The default English hyphenation splits Romanian words in the wrong places.
-Font.registerHyphenationCallback((word) => [word]);
+const toDataUri = (buf: ArrayBuffer) => {
+  const bytes = new Uint8Array(buf);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return `data:font/ttf;base64,${btoa(bin)}`;
+};
+
+let fontsReady: Promise<void> | null = null;
+
+/**
+ * Downloads the PDF fonts (with retries, since a dropped connection used to
+ * make the export fail silently) and registers them as data. Call it before
+ * rendering; it is cached after the first success.
+ */
+export function loadPdfFonts(): Promise<void> {
+  if (fontsReady) return fontsReady;
+  fontsReady = (async () => {
+    const fonts: { src: string; fontWeight: number; fontStyle?: 'italic' }[] = [];
+    for (const { file, ...style } of FONT_FILES) {
+      let buf: ArrayBuffer | null = null;
+      for (let attempt = 0; attempt < 3 && !buf; attempt++) {
+        try {
+          const res = await fetch(`/fonts/${file}`);
+          if (!res.ok) throw new Error(String(res.status));
+          buf = await res.arrayBuffer();
+        } catch {
+          await new Promise((r) => setTimeout(r, 700 * (attempt + 1)));
+        }
+      }
+      if (!buf) throw new Error(`font ${file}`);
+      fonts.push({ src: toDataUri(buf), ...style });
+    }
+    Font.register({ family: 'NotoSans', fonts });
+    // The default English hyphenation splits Romanian words in the wrong places.
+    Font.registerHyphenationCallback((word) => [word]);
+  })().catch((e) => {
+    fontsReady = null;
+    throw e;
+  });
+  return fontsReady;
+}
 
 const INK = '#111827';
 const MUTED = '#4B5563';
@@ -211,7 +245,7 @@ function columnWeights(header: string[], rows: string[][]): number[] {
 
 const isBlank = (s: string) => /^[….\s_]+$/.test(s);
 
-function TableView({ block, index }: { block: Extract<Block, { kind: 'table' }>; index: number }) {
+function TableView({ block, index, signature: sig }: { block: Extract<Block, { kind: 'table' }>; index: number; signature: string | null }) {
   const w = columnWeights(block.header, block.rows);
   const signature = /^Data completării/i.test(block.header[0] ?? '');
   const cols = block.header.length;
@@ -227,7 +261,12 @@ function TableView({ block, index }: { block: Extract<Block, { kind: 'table' }>;
       </View>
       {block.rows.map((row, r) => (
         <View key={`r${index}-${r}`} style={styles.row} wrap={false}>
-          {Array.from({ length: cols }, (_, j) => row[j] ?? '').map((c, j) => (
+          {Array.from({ length: cols }, (_, j) => row[j] ?? '').map((c, j) =>
+            signature && j === cols - 1 ? (
+              <View key={`c${index}-${r}-${j}`} style={[styles.cell, { flex: w[j], minHeight: 54, justifyContent: 'center' }]}>
+                {sig && <Image src={sig} style={{ maxHeight: 44, maxWidth: 170, objectFit: 'contain' }} />}
+              </View>
+            ) : (
             <Text
               key={`c${index}-${r}-${j}`}
               style={[
@@ -239,14 +278,15 @@ function TableView({ block, index }: { block: Extract<Block, { kind: 'table' }>;
             >
               {signature && isBlank(c) ? '' : rich(c, `td${index}-${r}-${j}`)}
             </Text>
-          ))}
+            ),
+          )}
         </View>
       ))}
     </View>
   );
 }
 
-function BlockView({ block, index }: { block: Block; index: number }) {
+function BlockView({ block, index, signature }: { block: Block; index: number; signature: string | null }) {
   if (block.kind === 'h1' || block.kind === 'h2') {
     return (
       <View wrap={false} minPresenceAhead={70}>
@@ -259,7 +299,7 @@ function BlockView({ block, index }: { block: Block; index: number }) {
     const note = /^Notă:/i.test(block.text);
     return <Text style={note ? styles.note : styles.p}>{rich(block.text, `p${index}`)}</Text>;
   }
-  if (block.kind === 'table') return <TableView block={block} index={index} />;
+  if (block.kind === 'table') return <TableView block={block} index={index} signature={signature} />;
   return (
     <View>
       {block.items.map((item, j) => (
@@ -277,10 +317,13 @@ export function DraftPdfDocument({
   company,
   doc,
   markdown,
+  signature = null,
 }: {
   tender: TenderWithState;
   company: CompanyProfile;
   doc: DocType;
+  /** Signature picture placed in the signature block (PNG data URL). */
+  signature?: string | null;
   /** Current edited document body (## section headings + Markdown blocks). */
   markdown: string;
 }) {
@@ -304,7 +347,7 @@ export function DraftPdfDocument({
         <Text style={styles.dateLine}>Data: {roDate()}</Text>
 
         {parseMarkdownBlocks(markdown).map((b, bi) => (
-          <BlockView key={`b${bi}`} block={b} index={bi} />
+          <BlockView key={`b${bi}`} block={b} index={bi} signature={signature} />
         ))}
 
         <Text style={styles.footerLeft} fixed>

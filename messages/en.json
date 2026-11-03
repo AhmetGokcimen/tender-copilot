@@ -610,7 +610,8 @@
     "noEvidence": "No evidence documents attached yet.",
     "manageArchive": "Manage in Archive",
     "noTender": "No tender available.",
-    "noTenderHint": "The feed returned no tenders to draft from."
+    "noTenderHint": "The feed returned no tenders to draft from.",
+    "pdfError": "The PDF could not be built, usually because the connection dropped while loading its fonts. Check your connection and try Download again."
   },
   "archive": {
     "title": "Archive & certificates",
@@ -771,7 +772,12 @@
     "caenMainLabel": "Main CAEN code",
     "caenSecondaryLabel": "Other CAEN codes",
     "caenSecondaryPlaceholder": "e.g. 4321 and press Enter",
-    "caenHint": "Tenders require the CAEN code to match the contract. The trade registry certificate lists all of them; you can upload it later."
+    "caenHint": "Tenders require the CAEN code to match the contract. The trade registry certificate lists all of them; you can upload it later.",
+    "repLabel": "Legal representative",
+    "repPlaceholder": "Who signs the offers",
+    "repRoleLabel": "Role",
+    "repRolePlaceholder": "e.g. administrator",
+    "repHint": "The person who signs offers and declarations. It can be someone other than the account holder."
   },
   "authorization": {
     "statusNotStarted": "Not started",
@@ -1017,7 +1023,10 @@
     "docType_rte": "RTE authorization",
     "docType_other": "Other document",
     "turnoverFootnote": "Turnover on file: {years}. Edit it in the onboarding answers.",
-    "download": "Download"
+    "download": "Download",
+    "repName": "Legal representative (signs the offers)",
+    "repRole": "Role",
+    "signature": "Signature image"
   },
   "resources": {
     "title": "Resources",
@@ -1090,5 +1099,14 @@
     "confirm": "I confirm these answers are my company's own and that I am authorised to give them. I understand they are made under the company's responsibility.",
     "skip": "Skip, leave blank",
     "create": "Create the documents"
+  },
+  "signature": {
+    "none": "No signature image yet",
+    "upload": "Upload signature",
+    "replace": "Replace",
+    "remove": "Remove",
+    "alt": "Signature",
+    "error": "Could not read that image. Use a PNG or JPG of the signature on white paper.",
+    "note": "Placed on the signature block of the PDF. It is a picture only: to submit in SEAP the files must still carry your company's qualified electronic signature."
   }
 }
