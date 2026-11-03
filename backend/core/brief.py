@@ -70,6 +70,53 @@ async def gather_source(
     return source[:MAX_SOURCE_CHARS], bool(documents.strip())
 
 
+async def brief_pending(session: Session, *, limit: int, max_seconds: float) -> dict:
+    """Pre-make briefs for the tenders worth it: open construction notices
+    (CPV 45) without one, those the registered companies score highest first,
+    then nearest deadline. A small cap keeps AI cost predictable; the rest is
+    made on demand when someone opens or hovers a tender."""
+    import time
+
+    from sqlmodel import func, select
+
+    from backend.models.user_tender_state import UserTenderState
+
+    if not enabled():
+        return {"briefed": 0, "failed": 0, "enabled": False}
+    started = time.monotonic()
+    now = datetime.now(UTC)
+    best = (
+        select(
+            UserTenderState.tender_source_system.label("s"),
+            UserTenderState.tender_external_id.label("e"),
+            func.max(UserTenderState.score).label("top"),
+        )
+        .group_by(UserTenderState.tender_source_system, UserTenderState.tender_external_id)
+        .subquery()
+    )
+    rows = session.exec(
+        select(Tender)
+        .outerjoin(best, (best.c.s == Tender.source_system) & (best.c.e == Tender.external_id))
+        .where(
+            (Tender.submission_deadline.is_(None)) | (Tender.submission_deadline >= now)  # type: ignore[union-attr]
+        )
+        .order_by(best.c.top.desc().nullslast(), Tender.submission_deadline.asc())
+        .limit(400)
+    ).all()
+    ai = MetaAIClient()
+    done = failed = 0
+    for tender in rows:
+        if done + failed >= limit or time.monotonic() - started > max_seconds:
+            break
+        if tender.brief or not (tender.cpv_codes and str(tender.cpv_codes[0]).startswith("45")):
+            continue
+        if await make_brief(session, tender, ai=ai):
+            done += 1
+        else:
+            failed += 1
+    return {"briefed": done, "failed": failed, "enabled": True}
+
+
 async def make_brief(
     session: Session,
     tender: Tender,

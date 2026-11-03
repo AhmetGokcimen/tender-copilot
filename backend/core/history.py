@@ -157,6 +157,35 @@ def renewal_pattern(session: Session, tender: Tender) -> dict | None:
 MIN_AWARDS_FOR_PRICE = 3
 
 
+def market_price_range(session: Session, tender: Tender) -> dict | None:
+    """Same spread as price_range, over all buyers' comparable awards (same first
+    four CPV digits) when one buyer has too few of its own. Descriptive only."""
+    cpv = (tender.cpv_codes[0] if tender.cpv_codes else "") or ""
+    prefix = cpv[:4]
+    if len(prefix) < 4:
+        return None
+    rows = session.exec(select(Award)).all()
+    deltas = sorted(
+        (a.contract_value / a.estimated_initial_value - 1) * 100
+        for a in rows
+        if a.cpv_codes
+        and str(a.cpv_codes[0]).startswith(prefix)
+        and a.contract_value
+        and a.estimated_initial_value
+        and a.contract_value > 0
+        and a.estimated_initial_value > 0
+    )
+    if len(deltas) < MIN_AWARDS_FOR_PRICE * 3:
+        return None
+    return {
+        "sample_size": len(deltas),
+        "low_pct": round(deltas[0], 1),
+        "median_pct": round(median(deltas), 1),
+        "high_pct": round(deltas[-1], 1),
+        "cpv_prefix": prefix,
+    }
+
+
 def price_range(session: Session, tender: Tender) -> dict | None:
     """How far below (or above) the buyer's own estimate this buyer's recent
     comparable contracts were awarded, as percentages of the initial estimate.

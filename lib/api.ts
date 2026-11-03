@@ -128,6 +128,22 @@ export async function briefTender(externalId: string): Promise<TenderWithState> 
   return post<TenderWithState>(`/tenders/${encodeURIComponent(externalId)}/brief`, {});
 }
 
+/** The standard VAT rate in force today (kept on the server in one dated table). */
+export async function fetchVat(): Promise<{ rate: number; effective_from: string; source: string }> {
+  if (USE_MOCK) return { rate: 0.21, effective_from: '2025-08-01', source: 'mock' };
+  return get('/public/vat');
+}
+
+/** Past award prices for comparable work (descriptive history only). */
+export async function fetchPriceHint(externalId: string): Promise<{
+  buyer: { sample_size: number; low_pct: number; median_pct: number; high_pct: number; cpv_prefix: string } | null;
+  market: { sample_size: number; low_pct: number; median_pct: number; high_pct: number; cpv_prefix: string } | null;
+  locked: boolean;
+}> {
+  if (USE_MOCK) return { buyer: null, market: null, locked: false };
+  return get(`/tenders/${encodeURIComponent(externalId)}/price-hint`);
+}
+
 /** Runs one bid-preparation agent; `output` is null when the model could not produce one. */
 export async function runBidAgent(
   externalId: string,

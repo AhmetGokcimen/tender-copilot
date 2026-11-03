@@ -16,6 +16,7 @@ from sqlmodel import Session
 
 from backend.api.schemas import SyncReport
 from backend.core.config import settings
+from backend.core import brief as brief_core
 from backend.core import translate
 from backend.core.errors import error_summary
 from backend.core.sync import (
@@ -126,6 +127,21 @@ async def translate_tenders(
     if not _token_ok(x_sync_token):
         raise HTTPException(status_code=403, detail="Forbidden")
     return await translate.translate_pending(session, limit=limit, max_seconds=max_seconds)
+
+
+@router.post("/internal/brief-tenders", tags=["internal"])
+async def brief_tenders(
+    limit: int = Query(default=10, le=40),
+    max_seconds: float = Query(default=200, le=280),
+    x_sync_token: str | None = Header(default=None),
+    session: Session = Depends(get_session),
+) -> dict:
+    """Detailed briefs for the open construction tenders that matter most (a few per run)."""
+    if not settings.sync_secret:
+        raise HTTPException(status_code=503, detail="Sync not configured")
+    if not _token_ok(x_sync_token):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    return await brief_core.brief_pending(session, limit=limit, max_seconds=max_seconds)
 
 
 @router.get("/internal/diagnostics", tags=["internal"])

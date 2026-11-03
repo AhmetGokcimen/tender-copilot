@@ -40,6 +40,7 @@ function RowMetric({
   );
 }
 import { TenderCard } from '@/components/TenderCard';
+import { TenderCardSkeleton } from '@/components/TenderCardSkeleton';
 import { CheckboxRow } from '@/components/CheckboxRow';
 import { EmptyState } from '@/components/EmptyState';
 import { Icon } from '@/components/Icon';
@@ -361,8 +362,8 @@ export default function OpportunitiesPage() {
         </div>
           {isLoading ? (
             <div className="flex flex-col gap-space-md" aria-busy="true">
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="h-36 animate-pulse rounded-xl bg-surface-container-lowest" />
+              {[0, 1, 2, 3, 4].map((i) => (
+                <TenderCardSkeleton key={i} />
               ))}
             </div>
           ) : isError ? (

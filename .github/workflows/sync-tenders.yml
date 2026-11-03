@@ -49,6 +49,16 @@ jobs:
         env:
           SYNC_URL: ${{ secrets.SYNC_URL }}
           SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
+      - name: Pre-read the most relevant open tenders
+        # Best effort: detailed briefs for a few high-scoring construction tenders per run; the rest are made on demand.
+        continue-on-error: true
+        run: |
+          curl -sS -L --post301 --post302 --post303 -X POST \
+            "$SYNC_URL/internal/brief-tenders?limit=10" \
+            -H "X-Sync-Token: $SYNC_TOKEN" --max-time 300; echo
+        env:
+          SYNC_URL: ${{ secrets.SYNC_URL }}
+          SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
       - name: Translate new tenders to English
         # Best effort: a failure here never fails the sync. Skips quietly when the AI key is unset.
         continue-on-error: true

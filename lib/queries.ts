@@ -11,8 +11,10 @@ import {
   fetchEvidence,
   fetchMe,
   fetchOnboardingStatus,
+  fetchPriceHint,
   fetchTender,
   fetchTenders,
+  fetchVat,
   patchAuthorization,
   patchCompany,
 } from './api';
@@ -40,6 +42,21 @@ export function useTender(externalId: string, enabled = true) {
     queryKey: qk.tender(externalId),
     queryFn: () => fetchTender(externalId),
     enabled: enabled && externalId.length > 0,
+  });
+}
+
+/** The VAT rate in force; falls back to the current standard rate while loading or offline. */
+export const FALLBACK_VAT = 0.21;
+export function useVat() {
+  return useQuery({ queryKey: ['vat'] as const, queryFn: fetchVat, staleTime: 60 * 60 * 1000 });
+}
+
+export function usePriceHint(externalId: string) {
+  return useQuery({
+    queryKey: ['price-hint', externalId] as const,
+    queryFn: () => fetchPriceHint(externalId),
+    staleTime: 10 * 60 * 1000,
+    retry: false,
   });
 }
 
