@@ -175,6 +175,34 @@ class EligibilityVerdict(BaseModel):
     justification: str = ""
 
 
+def _record_usage(model: str, purpose: str, usage: object) -> None:
+    """Store the provider's token counts for this call. Never raises: a logging
+    problem must not break the feature that made the call."""
+    try:
+        from sqlmodel import Session
+
+        from backend.db import engine
+        from backend.models.ai_usage import AiUsage
+
+        if not isinstance(usage, dict):
+            return
+        details_out = usage.get("output_tokens_details") or {}
+        details_in = usage.get("input_tokens_details") or {}
+        row = AiUsage(
+            purpose=purpose,
+            model=model,
+            input_tokens=int(usage.get("input_tokens") or 0),
+            output_tokens=int(usage.get("output_tokens") or 0),
+            reasoning_tokens=int(details_out.get("reasoning_tokens") or 0),
+            cached_tokens=int(details_in.get("cached_tokens") or 0),
+        )
+        with Session(engine) as session:
+            session.add(row)
+            session.commit()
+    except Exception:  # noqa: BLE001
+        pass
+
+
 class MetaAIClient:
     def __init__(self, client: httpx.AsyncClient | None = None) -> None:
         self.model = settings.meta_model
@@ -192,6 +220,7 @@ class MetaAIClient:
         *,
         json_mode: bool = False,
         images: list[bytes] | None = None,
+        purpose: str = "other",
     ) -> str:
         content: list[dict] = [{"type": "input_text", "text": user_message}]
         for png in images or []:
@@ -210,6 +239,7 @@ class MetaAIClient:
         response = await self._client.post("/responses", json=payload)
         response.raise_for_status()
         data = response.json()
+        _record_usage(self.model, purpose, data.get("usage"))
         return _extract_output_text(data)
 
     async def summarize_justification(
@@ -217,11 +247,11 @@ class MetaAIClient:
     ) -> str:
         system_prompt = JUSTIFY_SYSTEM_PROMPT.format(language=language)
         user_message = f"Tender:\n{tender_summary}\n\nCompany profile:\n{company_profile_summary}"
-        return (await self._chat(system_prompt, user_message)).strip()
+        return (await self._chat(system_prompt, user_message, purpose="justification")).strip()
 
     async def simplify_title(self, title: str, *, language: str = "en") -> str:
         system_prompt = SIMPLIFY_TITLE_SYSTEM_PROMPT.format(language=language)
-        return (await self._chat(system_prompt, title)).strip()
+        return (await self._chat(system_prompt, title, purpose="simplify_title")).strip()
 
     async def translate_tender(self, title: str, description: str | None) -> tuple[str, str] | None:
         """English title + short summary, or None when the model's answer is unusable."""
@@ -229,7 +259,7 @@ class MetaAIClient:
         if description:
             user_message += f"\n\nDescription: {description[:1500]}"
         for _ in range(2):
-            raw = await self._chat(TRANSLATE_SYSTEM_PROMPT, user_message, json_mode=True)
+            raw = await self._chat(TRANSLATE_SYSTEM_PROMPT, user_message, json_mode=True, purpose="translate")
             try:
                 data = json.loads(raw)
                 title_en, summary = str(data["title"]).strip(), str(data["summary"]).strip()
@@ -244,7 +274,7 @@ class MetaAIClient:
         schema = json.dumps(TenderBrief.model_json_schema())
         system_prompt = BRIEF_SYSTEM_PROMPT.format(language=language, schema=schema)
         for _ in range(2):
-            raw = await self._chat(system_prompt, source_text, json_mode=True)
+            raw = await self._chat(system_prompt, source_text, json_mode=True, purpose=f"brief:{language}")
             try:
                 brief = TenderBrief.model_validate(json.loads(raw))
             except (json.JSONDecodeError, ValidationError):
@@ -257,7 +287,7 @@ class MetaAIClient:
         """Transcribe one rendered page image via the model's vision input.
         Same Responses API contract and retry policy as the text steps —
         no extra provider or API key."""
-        return (await self._chat(OCR_SYSTEM_PROMPT, hint, images=[png_bytes])).strip()
+        return (await self._chat(OCR_SYSTEM_PROMPT, hint, images=[png_bytes], purpose="ocr")).strip()
 
     async def extract_requirements(self, specification_text: str) -> ExtractedRequirements:
         schema = json.dumps(ExtractedRequirements.model_json_schema())
@@ -265,7 +295,7 @@ class MetaAIClient:
 
         last_raw: str | None = None
         for _ in range(3):
-            raw = await self._chat(system_prompt, specification_text, json_mode=True)
+            raw = await self._chat(system_prompt, specification_text, json_mode=True, purpose="extract")
             last_raw = raw
             try:
                 return ExtractedRequirements.model_validate(json.loads(raw))
@@ -286,7 +316,7 @@ class MetaAIClient:
         )
 
         for _ in range(3):
-            raw = await self._chat(system_prompt, user_message, json_mode=True)
+            raw = await self._chat(system_prompt, user_message, json_mode=True, purpose="compare")
             try:
                 return EligibilityVerdict.model_validate(json.loads(raw))
             except (json.JSONDecodeError, ValidationError):

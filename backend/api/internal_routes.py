@@ -12,7 +12,9 @@ import time
 from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
-from sqlmodel import Session
+from sqlmodel import Session, select
+
+from backend.models.ai_usage import AiUsage
 
 from backend.api.schemas import SyncReport
 from backend.core.config import settings
@@ -142,6 +144,46 @@ async def brief_tenders(
     if not _token_ok(x_sync_token):
         raise HTTPException(status_code=403, detail="Forbidden")
     return await brief_core.brief_pending(session, limit=limit, max_seconds=max_seconds)
+
+
+@router.get("/internal/ai-usage", tags=["internal"])
+def ai_usage(
+    days: int = Query(default=30, ge=1, le=365),
+    x_sync_token: str | None = Header(default=None),
+    session: Session = Depends(get_session),
+) -> dict:
+    """Measured model usage by purpose over the last `days`: calls, tokens, and
+    the cost at Muse Wonder prices ($4 in / $0.20 cached in / $20 out per 1M;
+    output includes reasoning). The per-call averages replace the estimates in
+    the cost report."""
+    if not settings.sync_secret:
+        raise HTTPException(status_code=503, detail="Sync not configured")
+    if not _token_ok(x_sync_token):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    since = datetime.now(UTC) - timedelta(days=days)
+    rows = session.exec(select(AiUsage).where(AiUsage.created_at >= since)).all()
+    by: dict[str, dict] = {}
+    for r in rows:
+        d = by.setdefault(r.purpose, {"calls": 0, "input": 0, "output": 0, "reasoning": 0, "cached": 0})
+        d["calls"] += 1
+        d["input"] += r.input_tokens
+        d["output"] += r.output_tokens
+        d["reasoning"] += r.reasoning_tokens
+        d["cached"] += r.cached_tokens
+    out = {}
+    for purpose, d in sorted(by.items()):
+        n = d["calls"]
+        fresh_in = max(0, d["input"] - d["cached"])
+        usd = (fresh_in * 4.0 + d["cached"] * 0.2 + d["output"] * 20.0) / 1e6
+        out[purpose] = {
+            **d,
+            "avg_input": round(d["input"] / n),
+            "avg_output": round(d["output"] / n),
+            "avg_reasoning": round(d["reasoning"] / n),
+            "usd_muse_wonder": round(usd, 4),
+            "usd_per_call": round(usd / n, 5),
+        }
+    return {"days": days, "purposes": out, "total_usd_muse_wonder": round(sum(v["usd_muse_wonder"] for v in out.values()), 4)}
 
 
 @router.get("/internal/diagnostics", tags=["internal"])

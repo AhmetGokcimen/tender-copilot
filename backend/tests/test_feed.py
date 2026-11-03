@@ -366,3 +366,26 @@ def test_brief_pending_only_briefs_open_construction(seed: TestClient, monkeypat
         out = asyncio.run(brief_core.brief_pending(session, limit=5, max_seconds=30))
     assert out["enabled"] is True
     assert out["briefed"] == len(made)
+
+
+def test_ai_usage_is_recorded_and_reported(seed: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    import asyncio
+
+    import httpx
+
+    from backend.ai.client import MetaAIClient
+    from backend.core.config import settings
+
+    body = {
+        "output": [{"type": "message", "content": [{"type": "output_text", "text": "hi"}]}],
+        "usage": {"input_tokens": 1000, "output_tokens": 500, "output_tokens_details": {"reasoning_tokens": 300}, "input_tokens_details": {"cached_tokens": 200}},
+    }
+    transport = httpx.MockTransport(lambda req: httpx.Response(200, json=body))
+    client = MetaAIClient(httpx.AsyncClient(transport=transport, base_url="http://x"))
+    assert asyncio.run(client._chat("s", "u", purpose="translate")) == "hi"  # noqa: SLF001
+
+    monkeypatch.setattr(settings, "sync_secret", "s3cret")
+    out = seed.get("/api/internal/ai-usage", headers={"X-Sync-Token": "s3cret"}).json()
+    row = out["purposes"]["translate"]
+    assert (row["calls"], row["input"], row["output"], row["reasoning"], row["cached"]) == (1, 1000, 500, 300, 200)
+    assert row["usd_per_call"] == round((800 * 4 + 200 * 0.2 + 500 * 20) / 1e6, 5)

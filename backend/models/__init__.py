@@ -1,3 +1,4 @@
+from backend.models.ai_usage import AiUsage
 from backend.models.award import Award
 from backend.models.company import CompanyProfile
 from backend.models.country_authorization import CountryAuthorization
