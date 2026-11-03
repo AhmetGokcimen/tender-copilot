@@ -15,6 +15,7 @@ import {
 } from '@/lib/bid-inputs';
 import { useBidInputsStore } from '@/stores/useBidInputsStore';
 import type { TenderWithState } from '@/lib/types';
+import type { Company } from '@/lib/company-data';
 import type { TechnicalDraft } from '@/lib/agents';
 
 const FIELD =
@@ -66,12 +67,14 @@ const fmt = (n: number | null) =>
  */
 export function BidInputsDialog({
   tender,
+  company,
   items,
   vatRate,
   onSubmit,
   onSkip,
 }: {
   tender: TenderWithState;
+  company: Company | null;
   items: TechnicalDraft['price_items'];
   vatRate: number;
   onSubmit: (inputs: BidInputs) => void;
@@ -80,7 +83,16 @@ export function BidInputsDialog({
   const t = useTranslations('bidInputs');
   const save = useBidInputsStore((s) => s.save);
   // Read once: a selector that builds a new object each call re-renders forever.
-  const [v, setV] = useState<BidInputs>(() => useBidInputsStore.getState().forTender(tender.external_id));
+  // The company record is the source of truth for who signs and where the office is.
+  const [v, setV] = useState<BidInputs>(() => {
+    const base = useBidInputsStore.getState().forTender(tender.external_id);
+    return {
+      ...base,
+      repName: company?.legal_rep_name || base.repName,
+      repRole: company?.legal_rep_role || base.repRole,
+      address: [company?.address, company?.county].filter(Boolean).join(', ') || base.address,
+    };
+  });
   const { data: hint } = usePriceHint(tender.external_id);
 
   useEffect(() => {

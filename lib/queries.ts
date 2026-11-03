@@ -19,6 +19,7 @@ import {
   patchCompany,
 } from './api';
 import { useAuthToken } from './auth';
+import { loadCompanyData } from './company-data';
 import type { AuthorizationPatch, CompanyPatch, CompanyProfile } from './types';
 
 export const qk = {
@@ -58,6 +59,11 @@ export function usePriceHint(externalId: string) {
     staleTime: 10 * 60 * 1000,
     retry: false,
   });
+}
+
+/** The saved company record (address, signer, signature, certificates...). */
+export function useCompanyData() {
+  return useQuery({ queryKey: ['company-data'] as const, queryFn: loadCompanyData, staleTime: 60_000 });
 }
 
 export function useCompany() {

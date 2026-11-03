@@ -8,6 +8,7 @@ import { Icon } from '@/components/Icon';
 import { buttonClass } from '@/components/ui/Button';
 import { INPUT } from '@/components/ui/form';
 import { useDocumentAgent } from '@/components/agent/useDocumentAgent';
+import { SignatureField } from '@/components/SignatureField';
 import { CountField, MoneyInput, groupDigits } from '@/components/onboarding/steps';
 import {
   DateInput,
@@ -272,6 +273,20 @@ export default function ProfilePage() {
                 </div>
               ))}
             </dl>
+            <div className="mt-space-md grid grid-cols-1 gap-space-md border-t border-line pt-space-md sm:grid-cols-2">
+              <label className="flex flex-col gap-1 text-[13.5px] text-ink">
+                {t('repName')}
+                <input className={INPUT} value={c.legal_rep_name ?? ''} onChange={(e) => set({ legal_rep_name: e.target.value || null })} />
+              </label>
+              <label className="flex flex-col gap-1 text-[13.5px] text-ink">
+                {t('repRole')}
+                <input className={INPUT} value={c.legal_rep_role ?? ''} onChange={(e) => set({ legal_rep_role: e.target.value || null })} />
+              </label>
+              <div className="flex flex-col gap-1 text-[13.5px] text-ink sm:col-span-2">
+                {t('signature')}
+                <SignatureField value={c.signature_png} onChange={(png) => set({ signature_png: png })} />
+              </div>
+            </div>
           </Card>
           <Card id="contracts" title={t('section_contracts')} hint={t('contractsHint')}>
             {data.contracts.map((k) => (

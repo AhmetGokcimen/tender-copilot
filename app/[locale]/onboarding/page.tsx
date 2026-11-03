@@ -436,6 +436,27 @@ export default function OnboardingPage() {
                   className={INPUT}
                 />
               </label>
+              <div className="grid grid-cols-1 gap-space-md sm:grid-cols-2">
+                <label className={LABEL}>
+                  {t('repLabel')}
+                  <input
+                    value={c.legal_rep_name ?? ''}
+                    onChange={(e) => set({ legal_rep_name: e.target.value || null })}
+                    placeholder={t('repPlaceholder')}
+                    className={INPUT}
+                  />
+                </label>
+                <label className={LABEL}>
+                  {t('repRoleLabel')}
+                  <input
+                    value={c.legal_rep_role ?? ''}
+                    onChange={(e) => set({ legal_rep_role: e.target.value || null })}
+                    placeholder={t('repRolePlaceholder')}
+                    className={INPUT}
+                  />
+                </label>
+              </div>
+              <Help>{t('repHint')}</Help>
               {(c.address || c.county) && (
                 <p className="flex items-start gap-2 rounded-lg bg-sunk/60 px-3 py-2 text-[13.5px] text-ink-2">
                   <Icon name="location_on" size="sm" className="mt-0.5 text-muted" />
