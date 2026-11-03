@@ -179,23 +179,23 @@
   background-size: 22px 22px;
 }
 
-/* Assistant highlight ring: calm navy outline with a soft decaying glow. */
+/* Assistant highlight: a bright ring, a tinted fill and a glow that pulses, so the
+   element is easy to find on a busy page. */
 .assistant-highlight {
-  outline: 2px solid var(--indigo);
-  outline-offset: 3px;
-  border-radius: 0.5rem;
-  animation: assistant-ring 2.6s ease-out forwards;
+  outline: 3px solid var(--indigo);
+  outline-offset: 4px;
+  border-radius: 0.6rem;
+  background-color: rgb(var(--indigo-rgb) / 0.07);
+  animation: assistant-ring 1.3s ease-in-out 4;
 }
 
 @keyframes assistant-ring {
-  0% {
-    box-shadow: 0 0 0 0 rgb(var(--indigo-rgb) / 0.35);
-  }
-  40% {
-    box-shadow: 0 0 0 6px rgb(var(--indigo-rgb) / 0.12);
-  }
+  0%,
   100% {
-    box-shadow: 0 0 0 0 rgb(var(--indigo-rgb) / 0);
+    box-shadow: 0 0 0 0 rgb(var(--indigo-rgb) / 0.45), 0 0 0 0 rgb(var(--indigo-rgb) / 0.18);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgb(var(--indigo-rgb) / 0.2), 0 0 28px 10px rgb(var(--indigo-rgb) / 0.28);
   }
 }
 

@@ -54,26 +54,30 @@ function textOf(el: Element): string {
 
 export function collectDomContext(limit = 80): DomContextNode[] {
   if (typeof document === 'undefined') return [];
-  const nodes: DomContextNode[] = [];
-  const els = document.querySelectorAll(CANDIDATES);
-  for (const el of els) {
-    if (nodes.length >= limit) break;
+  const visible: { el: Element; r: DOMRect }[] = [];
+  for (const el of document.querySelectorAll(CANDIDATES)) {
     if (el.closest('[data-assistant-ui]')) continue;
     if (el instanceof HTMLInputElement && el.type === 'hidden') continue;
     const r = el.getBoundingClientRect();
     if (r.width <= 0 || r.height <= 0) continue;
-    nodes.push({
-      tag: el.tagName.toLowerCase(),
-      text: textOf(el),
-      role: roleOf(el),
-      hook: el.getAttribute('data-assistant'),
-      rect: {
-        x: Math.round(r.x),
-        y: Math.round(r.y),
-        w: Math.round(r.width),
-        h: Math.round(r.height),
-      },
-    });
+    visible.push({ el, r });
   }
-  return nodes;
+  // The stable hooks come first (the page's own landmarks, a couple of each),
+  // then plain controls, so a long list of links can never push them out.
+  const perHook = new Map<string, number>();
+  const hooked = visible.filter(({ el }) => {
+    const hook = el.getAttribute('data-assistant');
+    if (!hook) return false;
+    const n = (perHook.get(hook) ?? 0) + 1;
+    perHook.set(hook, n);
+    return n <= 2;
+  });
+  const plain = visible.filter(({ el }) => !el.getAttribute('data-assistant'));
+  return [...hooked, ...plain].slice(0, limit).map(({ el, r }) => ({
+    tag: el.tagName.toLowerCase(),
+    text: textOf(el) || (el.querySelector('h1,h2,h3')?.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 80),
+    role: roleOf(el),
+    hook: el.getAttribute('data-assistant'),
+    rect: { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) },
+  }));
 }

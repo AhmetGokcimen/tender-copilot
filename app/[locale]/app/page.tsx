@@ -248,6 +248,7 @@ export default function OpportunitiesPage() {
         <div className="flex flex-wrap items-center gap-space-sm">
           <div ref={filterRef} className="relative">
             <button
+              data-assistant="feed-filters"
               type="button"
               aria-expanded={filtersOpen}
               aria-controls="feed-filters"

@@ -37,6 +37,7 @@ from backend.api.schemas import (
     TenderWithStatePage,
 )
 from backend.core import agents as agents_core
+from backend.core import assistant as assistant_core
 from backend.core import brief as brief_core
 from backend.core import score_jobs, translate
 from backend.core.authorizations import (
@@ -262,6 +263,15 @@ async def run_bid_agent(
         language=body.language,
     )
     return {"agent": agent, "output": output}
+
+
+@router.post("/assistant/chat", response_model=assistant_core.AssistantResponse, tags=["assistant"])
+async def assistant_chat(
+    body: assistant_core.AssistantRequest,
+    user: User = Depends(get_request_user),  # noqa: ARG001 - signed-in users only
+) -> assistant_core.AssistantResponse:
+    """The in-app assistant: an answer, optionally a page to open and an element to point at."""
+    return await assistant_core.reply(body)
 
 
 @router.post("/tenders/{external_id}/brief", response_model=TenderFeedItem, tags=["tenders"])

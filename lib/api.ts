@@ -128,6 +128,17 @@ export async function briefTender(externalId: string): Promise<TenderWithState> 
   return post<TenderWithState>(`/tenders/${encodeURIComponent(externalId)}/brief`, {});
 }
 
+/** The assistant's answer: a message, optionally a page to open and an element to point at. */
+export async function askAssistant(body: unknown): Promise<{
+  message: string;
+  highlight_selector: string | null;
+  navigate_to: string | null;
+  agent: string;
+  revision: { target: string; before: string; after: string } | null;
+}> {
+  return post('/assistant/chat', body);
+}
+
 /** The standard VAT rate in force today (kept on the server in one dated table). */
 export async function fetchVat(): Promise<{ rate: number; effective_from: string; source: string }> {
   if (USE_MOCK) return { rate: 0.21, effective_from: '2025-08-01', source: 'mock' };

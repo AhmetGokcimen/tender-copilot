@@ -44,6 +44,20 @@ export function resolveVisibleTarget(selector: string): Element | null {
   return null;
 }
 
+/** Resolves the element once it is on screen (a page may still be loading after navigation), or null. */
+export function waitForTarget(selector: string, timeoutMs = 8000): Promise<Element | null> {
+  return new Promise((resolve) => {
+    const started = Date.now();
+    const tick = () => {
+      const el = resolveVisibleTarget(selector);
+      if (el) return resolve(el);
+      if (Date.now() - started > timeoutMs) return resolve(null);
+      window.setTimeout(tick, 150);
+    };
+    tick();
+  });
+}
+
 export function prefersReducedMotion(): boolean {
   return (
     typeof window !== 'undefined' &&
@@ -54,7 +68,7 @@ export function prefersReducedMotion(): boolean {
 export function scrollAndHighlight(el: Element): void {
   el.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'center' });
   el.classList.add('assistant-highlight');
-  window.setTimeout(() => el.classList.remove('assistant-highlight'), 2600);
+  window.setTimeout(() => el.classList.remove('assistant-highlight'), 5200);
 }
 
 /** Viewport-safe callout anchor near the element: above when room, else below. */

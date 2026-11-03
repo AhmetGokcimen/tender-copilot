@@ -9,6 +9,7 @@
 import type { AgentId } from './types';
 import type { DomContextNode } from './dom-context';
 import { mockAssistantReply } from './assistant-mock';
+import { askAssistant } from './api';
 
 /** Bounded snapshot of the open workspace document (revision targeting). */
 export interface DocEditContext {
@@ -39,24 +40,18 @@ export interface DocRevision {
 export interface AssistantResponse {
   message: string;
   highlight_selector: string | null;
+  /** A page of the app to open before pointing (the server only returns real paths). */
+  navigate_to?: string | null;
   agent: AgentId;
   revision?: DocRevision | null;
 }
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== 'false';
-// Same-origin by default — see lib/api.ts for why. Override only to point
-// at a remote API explicitly.
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 export async function postAssistant(req: AssistantRequest): Promise<AssistantResponse> {
   if (USE_MOCK) return mockAssistantReply(req);
-  const res = await fetch(`${API_URL}/assistant/chat`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(req),
-  });
-  if (!res.ok) throw new Error(`POST /assistant/chat failed: ${res.status}`);
-  return res.json() as Promise<AssistantResponse>;
+  const res = await askAssistant(req);
+  return { ...res, agent: res.agent as AgentId };
 }
 
 /**

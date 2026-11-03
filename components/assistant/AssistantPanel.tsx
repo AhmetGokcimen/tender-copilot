@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { clsx } from 'clsx';
-import { usePathname } from '@/i18n/routing';
+import { usePathname, useRouter } from '@/i18n/routing';
 import { useTender } from '@/lib/queries';
 import { Icon } from '../Icon';
 import { DOC_TITLES } from '@/lib/draft-template';
@@ -20,6 +20,16 @@ function tenderIdFrom(pathname: string): string | null {
   const m = /^\/app\/tenders\/([^/]+)/.exec(pathname);
   return m ? decodeURIComponent(m[1]) : null;
 }
+
+const PAGE_KEYS: [RegExp, string][] = [
+  [/^\/app\/tenders\/[^/?]+/, 'analysis'],
+  [/^\/app\/tenders/, 'analysis'],
+  [/^\/app\/pipeline/, 'pipeline'],
+  [/^\/app\/archive/, 'archive'],
+  [/^\/app\/profile/, 'profile'],
+  [/^\/app\/settings/, 'settings'],
+  [/^\/app/, 'opportunities'],
+];
 
 function useViewport() {
   const [vp, setVp] = useState({ w: 1280, h: 800 });
@@ -58,6 +68,8 @@ function nearestAnchor(cx: number, cy: number, vw: number, vh: number): DockAnch
 export function AssistantPanel() {
   const t = useTranslations('assistant');
   const pathname = usePathname();
+  const router = useRouter();
+  const tnav = useTranslations('nav');
   const tenderId = tenderIdFrom(pathname);
   const { data: tender } = useTender(tenderId ?? '', !!tenderId);
   const open = useAssistantStore((s) => s.open);
@@ -108,12 +120,12 @@ export function AssistantPanel() {
     ? [t('suggestShorten'), t('suggestNote'), t('suggestReplace')]
     : tenderId
       ? [t('suggestEligible'), t('suggestMissing'), t('suggestDraft')]
-      : [t('suggestCapable'), t('suggestWhere'), t('suggestScore')];
+      : [t('suggestPipeline'), t('suggestReminders'), t('suggestSignature')];
 
   const submit = (text: string) => {
     if (!text.trim() || sending) return;
     setDraft('');
-    void send(text, { pathname, tenderId, errorText: t('error') });
+    void send(text, { pathname, tenderId, errorText: t('error'), navigate: (p) => router.push(p) });
   };
 
   const clamp = (x: number, y: number) => ({
@@ -160,10 +172,10 @@ export function AssistantPanel() {
           dragOffset.current = null;
           setDragPos(null);
         }}
-        className="flex cursor-move touch-none select-none items-center gap-space-sm border-b border-outline-variant px-space-md py-space-sm"
+        className="flex cursor-move touch-none select-none items-center gap-space-sm border-b border-outline-variant bg-gradient-to-r from-indigo-soft/80 via-indigo-soft/30 to-transparent px-space-md py-space-sm"
       >
         <Icon name="drag_indicator" size="sm" className="shrink-0 text-on-surface-variant" />
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-navy text-white">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo text-on-indigo shadow-sm ring-4 ring-indigo/10">
           <Icon name="auto_awesome" size="sm" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col">
@@ -176,7 +188,9 @@ export function AssistantPanel() {
             <span className="tnum truncate font-code-sm text-code-sm text-on-surface-variant">
               {t('contextTender')}: {tenderId} · {tender.state.score ?? '—'}%
             </span>
-          ) : null}
+          ) : (
+            <span className="truncate text-[12px] text-on-surface-variant">{t('subtitle')}</span>
+          )}
         </div>
         <button
           type="button"
@@ -207,28 +221,43 @@ export function AssistantPanel() {
         ref={listRef}
         className="thin-scroll flex flex-1 flex-col gap-space-sm overflow-y-auto px-space-md py-space-md"
       >
-        {messages.map((m) => (
-          <div
-            key={m.id}
-            className={clsx('flex', m.role === 'user' ? 'justify-end' : 'justify-start')}
-          >
-            <p
-              className={clsx(
-                'max-w-[85%] rounded-lg px-space-sm py-space-xs font-body-md text-body-md',
-                m.role === 'user'
-                  ? 'bg-navy text-white'
-                  : 'border border-navy/15 bg-navy/10 text-on-surface',
+        {messages.map((m) => {
+          const pageKey = m.navigated ? PAGE_KEYS.find(([re]) => re.test(m.navigated ?? ''))?.[1] : undefined;
+          return (
+            <div key={m.id} className={clsx('flex items-end gap-space-xs', m.role === 'user' ? 'justify-end' : 'justify-start')}>
+              {m.role === 'ai' && (
+                <span className="mb-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-soft text-indigo-text">
+                  <Icon name="auto_awesome" size="xs" />
+                </span>
               )}
-            >
-              {m.text}
-            </p>
-          </div>
-        ))}
+              <div className={clsx('flex max-w-[82%] flex-col gap-1', m.role === 'user' ? 'items-end' : 'items-start')}>
+                <p
+                  className={clsx(
+                    'whitespace-pre-wrap px-space-sm py-space-xs font-body-md text-body-md shadow-sm',
+                    m.role === 'user'
+                      ? 'rounded-2xl rounded-br-md bg-indigo text-on-indigo'
+                      : 'rounded-2xl rounded-bl-md border border-outline-variant bg-surface text-on-surface',
+                  )}
+                >
+                  {m.text}
+                </p>
+                {pageKey && (
+                  <span className="inline-flex items-center gap-1 rounded-pill bg-indigo-soft px-2 py-0.5 text-[11.5px] font-medium text-indigo-text">
+                    <Icon name="arrow_outward" size="xs" />
+                    {t('opened')}: {tnav(pageKey)}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
         {sending && (
           <div className="flex justify-start">
-            <p className="flex items-center gap-space-xs rounded-lg border border-navy/15 bg-navy/10 px-space-sm py-space-xs font-body-md text-body-md text-on-surface-variant">
-              <Icon name="progress_activity" size="sm" className="animate-spin" />
-              {t('thinking')}
+            <p className="flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-outline-variant bg-surface px-space-sm py-space-xs font-body-md text-body-md text-on-surface-variant shadow-sm" aria-live="polite">
+              <span className="sr-only">{t('thinking')}</span>
+              <span className="agent-dot h-1.5 w-1.5 rounded-full bg-indigo" />
+              <span className="agent-dot h-1.5 w-1.5 rounded-full bg-indigo [animation-delay:200ms]" />
+              <span className="agent-dot h-1.5 w-1.5 rounded-full bg-indigo [animation-delay:400ms]" />
             </p>
           </div>
         )}
@@ -277,7 +306,7 @@ export function AssistantPanel() {
             type="button"
             disabled={sending}
             onClick={() => submit(s)}
-            className="rounded-full border border-navy/40 px-space-sm py-1 font-body-sm text-body-sm text-navy transition-colors hover:border-navy hover:bg-navy hover:text-white disabled:opacity-50"
+            className="rounded-full border border-outline-variant bg-surface px-space-sm py-1 font-body-sm text-body-sm text-on-surface transition-colors hover:border-indigo hover:bg-indigo-soft hover:text-indigo-text disabled:opacity-50"
           >
             {s}
           </button>
@@ -296,7 +325,7 @@ export function AssistantPanel() {
           placeholder={t('placeholder')}
           disabled={sending}
           aria-label={t('placeholder')}
-          className="h-10 min-w-0 flex-1 rounded border border-outline-variant bg-surface-container-lowest px-space-sm font-body-md text-body-md outline-none placeholder:text-on-surface-variant focus:border-navy"
+          className="h-10 min-w-0 flex-1 rounded-pill border border-outline-variant bg-surface px-space-md font-body-md text-body-md outline-none placeholder:text-on-surface-variant focus:border-indigo focus:ring-2 focus:ring-indigo/15"
         />
         <button
           type="submit"

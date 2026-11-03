@@ -42,7 +42,7 @@ const SECTIONS = ['company', 'contracts', 'guarantees', 'staff', 'workload', 'ex
 
 function Card({ id, title, hint, children }: { id: string; title: string; hint?: string; children: React.ReactNode }) {
   return (
-    <section id={id} className="scroll-mt-24 flex flex-col gap-space-md rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
+    <section id={id} data-assistant={`profile-${id}`} className="scroll-mt-24 flex flex-col gap-space-md rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
       <div className="flex flex-col gap-0.5">
         <h2 className="text-[18px] font-medium text-ink">{title}</h2>
         {hint && <Help>{hint}</Help>}
@@ -282,7 +282,7 @@ export default function ProfilePage() {
                 {t('repRole')}
                 <input className={INPUT} value={c.legal_rep_role ?? ''} onChange={(e) => set({ legal_rep_role: e.target.value || null })} />
               </label>
-              <div className="flex flex-col gap-1 text-[13.5px] text-ink sm:col-span-2">
+              <div data-assistant="profile-signature" className="flex flex-col gap-1 text-[13.5px] text-ink sm:col-span-2">
                 {t('signature')}
                 <SignatureField value={c.signature_png} onChange={(png) => set({ signature_png: png })} />
               </div>

@@ -389,3 +389,40 @@ def test_ai_usage_is_recorded_and_reported(seed: TestClient, monkeypatch: pytest
     row = out["purposes"]["translate"]
     assert (row["calls"], row["input"], row["output"], row["reasoning"], row["cached"]) == (1, 1000, 500, 300, 200)
     assert row["usd_per_call"] == round((800 * 4 + 200 * 0.2 + 500 * 20) / 1e6, 5)
+
+
+def test_assistant_opens_a_page_and_points_at_a_known_element(seed: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    import json as _json
+
+    from backend.ai.client import MetaAIClient
+    from backend.core.config import settings
+
+    plans = iter([
+        {"message": "Here is your pipeline.", "navigate_to": "/app/pipeline", "highlight_hook": "pipeline-board", "agent": "spec"},
+        {"message": "Nope", "navigate_to": "/etc/passwd", "highlight_hook": "x\"]; alert(1)//", "agent": "bogus"},
+        {"message": "Settings", "navigate_to": "/app/profile", "highlight_hook": "profile-preferences", "agent": "writer"},
+    ])
+
+    async def fake_chat(self, system: str, user: str, **_kw):  # noqa: ANN001
+        assert "pipeline-board" in system  # the site map is in the prompt
+        return _json.dumps(next(plans))
+
+    monkeypatch.setattr(MetaAIClient, "_chat", fake_chat)
+    monkeypatch.setattr(settings, "meta_api_key", "test-key")
+    body = {"question": "show me the pipeline", "pathname": "/app", "tenderId": None, "dom": [], "history": []}
+    ok = seed.post("/api/assistant/chat", json=body, headers=_auth()).json()
+    assert ok["navigate_to"] == "/app/pipeline"
+    assert ok["highlight_selector"] == '[data-assistant="pipeline-board"]'
+    bad = seed.post("/api/assistant/chat", json=body, headers=_auth()).json()
+    assert bad["navigate_to"] is None and bad["highlight_selector"] is None and bad["agent"] == "spec"
+    prof = seed.post("/api/assistant/chat", json=body, headers=_auth()).json()
+    assert prof["highlight_selector"] == '[data-assistant="profile-preferences"]' and prof["agent"] == "writer"
+
+
+def test_assistant_without_a_model_still_opens_pages(seed: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    from backend.core.config import settings
+
+    monkeypatch.setattr(settings, "meta_api_key", "")
+    body = {"question": "pipeline sayfasını aç", "pathname": "/app", "tenderId": None, "dom": [], "history": []}
+    out = seed.post("/api/assistant/chat", json=body, headers=_auth()).json()
+    assert out["navigate_to"] == "/app/pipeline"
