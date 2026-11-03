@@ -416,12 +416,20 @@ export default function ProfilePage() {
             </div>
             <div className="flex flex-wrap items-center justify-between gap-space-sm">
               <span className="text-[14.5px] text-ink">{t('minDays')}</span>
-              <input
-                inputMode="numeric"
+              <select
                 value={c.min_days_to_deadline}
-                onChange={(e) => set({ min_days_to_deadline: Math.min(90, Number(e.target.value.replace(/\D/g, '')) || 0) })}
-                className={`${INPUT} tnum !w-20 text-center`}
-              />
+                onChange={(e) => set({ min_days_to_deadline: Number(e.target.value) })}
+                className={`${INPUT} !w-auto`}
+              >
+                {[...new Set([1, 2, 3, 5, 7, 10, 14, 21, c.min_days_to_deadline])]
+                  .filter((d) => d > 0)
+                  .sort((a, b) => a - b)
+                  .map((d) => (
+                    <option key={d} value={d}>
+                      {t('daysBefore', { n: d })}
+                    </option>
+                  ))}
+              </select>
             </div>
             <YesNo label={t('carInsurance')} value={c.has_car_insurance} onChange={(v) => set({ has_car_insurance: v })} />
             <YesNo label={t('liabilityInsurance')} value={c.has_liability_insurance} onChange={(v) => set({ has_liability_insurance: v })} />

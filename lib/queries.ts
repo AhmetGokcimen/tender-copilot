@@ -11,6 +11,7 @@ import {
   fetchEvidence,
   fetchMe,
   fetchOnboardingStatus,
+  fetchPastWinnersQuota,
   fetchPriceHint,
   fetchTender,
   fetchTenders,
@@ -50,6 +51,11 @@ export function useTender(externalId: string, enabled = true) {
 export const FALLBACK_VAT = 0.21;
 export function useVat() {
   return useQuery({ queryKey: ['vat'] as const, queryFn: fetchVat, staleTime: 60 * 60 * 1000 });
+}
+
+/** Past-winner lookups used this month against the plan limit (the only quota enforced today). */
+export function usePastWinnersQuota() {
+  return useQuery({ queryKey: ['past-winners-quota'] as const, queryFn: fetchPastWinnersQuota, staleTime: 60_000, retry: false });
 }
 
 export function usePriceHint(externalId: string) {

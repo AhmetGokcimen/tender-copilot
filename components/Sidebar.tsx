@@ -8,7 +8,7 @@ import { Icon } from './Icon';
 import { LogoMark, Wordmark } from './brand/Logo';
 import { LanguageToggle } from './i18n/LanguageToggle';
 import { FlashNumber } from './FlashNumber';
-import { MOCK_QUOTA } from '@/lib/mock-data';
+import { usePastWinnersQuota } from '@/lib/queries';
 
 const ITEMS = [
   { key: 'opportunities', href: '/app', icon: 'grid_view' },
@@ -55,7 +55,11 @@ export function Sidebar() {
     activeMobileRef.current?.scrollIntoView({ inline: 'center', block: 'nearest' });
   }, [pathname]);
 
-  const quotaPct = Math.round((MOCK_QUOTA.used / MOCK_QUOTA.total) * 100);
+  // The one monthly limit that is enforced today: past-winner lookups.
+  const { data: quota } = usePastWinnersQuota();
+  const used = quota?.used ?? 0;
+  const total = quota?.limit ?? 0;
+  const quotaPct = total > 0 ? Math.min(100, Math.round((used / total) * 100)) : 0;
 
   return (
     <>
@@ -66,6 +70,17 @@ export function Sidebar() {
           collapsed ? 'w-16' : 'w-72',
         )}
       >
+        <button
+          type="button"
+          onClick={toggle}
+          aria-expanded={!collapsed}
+          title={collapsed ? t('expand') : t('collapse')}
+          aria-label={collapsed ? t('expand') : t('collapse')}
+          data-assistant="nav-collapse"
+          className="absolute -right-3 top-[22px] z-10 flex h-6 w-6 items-center justify-center rounded-full border border-outline-variant bg-surface-container-lowest text-on-surface-variant shadow-sm transition-colors hover:border-outline hover:text-on-surface"
+        >
+          <Icon name={collapsed ? 'chevron_right' : 'chevron_left'} size="xs" />
+        </button>
         <div className="flex flex-col">
           <div
             className={clsx(
@@ -111,19 +126,6 @@ export function Sidebar() {
               </Link>
             ))}
           </nav>
-          <div className={clsx('px-space-md', collapsed && 'px-space-xs')}>
-            <button
-              type="button"
-              onClick={toggle}
-              aria-expanded={!collapsed}
-              title={collapsed ? t('expand') : t('collapse')}
-              aria-label={collapsed ? t('expand') : t('collapse')}
-              data-assistant="nav-collapse"
-              className="flex h-9 w-full items-center justify-center rounded text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface"
-            >
-              <Icon name={collapsed ? 'chevron_right' : 'chevron_left'} size="sm" />
-            </button>
-          </div>
         </div>
         <div
           className={clsx(
@@ -133,10 +135,10 @@ export function Sidebar() {
         >
           {collapsed ? (
             <span
-              title={t('quotaUsed', { used: MOCK_QUOTA.used, total: MOCK_QUOTA.total })}
+              title={t('quotaUsed', { used, total })}
               className="tnum py-space-xs font-code-sm text-code-sm font-semibold text-ink"
             >
-              {MOCK_QUOTA.used}/{MOCK_QUOTA.total}
+              {total > 0 ? `${used}/${total}` : '–'}
             </span>
           ) : (
             <div className="rounded bg-surface-container-lowest p-space-sm shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
@@ -145,7 +147,7 @@ export function Sidebar() {
                   {t('quotaTitle')}
                 </span>
                 <FlashNumber
-                  value={`${MOCK_QUOTA.used}/${MOCK_QUOTA.total}`}
+                  value={total > 0 ? `${used}/${total}` : '–'}
                   className="tnum font-code-sm text-code-sm font-semibold text-ink"
                 />
               </div>
@@ -153,7 +155,7 @@ export function Sidebar() {
                 <div className="h-full rounded-full bg-indigo" style={{ width: `${quotaPct}%` }} />
               </div>
               <p className="mt-space-xs whitespace-nowrap font-label-sm text-label-sm text-on-surface-variant">
-                {t('quotaUsed', { used: MOCK_QUOTA.used, total: MOCK_QUOTA.total })}
+                {t('quotaUsed', { used, total })}
               </p>
             </div>
           )}
