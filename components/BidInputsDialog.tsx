@@ -78,9 +78,9 @@ export function BidInputsDialog({
   onSkip: () => void;
 }) {
   const t = useTranslations('bidInputs');
-  const stored = useBidInputsStore((s) => s.forTender(tender.external_id));
   const save = useBidInputsStore((s) => s.save);
-  const [v, setV] = useState<BidInputs>(stored);
+  // Read once: a selector that builds a new object each call re-renders forever.
+  const [v, setV] = useState<BidInputs>(() => useBidInputsStore.getState().forTender(tender.external_id));
   const { data: hint } = usePriceHint(tender.external_id);
 
   useEffect(() => {
