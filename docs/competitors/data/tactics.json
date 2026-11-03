@@ -1,0 +1,92 @@
+[
+ {
+  "id": "t1",
+  "source": "DataDriven.ro",
+  "tactic": "Üç seviyeli yeterlilik etiketi: 'Participă / Participă cu atenție / Nerecomandat'",
+  "why": "Okuyan 2 saniyede karar verir.",
+  "for_licits": "Licits'te şart başına karşılandı/karşılanmadı/belirsiz var; üstüne tek bir genel trafik ışığı ekle.",
+  "effort": "Düşük",
+  "impact": "Yüksek"
+ },
+ {
+  "id": "t2",
+  "source": "DataDriven.ro",
+  "tactic": "Sitede isimli referans ve 'Peste 300 de companii' sayacı",
+  "why": "Küçük müteahhit, benzer firmanın kullandığını görünce güvenir.",
+  "for_licits": "İlk 3–5 beta kullanıcısından isimli alıntı al; sayacı yalnızca gerçek rakamla yaz.",
+  "effort": "Düşük",
+  "impact": "Yüksek"
+ },
+ {
+  "id": "t3",
+  "source": "DataDriven.ro",
+  "tactic": "Ücretli destekli onboarding (tek seferlik)",
+  "why": "Takılan müşteri hızlı aktive olur, gelir artar.",
+  "for_licits": "Profil doğrulama + ilk 3 ihale için ücretli kurulum paketi dene.",
+  "effort": "Düşük",
+  "impact": "Orta"
+ },
+ {
+  "id": "t4",
+  "source": "DataDriven.ro",
+  "tactic": "Üst planda MCP sunucusu / kendi AI'nı getir",
+  "why": "Teknik ekipleri ve danışmanları çeker.",
+  "for_licits": "Pro plana API/MCP ekle; danışmanlar için kanal aç.",
+  "effort": "Orta",
+  "impact": "Orta"
+ },
+ {
+  "id": "t5",
+  "source": "DataDriven.ro",
+  "tactic": "Kurucu basında: Economedia ve Profit.ro röportajları",
+  "why": "Güven ve SEO kazandırır, satış ekibi gerektirmez.",
+  "for_licits": "Kurucu hikâyesi + doğrulama sonuçları (geri test) ile 2–3 yerel iş basını hedefle.",
+  "effort": "Orta",
+  "impact": "Yüksek"
+ },
+ {
+  "id": "t6",
+  "source": "Licitatia.ro",
+  "tactic": "Ana akım sitelerde '(P)' advertorial haberler",
+  "why": "Köklü marka algısı; arama trafiği.",
+  "for_licits": "Yıllık alım hacmi ve geri test verisiyle tek bir advertorial dene.",
+  "effort": "Orta",
+  "impact": "Orta"
+ },
+ {
+  "id": "t7",
+  "source": "sicap.ai",
+  "tactic": "Ücretsiz kazanan arama katmanı",
+  "why": "Fiyat çıpasını kırar, huni tepesini doldurur.",
+  "for_licits": "Ücretsiz 'kim kazandı' arama (düşük kota) ile kayıt topla.",
+  "effort": "Orta",
+  "impact": "Yüksek"
+ },
+ {
+  "id": "t8",
+  "source": "Licitatie-publica.ro",
+  "tactic": "Ana vaat: 'benzer ihaleleri kim, hangi fiyata kazandı'",
+  "why": "Sorunu somut cümleyle anlatır.",
+  "for_licits": "Licits zaten sunuyor (ANAF mali veri ekli); landing'de başlığa çıkar.",
+  "effort": "Düşük",
+  "impact": "Yüksek"
+ },
+ {
+  "id": "t9",
+  "source": "Jorpex",
+  "tactic": "Slack/Teams'e uyarı",
+  "why": "Ekip içinde tetikleyici olur.",
+  "for_licits": "E-posta uyarıları yapılırken aynı altyapıyla Slack webhook ekle.",
+  "effort": "Düşük",
+  "impact": "Düşük"
+ },
+ {
+  "id": "t10",
+  "source": "Tümü",
+  "tactic": "'Licits vs DataDriven' alternatif sayfaları (market-competitors iskeleti)",
+  "why": "'X alternatifi' aramaları alt hunidir.",
+  "for_licits": "/vs/datadriven ve /vs/licitatia sayfaları: tablo, 'nerede kazanırız', 'nerede kaybederiz'.",
+  "effort": "Düşük",
+  "impact": "Yüksek"
+ }
+]

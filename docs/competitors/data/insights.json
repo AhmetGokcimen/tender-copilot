@@ -1,0 +1,170 @@
+[
+ {
+  "id": "sw1",
+  "kind": "Güçlü yön",
+  "text": "ANAF'tan otomatik profil: CUI girince ünvan, adres, CAEN, ciro ve kazanılan sözleşmeler dolar.",
+  "evidence": "README, 7 adımlı onboarding. Karşılaştırılan sitelerde böyle bir adım görmedim.",
+  "source_id": "s1"
+ },
+ {
+  "id": "sw2",
+  "kind": "Güçlü yön",
+  "text": "Yeterlilik kontrolü ciro/deneyim için aritmetikle yapılıyor ve her karar gerekçeli.",
+  "evidence": "README. DataDriven etiket veriyor, gerekçesini sitede göstermiyor.",
+  "source_id": "s1"
+ },
+ {
+  "id": "sw3",
+  "kind": "Güçlü yön",
+  "text": "Kazananlar + ANAF mali veri + yenilenen alım tespiti (ödeme planı üst katmanda fiyat aralığı).",
+  "evidence": "README. Yalnızca Licitatie-publica.ro benzer 'kim hangi fiyata kazandı' diyor.",
+  "source_id": "s1"
+ },
+ {
+  "id": "sw4",
+  "kind": "Güçlü yön",
+  "text": "Teklif ve DUAE taslağı; taranmış PDF okuma tüm planlarda.",
+  "evidence": "README. DataDriven DUAE'yi belirtmiyor.",
+  "source_id": "s1"
+ },
+ {
+  "id": "sw5",
+  "kind": "Zayıf yön",
+  "text": "Fiyat DataDriven'ın 1,7–2,8 katı (kademe kademe).",
+  "evidence": "Fiyat tablosu (hesaplanan).",
+  "source_id": "s2"
+ },
+ {
+  "id": "sw6",
+  "kind": "Zayıf yön",
+  "text": "E-posta uyarısı yok; faturalama yok, üst plan herkese açık; kotalar çoğunlukla uygulanmıyor.",
+  "evidence": "README 'Status' bölümü.",
+  "source_id": "s1"
+ },
+ {
+  "id": "sw7",
+  "kind": "Zayıf yön",
+  "text": "Yalnızca SEAP/ANAF; rakipler 3.500–10.000 kaynak iddia ediyor. Yalnızca tam CPV eşleşmesi (geri testte vakaların üçte biri sıfır skor).",
+  "evidence": "README + rakip siteler.",
+  "source_id": "s1"
+ },
+ {
+  "id": "sw8",
+  "kind": "Zayıf yön",
+  "text": "Sosyal kanıt yok: waitlist'te sizden başka kayıt yok, beta davetle.",
+  "evidence": "Supabase waitlist tablosu (1 kayıt, sahibi).",
+  "source_id": "s7"
+ },
+ {
+  "id": "sw9",
+  "kind": "Fırsat",
+  "text": "Hiçbir rakip sayfasında her kararın dayandığı ihale paragrafını göstermiyor (okuduğum sayfalarda yok). Licits'in sıradaki işi bu.",
+  "evidence": "README 'Status'; rakip sayfaları.",
+  "source_id": "s1"
+ },
+ {
+  "id": "sw10",
+  "kind": "Fırsat",
+  "text": "Şeffaf fiyat: Licitatie-publica.ro ve sicap.pro fiyat vermiyor, Licitatia.ro'da SEAP paketi fiyatsız.",
+  "evidence": "Rakip siteler.",
+  "source_id": "s3"
+ },
+ {
+  "id": "sw11",
+  "kind": "Fırsat",
+  "text": "İnşaat gibi tek sektöre odak: rakipler genel dil kullanıyor, sektör sertifika listeleri yok.",
+  "evidence": "Rakip ana sayfaları.",
+  "source_id": "s2"
+ },
+ {
+  "id": "sw12",
+  "kind": "Fırsat",
+  "text": "Çok ülke: Jorpex 50+ portal satıyor ama yeterlilik/teklif yok; Licits her kaynağı adapter olarak tasarlamış.",
+  "evidence": "Jorpex sayfası; README.",
+  "source_id": "s5"
+ },
+ {
+  "id": "sw13",
+  "kind": "Tehdit",
+  "text": "DataDriven hızlı ilerliyor: 2 yılda 300+ firma iddiası, AI teklif atölyesi, MCP, 14 gün deneme.",
+  "evidence": "DataDriven ana sayfa.",
+  "source_id": "s2"
+ },
+ {
+  "id": "sw14",
+  "kind": "Tehdit",
+  "text": "sicap.ai ücretsiz kazanan bilgisi sunuyor; ödeme isteği düşer.",
+  "evidence": "Apify karşılaştırma tablosu (ikinci el).",
+  "source_id": "s6"
+ },
+ {
+  "id": "sw15",
+  "kind": "Tehdit",
+  "text": "Yeni SICAP sisteminin gecikmeleri: SEAP adaptörü değişirse veri akışı kırılabilir.",
+  "evidence": "Profit.ro haberi (arama sonucu).",
+  "source_id": "s8"
+ },
+ {
+  "id": "sw16",
+  "kind": "Tehdit",
+  "text": "Sektör eleştirisi: 'AI evrak yükünü artırır' (DataDriven kurucusu). Teklif taslağı vaadi mesafeli karşılanabilir.",
+  "evidence": "Economedia röportajı.",
+  "source_id": "s9"
+ },
+ {
+  "id": "pt1",
+  "kind": "Çalışan kalıp",
+  "text": "'Elle aramayı bırak' zaman tasarrufu başlığı.",
+  "evidence": "DataDriven: 'Găsește mai simplu…'; Licitatia.ro (Spotmedia): 'fără să verifici zilnic SEAP'; Jorpex: 'replaces hours' .",
+  "source_id": "s2"
+ },
+ {
+  "id": "pt2",
+  "kind": "Çalışan kalıp",
+  "text": "14 gün ücretsiz deneme, kart/yükümlülük yok.",
+  "evidence": "DataDriven, Jorpex, Licitatie-publica.ro.",
+  "source_id": "s2"
+ },
+ {
+  "id": "pt3",
+  "kind": "Çalışan kalıp",
+  "text": "Sayıyla kanıt: kaynak sayısı, firma sayısı, yıl.",
+  "evidence": "DataDriven 10.000+ kaynak ve 300+ firma; Licitatie-publica.ro 3.500+ kaynak; Licitatia.ro 22 yıl.",
+  "source_id": "s2"
+ },
+ {
+  "id": "pt4",
+  "kind": "Çalışan kalıp",
+  "text": "Basın ve advertorial ile güven kurma.",
+  "evidence": "Licitatia.ro '(P)' haberleri; DataDriven kurucu röportajları.",
+  "source_id": "s3"
+ },
+ {
+  "id": "gp1",
+  "kind": "Boşluk",
+  "text": "Kararın kaynağı olan paragrafı gösteren yeterlilik kontrolü.",
+  "evidence": "Okunan rakip sayfalarında yok; Licits yol haritasında.",
+  "source_id": "s1"
+ },
+ {
+  "id": "gp2",
+  "kind": "Boşluk",
+  "text": "Sektöre göre dil ve sertifika kontrol listesi (güneş, elektrik, yol, HVAC...).",
+  "evidence": "Rakip ana sayfaları genel.",
+  "source_id": "s2"
+ },
+ {
+  "id": "gp3",
+  "kind": "Boşluk",
+  "text": "DUAE'yi SEAP akışına uygun üreten Romanyalı ürün.",
+  "evidence": "Aramada bulunamadı; doğrulanmadı.",
+  "source_id": "s4"
+ },
+ {
+  "id": "gp4",
+  "kind": "Boşluk",
+  "text": "Açık, herkese görünür fiyat ve kullanım kotası.",
+  "evidence": "Licitatie-publica.ro, sicap.pro fiyatı gizli.",
+  "source_id": "s4"
+ }
+]

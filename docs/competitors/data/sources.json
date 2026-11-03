@@ -1,0 +1,93 @@
+[
+ {
+  "id": "s1",
+  "title": "Licits README ve docs",
+  "url": "https://github.com/ahmetgokcimen/tender-copilot",
+  "used_for": "Licits özellikleri, fiyatları, doğrulama",
+  "status": "okundu"
+ },
+ {
+  "id": "s2",
+  "title": "DataDriven.ro ana sayfa",
+  "url": "https://datadriven.ro",
+  "used_for": "Başlık, planlar, fiyatlar, referanslar",
+  "status": "okundu"
+ },
+ {
+  "id": "s3",
+  "title": "Licitatia.ro ana sayfa ve abonamentler",
+  "url": "http://www.licitatia.ro/abonamente.html",
+  "used_for": "Başlık, planlar, özellikler",
+  "status": "okundu"
+ },
+ {
+  "id": "s4",
+  "title": "Licitatie-publica.ro ana sayfa",
+  "url": "https://www.licitatie-publica.ro",
+  "used_for": "Başlık, hizmetler, kanıt",
+  "status": "okundu"
+ },
+ {
+  "id": "s5",
+  "title": "Jorpex Romania rehberi",
+  "url": "https://jorpex.com/guides/find-tenders-romania/",
+  "used_for": "Fiyat, özellikler",
+  "status": "okundu"
+ },
+ {
+  "id": "s6",
+  "title": "Apify SEAP/SICAP karşılaştırma tablosu",
+  "url": "https://apify.com/apnoda/seap-sicap-tenders.md",
+  "used_for": "sicap.ai ve sicap.pro (sitelerin kendisi 403 verdi)",
+  "status": "ikinci el"
+ },
+ {
+  "id": "s7",
+  "title": "Supabase waitlist tablosu",
+  "url": "(özel)",
+  "used_for": "Waitlist sayısı",
+  "status": "okundu"
+ },
+ {
+  "id": "s8",
+  "title": "Profit.ro: SICAP gecikmesi",
+  "url": "https://profit.ro/povesti-cu-profit/it-c/ministrul-comunicatiilor-sicap-noul-sistem-de-licitatii-publice-are-intarzieri-din-cauza-furnizorului-15566143",
+  "used_for": "Yeni SICAP riski",
+  "status": "yalnızca arama sonucu"
+ },
+ {
+  "id": "s9",
+  "title": "Economedia: DataDriven kurucusu röportajı",
+  "url": "https://economedia.ro/?p=304493",
+  "used_for": "AI ve evrak yükü görüşü",
+  "status": "okundu"
+ },
+ {
+  "id": "s10",
+  "title": "G2: Tender Service SRL",
+  "url": "https://www.g2.com/products/tender-service-srl",
+  "used_for": "Ek doğrulama",
+  "status": "engellendi (403)"
+ },
+ {
+  "id": "s11",
+  "title": "Meta Reklam Kütüphanesi",
+  "url": "https://www.facebook.com/ads/library",
+  "used_for": "Rakip reklamları",
+  "status": "yapılmadı"
+ },
+ {
+  "id": "s12",
+  "title": "LinkedIn Reklam Kütüphanesi",
+  "url": "https://www.linkedin.com/ad-library",
+  "used_for": "Rakip reklamları",
+  "status": "yapılmadı"
+ },
+ {
+  "id": "s13",
+  "title": "Google Ads Şeffaflık Merkezi",
+  "url": "https://adstransparency.google.com",
+  "used_for": "Rakip reklamları",
+  "status": "yapılmadı"
+ }
+]

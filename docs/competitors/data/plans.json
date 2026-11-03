@@ -1,0 +1,112 @@
+[
+ {
+  "id": "licits-start",
+  "competitor_id": "licits",
+  "competitor": "Licits",
+  "plan": "Start",
+  "price_ron": 199,
+  "price_ron_high": 199,
+  "users": 1,
+  "note": "RON/ay, KDV hariç (README)"
+ },
+ {
+  "id": "licits-growth",
+  "competitor_id": "licits",
+  "competitor": "Licits",
+  "plan": "Growth",
+  "price_ron": 349,
+  "price_ron_high": 349,
+  "users": 3,
+  "note": "RON/ay, KDV hariç (README)"
+ },
+ {
+  "id": "licits-pro",
+  "competitor_id": "licits",
+  "competitor": "Licits",
+  "plan": "Pro",
+  "price_ron": 499,
+  "price_ron_high": 499,
+  "users": 5,
+  "note": "RON/ay, KDV hariç (README)"
+ },
+ {
+  "id": "datadriven-standard",
+  "competitor_id": "datadriven",
+  "competitor": "DataDriven.ro",
+  "plan": "Standard",
+  "price_ron": 70,
+  "price_ron_high": 70,
+  "users": 1,
+  "note": "RON/ay; sitede 'per utilizator, pe lună'; yıllıkta %18 indirim"
+ },
+ {
+  "id": "datadriven-expert",
+  "competitor_id": "datadriven",
+  "competitor": "DataDriven.ro",
+  "plan": "Expert",
+  "price_ron": 130,
+  "price_ron_high": 130,
+  "users": 2,
+  "note": "RON/ay; sitede 'per utilizator, pe lună'; yıllıkta %18 indirim"
+ },
+ {
+  "id": "datadriven-premium",
+  "competitor_id": "datadriven",
+  "competitor": "DataDriven.ro",
+  "plan": "Premium",
+  "price_ron": 290,
+  "price_ron_high": 290,
+  "users": 5,
+  "note": "RON/ay; sitede 'per utilizator, pe lună'; yıllıkta %18 indirim"
+ },
+ {
+  "id": "licitatia-start",
+  "competitor_id": "licitatia",
+  "competitor": "Licitatia.ro",
+  "plan": "Start",
+  "price_ron": 75,
+  "price_ron_high": 90,
+  "users": 1,
+  "note": "RON/ay, 12 aylık, KDV hariç; sayfada her plan için iki fiyat var, hangisinin indirimli olduğu yazmıyor; users = e-posta adresi sayısı"
+ },
+ {
+  "id": "licitatia-business",
+  "competitor_id": "licitatia",
+  "competitor": "Licitatia.ro",
+  "plan": "Business",
+  "price_ron": 115,
+  "price_ron_high": 133,
+  "users": 3,
+  "note": "RON/ay, 12 aylık, KDV hariç; sayfada her plan için iki fiyat var, hangisinin indirimli olduğu yazmıyor; users = e-posta adresi sayısı"
+ },
+ {
+  "id": "licitatia-mega",
+  "competitor_id": "licitatia",
+  "competitor": "Licitatia.ro",
+  "plan": "Mega",
+  "price_ron": 175,
+  "price_ron_high": 216,
+  "users": 5,
+  "note": "RON/ay, 12 aylık, KDV hariç; sayfada her plan için iki fiyat var, hangisinin indirimli olduğu yazmıyor; users = e-posta adresi sayısı"
+ },
+ {
+  "id": "jorpex-tek plan",
+  "competitor_id": "jorpex",
+  "competitor": "Jorpex",
+  "plan": "Tek plan",
+  "price_ron": 245,
+  "price_ron_high": 245,
+  "users": null,
+  "note": "€49/ay; 1 EUR = 5 RON varsayımıyla çevrildi (benim varsayımım)"
+ },
+ {
+  "id": "sicapai-ücretsiz",
+  "competitor_id": "sicapai",
+  "competitor": "sicap.ai",
+  "plan": "Ücretsiz",
+  "price_ron": 0,
+  "price_ron_high": 0,
+  "users": null,
+  "note": "Ücretsiz (üçüncü taraf tablosu)"
+ }
+]

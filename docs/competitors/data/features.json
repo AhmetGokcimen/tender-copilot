@@ -1,0 +1,562 @@
+[
+ {
+  "id": "licits-alerts",
+  "competitor_id": "licits",
+  "competitor": "Licits (biz)",
+  "feature": "alerts",
+  "feature_label": "E-posta uyarısı",
+  "level": "Yok",
+  "note": "README: e-posta uyarıları 'yakında', henüz yok",
+  "source_id": "s1"
+ },
+ {
+  "id": "licits-filters",
+  "competitor_id": "licits",
+  "competitor": "Licits (biz)",
+  "feature": "filters",
+  "feature_label": "CPV/il/değer filtresi",
+  "level": "Var",
+  "note": "README: CPV, il, değer, son tarih",
+  "source_id": "s1"
+ },
+ {
+  "id": "licits-summary",
+  "competitor_id": "licits",
+  "competitor": "Licits (biz)",
+  "feature": "summary",
+  "feature_label": "AI özet",
+  "level": "Var",
+  "note": "README: EN/RO sade başlık ve özet",
+  "source_id": "s1"
+ },
+ {
+  "id": "licits-eligibility",
+  "competitor_id": "licits",
+  "competitor": "Licits (biz)",
+  "feature": "eligibility",
+  "feature_label": "AI yeterlilik kontrolü",
+  "level": "Var",
+  "note": "README: ciro/deneyim aritmetikle, gerekçeli",
+  "source_id": "s1"
+ },
+ {
+  "id": "licits-draft",
+  "competitor_id": "licits",
+  "competitor": "Licits (biz)",
+  "feature": "draft",
+  "feature_label": "Teklif/DUAE taslağı",
+  "level": "Var",
+  "note": "README: teklif ve DUAE taslağı",
+  "source_id": "s1"
+ },
+ {
+  "id": "licits-winners",
+  "competitor_id": "licits",
+  "competitor": "Licits (biz)",
+  "feature": "winners",
+  "feature_label": "Önceki kazananlar",
+  "level": "Var",
+  "note": "README: son 5 sözleşmenin kazananı + ANAF mali veri",
+  "source_id": "s1"
+ },
+ {
+  "id": "licits-ocr",
+  "competitor_id": "licits",
+  "competitor": "Licits (biz)",
+  "feature": "ocr",
+  "feature_label": "Taranmış PDF okuma",
+  "level": "Var",
+  "note": "README: taranmış PDF sınırsız",
+  "source_id": "s1"
+ },
+ {
+  "id": "licits-api",
+  "competitor_id": "licits",
+  "competitor": "Licits (biz)",
+  "feature": "api",
+  "feature_label": "API / MCP",
+  "level": "Yok",
+  "note": "README'de API/MCP yok",
+  "source_id": "s1"
+ },
+ {
+  "id": "datadriven-alerts",
+  "competitor_id": "datadriven",
+  "competitor": "DataDriven.ro",
+  "feature": "alerts",
+  "feature_label": "E-posta uyarısı",
+  "level": "Var",
+  "note": "Günlük uyarılar",
+  "source_id": "s2"
+ },
+ {
+  "id": "datadriven-filters",
+  "competitor_id": "datadriven",
+  "competitor": "DataDriven.ro",
+  "feature": "filters",
+  "feature_label": "CPV/il/değer filtresi",
+  "level": "Var",
+  "note": "CPV, değer, idare, il",
+  "source_id": "s2"
+ },
+ {
+  "id": "datadriven-summary",
+  "competitor_id": "datadriven",
+  "competitor": "DataDriven.ro",
+  "feature": "summary",
+  "feature_label": "AI özet",
+  "level": "Var",
+  "note": "AI ile eleme (triage)",
+  "source_id": "s2"
+ },
+ {
+  "id": "datadriven-eligibility",
+  "competitor_id": "datadriven",
+  "competitor": "DataDriven.ro",
+  "feature": "eligibility",
+  "feature_label": "AI yeterlilik kontrolü",
+  "level": "Var",
+  "note": "'Participă / Participă cu atenție / Nerecomandat' (Standard+)",
+  "source_id": "s2"
+ },
+ {
+  "id": "datadriven-draft",
+  "competitor_id": "datadriven",
+  "competitor": "DataDriven.ro",
+  "feature": "draft",
+  "feature_label": "Teklif/DUAE taslağı",
+  "level": "Kısmi",
+  "note": "AI 'Atelier de oferte' dosya hazırlar; DUAE belirtilmemiş",
+  "source_id": "s2"
+ },
+ {
+  "id": "datadriven-winners",
+  "competitor_id": "datadriven",
+  "competitor": "DataDriven.ro",
+  "feature": "winners",
+  "feature_label": "Önceki kazananlar",
+  "level": "Var",
+  "note": "Rakip istatistikleri ve sözleşme geçmişi (Expert)",
+  "source_id": "s2"
+ },
+ {
+  "id": "datadriven-ocr",
+  "competitor_id": "datadriven",
+  "competitor": "DataDriven.ro",
+  "feature": "ocr",
+  "feature_label": "Taranmış PDF okuma",
+  "level": "Var",
+  "note": "Taranmış PDF aranabilir metin (Expert)",
+  "source_id": "s2"
+ },
+ {
+  "id": "datadriven-api",
+  "competitor_id": "datadriven",
+  "competitor": "DataDriven.ro",
+  "feature": "api",
+  "feature_label": "API / MCP",
+  "level": "Var",
+  "note": "MCP sunucusu (Premium), veri akışı/PowerBI ek hizmet",
+  "source_id": "s2"
+ },
+ {
+  "id": "licitatia-alerts",
+  "competitor_id": "licitatia",
+  "competitor": "Licitatia.ro",
+  "feature": "alerts",
+  "feature_label": "E-posta uyarısı",
+  "level": "Var",
+  "note": "Günlük e-posta uyarısı",
+  "source_id": "s3"
+ },
+ {
+  "id": "licitatia-filters",
+  "competitor_id": "licitatia",
+  "competitor": "Licitatia.ro",
+  "feature": "filters",
+  "feature_label": "CPV/il/değer filtresi",
+  "level": "Var",
+  "note": "Anahtar kelime/ID, CPV alanı",
+  "source_id": "s3"
+ },
+ {
+  "id": "licitatia-summary",
+  "competitor_id": "licitatia",
+  "competitor": "Licitatia.ro",
+  "feature": "summary",
+  "feature_label": "AI özet",
+  "level": "Kısmi",
+  "note": "'AI search' ve 'AI monitoring' listelenmiş, özet belirtilmemiş",
+  "source_id": "s3"
+ },
+ {
+  "id": "licitatia-eligibility",
+  "competitor_id": "licitatia",
+  "competitor": "Licitatia.ro",
+  "feature": "eligibility",
+  "feature_label": "AI yeterlilik kontrolü",
+  "level": "Yok",
+  "note": "Sayfada bulunamadı",
+  "source_id": "s3"
+ },
+ {
+  "id": "licitatia-draft",
+  "competitor_id": "licitatia",
+  "competitor": "Licitatia.ro",
+  "feature": "draft",
+  "feature_label": "Teklif/DUAE taslağı",
+  "level": "Yok",
+  "note": "Yazılım yok; 'Pregătire dosare' insan danışmanlığı",
+  "source_id": "s3"
+ },
+ {
+  "id": "licitatia-winners",
+  "competitor_id": "licitatia",
+  "competitor": "Licitatia.ro",
+  "feature": "winners",
+  "feature_label": "Önceki kazananlar",
+  "level": "Kısmi",
+  "note": "'Atribuiri' ihale türü olarak var, kazanan analizi belirtilmemiş",
+  "source_id": "s3"
+ },
+ {
+  "id": "licitatia-ocr",
+  "competitor_id": "licitatia",
+  "competitor": "Licitatia.ro",
+  "feature": "ocr",
+  "feature_label": "Taranmış PDF okuma",
+  "level": "Bilinmiyor",
+  "note": "'Document decryption' var, OCR belirtilmemiş",
+  "source_id": "s3"
+ },
+ {
+  "id": "licitatia-api",
+  "competitor_id": "licitatia",
+  "competitor": "Licitatia.ro",
+  "feature": "api",
+  "feature_label": "API / MCP",
+  "level": "Bilinmiyor",
+  "note": "Bulunamadı",
+  "source_id": "s3"
+ },
+ {
+  "id": "licitatiepublica-alerts",
+  "competitor_id": "licitatiepublica",
+  "competitor": "Licitatie-publica.ro",
+  "feature": "alerts",
+  "feature_label": "E-posta uyarısı",
+  "level": "Var",
+  "note": "E-posta uyarısı",
+  "source_id": "s4"
+ },
+ {
+  "id": "licitatiepublica-filters",
+  "competitor_id": "licitatiepublica",
+  "competitor": "Licitatie-publica.ro",
+  "feature": "filters",
+  "feature_label": "CPV/il/değer filtresi",
+  "level": "Var",
+  "note": "Anahtar kelime, CPV, konum",
+  "source_id": "s4"
+ },
+ {
+  "id": "licitatiepublica-summary",
+  "competitor_id": "licitatiepublica",
+  "competitor": "Licitatie-publica.ro",
+  "feature": "summary",
+  "feature_label": "AI özet",
+  "level": "Var",
+  "note": "AI özet ve açıklamalar",
+  "source_id": "s4"
+ },
+ {
+  "id": "licitatiepublica-eligibility",
+  "competitor_id": "licitatiepublica",
+  "competitor": "Licitatie-publica.ro",
+  "feature": "eligibility",
+  "feature_label": "AI yeterlilik kontrolü",
+  "level": "Var",
+  "note": "'Asistent AI Licitatii' yeterlilik kriterlerini kontrol eder",
+  "source_id": "s4"
+ },
+ {
+  "id": "licitatiepublica-draft",
+  "competitor_id": "licitatiepublica",
+  "competitor": "Licitatie-publica.ro",
+  "feature": "draft",
+  "feature_label": "Teklif/DUAE taslağı",
+  "level": "Yok",
+  "note": "Danışmanlık sunuyor, yazılım taslağı belirtilmemiş",
+  "source_id": "s4"
+ },
+ {
+  "id": "licitatiepublica-winners",
+  "competitor_id": "licitatiepublica",
+  "competitor": "Licitatie-publica.ro",
+  "feature": "winners",
+  "feature_label": "Önceki kazananlar",
+  "level": "Var",
+  "note": "Benzer ihaleleri kim hangi fiyata kazandı",
+  "source_id": "s4"
+ },
+ {
+  "id": "licitatiepublica-ocr",
+  "competitor_id": "licitatiepublica",
+  "competitor": "Licitatie-publica.ro",
+  "feature": "ocr",
+  "feature_label": "Taranmış PDF okuma",
+  "level": "Bilinmiyor",
+  "note": "Bulunamadı",
+  "source_id": "s4"
+ },
+ {
+  "id": "licitatiepublica-api",
+  "competitor_id": "licitatiepublica",
+  "competitor": "Licitatie-publica.ro",
+  "feature": "api",
+  "feature_label": "API / MCP",
+  "level": "Var",
+  "note": "API var",
+  "source_id": "s4"
+ },
+ {
+  "id": "jorpex-alerts",
+  "competitor_id": "jorpex",
+  "competitor": "Jorpex",
+  "feature": "alerts",
+  "feature_label": "E-posta uyarısı",
+  "level": "Var",
+  "note": "Slack/e-posta/Teams, gerçek zamanlı",
+  "source_id": "s5"
+ },
+ {
+  "id": "jorpex-filters",
+  "competitor_id": "jorpex",
+  "competitor": "Jorpex",
+  "feature": "filters",
+  "feature_label": "CPV/il/değer filtresi",
+  "level": "Var",
+  "note": "Sektör, bölge, değer aralığı",
+  "source_id": "s5"
+ },
+ {
+  "id": "jorpex-summary",
+  "competitor_id": "jorpex",
+  "competitor": "Jorpex",
+  "feature": "summary",
+  "feature_label": "AI özet",
+  "level": "Kısmi",
+  "note": "'AI-matched alerts'",
+  "source_id": "s5"
+ },
+ {
+  "id": "jorpex-eligibility",
+  "competitor_id": "jorpex",
+  "competitor": "Jorpex",
+  "feature": "eligibility",
+  "feature_label": "AI yeterlilik kontrolü",
+  "level": "Yok",
+  "note": "Bulunamadı",
+  "source_id": "s5"
+ },
+ {
+  "id": "jorpex-draft",
+  "competitor_id": "jorpex",
+  "competitor": "Jorpex",
+  "feature": "draft",
+  "feature_label": "Teklif/DUAE taslağı",
+  "level": "Yok",
+  "note": "Bulunamadı",
+  "source_id": "s5"
+ },
+ {
+  "id": "jorpex-winners",
+  "competitor_id": "jorpex",
+  "competitor": "Jorpex",
+  "feature": "winners",
+  "feature_label": "Önceki kazananlar",
+  "level": "Yok",
+  "note": "Bulunamadı",
+  "source_id": "s5"
+ },
+ {
+  "id": "jorpex-ocr",
+  "competitor_id": "jorpex",
+  "competitor": "Jorpex",
+  "feature": "ocr",
+  "feature_label": "Taranmış PDF okuma",
+  "level": "Bilinmiyor",
+  "note": "Bulunamadı",
+  "source_id": "s5"
+ },
+ {
+  "id": "jorpex-api",
+  "competitor_id": "jorpex",
+  "competitor": "Jorpex",
+  "feature": "api",
+  "feature_label": "API / MCP",
+  "level": "Bilinmiyor",
+  "note": "Bulunamadı",
+  "source_id": "s5"
+ },
+ {
+  "id": "sicapai-alerts",
+  "competitor_id": "sicapai",
+  "competitor": "sicap.ai",
+  "feature": "alerts",
+  "feature_label": "E-posta uyarısı",
+  "level": "Yok",
+  "note": "Apify tablosunda e-posta uyarısı yok (ikinci el)",
+  "source_id": "s6"
+ },
+ {
+  "id": "sicapai-filters",
+  "competitor_id": "sicapai",
+  "competitor": "sicap.ai",
+  "feature": "filters",
+  "feature_label": "CPV/il/değer filtresi",
+  "level": "Bilinmiyor",
+  "note": "Bulunamadı",
+  "source_id": "s6"
+ },
+ {
+  "id": "sicapai-summary",
+  "competitor_id": "sicapai",
+  "competitor": "sicap.ai",
+  "feature": "summary",
+  "feature_label": "AI özet",
+  "level": "Bilinmiyor",
+  "note": "Bulunamadı",
+  "source_id": "s6"
+ },
+ {
+  "id": "sicapai-eligibility",
+  "competitor_id": "sicapai",
+  "competitor": "sicap.ai",
+  "feature": "eligibility",
+  "feature_label": "AI yeterlilik kontrolü",
+  "level": "Bilinmiyor",
+  "note": "Bulunamadı",
+  "source_id": "s6"
+ },
+ {
+  "id": "sicapai-draft",
+  "competitor_id": "sicapai",
+  "competitor": "sicap.ai",
+  "feature": "draft",
+  "feature_label": "Teklif/DUAE taslağı",
+  "level": "Bilinmiyor",
+  "note": "Bulunamadı",
+  "source_id": "s6"
+ },
+ {
+  "id": "sicapai-winners",
+  "competitor_id": "sicapai",
+  "competitor": "sicap.ai",
+  "feature": "winners",
+  "feature_label": "Önceki kazananlar",
+  "level": "Var",
+  "note": "Arayüzde kazanan bilgisi (ikinci el)",
+  "source_id": "s6"
+ },
+ {
+  "id": "sicapai-ocr",
+  "competitor_id": "sicapai",
+  "competitor": "sicap.ai",
+  "feature": "ocr",
+  "feature_label": "Taranmış PDF okuma",
+  "level": "Bilinmiyor",
+  "note": "Bulunamadı",
+  "source_id": "s6"
+ },
+ {
+  "id": "sicapai-api",
+  "competitor_id": "sicapai",
+  "competitor": "sicap.ai",
+  "feature": "api",
+  "feature_label": "API / MCP",
+  "level": "Yok",
+  "note": "Kamu API yok (ikinci el)",
+  "source_id": "s6"
+ },
+ {
+  "id": "sicappro-alerts",
+  "competitor_id": "sicappro",
+  "competitor": "sicap.pro",
+  "feature": "alerts",
+  "feature_label": "E-posta uyarısı",
+  "level": "Var",
+  "note": "E-posta uyarısı (ikinci el)",
+  "source_id": "s6"
+ },
+ {
+  "id": "sicappro-filters",
+  "competitor_id": "sicappro",
+  "competitor": "sicap.pro",
+  "feature": "filters",
+  "feature_label": "CPV/il/değer filtresi",
+  "level": "Bilinmiyor",
+  "note": "Bulunamadı",
+  "source_id": "s6"
+ },
+ {
+  "id": "sicappro-summary",
+  "competitor_id": "sicappro",
+  "competitor": "sicap.pro",
+  "feature": "summary",
+  "feature_label": "AI özet",
+  "level": "Bilinmiyor",
+  "note": "Bulunamadı",
+  "source_id": "s6"
+ },
+ {
+  "id": "sicappro-eligibility",
+  "competitor_id": "sicappro",
+  "competitor": "sicap.pro",
+  "feature": "eligibility",
+  "feature_label": "AI yeterlilik kontrolü",
+  "level": "Bilinmiyor",
+  "note": "Bulunamadı",
+  "source_id": "s6"
+ },
+ {
+  "id": "sicappro-draft",
+  "competitor_id": "sicappro",
+  "competitor": "sicap.pro",
+  "feature": "draft",
+  "feature_label": "Teklif/DUAE taslağı",
+  "level": "Bilinmiyor",
+  "note": "Bulunamadı",
+  "source_id": "s6"
+ },
+ {
+  "id": "sicappro-winners",
+  "competitor_id": "sicappro",
+  "competitor": "sicap.pro",
+  "feature": "winners",
+  "feature_label": "Önceki kazananlar",
+  "level": "Var",
+  "note": "Arayüzde kazanan bilgisi (ikinci el)",
+  "source_id": "s6"
+ },
+ {
+  "id": "sicappro-ocr",
+  "competitor_id": "sicappro",
+  "competitor": "sicap.pro",
+  "feature": "ocr",
+  "feature_label": "Taranmış PDF okuma",
+  "level": "Bilinmiyor",
+  "note": "Bulunamadı",
+  "source_id": "s6"
+ },
+ {
+  "id": "sicappro-api",
+  "competitor_id": "sicappro",
+  "competitor": "sicap.pro",
+  "feature": "api",
+  "feature_label": "API / MCP",
+  "level": "Yok",
+  "note": "Kamu API yok, dışa aktarma sınırlı (ikinci el)",
+  "source_id": "s6"
+ }
+]
