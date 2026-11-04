@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Tender Copilot API",
-    "description": "Multi-country public-procurement copilot backend. Only Romania/SEAP is implemented so far — see the repo README for the adapter architecture. Every /api/* call except /api/auth/* needs an `Authorization: Bearer <JWT>` header; mint one via /api/auth/demo (one click) or /api/auth/google/login. Data is multi-tenant: every login owns its companies via onboarding. POST /internal/sync-tenders is the cron-triggered incremental sync (X-Sync-Token, not JWT). Breaking changes vs 0.5.0 are listed in API_CHANGES.md.",
+    "description": "Multi-country public-procurement copilot backend. Only Romania/SEAP is implemented so far — see the repo README for the adapter architecture. Every /api/* call except /api/auth/* needs an `Authorization: Bearer <JWT>` header; mint one via /api/auth/demo (one click) or /api/auth/google/login. Data is multi-tenant: every login owns its companies via onboarding. POST /internal/sync-tenders is the cron-triggered incremental sync (X-Sync-Token, not JWT). /api/v1/* (read-only REST) and /api/mcp (MCP server for AI assistants) take an API key instead: `Authorization: Bearer ofk_…`, created under /api/api-keys. Breaking changes vs 0.5.0 are listed in API_CHANGES.md.",
     "version": "0.6.0"
   },
   "paths": {
@@ -110,7 +110,7 @@
           "auth"
         ],
         "summary": "Demo Login",
-        "description": "Zero-friction demo entry: mints the fixed demo user's long-lived\ntoken and hands it to the frontend — no Google account needed.",
+        "description": "Zero-friction demo entry: mints the fixed demo user's long-lived\ntoken and hands it to the frontend — no Google account needed. Local\nruns only: a deployed API answers 404 (see core.auth.demo_login_enabled).",
         "operationId": "demo_login_api_auth_demo_get",
         "responses": {
           "200": {
@@ -150,6 +150,78 @@
             "HTTPBearer": []
           }
         ]
+      }
+    },
+    "/api/public/vat": {
+      "get": {
+        "tags": [
+          "public"
+        ],
+        "summary": "Vat Info",
+        "description": "The standard VAT rate in force today (kept in core/tax.py).",
+        "operationId": "vat_info_api_public_vat_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VatInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public/map-tenders": {
+      "get": {
+        "tags": [
+          "public"
+        ],
+        "summary": "Map Tenders",
+        "description": "The newest open construction notice (CPV 45) of each county. A county\nkeeps its notice until a newer one replaces it or its deadline passes, so\nquiet days (weekends) do not empty the map; `hours` only bounds the lookback.",
+        "operationId": "map_tenders_api_public_map_tenders_get",
+        "parameters": [
+          {
+            "name": "hours",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1440,
+              "minimum": 1,
+              "default": 720,
+              "title": "Hours"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MapTender"
+                  },
+                  "title": "Response Map Tenders Api Public Map Tenders Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/tenders": {
@@ -439,6 +511,218 @@
         }
       }
     },
+    "/api/tenders/{external_id}/agents/{agent}": {
+      "post": {
+        "tags": [
+          "tenders"
+        ],
+        "summary": "Run Bid Agent",
+        "description": "Run one of the five bid-preparation agents (spec, eligibility, legal,\nwriter, risk) and return its structured output. `spec` is tender-wide and\nkept; the others are made for the caller's company on every run.",
+        "operationId": "run_bid_agent_api_tenders__external_id__agents__agent__post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "external_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "External Id"
+            }
+          },
+          {
+            "name": "agent",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Run Bid Agent Api Tenders  External Id  Agents  Agent  Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/assistant/chat": {
+      "post": {
+        "tags": [
+          "assistant"
+        ],
+        "summary": "Assistant Chat",
+        "description": "The in-app assistant: an answer, optionally a page to open and an element to point at.",
+        "operationId": "assistant_chat_api_assistant_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistantRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/tenders/{external_id}/brief": {
+      "post": {
+        "tags": [
+          "tenders"
+        ],
+        "summary": "Brief Tender",
+        "description": "Detailed brief of one tender (scope, method, conditions, watch-outs),\nread from the notice and its specification once and kept. Slow on the\nfirst request; the field stays empty if the AI key is missing or the\nmodel fails.",
+        "operationId": "brief_tender_api_tenders__external_id__brief_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "external_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "External Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenderFeedItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tenders/{external_id}/translate": {
+      "post": {
+        "tags": [
+          "tenders"
+        ],
+        "summary": "Translate Tender",
+        "description": "English title + summary for one tender, made on first request and kept.\nReturns the tender as the detail endpoint does; fields stay empty when\nthe AI key is missing or the model fails (the page then falls back).",
+        "operationId": "translate_tender_api_tenders__external_id__translate_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "external_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "External Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenderFeedItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/tenders/{external_id}/authority-history": {
       "get": {
         "tags": [
@@ -470,6 +754,242 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AuthorityHistory"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tenders/{external_id}/price-hint": {
+      "get": {
+        "tags": [
+          "tenders"
+        ],
+        "summary": "Get Price Hint",
+        "description": "Past award prices for comparable work as % of the buyer's estimate.\nPublic award history only; descriptive, never a bid recommendation.",
+        "operationId": "get_price_hint_api_tenders__external_id__price_hint_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "external_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "External Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceHint"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tenders/{external_id}/renewal": {
+      "get": {
+        "tags": [
+          "tenders"
+        ],
+        "summary": "Get Renewal",
+        "description": "Whether this buyer re-tenders the same kind of work on a rhythm, and\n(Professional plan) the spread of its past award prices against estimate.",
+        "operationId": "get_renewal_api_tenders__external_id__renewal_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "external_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "External Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenewalInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/usage/past-winners": {
+      "get": {
+        "tags": [
+          "tenders"
+        ],
+        "summary": "Past Winners Quota",
+        "operationId": "past_winners_quota_api_usage_past_winners_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Quota"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/tenders/{external_id}/past-winners": {
+      "post": {
+        "tags": [
+          "tenders"
+        ],
+        "summary": "Past Winners",
+        "description": "Who won this buyer's last few contracts in the same CPV division, with\neach winner's latest ANAF turnover, profit and headcount. Costs one unit of\nthe monthly quota per distinct tender (a repeat lookup is free); nothing is\ncharged when there is nothing to show.",
+        "operationId": "past_winners_api_tenders__external_id__past_winners_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "external_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "External Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PastWinners"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/awards/won": {
+      "get": {
+        "tags": [
+          "companies"
+        ],
+        "summary": "Awards Won",
+        "description": "Contracts SEAP shows as awarded to a company (matched on its CUI), newest\nfirst. Public notice data, so it is not company-scoped; auth only gates the\ncaller. Used to prefill past experience in onboarding.",
+        "operationId": "awards_won_api_awards_won_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cui",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 14,
+              "title": "Cui"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 30,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WonContract"
+                  },
+                  "title": "Response Awards Won Api Awards Won Get"
                 }
               }
             }
@@ -1069,7 +1589,8 @@
                   "type": "array",
                   "items": {
                     "type": "string"
-                  }
+                  },
+                  "maxItems": 20
                 },
                 {
                   "type": "null"
@@ -1088,7 +1609,8 @@
                   "type": "array",
                   "items": {
                     "type": "string"
-                  }
+                  },
+                  "maxItems": 20
                 },
                 {
                   "type": "null"
@@ -1103,6 +1625,8 @@
             "required": false,
             "schema": {
               "type": "integer",
+              "maximum": 60,
+              "minimum": 1,
               "default": 30,
               "title": "Days"
             }
@@ -1884,6 +2408,1009 @@
         }
       }
     },
+    "/api/api-keys": {
+      "get": {
+        "tags": [
+          "api-keys"
+        ],
+        "summary": "List Keys",
+        "operationId": "list_keys_api_api_keys_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyList"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "api-keys"
+        ],
+        "summary": "Create Key",
+        "operationId": "create_key_api_api_keys_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiKeyCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyCreated"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/api-keys/{key_id}": {
+      "delete": {
+        "tags": [
+          "api-keys"
+        ],
+        "summary": "Revoke Key",
+        "operationId": "revoke_key_api_api_keys__key_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Key Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "tags": [
+          "public-api"
+        ],
+        "summary": "Me",
+        "description": "Who the key belongs to and how much of today's quota is used.",
+        "operationId": "me_api_v1_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Me Api V1 Me Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/profile": {
+      "get": {
+        "tags": [
+          "public-api"
+        ],
+        "summary": "Profile",
+        "description": "The saved filters (CPV codes, keywords, exclusions, capacity...) that rank tenders.",
+        "operationId": "profile_api_v1_profile_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Profile Api V1 Profile Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tenders": {
+      "get": {
+        "tags": [
+          "public-api"
+        ],
+        "summary": "Search Tenders",
+        "description": "Search tenders, best match for the key owner's profile first.",
+        "operationId": "search_tenders_api_v1_tenders_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Words to find in title, summary or authority",
+              "title": "Q"
+            },
+            "description": "Words to find in title, summary or authority"
+          },
+          {
+            "name": "county",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "County"
+            }
+          },
+          {
+            "name": "cpv",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "CPV code or division prefix, e.g. 45 or 45233",
+              "title": "Cpv"
+            },
+            "description": "CPV code or division prefix, e.g. 45 or 45233"
+          },
+          {
+            "name": "procedure_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Procedure Type"
+            }
+          },
+          {
+            "name": "min_value",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Value"
+            }
+          },
+          {
+            "name": "max_value",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Max Value"
+            }
+          },
+          {
+            "name": "min_score",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 100,
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Score"
+            }
+          },
+          {
+            "name": "eligible",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Eligible"
+            }
+          },
+          {
+            "name": "deadline_within_days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 365,
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Deadline Within Days"
+            }
+          },
+          {
+            "name": "min_days_left",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 365,
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Skip tenders closing sooner than this",
+              "title": "Min Days Left"
+            },
+            "description": "Skip tenders closing sooner than this"
+          },
+          {
+            "name": "include_closed",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Closed"
+            }
+          },
+          {
+            "name": "include_dismissed",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Dismissed"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "match",
+                "deadline",
+                "value"
+              ],
+              "type": "string",
+              "default": "match",
+              "title": "Sort"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 25,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Search Tenders Api V1 Tenders Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tenders/{tender_id}": {
+      "get": {
+        "tags": [
+          "public-api"
+        ],
+        "summary": "Get Tender",
+        "operationId": "get_tender_api_v1_tenders__tender_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tender_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tender Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Tender Api V1 Tenders  Tender Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/deadlines": {
+      "get": {
+        "tags": [
+          "public-api"
+        ],
+        "summary": "Deadlines",
+        "operationId": "deadlines_api_v1_deadlines_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "within_days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 365,
+              "minimum": 1,
+              "default": 14,
+              "title": "Within Days"
+            }
+          },
+          {
+            "name": "followed_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Followed Only"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 25,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Deadlines Api V1 Deadlines Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pipeline": {
+      "get": {
+        "tags": [
+          "public-api"
+        ],
+        "summary": "Pipeline",
+        "description": "The owner's own board: tenders marked preparing, applied, rejected...",
+        "operationId": "pipeline_api_v1_pipeline_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Pipeline Api V1 Pipeline Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/mcp": {
+      "get": {
+        "tags": [
+          "mcp"
+        ],
+        "summary": "Mcp Not Streamable",
+        "operationId": "mcp_not_streamable_api_mcp_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "mcp"
+        ],
+        "summary": "Mcp Endpoint",
+        "operationId": "mcp_endpoint_api_mcp_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Payload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "mcp"
+        ],
+        "summary": "Mcp Not Streamable",
+        "operationId": "mcp_not_streamable_api_mcp_delete",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/oauth/register": {
+      "post": {
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Register",
+        "operationId": "register_api_oauth_register_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/oauth/client": {
+      "get": {
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Client Info",
+        "description": "Name of the app asking for access, for the consent screen. 400 when\nthe app or redirect address is not registered.",
+        "operationId": "client_info_api_oauth_client_get",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Client Id"
+            }
+          },
+          {
+            "name": "redirect_uri",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Redirect Uri"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/oauth/authorize": {
+      "post": {
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Authorize",
+        "operationId": "authorize_api_oauth_authorize_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorizeBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorizeResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/oauth/token": {
+      "get": {
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Token Get",
+        "operationId": "token_get_api_oauth_token_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Token",
+        "operationId": "token_api_oauth_token_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/oauth/revoke": {
+      "post": {
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Revoke",
+        "operationId": "revoke_api_oauth_revoke_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/oauth-protected-resource/{resource_path}": {
+      "get": {
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Protected Resource",
+        "operationId": "protected_resource__well_known_oauth_protected_resource__resource_path__get",
+        "parameters": [
+          {
+            "name": "resource_path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Resource Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/oauth-protected-resource": {
+      "get": {
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Protected Resource",
+        "operationId": "protected_resource__well_known_oauth_protected_resource_get",
+        "parameters": [
+          {
+            "name": "resource_path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "api/mcp",
+              "title": "Resource Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/oauth-authorization-server/{issuer_path}": {
+      "get": {
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Authorization Server",
+        "operationId": "authorization_server__well_known_oauth_authorization_server__issuer_path__get",
+        "parameters": [
+          {
+            "name": "issuer_path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Issuer Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/oauth-authorization-server": {
+      "get": {
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Authorization Server",
+        "operationId": "authorization_server__well_known_oauth_authorization_server_get",
+        "parameters": [
+          {
+            "name": "issuer_path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Issuer Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/internal/sync-tenders": {
       "post": {
         "tags": [
@@ -1988,6 +3515,908 @@
         }
       }
     },
+    "/internal/translate-tenders": {
+      "post": {
+        "tags": [
+          "internal"
+        ],
+        "summary": "Translate Tenders",
+        "description": "English titles/summaries for tenders that have none (deadline-nearest first).",
+        "operationId": "translate_tenders_internal_translate_tenders_post",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 300,
+              "default": 40,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "max_seconds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 600,
+              "default": 150,
+              "title": "Max Seconds"
+            }
+          },
+          {
+            "name": "x-sync-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Sync-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Translate Tenders Internal Translate Tenders Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/internal/brief-tenders": {
+      "post": {
+        "tags": [
+          "internal"
+        ],
+        "summary": "Brief Tenders",
+        "description": "Detailed briefs for the open construction tenders that matter most (a few per run).",
+        "operationId": "brief_tenders_internal_brief_tenders_post",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 40,
+              "default": 10,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "max_seconds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 280,
+              "default": 200,
+              "title": "Max Seconds"
+            }
+          },
+          {
+            "name": "x-sync-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Sync-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Brief Tenders Internal Brief Tenders Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/internal/send-test-email": {
+      "post": {
+        "tags": [
+          "internal"
+        ],
+        "summary": "Send Test Email",
+        "description": "Send one test message to check the mail setup (SMTP or Resend).",
+        "operationId": "send_test_email_internal_send_test_email_post",
+        "parameters": [
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 5,
+              "maxLength": 200,
+              "title": "To"
+            }
+          },
+          {
+            "name": "x-sync-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Sync-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Send Test Email Internal Send Test Email Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/internal/send-reminders": {
+      "post": {
+        "tags": [
+          "internal"
+        ],
+        "summary": "Send Reminders",
+        "description": "E-mail deadline reminders for the tenders users track (once per tender).",
+        "operationId": "send_reminders_internal_send_reminders_post",
+        "parameters": [
+          {
+            "name": "dry_run",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Dry Run"
+            }
+          },
+          {
+            "name": "x-sync-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Sync-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Send Reminders Internal Send Reminders Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/internal/ai-usage": {
+      "get": {
+        "tags": [
+          "internal"
+        ],
+        "summary": "Ai Usage",
+        "description": "Measured model usage by purpose over the last `days`: calls, tokens, and\nthe cost at Muse Wonder prices ($4 in / $0.20 cached in / $20 out per 1M;\noutput includes reasoning). The per-call averages replace the estimates in\nthe cost report.",
+        "operationId": "ai_usage_internal_ai_usage_get",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 365,
+              "minimum": 1,
+              "default": 30,
+              "title": "Days"
+            }
+          },
+          {
+            "name": "x-sync-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Sync-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Ai Usage Internal Ai Usage Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/internal/diagnostics": {
+      "get": {
+        "tags": [
+          "internal"
+        ],
+        "summary": "Diagnostics",
+        "description": "Deployment check for the sync job (same X-Sync-Token): which database\nthe backend uses and whether it answers. Never returns the URL itself.",
+        "operationId": "diagnostics_internal_diagnostics_get",
+        "parameters": [
+          {
+            "name": "x-sync-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Sync-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Diagnostics Internal Diagnostics Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/sync-tenders": {
+      "post": {
+        "tags": [
+          "internal"
+        ],
+        "summary": "Sync Tenders",
+        "description": "Pull tenders (+ optionally awards) published since the last run.\nShort-lived and idempotent by design: the checkpoint advances per\ncompleted slice, caps/timeouts just defer the rest to the next run.",
+        "operationId": "sync_tenders_api_internal_sync_tenders_post",
+        "parameters": [
+          {
+            "name": "lookback_hours",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 168,
+              "default": 48,
+              "title": "Lookback Hours"
+            }
+          },
+          {
+            "name": "max_tenders",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 2000,
+              "default": 500,
+              "title": "Max Tenders"
+            }
+          },
+          {
+            "name": "include_awards",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Include Awards"
+            }
+          },
+          {
+            "name": "max_awards",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "default": 100,
+              "title": "Max Awards"
+            }
+          },
+          {
+            "name": "max_seconds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 900,
+              "default": 240,
+              "title": "Max Seconds"
+            }
+          },
+          {
+            "name": "x-sync-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Sync-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncReport"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/translate-tenders": {
+      "post": {
+        "tags": [
+          "internal"
+        ],
+        "summary": "Translate Tenders",
+        "description": "English titles/summaries for tenders that have none (deadline-nearest first).",
+        "operationId": "translate_tenders_api_internal_translate_tenders_post",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 300,
+              "default": 40,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "max_seconds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 600,
+              "default": 150,
+              "title": "Max Seconds"
+            }
+          },
+          {
+            "name": "x-sync-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Sync-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Translate Tenders Api Internal Translate Tenders Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/brief-tenders": {
+      "post": {
+        "tags": [
+          "internal"
+        ],
+        "summary": "Brief Tenders",
+        "description": "Detailed briefs for the open construction tenders that matter most (a few per run).",
+        "operationId": "brief_tenders_api_internal_brief_tenders_post",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 40,
+              "default": 10,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "max_seconds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 280,
+              "default": 200,
+              "title": "Max Seconds"
+            }
+          },
+          {
+            "name": "x-sync-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Sync-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Brief Tenders Api Internal Brief Tenders Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/send-test-email": {
+      "post": {
+        "tags": [
+          "internal"
+        ],
+        "summary": "Send Test Email",
+        "description": "Send one test message to check the mail setup (SMTP or Resend).",
+        "operationId": "send_test_email_api_internal_send_test_email_post",
+        "parameters": [
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 5,
+              "maxLength": 200,
+              "title": "To"
+            }
+          },
+          {
+            "name": "x-sync-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Sync-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Send Test Email Api Internal Send Test Email Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/send-reminders": {
+      "post": {
+        "tags": [
+          "internal"
+        ],
+        "summary": "Send Reminders",
+        "description": "E-mail deadline reminders for the tenders users track (once per tender).",
+        "operationId": "send_reminders_api_internal_send_reminders_post",
+        "parameters": [
+          {
+            "name": "dry_run",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Dry Run"
+            }
+          },
+          {
+            "name": "x-sync-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Sync-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Send Reminders Api Internal Send Reminders Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/ai-usage": {
+      "get": {
+        "tags": [
+          "internal"
+        ],
+        "summary": "Ai Usage",
+        "description": "Measured model usage by purpose over the last `days`: calls, tokens, and\nthe cost at Muse Wonder prices ($4 in / $0.20 cached in / $20 out per 1M;\noutput includes reasoning). The per-call averages replace the estimates in\nthe cost report.",
+        "operationId": "ai_usage_api_internal_ai_usage_get",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 365,
+              "minimum": 1,
+              "default": 30,
+              "title": "Days"
+            }
+          },
+          {
+            "name": "x-sync-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Sync-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Ai Usage Api Internal Ai Usage Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/diagnostics": {
+      "get": {
+        "tags": [
+          "internal"
+        ],
+        "summary": "Diagnostics",
+        "description": "Deployment check for the sync job (same X-Sync-Token): which database\nthe backend uses and whether it answers. Never returns the URL itself.",
+        "operationId": "diagnostics_api_internal_diagnostics_get",
+        "parameters": [
+          {
+            "name": "x-sync-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Sync-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Diagnostics Api Internal Diagnostics Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Api Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "Health",
@@ -2011,6 +4440,310 @@
   },
   "components": {
     "schemas": {
+      "AgentRequest": {
+        "properties": {
+          "company_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Id"
+          },
+          "evidence": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence",
+            "default": []
+          },
+          "context": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Context",
+            "default": {}
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "default": "en"
+          }
+        },
+        "type": "object",
+        "title": "AgentRequest"
+      },
+      "ApiKeyCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "company_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Id"
+          },
+          "expires_in_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 730.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires In Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ApiKeyCreate"
+      },
+      "ApiKeyCreated": {
+        "properties": {
+          "key": {
+            "$ref": "#/components/schemas/ApiKeyView"
+          },
+          "secret": {
+            "type": "string",
+            "title": "Secret"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "secret"
+        ],
+        "title": "ApiKeyCreated"
+      },
+      "ApiKeyList": {
+        "properties": {
+          "keys": {
+            "items": {
+              "$ref": "#/components/schemas/ApiKeyView"
+            },
+            "type": "array",
+            "title": "Keys"
+          },
+          "max_keys": {
+            "type": "integer",
+            "title": "Max Keys"
+          },
+          "daily_limit": {
+            "type": "integer",
+            "title": "Daily Limit"
+          },
+          "used_today": {
+            "type": "integer",
+            "title": "Used Today"
+          }
+        },
+        "type": "object",
+        "required": [
+          "keys",
+          "max_keys",
+          "daily_limit",
+          "used_today"
+        ],
+        "title": "ApiKeyList"
+      },
+      "ApiKeyView": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "prefix": {
+            "type": "string",
+            "title": "Prefix"
+          },
+          "company_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "connected_app": {
+            "type": "boolean",
+            "title": "Connected App",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "prefix",
+          "company_id",
+          "created_at",
+          "last_used_at",
+          "expires_at"
+        ],
+        "title": "ApiKeyView"
+      },
+      "AssistantRequest": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          },
+          "pathname": {
+            "type": "string",
+            "title": "Pathname",
+            "default": "/app"
+          },
+          "tenderId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenderid"
+          },
+          "dom": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Dom",
+            "default": []
+          },
+          "history": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "History",
+            "default": []
+          },
+          "doc": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Doc"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "title": "AssistantRequest"
+      },
+      "AssistantResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "highlight_selector": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Highlight Selector"
+          },
+          "navigate_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Navigate To"
+          },
+          "agent": {
+            "type": "string",
+            "title": "Agent",
+            "default": "spec"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Revision"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "AssistantResponse"
+      },
       "AuthorityAwards": {
         "properties": {
           "count": {
@@ -2197,6 +4930,80 @@
         "type": "object",
         "title": "AuthorizationPatch"
       },
+      "AuthorizeBody": {
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "title": "Client Id"
+          },
+          "redirect_uri": {
+            "type": "string",
+            "title": "Redirect Uri"
+          },
+          "response_type": {
+            "type": "string",
+            "title": "Response Type",
+            "default": "code"
+          },
+          "code_challenge": {
+            "type": "string",
+            "title": "Code Challenge",
+            "default": ""
+          },
+          "code_challenge_method": {
+            "type": "string",
+            "title": "Code Challenge Method",
+            "default": ""
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "default": ""
+          },
+          "approve": {
+            "type": "boolean",
+            "title": "Approve"
+          }
+        },
+        "type": "object",
+        "required": [
+          "client_id",
+          "redirect_uri",
+          "approve"
+        ],
+        "title": "AuthorizeBody"
+      },
+      "AuthorizeResult": {
+        "properties": {
+          "redirect_to": {
+            "type": "string",
+            "title": "Redirect To"
+          }
+        },
+        "type": "object",
+        "required": [
+          "redirect_to"
+        ],
+        "title": "AuthorizeResult"
+      },
+      "ClientInfo": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "default": "tenders.read"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ClientInfo"
+      },
       "CompanyDetail": {
         "properties": {
           "id": {
@@ -2351,6 +5158,57 @@
             },
             "type": "array",
             "title": "Keywords"
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website"
+          },
+          "subsectors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Subsectors"
+          },
+          "annual_capacity_currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Annual Capacity Currency"
+          },
+          "team_eu_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Eu Count"
+          },
+          "team_non_eu_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Non Eu Count"
           }
         },
         "type": "object",
@@ -2372,7 +5230,12 @@
           "similar_experience_currency",
           "similar_experience_contract_count",
           "target_countries",
-          "keywords"
+          "keywords",
+          "website",
+          "subsectors",
+          "annual_capacity_currency",
+          "team_eu_count",
+          "team_non_eu_count"
         ],
         "title": "CompanyDetail",
         "description": "Full company profile for the onboarding wizard and profile screens.\nA superset of the frontend's CompanyProfile — extra keys are ignored\nby TS structural typing, so this stays contract-compatible."
@@ -2636,6 +5499,64 @@
               }
             ],
             "title": "Keywords"
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website"
+          },
+          "subsectors": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subsectors"
+          },
+          "annual_capacity_currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Annual Capacity Currency"
+          },
+          "team_eu_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Eu Count"
+          },
+          "team_non_eu_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Non Eu Count"
           }
         },
         "type": "object",
@@ -2810,6 +5731,57 @@
               }
             ],
             "title": "Similar Experience Contract Count"
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website"
+          },
+          "subsectors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Subsectors"
+          },
+          "annual_capacity_currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Annual Capacity Currency"
+          },
+          "team_eu_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Eu Count"
+          },
+          "team_non_eu_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Non Eu Count"
           }
         },
         "type": "object",
@@ -3014,6 +5986,64 @@
         ],
         "title": "KeywordOption"
       },
+      "MapTender": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "county": {
+            "type": "string",
+            "title": "County"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Published At"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "county",
+          "value",
+          "currency",
+          "published_at",
+          "url"
+        ],
+        "title": "MapTender"
+      },
       "OcrJobResponse": {
         "properties": {
           "job_id": {
@@ -3135,6 +6165,273 @@
         ],
         "title": "OnboardingStatus"
       },
+      "PastWinner": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "awarded_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Awarded On"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "winner_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Winner Name"
+          },
+          "winner_cui": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Winner Cui"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "figures": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WinnerFigures"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "awarded_on",
+          "value",
+          "currency",
+          "winner_name",
+          "winner_cui",
+          "url",
+          "figures"
+        ],
+        "title": "PastWinner"
+      },
+      "PastWinners": {
+        "properties": {
+          "authority": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Authority"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WinnersSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PastWinner"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "quota": {
+            "$ref": "#/components/schemas/Quota"
+          },
+          "charged": {
+            "type": "boolean",
+            "title": "Charged"
+          }
+        },
+        "type": "object",
+        "required": [
+          "authority",
+          "summary",
+          "items",
+          "quota",
+          "charged"
+        ],
+        "title": "PastWinners"
+      },
+      "PriceHint": {
+        "properties": {
+          "buyer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PriceRange"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "market": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PriceRange"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "locked": {
+            "type": "boolean",
+            "title": "Locked"
+          }
+        },
+        "type": "object",
+        "required": [
+          "buyer",
+          "market",
+          "locked"
+        ],
+        "title": "PriceHint"
+      },
+      "PriceRange": {
+        "properties": {
+          "sample_size": {
+            "type": "integer",
+            "title": "Sample Size"
+          },
+          "low_pct": {
+            "type": "number",
+            "title": "Low Pct"
+          },
+          "median_pct": {
+            "type": "number",
+            "title": "Median Pct"
+          },
+          "high_pct": {
+            "type": "number",
+            "title": "High Pct"
+          },
+          "cpv_prefix": {
+            "type": "string",
+            "title": "Cpv Prefix"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sample_size",
+          "low_pct",
+          "median_pct",
+          "high_pct",
+          "cpv_prefix"
+        ],
+        "title": "PriceRange",
+        "description": "Past awards of this buyer for comparable work, as % of its own estimate\n(negative = awarded below the estimate). Descriptive history, not advice."
+      },
+      "Quota": {
+        "properties": {
+          "used": {
+            "type": "integer",
+            "title": "Used"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "used",
+          "limit"
+        ],
+        "title": "Quota"
+      },
+      "RenewalInfo": {
+        "properties": {
+          "renewal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RenewalPattern"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "price_range": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PriceRange"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "price_locked": {
+            "type": "boolean",
+            "title": "Price Locked"
+          }
+        },
+        "type": "object",
+        "required": [
+          "renewal",
+          "price_range",
+          "price_locked"
+        ],
+        "title": "RenewalInfo"
+      },
       "RenewalPattern": {
         "properties": {
           "detected": {
@@ -3195,6 +6492,29 @@
         ],
         "title": "RenewalPattern",
         "description": "Recurrence guess for one tender (detail only — the feed leaves it\nnull to avoid N+1 sibling queries). next_expected_date is an explicitly\nlabeled estimate (see `note`), never a promise."
+      },
+      "Revision": {
+        "properties": {
+          "target": {
+            "type": "string",
+            "title": "Target",
+            "default": ""
+          },
+          "before": {
+            "type": "string",
+            "title": "Before",
+            "default": ""
+          },
+          "after": {
+            "type": "string",
+            "title": "After"
+          }
+        },
+        "type": "object",
+        "required": [
+          "after"
+        ],
+        "title": "Revision"
       },
       "ScoreJobResponse": {
         "properties": {
@@ -3517,6 +6837,17 @@
             ],
             "title": "Ai Title Simplified"
           },
+          "summary_en": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary En"
+          },
           "extracted_requirements": {
             "anyOf": [
               {
@@ -3539,6 +6870,30 @@
               }
             ],
             "title": "Extraction Confidence"
+          },
+          "brief": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brief"
+          },
+          "spec": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spec"
           },
           "first_seen_at": {
             "type": "string",
@@ -3688,6 +7043,18 @@
                 "type": "null"
               }
             ]
+          },
+          "brief": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brief"
           }
         },
         "type": "object",
@@ -3753,6 +7120,17 @@
               }
             ],
             "title": "Ai Title Simplified"
+          },
+          "summary_en": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary En"
           },
           "extracted_requirements": {
             "items": {
@@ -3826,6 +7204,7 @@
           "score_reasons",
           "ai_summary",
           "ai_title_simplified",
+          "summary_en",
           "extracted_requirements",
           "eligible",
           "country_authorization_status",
@@ -4150,6 +7529,29 @@
         ],
         "title": "TenderWithStatePage"
       },
+      "TopWinner": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "wins": {
+            "type": "integer",
+            "title": "Wins"
+          },
+          "total_value": {
+            "type": "number",
+            "title": "Total Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "wins",
+          "total_value"
+        ],
+        "title": "TopWinner"
+      },
       "UserTenderState": {
         "properties": {
           "id": {
@@ -4308,6 +7710,194 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VatInfo": {
+        "properties": {
+          "rate": {
+            "type": "number",
+            "title": "Rate"
+          },
+          "effective_from": {
+            "type": "string",
+            "title": "Effective From"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rate",
+          "effective_from",
+          "source"
+        ],
+        "title": "VatInfo"
+      },
+      "WinnerFigures": {
+        "properties": {
+          "year": {
+            "type": "integer",
+            "title": "Year"
+          },
+          "turnover": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Turnover"
+          },
+          "net_profit": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Profit"
+          },
+          "employees": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Employees"
+          }
+        },
+        "type": "object",
+        "required": [
+          "year",
+          "turnover",
+          "net_profit",
+          "employees"
+        ],
+        "title": "WinnerFigures"
+      },
+      "WinnersSummary": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "total_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Value"
+          },
+          "top": {
+            "items": {
+              "$ref": "#/components/schemas/TopWinner"
+            },
+            "type": "array",
+            "title": "Top"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "total_value",
+          "top"
+        ],
+        "title": "WinnersSummary",
+        "description": "The buyer's whole award history in this CPV division, not just the last five."
+      },
+      "WonContract": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "contracting_authority": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contracting Authority"
+          },
+          "cpv_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cpv Codes"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "awarded_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Awarded On"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "contracting_authority",
+          "cpv_codes",
+          "value",
+          "currency",
+          "awarded_on",
+          "url"
+        ],
+        "title": "WonContract"
       }
     },
     "securitySchemes": {
