@@ -1279,5 +1279,17 @@
     "gpt3": "Accept the warning about custom servers, then sign in to Licits and press Allow.",
     "gpt4": "Start a chat and ask, for example: Find me the best open tenders for my company.",
     "gptNote": "Which plans can add a custom MCP server is decided by OpenAI and changes, so check your plan on their help page. Licits only reads, so it works with read-only access."
+  },
+  "aiTip": {
+    "title": "Ask your own AI about tenders",
+    "body": "Connect ChatGPT or Claude to Licits and ask for the tenders that fit your firm. Read only, and it takes a minute.",
+    "step1": "In ChatGPT or Claude, add a custom connector.",
+    "step2": "Paste the address below.",
+    "step3": "Sign in to Licits and press Allow.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "cta": "Show me how",
+    "later": "Not now",
+    "close": "Close"
   }
 }

@@ -1,6 +1,7 @@
 import { Sidebar } from '@/components/Sidebar';
 import { BlueprintGrid } from '@/components/BlueprintGrid';
 import { RequireOnboarding } from '@/components/RequireOnboarding';
+import { AiTipCard } from '@/components/AiTipCard';
 import { LanguageToggle } from '@/components/i18n/LanguageToggle';
 import { AssistantFab } from '@/components/assistant/AssistantFab';
 import { AssistantPanel } from '@/components/assistant/AssistantPanel';
@@ -16,7 +17,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <LanguageToggle />
         </div>
         <main className="relative z-10 mx-auto max-w-[1600px] px-margin py-space-lg lg:px-margin-desktop lg:pt-space-sm">
-          <RequireOnboarding>{children}</RequireOnboarding>
+          <RequireOnboarding>
+            {children}
+            <AiTipCard />
+          </RequireOnboarding>
         </main>
       </div>
       <AssistantFab />
