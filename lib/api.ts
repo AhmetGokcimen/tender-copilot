@@ -7,6 +7,7 @@
  * the wizard and settings stay consistent offline. Real mode attaches the
  * JWT from /auth/callback to every call.
  */
+import { logAiCalls } from './ai-log';
 import type {
   AuthMe,
   AuthorizationPatch,
@@ -57,6 +58,7 @@ async function get<T>(path: string): Promise<T> {
     cache: 'no-store',
     headers: { ...authHeaders() },
   });
+  logAiCalls(res, path);
   if (!res.ok) await fail('GET', path, res);
   return res.json() as Promise<T>;
 }
@@ -68,6 +70,7 @@ async function post<T>(path: string, body: unknown): Promise<T> {
     headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(body),
   });
+  logAiCalls(res, path);
   if (!res.ok) await fail('POST', path, res);
   return res.json() as Promise<T>;
 }
@@ -79,6 +82,7 @@ async function patch<T>(path: string, body: unknown): Promise<T> {
     headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(body),
   });
+  logAiCalls(res, path);
   if (!res.ok) await fail('PATCH', path, res);
   return res.json() as Promise<T>;
 }

@@ -45,6 +45,7 @@ app.add_middleware(
     allow_credentials="*" not in _origins,  # browsers reject "*" combined with credentials
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-AI-Trace"],
 )
 
 app.include_router(auth_router, prefix="/api")
@@ -106,7 +107,25 @@ async def _ready_before_request(request, call_next):
         from starlette.concurrency import run_in_threadpool
 
         await run_in_threadpool(ensure_ready)
-    return await call_next(request)
+    # Collect this request's AI calls and hand them to the browser console (see lib/ai-log.ts).
+    from backend.ai.client import ai_trace
+
+    calls: list = []
+    token = ai_trace.set(calls)
+    try:
+        response = await call_next(request)
+    finally:
+        ai_trace.reset(token)
+    if calls:
+        import json
+
+        raw = json.dumps(calls)  # ASCII-only, safe for a header
+        while len(raw) > 7000 and calls:
+            calls.pop()
+            raw = json.dumps(calls)
+        if calls:
+            response.headers["X-AI-Trace"] = raw
+    return response
 
 
 @app.exception_handler(Exception)
