@@ -6,6 +6,16 @@ They are merged here, history preserved below. The versioned contract is
 
 ---
 
+# Connector directory readiness (2026-11-03)
+
+Additive. Preparation for listing Licits in Claude's connectors directory: [docs/CONNECTOR_SUBMISSION.md](docs/CONNECTOR_SUBMISSION.md).
+
+- MCP `tools/list` now returns a `title` and `annotations.title` for every tool, plus `idempotentHint`.
+- `POST /api/mcp` rejects browser `Origin` values outside an allow-list (`403`); requests without `Origin` are unaffected. `MCP_ALLOWED_ORIGINS` (comma-separated hosts) adds more.
+- Public docs page `/{locale}/docs/mcp`; privacy notice section `connectors` and terms section `api`; AI assistant and API calls listed on every plan on the pricing page; landing section and FAQ entry.
+
+---
+
 # OAuth for the MCP server: claude.ai and ChatGPT (2026-11-03)
 
 Additive. Guide: [docs/API_AND_MCP.md](docs/API_AND_MCP.md#connecting-claudeai-and-chatgpt-oauth).

@@ -20,6 +20,7 @@ export function llmsIndex(): string {
     `- [Licits home (English)](${pageUrl('en')}): what Licits does and who it is for`,
     `- [Licits acasă (română)](${pageUrl('ro')}): ce face Licits și pentru cine este`,
     `- [Pricing](${pageUrl('en', '/pricing')}): plans and the two-week free start for the waitlist`,
+    `- [Connect an AI assistant](${pageUrl('en', '/docs/mcp')}): MCP server and read-only API for Claude, ChatGPT and Cursor`,
     `- [About](${pageUrl('en', '/about')}) / [Despre noi](${pageUrl('ro', '/about')}): why Licits exists and what it believes`,
     '',
     '## Guides for companies new to Romanian public tenders (English)',

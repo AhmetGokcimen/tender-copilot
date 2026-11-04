@@ -2,7 +2,7 @@
  "en": {
   "title": "Terms of use",
   "description": "The terms for using the Licits early-access pilot: who it is for, what it does and does not do, your content, acceptable use, and liability.",
-  "updated": "2026-10-31",
+  "updated": "2026-11-03",
   "intro": "These terms govern your use of licits.com and the Licits pilot. By creating an account or using Licits you accept them on behalf of your company. If you do not agree, please do not use Licits. Licits is an early-access pilot, so some things will change.",
   "sections": [
    {
@@ -69,6 +69,22 @@
     ]
    },
    {
+    "id": "api",
+    "h": "Connecting your own AI assistant or scripts",
+    "p": [
+     "You can connect an AI assistant or a script to your account with an API key or by signing in through OAuth. Access is read only, acts as your account and company, and is part of the plan you are on, within its daily limit (shown on the pricing page and in Settings)."
+    ],
+    "list": [
+     "Keep your keys private. You are responsible for what is done with your keys and with the apps you connect, as if you had done it yourself.",
+     "Disconnect an app or revoke a key in Settings if you no longer trust it. Do not share a key with people outside your organization.",
+     "Do not use the API or an assistant to copy tender data in bulk, to build a competing database or service, to resell access, or to get around the limits.",
+     "We may limit, suspend or revoke a key or a connection that is abused or puts the service at risk."
+    ],
+    "p2": [
+     "An assistant you connect is run by a third party under its own terms. What it says is its own output, not ours, and the duty to check everything before you rely on it applies to it in full. Tender text can contain instructions aimed at AI tools. Licits labels it as data but cannot control how your assistant treats it."
+    ]
+   },
+   {
     "id": "pilot",
     "h": "Pilot status and availability",
     "p": [
@@ -130,7 +146,7 @@
  "ro": {
   "title": "Termeni de utilizare",
   "description": "Termenii de utilizare a pilotului Licits în acces anticipat: pentru cine este, ce face și ce nu face, conținutul tău, utilizarea acceptabilă și răspunderea.",
-  "updated": "2026-10-31",
+  "updated": "2026-11-03",
   "intro": "Acești termeni reglementează utilizarea licits.com și a pilotului Licits. Prin crearea unui cont sau prin utilizarea Licits îi accepți în numele firmei tale. Dacă nu ești de acord, te rugăm să nu folosești Licits. Licits este un pilot în acces anticipat, deci unele lucruri se vor schimba.",
   "sections": [
    {
@@ -194,6 +210,22 @@
     ],
     "p2": [
      "Putem suspenda accesul dacă aceste reguli sunt încălcate sau dacă serviciul este pus în pericol."
+    ]
+   },
+   {
+    "id": "api",
+    "h": "Conectarea propriului asistent AI sau a unor scripturi",
+    "p": [
+     "Poți conecta un asistent AI sau un script la contul tău cu o cheie API sau autentificându-te prin OAuth. Accesul este doar pentru citire, acționează în numele contului și al firmei tale și face parte din planul tău, în limita zilnică a acestuia (afișată pe pagina de prețuri și în Setări)."
+    ],
+    "list": [
+     "Păstrează cheile private. Ești responsabil pentru ce se face cu cheile tale și cu aplicațiile conectate, ca și cum ai face tu însuți.",
+     "Deconectează o aplicație sau revocă o cheie din Setări dacă nu mai ai încredere în ea. Nu împărtăși o cheie cu persoane din afara organizației tale.",
+     "Nu folosi API-ul sau un asistent pentru a copia în masă date despre licitații, pentru a construi o bază de date sau un serviciu concurent, pentru a revinde accesul sau pentru a ocoli limitele.",
+     "Putem limita, suspenda sau revoca o cheie ori o conexiune care este folosită abuziv sau pune serviciul în pericol."
+    ],
+    "p2": [
+     "Un asistent pe care îl conectezi este operat de un terț, conform propriilor termeni. Ce spune el este rezultatul lui, nu al nostru, iar obligația de a verifica totul înainte să te bazezi pe el se aplică integral. Textul licitațiilor poate conține instrucțiuni adresate instrumentelor AI. Licits îl marchează ca date, dar nu poate controla cum îl tratează asistentul tău."
     ]
    },
    {

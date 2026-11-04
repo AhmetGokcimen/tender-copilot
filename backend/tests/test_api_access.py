@@ -425,3 +425,35 @@ def test_mcp_quota_counts_tool_calls(world, monkeypatch):
     assert _rpc(api, secret, "ping").status_code == 200
     assert _rpc(api, secret, "ping").status_code == 200
     assert _rpc(api, secret, "ping").status_code == 429
+
+
+def test_mcp_tools_have_titles_and_safety_annotations(world):
+    api, _ = world
+    secret = _make_key(api)["secret"]
+    for tool in _rpc(api, secret, "tools/list").json()["result"]["tools"]:
+        assert tool["title"] and tool["annotations"]["title"] == tool["title"]
+        assert tool["annotations"]["readOnlyHint"] is True and tool["annotations"]["destructiveHint"] is False
+
+
+@pytest.mark.parametrize(
+    ("origin", "status"),
+    [
+        (None, 200),  # CLIs and server-side connectors send no Origin
+        ("https://claude.ai", 200),
+        ("https://www.chatgpt.com", 200),
+        ("http://localhost:6274", 200),  # MCP Inspector
+        ("http://testserver", 200),  # our own host
+        ("https://evil.example", 403),
+        ("https://claude.ai.evil.example", 403),
+        ("https://notclaude.ai", 403),
+        ("null", 403),
+    ],
+)
+def test_mcp_checks_the_origin_header(world, origin, status):
+    api, _ = world
+    secret = _make_key(api)["secret"]
+    headers = {"Authorization": f"Bearer {secret}"}
+    if origin is not None:
+        headers["Origin"] = origin
+    res = api.post("/api/mcp", json={"jsonrpc": "2.0", "id": 1, "method": "ping"}, headers=headers)
+    assert res.status_code == status

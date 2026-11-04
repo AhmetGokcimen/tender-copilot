@@ -2,7 +2,7 @@
  "en": {
   "title": "Privacy notice",
   "description": "How Licits collects, uses and protects personal data and confidential company data, who it is shared with, and the rights you have.",
-  "updated": "2026-10-31",
+  "updated": "2026-11-03",
   "intro": "Licits helps Romanian construction companies find and prepare public tenders. To do that we handle company information, and some personal data. This notice explains what we collect, why, where it goes and what you can do about it. Licits is an early-access pilot, and this notice describes how the pilot works today.",
   "sections": [
    {
@@ -60,6 +60,13 @@
       "k": "Until you delete them or your account is closed."
      },
      {
+      "t": "API keys and connected apps",
+      "d": "The name you give a key, a one-way hash of the key (the key itself is shown once and is not stored), when it was made and last used, the number of calls per day, and for an AI assistant you connect, the app's name and a hash of its access tokens.",
+      "w": "To let you connect your own AI assistant or scripts, to apply the daily limit, and to let you disconnect them.",
+      "b": "Performing our agreement with you (Art. 6(1)(b)).",
+      "k": "Until you revoke the key or disconnect the app, or your account is closed."
+     },
+     {
       "t": "Technical data",
       "d": "IP address, browser type, pages requested and error details, held in the logs of our hosting and database providers.",
       "w": "To run the site, keep it secure and fix faults.",
@@ -109,6 +116,24 @@
     ]
    },
    {
+    "id": "connectors",
+    "h": "AI assistants you connect (API and MCP)",
+    "p": [
+     "You can connect your own AI assistant, such as Claude or ChatGPT, or a script to Licits, with an API key or by signing in through OAuth. This is optional and off until you set it up.",
+     "What a connected assistant can read: your saved filters and company summary (company name, industry, CPV codes, keywords, excluded keywords, target countries, capacity, turnover and certifications), tenders ranked for your profile with their public notice text, the details of a tender, your deadlines, and your tender board. It cannot change anything, create keys or send messages. It does not receive your uploaded documents, your drafts, your CUI or your contact details."
+    ],
+    "list": [
+     "Keys are shown once and stored only as a hash. Keep them private: anyone who has one can read what the assistant can read.",
+     "You can revoke a key or disconnect an app in Settings at any time, and it stops working at once.",
+     "We count calls per key and day to apply the limit. We do not keep the content of your assistant's requests or of our answers.",
+     "When you sign in through OAuth, the app registers with us, gets a one-time code after you allow it, and swaps it for short-lived tokens. We store only hashes of them."
+    ],
+    "p2": [
+     "Once Licits answers your assistant, the data is held by the company that runs the assistant, such as Anthropic or OpenAI, under its own terms and privacy policy. It is not our processor: you chose it, and we do not control what it does with the data. Check its settings, especially whether conversations are used to train models.",
+     "Tender titles and texts come from third parties and can contain instructions aimed at AI tools. Licits marks them as data, but please check what your assistant does with them."
+    ]
+   },
+   {
     "id": "recipients",
     "h": "Who we share data with",
     "p": [
@@ -121,6 +146,7 @@
      "Meta Platforms: the AI model described above.",
      "FormSubmit: forwards contact-form messages to our inbox. Your browser sends the message to FormSubmit, which emails it to us.",
      "Google: the icon font is loaded from Google Fonts, so your IP address is sent to Google when a page loads.",
+     "AI assistant providers you choose to connect, such as Anthropic or OpenAI: they receive what your assistant reads from Licits, only after you connect one.",
      "ANAF: when you enter a CUI, the CUI is sent to ANAF's public service to look up the company's registration details.",
      "Google Analytics: visitor statistics, only if you accept the analytics cookies. Google acts as our processor."
     ],
@@ -206,7 +232,7 @@
  "ro": {
   "title": "Notă de confidențialitate",
   "description": "Cum colectează, folosește și protejează Licits datele personale și datele confidențiale ale companiilor, cu cine le împarte și ce drepturi ai.",
-  "updated": "2026-10-31",
+  "updated": "2026-11-03",
   "intro": "Licits ajută firmele de construcții din România să găsească și să pregătească licitații publice. Pentru asta, prelucrăm informații despre companii și unele date personale. Această notă explică ce colectăm, de ce, unde ajung datele și ce poți face în legătură cu ele. Licits este un pilot în acces anticipat, iar nota descrie cum funcționează pilotul astăzi.",
   "sections": [
    {
@@ -264,6 +290,13 @@
       "k": "Până le ștergi sau până se închide contul."
      },
      {
+      "t": "Chei API și aplicații conectate",
+      "d": "Numele pe care îl dai unei chei, o amprentă ireversibilă a cheii (cheia în sine se afișează o singură dată și nu este stocată), când a fost creată și folosită ultima dată, numărul de apeluri pe zi și, pentru un asistent AI conectat, numele aplicației și o amprentă a token-urilor de acces.",
+      "w": "Ca să îți poți conecta propriul asistent AI sau scripturi, ca să aplicăm limita zilnică și ca să le poți deconecta.",
+      "b": "Executarea contractului cu tine (art. 6 alin. (1) lit. b).",
+      "k": "Până revoci cheia sau deconectezi aplicația, ori până se închide contul."
+     },
+     {
       "t": "Date tehnice",
       "d": "Adresa IP, tipul de browser, paginile cerute și detalii despre erori, păstrate în jurnalele furnizorilor noștri de găzduire și de bază de date.",
       "w": "Ca să rulăm site-ul, să îl ținem în siguranță și să remediem defecțiuni.",
@@ -313,6 +346,24 @@
     ]
    },
    {
+    "id": "connectors",
+    "h": "Asistenți AI pe care îi conectezi (API și MCP)",
+    "p": [
+     "Îți poți conecta la Licits propriul asistent AI, precum Claude sau ChatGPT, sau un script, cu o cheie API sau autentificându-te prin OAuth. Este opțional și oprit până îl configurezi.",
+     "Ce poate citi un asistent conectat: filtrele salvate și un rezumat al firmei (denumirea, domeniul, codurile CPV, cuvintele-cheie, cuvintele excluse, țările țintă, capacitatea, cifra de afaceri și certificările), licitații ordonate după profilul tău împreună cu textul public al anunțului, detaliile unei licitații, termenele și tabloul tău de licitații. Nu poate modifica nimic, nu poate crea chei și nu poate trimite mesaje. Nu primește documentele încărcate, ciornele, CUI-ul sau datele tale de contact."
+    ],
+    "list": [
+     "Cheile se afișează o singură dată și sunt stocate doar sub formă de amprentă. Păstrează-le private: oricine are una poate citi ce poate citi asistentul.",
+     "Poți revoca o cheie sau deconecta o aplicație oricând din Setări, iar acestea încetează să funcționeze imediat.",
+     "Numărăm apelurile pe cheie și pe zi pentru a aplica limita. Nu păstrăm conținutul cererilor asistentului tău și nici al răspunsurilor noastre.",
+     "Când te autentifici prin OAuth, aplicația se înregistrează la noi, primește un cod unic după ce o permiți și îl schimbă pe token-uri cu viață scurtă. Stocăm doar amprentele lor."
+    ],
+    "p2": [
+     "După ce Licits răspunde asistentului tău, datele ajung la compania care operează asistentul, de exemplu Anthropic sau OpenAI, conform propriilor termeni și politici de confidențialitate. Nu este persoana noastră împuternicită: tu l-ai ales, iar noi nu controlăm ce face cu datele. Verifică setările lui, mai ales dacă conversațiile sunt folosite pentru antrenarea modelelor.",
+     "Titlurile și textele licitațiilor provin de la terți și pot conține instrucțiuni adresate instrumentelor AI. Licits le marchează ca simple date, dar verifică ce face asistentul tău cu ele."
+    ]
+   },
+   {
     "id": "recipients",
     "h": "Cu cine împărtășim datele",
     "p": [
@@ -325,6 +376,7 @@
      "Meta Platforms: modelul AI descris mai sus.",
      "FormSubmit: transmite mesajele din formularul de contact în căsuța noastră. Browserul tău trimite mesajul către FormSubmit, care ni-l trimite prin email.",
      "Google: fontul de pictograme se încarcă din Google Fonts, deci adresa ta IP este trimisă către Google când se încarcă o pagină.",
+     "Furnizorii de asistenți AI pe care alegi să îi conectezi, precum Anthropic sau OpenAI: primesc ce citește asistentul tău din Licits, doar după ce conectezi unul.",
      "ANAF: când introduci un CUI, acesta este trimis serviciului public al ANAF pentru a obține datele de înregistrare ale firmei.",
      "Google Analytics: statistici despre vizitatori, doar dacă accepți cookie-urile de analiză. Google acționează ca persoană împuternicită a noastră."
     ],
