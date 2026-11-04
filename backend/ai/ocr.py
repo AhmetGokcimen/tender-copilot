@@ -11,6 +11,7 @@ pages carry 0-65 text chars plus a full-page image, while even the
 sparsest real text page carries 300+.
 """
 
+import asyncio
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Literal
@@ -28,6 +29,8 @@ TEXT_PAGE_MIN_CHARS = 100
 OCR_DPI = 150
 # Cost guard: a fully-scanned caiet longer than this gets truncated, honestly flagged.
 OCR_MAX_PAGES = 30
+# Vision calls in flight at once.
+OCR_CONCURRENCY = 4
 
 
 class OCRError(Exception):
@@ -98,8 +101,8 @@ async def extract_pdf_text(
     """Merge a PDF's text-layer pages with vision OCR of its scanned pages.
 
     `ocr_page` renders PNG -> transcription; the default uses the Meta
-    client (same provider/key as the other AI steps). Sequential on purpose:
-    predictable latency, no rate-limit bursts. Failures and page-cap skips
+    client (same provider/key as the other AI steps). Scanned pages are read
+    OCR_CONCURRENCY at a time. Failures and page-cap skips
     are recorded on the result, never raised — the caller decides whether
     partial text is enough.
     """
@@ -110,6 +113,7 @@ async def extract_pdf_text(
     errors: dict[int, str] = {}
     ocr_used = 0
     truncated = False
+    jobs: list[tuple[int, int, bytes]] = []  # (index in page_texts, 1-based page, png)
 
     with pymupdf.open(stream=pdf_bytes, filetype="pdf") as doc:
         for index, (page, kind) in enumerate(zip(doc, kinds)):
@@ -120,17 +124,33 @@ async def extract_pdf_text(
                 page_texts.append("")
             else:
                 scanned.append(page_no)
-                if ocr_used >= max_ocr_pages:
+                if len(jobs) >= max_ocr_pages:
                     truncated = True
                     page_texts.append("")
                     continue
                 try:
-                    png = page.get_pixmap(dpi=dpi).tobytes("png")
-                    page_texts.append((await ocr(png)).strip())
-                    ocr_used += 1
+                    jobs.append((index, page_no, page.get_pixmap(dpi=dpi).tobytes("png")))
+                    page_texts.append("")
                 except Exception as e:  # noqa: BLE001 — recorded, see docstring
                     errors[page_no] = f"{type(e).__name__}: {e}"
                     page_texts.append(f"[page {page_no}: OCR failed]")
+
+    # Scanned pages are read a few at a time: several sequential vision calls were
+    # the slowest part of reading a dossier. The cap keeps rate-limit bursts small.
+    gate = asyncio.Semaphore(OCR_CONCURRENCY)
+
+    async def read(png: bytes) -> str:
+        async with gate:
+            return (await ocr(png)).strip()
+
+    results = await asyncio.gather(*(read(png) for _, _, png in jobs), return_exceptions=True)
+    for (index, page_no, _), res in zip(jobs, results):
+        if isinstance(res, BaseException):
+            errors[page_no] = f"{type(res).__name__}: {res}"
+            page_texts[index] = f"[page {page_no}: OCR failed]"
+        else:
+            page_texts[index] = res
+            ocr_used += 1
 
     full_text = "\n\n".join(t for t in page_texts if t)
     if truncated:

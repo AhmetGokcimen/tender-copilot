@@ -848,7 +848,9 @@
     "blacklist": "Blacklist keywords (comma separated)",
     "profileTitle": "Company profile",
     "matchingTitle": "Matching preferences",
-    "saved": "Company profile saved."
+    "saved": "Company profile saved.",
+    "signOut": "Sign out",
+    "signOutHint": "Ends your session on this device and returns to the home page."
   },
   "agent": {
     "docTitle": "Reading your document",
@@ -1106,10 +1108,11 @@
     "subcontract": "Do you plan to subcontract part of the contract?",
     "subcontractNote": "Which part, and to whom (if known)",
     "size": "Company size",
-    "size_micro": "Micro",
-    "size_small": "Small",
-    "size_medium": "Medium",
-    "size_large": "Large",
+    "sizeHelp": "EU definition, by staff and by turnover or balance sheet. Micro: under 10 employees and up to €2M. Small: under 50 employees and up to €10M. Medium: under 250 employees and up to €50M turnover or €43M balance sheet. Large: more than that. Both limits must hold; use your last financial year.",
+    "size_micro": "Micro (< 10 employees)",
+    "size_small": "Small (10-49)",
+    "size_medium": "Medium (50-249)",
+    "size_large": "Large (250+)",
     "repName": "Legal representative (name)",
     "repRole": "Role (e.g. administrator)",
     "address": "Registered office address",
@@ -1147,6 +1150,19 @@
     "error": "Could not read that image. Use a PNG or JPG of the signature on white paper.",
     "note": "Placed on the signature block of the PDF. It is a picture only: to submit in SEAP the files must still carry your company's qualified electronic signature."
   },
+  "completeness": {
+    "title": "Complete your company profile for better results",
+    "body": "Matching, eligibility checks and your bid documents use these details. Still missing: {items}.",
+    "cta": "Complete profile",
+    "dismiss": "Hide for now",
+    "item_cui": "tax ID (CUI)",
+    "item_address": "registered address",
+    "item_rep": "legal representative",
+    "item_caen": "main CAEN code",
+    "item_turnover": "turnover",
+    "item_credentials": "certificates",
+    "item_contracts": "past contracts"
+  },
   "review": {
     "title": "Review before you submit",
     "hint": "Notes from the agents. They are not part of the documents.",
@@ -1160,6 +1176,9 @@
     "level_low": "low",
     "level_medium": "medium",
     "level_high": "high",
+    "counts": "{missing} missing items · {risks} risks · {met} of {total} requirements confirmed",
+    "showAll": "Show all {n}",
+    "showLess": "Show fewer",
     "flags": "Some text in the tender files looked like instructions to an AI and was cut out before reading. Treat this tender's analysis with care and check the original documents."
   },
   "apiAccess": {

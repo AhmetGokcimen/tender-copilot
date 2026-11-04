@@ -15,10 +15,11 @@ interface PipelineState {
   untrack: (externalId: string) => void;
 }
 
-const SEED: Record<string, PipelineStatus> = {
-  CN1065104: 'reviewing',
-  CN1064559: 'applied',
-};
+// Demo seed only in mock mode; real accounts must start with nothing tracked.
+const SEED: Record<string, PipelineStatus> =
+  process.env.NEXT_PUBLIC_USE_MOCK !== 'false'
+    ? { CN1065104: 'reviewing', CN1064559: 'applied' }
+    : {};
 
 export const usePipelineStore = create<PipelineState>()(
   persist(

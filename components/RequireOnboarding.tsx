@@ -35,7 +35,7 @@ export function RequireOnboarding({ children }: { children: React.ReactNode }) {
         if (!ok) router.replace('/onboarding');
       })
       .catch(() => setDone(true));
-  }, [session.status, router, queryClient]);
+  }, [session, router, queryClient]);
 
   if (session.status !== 'in' || !done) {
     return (

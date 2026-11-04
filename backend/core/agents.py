@@ -250,7 +250,8 @@ async def run_agent(
             return tender.spec
         adapter = adapter or RomaniaSeapAdapter()
         source, from_docs, flags = await gather_source(adapter, tender, ai)
-        analysis = await _run(ai, "spec", {}, source)
+        # A shorter input keeps this first step fast; the requirements sit early in the dossier.
+        analysis = await _run(ai, "spec", {}, source[:30_000])
         if analysis is None:
             return None
         result = analysis.model_dump()

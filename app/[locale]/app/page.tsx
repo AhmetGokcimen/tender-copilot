@@ -39,6 +39,7 @@ function RowMetric({
     </div>
   );
 }
+import { ProfileCompletenessBanner } from '@/components/ProfileCompletenessBanner';
 import { TenderCard } from '@/components/TenderCard';
 import { TenderCardSkeleton } from '@/components/TenderCardSkeleton';
 import { CheckboxRow } from '@/components/CheckboxRow';
@@ -161,6 +162,7 @@ export default function OpportunitiesPage() {
 
   return (
     <div className="flex flex-col gap-space-xl">
+      <ProfileCompletenessBanner />
       <header data-assistant="feed-header" className="flex flex-col gap-space-md">
         <div className="flex flex-col justify-between gap-space-md lg:flex-row lg:items-center">
           <div className="flex max-w-3xl flex-col gap-1">

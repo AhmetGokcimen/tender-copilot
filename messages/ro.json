@@ -848,7 +848,9 @@
     "blacklist": "Cuvinte excluse (separate prin virgulă)",
     "profileTitle": "Profilul companiei",
     "matchingTitle": "Preferințe de potrivire",
-    "saved": "Profilul companiei a fost salvat."
+    "saved": "Profilul companiei a fost salvat.",
+    "signOut": "Deconectare",
+    "signOutHint": "Încheie sesiunea pe acest dispozitiv și te duce la pagina principală."
   },
   "agent": {
     "docTitle": "Îți citim documentul",
@@ -1106,10 +1108,11 @@
     "subcontract": "Intenționezi să subcontractezi o parte din contract?",
     "subcontractNote": "Ce parte și cui (dacă se știe)",
     "size": "Dimensiunea companiei",
-    "size_micro": "Micro",
-    "size_small": "Mică",
-    "size_medium": "Mijlocie",
-    "size_large": "Mare",
+    "sizeHelp": "Definiția UE, după număr de angajați și cifră de afaceri sau total active. Micro: sub 10 angajați și până la 2 mil. €. Mică: sub 50 de angajați și până la 10 mil. €. Mijlocie: sub 250 de angajați și până la 50 mil. € cifră de afaceri sau 43 mil. € active. Mare: peste acestea. Ambele limite trebuie respectate; folosește ultimul exercițiu financiar.",
+    "size_micro": "Micro (sub 10 angajați)",
+    "size_small": "Mică (10-49)",
+    "size_medium": "Mijlocie (50-249)",
+    "size_large": "Mare (250+)",
     "repName": "Reprezentant legal (nume)",
     "repRole": "Funcția (ex. administrator)",
     "address": "Adresa sediului social",
@@ -1147,6 +1150,19 @@
     "error": "Imaginea nu a putut fi citită. Folosește un PNG sau JPG cu semnătura pe hârtie albă.",
     "note": "Se pune în blocul de semnătură din PDF. Este doar o imagine: pentru depunere în SEAP fișierele trebuie să poarte în continuare semnătura electronică calificată a companiei."
   },
+  "completeness": {
+    "title": "Completează profilul companiei pentru rezultate mai bune",
+    "body": "Potrivirea, verificarea eligibilității și documentele ofertei folosesc aceste date. Încă lipsesc: {items}.",
+    "cta": "Completează profilul",
+    "dismiss": "Ascunde deocamdată",
+    "item_cui": "CUI",
+    "item_address": "adresa sediului",
+    "item_rep": "reprezentantul legal",
+    "item_caen": "codul CAEN principal",
+    "item_turnover": "cifra de afaceri",
+    "item_credentials": "certificate",
+    "item_contracts": "contracte anterioare"
+  },
   "review": {
     "title": "De verificat înainte de depunere",
     "hint": "Note ale agenților. Nu fac parte din documente.",
@@ -1160,6 +1176,9 @@
     "level_low": "scăzut",
     "level_medium": "mediu",
     "level_high": "ridicat",
+    "counts": "{missing} elemente lipsă · {risks} riscuri · {met} din {total} cerințe confirmate",
+    "showAll": "Arată toate {n}",
+    "showLess": "Arată mai puține",
     "flags": "Unele texte din fișierele licitației păreau instrucțiuni pentru o IA și au fost eliminate înainte de citire. Tratează cu atenție analiza acestei licitații și verifică documentele originale."
   },
   "apiAccess": {

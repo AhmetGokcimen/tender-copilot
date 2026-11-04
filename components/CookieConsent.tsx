@@ -6,7 +6,9 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { GA_ID, readConsent, subscribeConsent, writeConsent, type Consent } from '@/lib/consent';
 
-const server = (): Consent => 'unknown';
+// The server cannot know the visitor's choice. It renders no banner at all, so a visitor who
+// already answered never sees it flash in the HTML and vanish once the page hydrates.
+const server = (): Consent | 'pending' => 'pending';
 const useConsent = () => useSyncExternalStore(subscribeConsent, readConsent, server);
 
 /** Same look for both answers, so refusing is as easy as accepting. */

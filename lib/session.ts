@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { USE_MOCK } from '@/lib/api';
 import { clearMockSession, getMockSession, loginMockUser } from '@/lib/mock-auth';
 import { supabase } from '@/lib/supabase/browser';
+import { claimLocalData, releaseLocalData } from '@/lib/local-owner';
 
 /**
  * One session API for both modes. Real mode is Supabase Auth (email and
@@ -29,6 +30,11 @@ export function useSession(): SessionState {
     const sb = supabase();
     const apply = (session: Awaited<ReturnType<typeof sb.auth.getSession>>['data']['session']) => {
       const u = session?.user;
+      // Another account used this browser before: drop its local data and start clean.
+      if (u && claimLocalData(u.id)) {
+        window.location.reload();
+        return;
+      }
       setState(
         u
           ? {
@@ -66,6 +72,7 @@ export async function signIn(email: string, password: string): Promise<SignInErr
 }
 
 export async function signOut(): Promise<void> {
+  releaseLocalData();
   if (USE_MOCK) {
     clearMockSession();
     return;

@@ -23,7 +23,7 @@ MAX_SOURCE_CHARS = 45_000
 # Pre-reading only covers tenders some registered company scores at least this high.
 PREBRIEF_MIN_SCORE = 50
 OCR_PAGES = 6
-DOCS_BUDGET_SECONDS = 100.0
+DOCS_BUDGET_SECONDS = 45.0
 
 
 async def _caiet_text(adapter: RomaniaSeapAdapter, tender: Tender, ai: MetaAIClient) -> str:
@@ -61,13 +61,16 @@ async def gather_source(
     """Notice text plus, when the dossier has one, the specification text, with
     instruction-like sentences cut out. Returns (source text, whether documents
     were read, flags for what was cut)."""
-    notice = await _notice_text(adapter, tender)
-    documents = ""
-    if tender.notice_type_id is not None:
+    # The notice text and the dossier are independent, so they are fetched together.
+    async def docs() -> str:
+        if tender.notice_type_id is None:
+            return ""
         try:
-            documents = await asyncio.wait_for(_caiet_text(adapter, tender, ai), DOCS_BUDGET_SECONDS)
+            return await asyncio.wait_for(_caiet_text(adapter, tender, ai), DOCS_BUDGET_SECONDS)
         except TimeoutError:
-            documents = ""
+            return ""
+
+    notice, documents = await asyncio.gather(_notice_text(adapter, tender), docs())
     source = notice
     if documents.strip():
         source = f"{notice}\n\n--- Specification documents ---\n{documents}"

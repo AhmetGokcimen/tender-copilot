@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
+import { signOut } from '@/lib/session';
 import { useCompanyStore } from '@/stores/useCompanyStore';
 import { useAuthorizationStore } from '@/stores/useAuthorizationStore';
 import { useOnboardingStatus } from '@/lib/queries';
@@ -15,6 +16,7 @@ import { INPUT } from '@/components/ui/form';
 export default function SettingsPage() {
   const t = useTranslations('settings');
   const tc = useTranslations('common');
+  const locale = useLocale();
   const profile = useCompanyStore((s) => s.profile);
   const update = useCompanyStore((s) => s.update);
   const reset = useCompanyStore((s) => s.reset);
@@ -131,6 +133,22 @@ export default function SettingsPage() {
       </div>
 
       <ApiAccessSection />
+
+      <section data-assistant="settings-signout" className="flex items-center gap-space-md rounded-xl bg-surface-container-lowest p-space-md shadow-sm">
+        <p className="flex-1 font-body-md text-body-md text-on-surface-variant">{t('signOutHint')}</p>
+        <button
+          type="button"
+          onClick={() => {
+            void signOut().finally(() => {
+              window.location.assign(`/${locale}`);
+            });
+          }}
+          className="inline-flex h-9 shrink-0 items-center gap-space-xs rounded-pill border border-outline-variant px-space-md font-label-md text-label-md text-on-surface hover:bg-surface-container"
+        >
+          <Icon name="logout" size="sm" />
+          {t('signOut')}
+        </button>
+      </section>
     </div>
   );
 }
