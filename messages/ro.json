@@ -1268,5 +1268,17 @@
     "gpt3": "Acceptă avertismentul despre serverele personalizate, apoi autentifică-te în Licits și apasă Permite.",
     "gpt4": "Începe o conversație și cere, de exemplu: Găsește-mi cele mai bune licitații deschise pentru firma mea.",
     "gptNote": "Ce planuri pot adăuga un server MCP personalizat decide OpenAI și se schimbă, așa că verifică planul tău în pagina lor de ajutor. Licits doar citește, deci funcționează și cu acces doar pentru citire."
+  },
+  "aiTip": {
+    "title": "Întreabă-ți propriul AI despre licitații",
+    "body": "Conectează ChatGPT sau Claude la Licits și cere licitațiile care se potrivesc firmei tale. Doar citire, durează un minut.",
+    "step1": "În ChatGPT sau Claude, adaugă un conector personalizat.",
+    "step2": "Lipește adresa de mai jos.",
+    "step3": "Autentifică-te în Licits și apasă Permite.",
+    "copy": "Copiază",
+    "copied": "Copiat",
+    "cta": "Arată-mi cum",
+    "later": "Nu acum",
+    "close": "Închide"
   }
 }
