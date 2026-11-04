@@ -248,6 +248,7 @@ async function matchWithModel(rawText: string, lang: 'en' | 'ro'): Promise<{ sum
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 45_000);
   try {
+    const t0 = Date.now();
     const res = await fetch(`${base}/responses`, {
       method: 'POST',
       signal: ctrl.signal,
@@ -273,6 +274,7 @@ async function matchWithModel(rawText: string, lang: 'en' | 'ro'): Promise<{ sum
     });
     if (!res.ok) return null;
     const data = await res.json();
+    console.info(`[AI] %s model=%s %dms tokens in=%s out=%s (server action, Meta Responses API)`, 'site-scan', process.env.META_MODEL || 'muse-wonder-1.0', Date.now() - t0, data.usage?.input_tokens ?? '?', data.usage?.output_tokens ?? '?');
     const out = (data.output ?? [])
       .filter((o: { type?: string }) => o.type === 'message')
       .flatMap((o: { content?: { type?: string; text?: string }[] }) => o.content ?? [])

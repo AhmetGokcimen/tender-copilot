@@ -19,6 +19,9 @@ for manual review, instead of an exception breaking the pipeline.
 
 import base64
 import json
+import logging
+import time
+from contextvars import ContextVar
 
 import httpx
 from pydantic import BaseModel, ValidationError
@@ -176,6 +179,39 @@ class EligibilityVerdict(BaseModel):
     justification: str = ""
 
 
+# Per-request list of AI calls; main.py turns it into the X-AI-Trace response header
+# so the browser console can show what was sent to the model and what came back.
+ai_trace: ContextVar[list | None] = ContextVar("ai_trace", default=None)
+_ai_log = logging.getLogger("licits.ai")
+
+
+def _trace_call(model: str, purpose: str, started: float, system: str, user: str, out: str, usage: object) -> None:
+    """Log one model call (server log + request trace). Never raises."""
+    try:
+        u = usage if isinstance(usage, dict) else {}
+        entry = {
+            "purpose": purpose,
+            "model": model,
+            "endpoint": "POST /responses (Meta Responses API)",
+            "ms": int((time.monotonic() - started) * 1000),
+            "in": int(u.get("input_tokens") or 0),
+            "out": int(u.get("output_tokens") or 0),
+            "reasoning": int((u.get("output_tokens_details") or {}).get("reasoning_tokens") or 0),
+            "system": system[:160],
+            "prompt": user[:240],
+            "response": out[:240],
+        }
+        _ai_log.info(
+            "AI call %s model=%s %dms tokens in=%d out=%d reasoning=%d",
+            purpose, model, entry["ms"], entry["in"], entry["out"], entry["reasoning"],
+        )
+        trace = ai_trace.get()
+        if trace is not None and len(trace) < 12:
+            trace.append(entry)
+    except Exception:  # noqa: BLE001
+        pass
+
+
 def _record_usage(model: str, purpose: str, usage: object) -> None:
     """Store the provider's token counts for this call. Never raises: a logging
     problem must not break the feature that made the call."""
@@ -240,11 +276,14 @@ class MetaAIClient:
         if json_mode:
             payload["text"] = {"format": {"type": "json_object"}}
 
+        started = time.monotonic()
         response = await self._client.post("/responses", json=payload)
         response.raise_for_status()
         data = response.json()
         _record_usage(self.model, purpose, data.get("usage"))
-        return _extract_output_text(data)
+        text = _extract_output_text(data)
+        _trace_call(self.model, purpose, started, system_prompt, user_message, text, data.get("usage"))
+        return text
 
     async def summarize_justification(
         self, tender_summary: str, company_profile_summary: str, *, language: str = "en"
