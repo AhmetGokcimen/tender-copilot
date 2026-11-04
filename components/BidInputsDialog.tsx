@@ -200,9 +200,10 @@ export function BidInputsDialog({
                 placeholder={t('subcontractNote')}
               />
             )}
-            <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between md:gap-space-md">
+            <div className="flex flex-col gap-1">
               <p className="font-body-md text-body-md text-on-surface">{t('size')}</p>
               <Radio name={t('size')} value={v.size} options={sizes} onChange={(x) => set({ size: x })} />
+              <p className="font-body-sm text-body-sm text-on-surface-variant">{t('sizeHelp')}</p>
             </div>
             <div className="grid grid-cols-1 gap-space-sm md:grid-cols-2">
               <input className={FIELD} value={v.repName} onChange={(e) => set({ repName: e.target.value })} placeholder={t('repName')} />
