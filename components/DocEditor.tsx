@@ -51,11 +51,9 @@ export function DocEditor({
   storeContent,
   authors,
   edited,
-  aiRevised,
   exporting,
   copied,
   onContentChange,
-  onAskAi,
   onCopy,
   onDownloadPdf,
 }: {
@@ -66,11 +64,9 @@ export function DocEditor({
   storeContent: JSONContent;
   authors: AgentId[];
   edited: boolean;
-  aiRevised: boolean;
   exporting: boolean;
   copied: boolean;
   onContentChange: (content: JSONContent) => void;
-  onAskAi: () => void;
   onCopy: () => void;
   onDownloadPdf: () => void;
 }) {
@@ -152,11 +148,6 @@ export function DocEditor({
         <h3 className="min-w-0 flex-1 truncate font-headline-sm text-headline-sm text-on-surface">
           {title}
         </h3>
-        {aiRevised && (
-          <span className="rounded-full bg-navy/10 px-space-xs py-px font-label-sm text-label-sm text-navy">
-            {t('aiRevised')}
-          </span>
-        )}
         {edited && (
           <span className="rounded-full border border-warn/30 bg-warn-bg px-space-xs py-px font-label-sm text-label-sm text-warn">
             {t('edited')}
@@ -193,15 +184,6 @@ export function DocEditor({
             onClick={() => editor?.chain().focus().toggleOrderedList().run()}
           />
         </div>
-        <button
-          type="button"
-          data-assistant="workspace-ask-ai"
-          onClick={onAskAi}
-          className="flex h-9 items-center gap-space-xs rounded-pill border border-navy/40 px-space-sm font-label-md text-label-md text-navy transition-colors hover:bg-indigo hover:text-on-indigo"
-        >
-          <Icon name="auto_awesome" size="sm" />
-          {t('askAi')}
-        </button>
         <div className="ml-auto flex items-center gap-space-xs">
           <span className="tnum font-code-sm text-code-sm text-on-surface-variant">
             {pending ? t('saving') : t('saved')}

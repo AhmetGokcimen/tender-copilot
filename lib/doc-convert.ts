@@ -231,64 +231,11 @@ export function tiptapToText(doc: JSONContent): string {
   return texts.join(' ').replace(/\s+/g, ' ').trim();
 }
 
-/** h1/h2 heading texts in order (completeness + revision targeting). */
+/** h1/h2 heading texts in order (completeness). */
 export function docHeadings(doc: JSONContent): string[] {
   return (doc.content ?? [])
     .filter((n) => n.type === 'heading')
     .map((n) => inlineToMdStripped(n.content));
-}
-
-/** Top-level paragraph texts in order (revision targeting). */
-export function docParagraphs(doc: JSONContent): string[] {
-  const out: string[] = [];
-  for (const node of doc.content ?? []) {
-    if (node.type === 'paragraph') {
-      const text = inlineToMdStripped(node.content);
-      if (text.trim()) out.push(text);
-    }
-    if (node.type === 'bulletList' || node.type === 'orderedList') {
-      for (const item of node.content ?? []) {
-        const p = (item.content ?? []).find((c) => c.type === 'paragraph');
-        if (p) {
-          const text = inlineToMdStripped(p.content);
-          if (text.trim()) out.push(text);
-        }
-      }
-    }
-  }
-  return out;
-}
-
-export interface AppliedRevision {
-  doc: JSONContent;
-  applied: boolean;
-}
-
-/**
- * Applies an accepted AI revision to a document copy: replaces the first
- * top-level paragraph containing `target`, or appends when target is empty.
- */
-export function applyRevisionToJson(
-  doc: JSONContent,
-  target: string,
-  after: string,
-): AppliedRevision {
-  const next: JSONContent = JSON.parse(JSON.stringify(doc)) as JSONContent;
-  const replacement: JSONContent = { type: 'paragraph', content: parseInline(after) };
-  if (target.trim() === '') {
-    next.content = [...(next.content ?? []), replacement];
-    return { doc: next, applied: true };
-  }
-  const blocks = next.content ?? [];
-  for (let i = 0; i < blocks.length; i++) {
-    const b = blocks[i];
-    if (b.type === 'paragraph' && inlineToMdStripped(b.content).includes(target)) {
-      blocks[i] = replacement;
-      next.content = blocks;
-      return { doc: next, applied: true };
-    }
-  }
-  return { doc: next, applied: false };
 }
 
 /** Word count for save/completeness indicators. */

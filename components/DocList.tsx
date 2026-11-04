@@ -76,10 +76,10 @@ export function DocList({
                   {docCompleteness(doc)}% ·{' '}
                   <span
                     className={
-                      doc.aiRevised ? 'text-navy' : doc.edited ? 'text-warn' : 'text-info'
+                      doc.edited ? 'text-warn' : 'text-info'
                     }
                   >
-                    {doc.aiRevised ? t('aiRevised') : doc.edited ? t('edited') : t('ready')}
+                    {doc.edited ? t('edited') : t('ready')}
                   </span>
                 </span>
               ) : (

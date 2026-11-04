@@ -6,9 +6,7 @@ import { clsx } from 'clsx';
 import { usePathname, useRouter } from '@/i18n/routing';
 import { useTender } from '@/lib/queries';
 import { Icon } from '../Icon';
-import { DOC_TITLES } from '@/lib/draft-template';
 import { useAssistantStore, type DockAnchor } from '@/stores/useAssistantStore';
-import { useGeneratorStore } from '@/stores/useGeneratorStore';
 
 const MARGIN = 16;
 const SIZE = {
@@ -82,14 +80,7 @@ export function AssistantPanel() {
   const sending = useAssistantStore((s) => s.sending);
   const seedGreeting = useAssistantStore((s) => s.seedGreeting);
   const send = useAssistantStore((s) => s.send);
-  const appendAi = useAssistantStore((s) => s.appendAi);
   const clear = useAssistantStore((s) => s.clear);
-  const pendingRevision = useGeneratorStore((s) => s.pendingRevision);
-  const acceptRevision = useGeneratorStore((s) => s.acceptRevision);
-  const rejectRevision = useGeneratorStore((s) => s.rejectRevision);
-  const targetDoc = useGeneratorStore((s) =>
-    s.docEditTarget ? s.docs[s.docEditTarget] : undefined,
-  );
   const [draft, setDraft] = useState('');
   const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
   const dragOffset = useRef<{ dx: number; dy: number } | null>(null);
@@ -115,10 +106,7 @@ export function AssistantPanel() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length, sending, open]);
 
-  const editing = targetDoc && pathname.includes('/app/tenders/') ? targetDoc : undefined;
-  const suggestions = editing
-    ? [t('suggestShorten'), t('suggestNote'), t('suggestReplace')]
-    : tenderId
+  const suggestions = tenderId
       ? [t('suggestEligible'), t('suggestMissing'), t('suggestDraft')]
       : [t('suggestPipeline'), t('suggestReminders'), t('suggestSignature')];
 
@@ -180,11 +168,7 @@ export function AssistantPanel() {
         </span>
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="font-headline-sm text-headline-sm text-on-surface">{t('title')}</span>
-          {editing ? (
-            <span className="tnum truncate font-code-sm text-code-sm text-navy">
-              {t('contextDoc')}: {DOC_TITLES[editing.doc]}
-            </span>
-          ) : tender && tenderId ? (
+          {tender && tenderId ? (
             <span className="tnum truncate font-code-sm text-code-sm text-on-surface-variant">
               {t('contextTender')}: {tenderId} · {tender.state.score ?? '—'}%
             </span>
@@ -259,43 +243,6 @@ export function AssistantPanel() {
               <span className="agent-dot h-1.5 w-1.5 rounded-full bg-indigo [animation-delay:200ms]" />
               <span className="agent-dot h-1.5 w-1.5 rounded-full bg-indigo [animation-delay:400ms]" />
             </p>
-          </div>
-        )}
-        {pendingRevision && (
-          <div className="flex flex-col gap-space-xs rounded-lg border border-navy/25 bg-surface p-space-sm">
-            <span className="font-label-md text-label-md font-semibold text-navy">
-              {t('revisionTitle')}
-            </span>
-            {pendingRevision.before !== '' && (
-              <p className="rounded border border-outline-variant bg-surface-container-lowest p-space-xs font-body-sm text-body-sm text-on-surface-variant line-through">
-                {pendingRevision.before}
-              </p>
-            )}
-            <p className="rounded border border-navy/25 bg-navy/10 p-space-xs font-body-sm text-body-sm text-on-surface">
-              {pendingRevision.after}
-            </p>
-            <div className="flex justify-end gap-space-xs">
-              <button
-                type="button"
-                onClick={() => {
-                  rejectRevision();
-                  appendAi(t('revisionRejected'));
-                }}
-                className="h-8 rounded border border-outline-variant px-space-sm font-label-md text-label-md text-on-surface hover:bg-surface-container-low"
-              >
-                {t('reject')}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  acceptRevision();
-                  appendAi(t('revisionApplied'));
-                }}
-                className="h-8 rounded-pill bg-indigo px-space-sm font-label-md text-label-md text-on-indigo hover:bg-indigo-deep"
-              >
-                {t('accept')}
-              </button>
-            </div>
           </div>
         )}
       </div>
