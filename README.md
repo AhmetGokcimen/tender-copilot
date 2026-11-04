@@ -22,6 +22,8 @@ Every day hundreds of public tenders are published in Romania. For a small contr
 
 Licits does the reading and the first draft. **The company always makes the decision**: Licits shows its reasoning, flags what is unclear and never submits anything for you.
 
+**Where the idea came from.** I was doing tender consulting for a single company and had set up a small tool that scanned and filtered the official portal for that one client. The idea for Licits came out of that.
+
 ## What it does
 
 | | |
