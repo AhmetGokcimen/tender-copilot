@@ -23,7 +23,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from sqlmodel import Session
 
 from backend.core import tender_api
-from backend.core.api_keys import ApiPrincipal, authenticate
+from backend.core.api_keys import ApiPrincipal, identify
 from backend.core.config import settings
 from backend.db import get_session
 
@@ -262,6 +262,7 @@ def _handle(message: Any, session: Session, principal: ApiPrincipal) -> dict | N
     elif method == "tools/list":
         result = {"tools": _tool_list()}
     elif method == "tools/call":
+        principal.charge(session)  # only tool calls count against the daily quota
         result = _call_tool(session, principal, params)
     else:
         return _error(msg_id, -32601, f"Method not found: {method}")
@@ -296,7 +297,7 @@ def check_origin(request: Request) -> None:
 @router.post("/mcp", dependencies=[Depends(check_origin)])
 def mcp_endpoint(
     payload: Annotated[Any, Body()],
-    principal: ApiPrincipal = Depends(authenticate),
+    principal: ApiPrincipal = Depends(identify),
     session: Session = Depends(get_session),
 ):
     if isinstance(payload, list):  # batch (2025-03-26 and older clients)

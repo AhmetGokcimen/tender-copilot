@@ -418,13 +418,38 @@ def test_mcp_tool_errors_are_results_not_http_errors(world):
     assert bad_type["isError"] is True
 
 
-def test_mcp_quota_counts_tool_calls(world, monkeypatch):
+def test_mcp_quota_counts_tool_calls_not_the_handshake(world, monkeypatch):
     api, _ = world
     monkeypatch.setitem(plans.API_DAILY_CALLS, "pro", 2)
     secret = _make_key(api)["secret"]
-    assert _rpc(api, secret, "ping").status_code == 200
-    assert _rpc(api, secret, "ping").status_code == 200
-    assert _rpc(api, secret, "ping").status_code == 429
+    for _ in range(4):  # the handshake is free, however often a client repeats it
+        assert _rpc(api, secret, "initialize", {"protocolVersion": "2025-06-18"}).status_code == 200
+        assert _rpc(api, secret, "tools/list").status_code == 200
+        assert _rpc(api, secret, "ping").status_code == 200
+    assert api.get("/api/api-keys", headers=_jwt()).json()["used_today"] == 0
+
+    assert not _tool(api, secret, "get_my_filters").get("isError")
+    assert not _tool(api, secret, "my_pipeline").get("isError")
+    blocked = _rpc(api, secret, "tools/call", {"name": "get_my_filters", "arguments": {}})
+    assert blocked.status_code == 429 and int(blocked.headers["Retry-After"]) > 0
+    assert api.get("/api/api-keys", headers=_jwt()).json()["used_today"] == 2
+    # Free calls keep working once the quota is spent, so a client can still connect and list tools.
+    assert _rpc(api, secret, "tools/list").status_code == 200
+
+
+def test_seap_cui_prefix_is_stripped_from_the_authority(world):
+    from backend.db import engine
+
+    api, _ = world
+    with Session(engine) as s:
+        t = _tender("t-cui", "Culvert works", "45233000", 15)
+        t.contracting_authority = "4344570 - COMUNA SOTANGA"
+        s.add(t)
+        s.commit()
+    h = _bearer(_make_key(api)["secret"])
+    by_id = {t["id"]: t for t in api.get("/api/v1/tenders?limit=25", headers=h).json()["tenders"]}
+    assert by_id["t-cui"]["authority"] == "COMUNA SOTANGA"
+    assert by_id["t-road"]["authority"] == "Primaria Test"
 
 
 def test_mcp_tools_have_titles_and_safety_annotations(world):

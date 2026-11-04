@@ -326,16 +326,16 @@
     "footerResources": "Ghiduri",
     "asstEyebrow": "Asistenți AI",
     "asstTitle": "Cere-i propriului AI licitația pe care o poți câștiga.",
-    "asstSub": "Conectează Claude, ChatGPT sau Cursor la Licits. Asistentul tău îți citește filtrele și anunțurile SEAP deschise și răspunde pe baza lor. Doar citire, iar îl poți deconecta cu un clic.",
+    "asstSub": "Conectează ChatGPT, Claude sau Cursor la Licits. Asistentul tău îți citește filtrele și anunțurile SEAP deschise și răspunde pe baza lor. Doar citire, iar îl poți deconecta oricând.",
     "asst1Title": "Filtrele tale, clasamentul tău",
     "asst1Body": "Pornește de la profilul pe care l-ai configurat: lucrările tale, codurile CPV, județele și excluderile. Răspunsul este ordonat pentru firma ta, nu pentru toată lumea.",
     "asst2Title": "Doar citire",
     "asst2Body": "Poate vedea licitații, termene și tabloul tău. Nu poate schimba nimic, nu poate trimite nimic și nu îți vede documentele.",
     "asst3Title": "Conectat într-un minut",
-    "asst3Body": "În Claude, adaugi Licits ca server conector și te autentifici. Pentru alte instrumente, copiezi o cheie din Setări.",
+    "asst3Body": "În ChatGPT sau Claude, adaugi Licits ca server conector și te autentifici. Pentru alte instrumente, copiezi o cheie din Setări.",
     "asstLink": "Cum îl conectezi",
-    "asstWorks": "Funcționează cu Claude, ChatGPT și Cursor",
-    "asstExample": "Exemplu",
+    "asstWorks": "Funcționează cu ChatGPT, Claude și Cursor",
+    "asstExample": "Exemplu în ChatGPT",
     "asstUser": "Caută-mi lucrări de drumuri pentru care mai pot pregăti oferta. Cel puțin două săptămâni rămase.",
     "asstTool": "A folosit Licits: recommend_tenders",
     "asstReply": "Două licitații deschise se potrivesc profilului tău.",
@@ -346,8 +346,8 @@
     "asstMatch": "Potrivire {score}",
     "asstClosing": "Ambele sunt proceduri deschise. Verifică anunțul oficial din SEAP înainte să decizi.",
     "footerAssistant": "Asistent AI",
-    "faq7Q": "Pot folosi Licits din Claude sau ChatGPT?",
-    "faq7A": "Da. În Claude, adaugi Licits ca server conector personalizat (Settings, Connectors) și te autentifici. Pentru instrumentele care primesc o cheie, precum Claude Code sau Cursor, creezi una în Setări. Asistentul poate citi filtrele salvate, caută licitații, deschide o licitație și listează termenele tale. Este doar pentru citire: nu poate modifica contul și nu depune nimic, iar îl poți deconecta oricând."
+    "faq7Q": "Pot folosi Licits din ChatGPT sau Claude?",
+    "faq7A": "Da. În ChatGPT sau Claude, adaugi Licits ca server conector personalizat și te autentifici cu contul tău Licits. Pentru instrumentele care primesc o cheie, precum Cursor sau Claude Code, creezi una în Setări. Asistentul poate citi filtrele salvate, caută licitații, deschide o licitație și listează termenele tale. Este doar pentru citire: nu poate modifica contul și nu depune nimic, iar îl poți deconecta oricând. Ce planuri ChatGPT pot adăuga un server conector personalizat decide OpenAI."
   },
   "about": {
     "eyebrow": "Despre Licits",
@@ -438,9 +438,9 @@
     "fApi100": "Asistent AI și API, 100 de apeluri pe zi",
     "fApi1000": "Asistent AI și API, 1.000 de apeluri pe zi",
     "fApi5000": "Asistent AI și API, 5.000 de apeluri pe zi",
-    "tip_fApi100": "Conectează Claude, ChatGPT sau Cursor la licitațiile tale. Asistentul îți citește filtrele și anunțurile deschise și răspunde pe baza lor. Doar citire. 100 de apeluri pe zi, comune tuturor cheilor tale.",
-    "tip_fApi1000": "Conectează Claude, ChatGPT sau Cursor la licitațiile tale. Asistentul îți citește filtrele și anunțurile deschise și răspunde pe baza lor. Doar citire. 1.000 de apeluri pe zi, comune tuturor cheilor tale.",
-    "tip_fApi5000": "Conectează Claude, ChatGPT sau Cursor la licitațiile tale. Asistentul îți citește filtrele și anunțurile deschise și răspunde pe baza lor. Doar citire. 5.000 de apeluri pe zi, comune tuturor cheilor tale."
+    "tip_fApi100": "Conectează ChatGPT, Claude sau Cursor la licitațiile tale. Asistentul îți citește filtrele și anunțurile deschise și răspunde pe baza lor. Doar citire. 100 de apeluri pe zi, comune tuturor cheilor tale.",
+    "tip_fApi1000": "Conectează ChatGPT, Claude sau Cursor la licitațiile tale. Asistentul îți citește filtrele și anunțurile deschise și răspunde pe baza lor. Doar citire. 1.000 de apeluri pe zi, comune tuturor cheilor tale.",
+    "tip_fApi5000": "Conectează ChatGPT, Claude sau Cursor la licitațiile tale. Asistentul îți citește filtrele și anunțurile deschise și răspunde pe baza lor. Doar citire. 5.000 de apeluri pe zi, comune tuturor cheilor tale."
   },
   "contact": {
     "title": "Contactează-ne",
@@ -1175,13 +1175,13 @@
   },
   "apiAccess": {
     "title": "Asistent AI și API",
-    "subtitle": "Conectează Claude, ChatGPT sau Cursor la licitațiile tale, ordonate după filtrele din profil. Doar citire.",
+    "subtitle": "Conectează ChatGPT, Claude sau Cursor la licitațiile tale, ordonate după filtrele din profil. Doar citire.",
     "mockNote": "Mod demo: cheile create aici nu sunt reale. Autentifică-te pentru chei funcționale.",
     "usage": "{used} din {limit} apeluri folosite azi",
     "keysTitle": "Cheile tale",
     "none": "Nicio cheie încă.",
     "name": "Numele cheii",
-    "namePlaceholder": "ex. Claude pe laptopul meu",
+    "namePlaceholder": "ex. Cursor pe laptopul meu",
     "expiry": "Expiră",
     "never": "Niciodată",
     "days30": "În 30 de zile",
@@ -1209,8 +1209,8 @@
     "yourKey": "CHEIA_TA_API",
     "toolsTitle": "Ce poate face asistentul",
     "tools": "Îți citește filtrele salvate, recomandă cele mai bune licitații deschise, caută după județ, cod CPV, valoare sau termen, deschide detaliile unei licitații și listează termenele și tabloul tău. Nu poate modifica nimic în contul tău.",
-    "tabWeb": "Claude.ai / ChatGPT",
-    "webSteps": "În Claude.ai: Settings → Connectors → Add custom connector, lipește adresa de mai jos și conectează. Te autentifici în Licits și permiți accesul, fără cheie. ChatGPT: Settings → Connectors → adaugă un conector MCP personalizat cu aceeași adresă.",
+    "tabWeb": "ChatGPT / Claude.ai",
+    "webSteps": "ChatGPT (pe web): deschide Plugins, adaugă un server MCP personalizat, lipește adresa de mai jos și alege OAuth. Claude.ai: Settings → Connectors → Add custom connector, lipește adresa și conectează. În ambele cazuri te autentifici în Licits și permiți accesul, fără cheie. Numele meniurilor se schimbă, așa că caută opțiunea de server MCP sau conector personalizat.",
     "connectedApp": "Aplicație conectată",
     "disconnect": "Deconectează",
     "confirmDisconnect": "Deconectezi definitiv?"
@@ -1234,7 +1234,7 @@
   "mcpDocs": {
     "eyebrow": "Documentație",
     "title": "Conectează-ți asistentul AI la Licits",
-    "lead": "Licits are un server MCP și un API doar pentru citire. Conectează Claude, ChatGPT, Cursor sau propriul script și cere licitațiile care se potrivesc firmei tale. Răspunsurile vin din filtrele tale salvate și din anunțurile SEAP deschise.",
+    "lead": "Licits are un server MCP și un API doar pentru citire. Conectează ChatGPT, Claude, Cursor sau propriul script și cere licitațiile care se potrivesc firmei tale. Răspunsurile vin din filtrele tale salvate și din anunțurile SEAP deschise.",
     "address": "Adresa serverului",
     "connectTitle": "Conectare",
     "claudeTitle": "Claude (claude.ai și aplicația desktop)",
@@ -1243,8 +1243,7 @@
     "claude3": "Apasă Connect. Autentifică-te în Licits și apasă Permite.",
     "claude4": "Începe o conversație și cere, de exemplu: Găsește-mi cele mai bune licitații deschise pentru firma mea.",
     "gptTitle": "ChatGPT",
-    "gptBody": "Deschide Settings, apoi Connectors, și adaugă un conector MCP personalizat cu aceeași adresă. Autentifică-te în Licits când ți se cere. Disponibilitatea depinde de planul tău ChatGPT.",
-    "keyTitle": "Claude Code, Cursor și alte instrumente",
+    "keyTitle": "Cursor, Claude Code și alte instrumente",
     "keyBody": "Acestea trimit o cheie în loc să te autentifice. Creează una în Setări, la Asistent AI și API. Se afișează o singură dată, deci copiaz-o atunci.",
     "toolsTitle": "Ce poate face asistentul",
     "toolName": "Instrument",
@@ -1261,7 +1260,7 @@
     "prompt3": "Ce pregătesc acum și ce se închide săptămâna aceasta?",
     "prompt4": "Deschide licitația 123456 și spune-mi ce ne lipsește ca să depunem oferta.",
     "limitsTitle": "Limite",
-    "limitsBody": "Fiecare plan are o limită zilnică de apeluri, comună tuturor cheilor și aplicațiilor tale conectate. Se resetează la 00:00 UTC. Un răspuns conține cel mult 25 de licitații, iar poți avea până la 5 chei.",
+    "limitsBody": "Fiecare plan are o limită zilnică de apeluri, comună tuturor cheilor și aplicațiilor tale conectate. Se resetează la 00:00 UTC. Un răspuns conține cel mult 25 de licitații, iar poți avea până la 5 chei. În asistent se numără doar apelurile de instrumente, nu și handshake-ul de conectare.",
     "planCol": "Plan",
     "callsCol": "Apeluri pe zi",
     "safetyTitle": "Siguranță și confidențialitate",
@@ -1274,6 +1273,11 @@
     "apiBody": "Aceleași date prin HTTP simplu, pentru scripturi. Trimite cheia în antetul Authorization. Puncte de acces: /api/v1/me, /profile, /tenders, /tenders/{id}, /deadlines și /pipeline.",
     "supportTitle": "Suport",
     "supportBody": "O întrebare sau o problemă la conectare? Scrie-ne și îți răspunde un om.",
-    "supportLink": "Contact"
+    "supportLink": "Contact",
+    "gpt1": "Pe web, deschide Plugins și alege să adaugi un server MCP personalizat.",
+    "gpt2": "Numește-l Licits, lipește adresa serverului de mai sus și setează autentificarea pe OAuth.",
+    "gpt3": "Acceptă avertismentul despre serverele personalizate, apoi autentifică-te în Licits și apasă Permite.",
+    "gpt4": "Începe o conversație și cere, de exemplu: Găsește-mi cele mai bune licitații deschise pentru firma mea.",
+    "gptNote": "Ce planuri pot adăuga un server MCP personalizat decide OpenAI și se schimbă, așa că verifică planul tău în pagina lor de ajutor. Licits doar citește, deci funcționează și cu acces doar pentru citire."
   }
 }

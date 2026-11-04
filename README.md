@@ -81,7 +81,7 @@ Progress is saved after every step. The same profile powers matching, eligibilit
 
 **Assistant.** A chat bubble inside the app that knows which screen you are on and helps with the tender, your profile and the drafts.
 
-**AI connection (API and MCP).** Create a key under Settings and connect Claude, ChatGPT or Cursor to your tenders. Ask "find me the best open tenders for my company" and it answers from your saved filters. Read-only; see [the guide](docs/API_AND_MCP.md).
+**AI connection (API and MCP).** Create a key under Settings and connect ChatGPT, Claude or Cursor to your tenders. Ask "find me the best open tenders for my company" and it answers from your saved filters. Read-only; see [the guide](docs/API_AND_MCP.md).
 
 **Live map.** The landing page shows the newest open construction notice for each county seat on a dotted map of Romania, linked to the official notice.
 

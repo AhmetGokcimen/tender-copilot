@@ -36,6 +36,7 @@ CODE_TTL = timedelta(minutes=5)
 ACCESS_TTL = timedelta(hours=1)
 REFRESH_TTL = timedelta(days=30)
 MAX_REDIRECT_URIS = 5
+STALE_CLIENT_AGE = timedelta(days=7)
 REGISTER_LIMIT = 10  # registrations per client IP per hour (best effort, per instance)
 
 _BLOCKED_SCHEMES = {"javascript", "data", "vbscript", "file", "blob", "about", "ftp"}
@@ -87,20 +88,34 @@ def register_client(session: Session, body: dict, client_ip: str) -> OAuthClient
         raise OAuthError("invalid_redirect_uri", f"Send 1 to {MAX_REDIRECT_URIS} redirect_uris")
     if not all(_valid_redirect_uri(u) for u in uris):
         raise OAuthError("invalid_redirect_uri", "A redirect URI is not allowed")
-    method = body.get("token_endpoint_auth_method", "none")
-    if method != "none":
-        raise OAuthError("invalid_client_metadata", "Only public clients are supported (token_endpoint_auth_method: none)")
+    # Every client here is public (PKCE, no secret). RFC 7591 lets the server
+    # substitute metadata it does not support, so a client that asks for a
+    # secret is not refused: the response says "none" and it follows that.
     grants = body.get("grant_types") or ["authorization_code"]
-    if not isinstance(grants, list) or not set(grants) <= {"authorization_code", "refresh_token"}:
-        raise OAuthError("invalid_client_metadata", "Unsupported grant_types")
+    if not isinstance(grants, list) or not ({"authorization_code"} & set(grants)):
+        raise OAuthError("invalid_client_metadata", "grant_types must include authorization_code")
     name = body.get("client_name")
     name = " ".join(name.split())[:80] if isinstance(name, str) and name.strip() else "AI assistant"
 
+    _purge_unused_clients(session)
     client = OAuthClient(id="lc_" + secrets.token_urlsafe(18), name=name, redirect_uris=list(uris))
     session.add(client)
     session.commit()
     session.refresh(client)
     return client
+
+
+def _purge_unused_clients(session: Session) -> None:
+    """Registration is open to anyone, so drop apps that registered but never
+    got a code or a token within a week."""
+    cutoff = _utcnow() - STALE_CLIENT_AGE
+    for client in session.exec(select(OAuthClient).where(OAuthClient.created_at < cutoff)).all():
+        used = session.exec(select(OAuthCode.id).where(OAuthCode.client_id == client.id)).first() or session.exec(
+            select(OAuthToken.id).where(OAuthToken.client_id == client.id)
+        ).first()
+        if used is None:
+            session.delete(client)
+    session.commit()
 
 
 def redirect_allowed(client: OAuthClient, uri: str) -> bool:
@@ -279,3 +294,17 @@ def refresh(session: Session, *, client_id: str, refresh_token: str) -> dict:
     session.add(token)
     session.commit()
     return _issue(session, key, client_id)
+
+
+def revoke(session: Session, *, token: str, client_id: str) -> None:
+    """RFC 7009: disconnect the app the token belongs to. Unknown tokens are
+    ignored (the endpoint always answers 200), so it cannot be used to probe."""
+    column = OAuthToken.refresh_hash if token.startswith(REFRESH_PREFIX) else OAuthToken.access_hash
+    row = session.exec(select(OAuthToken).where(column == hash_key(token))).first()
+    if row is None or row.client_id != client_id:
+        return
+    key = session.get(ApiKey, row.key_id)
+    if key is not None and key.revoked_at is None:
+        key.revoked_at = _utcnow()
+        session.add(key)
+        session.commit()

@@ -68,7 +68,7 @@ export function AssistantConnect() {
         </div>
 
         <div
-          role="img"
+          role="group"
           aria-label={t('asstExample')}
           className="relative rounded-card border border-line bg-raised p-4 shadow-lift-2 md:p-6"
         >

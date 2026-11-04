@@ -56,14 +56,14 @@ export const PAGE_META: Record<string, Record<Lang, { title: string; description
   },
   '/docs/mcp': {
     en: {
-      title: 'Connect Claude, ChatGPT or Cursor to Licits | Docs',
+      title: 'Connect ChatGPT, Claude or Cursor to Licits | Docs',
       description:
-        'Connect your AI assistant to Licits over MCP or the read-only API. It reads your saved filters and the open SEAP notices and answers from them. Setup for Claude, ChatGPT, Claude Code and Cursor.',
+        'Connect your AI assistant to Licits over MCP or the read-only API. It reads your saved filters and the open SEAP notices and answers from them. Setup for ChatGPT, Claude, Cursor and Claude Code.',
     },
     ro: {
-      title: 'Conectează Claude, ChatGPT sau Cursor la Licits | Documentație',
+      title: 'Conectează ChatGPT, Claude sau Cursor la Licits | Documentație',
       description:
-        'Conectează-ți asistentul AI la Licits prin MCP sau API-ul doar pentru citire. Îți citește filtrele salvate și anunțurile SEAP deschise și răspunde pe baza lor. Configurare pentru Claude, ChatGPT, Claude Code și Cursor.',
+        'Conectează-ți asistentul AI la Licits prin MCP sau API-ul doar pentru citire. Îți citește filtrele salvate și anunțurile SEAP deschise și răspunde pe baza lor. Configurare pentru ChatGPT, Claude, Cursor și Claude Code.',
     },
   },
   '/contact': {

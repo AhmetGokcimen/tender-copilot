@@ -119,7 +119,7 @@
     "id": "connectors",
     "h": "AI assistants you connect (API and MCP)",
     "p": [
-     "You can connect your own AI assistant, such as Claude or ChatGPT, or a script to Licits, with an API key or by signing in through OAuth. This is optional and off until you set it up.",
+     "You can connect your own AI assistant, such as ChatGPT or Claude, or a script to Licits, with an API key or by signing in through OAuth. This is optional and off until you set it up.",
      "What a connected assistant can read: your saved filters and company summary (company name, industry, CPV codes, keywords, excluded keywords, target countries, capacity, turnover and certifications), tenders ranked for your profile with their public notice text, the details of a tender, your deadlines, and your tender board. It cannot change anything, create keys or send messages. It does not receive your uploaded documents, your drafts, your CUI or your contact details."
     ],
     "list": [
@@ -129,7 +129,7 @@
      "When you sign in through OAuth, the app registers with us, gets a one-time code after you allow it, and swaps it for short-lived tokens. We store only hashes of them."
     ],
     "p2": [
-     "Once Licits answers your assistant, the data is held by the company that runs the assistant, such as Anthropic or OpenAI, under its own terms and privacy policy. It is not our processor: you chose it, and we do not control what it does with the data. Check its settings, especially whether conversations are used to train models.",
+     "Once Licits answers your assistant, the data is held by the company that runs the assistant, such as OpenAI or Anthropic, under its own terms and privacy policy. It is not our processor: you chose it, and we do not control what it does with the data. Check its settings, especially whether conversations are used to train models.",
      "Tender titles and texts come from third parties and can contain instructions aimed at AI tools. Licits marks them as data, but please check what your assistant does with them."
     ]
    },
@@ -146,7 +146,7 @@
      "Meta Platforms: the AI model described above.",
      "FormSubmit: forwards contact-form messages to our inbox. Your browser sends the message to FormSubmit, which emails it to us.",
      "Google: the icon font is loaded from Google Fonts, so your IP address is sent to Google when a page loads.",
-     "AI assistant providers you choose to connect, such as Anthropic or OpenAI: they receive what your assistant reads from Licits, only after you connect one.",
+     "AI assistant providers you choose to connect, such as OpenAI or Anthropic: they receive what your assistant reads from Licits, only after you connect one.",
      "ANAF: when you enter a CUI, the CUI is sent to ANAF's public service to look up the company's registration details.",
      "Google Analytics: visitor statistics, only if you accept the analytics cookies. Google acts as our processor."
     ],
@@ -349,7 +349,7 @@
     "id": "connectors",
     "h": "Asistenți AI pe care îi conectezi (API și MCP)",
     "p": [
-     "Îți poți conecta la Licits propriul asistent AI, precum Claude sau ChatGPT, sau un script, cu o cheie API sau autentificându-te prin OAuth. Este opțional și oprit până îl configurezi.",
+     "Îți poți conecta la Licits propriul asistent AI, precum ChatGPT sau Claude, sau un script, cu o cheie API sau autentificându-te prin OAuth. Este opțional și oprit până îl configurezi.",
      "Ce poate citi un asistent conectat: filtrele salvate și un rezumat al firmei (denumirea, domeniul, codurile CPV, cuvintele-cheie, cuvintele excluse, țările țintă, capacitatea, cifra de afaceri și certificările), licitații ordonate după profilul tău împreună cu textul public al anunțului, detaliile unei licitații, termenele și tabloul tău de licitații. Nu poate modifica nimic, nu poate crea chei și nu poate trimite mesaje. Nu primește documentele încărcate, ciornele, CUI-ul sau datele tale de contact."
     ],
     "list": [
@@ -359,7 +359,7 @@
      "Când te autentifici prin OAuth, aplicația se înregistrează la noi, primește un cod unic după ce o permiți și îl schimbă pe token-uri cu viață scurtă. Stocăm doar amprentele lor."
     ],
     "p2": [
-     "După ce Licits răspunde asistentului tău, datele ajung la compania care operează asistentul, de exemplu Anthropic sau OpenAI, conform propriilor termeni și politici de confidențialitate. Nu este persoana noastră împuternicită: tu l-ai ales, iar noi nu controlăm ce face cu datele. Verifică setările lui, mai ales dacă conversațiile sunt folosite pentru antrenarea modelelor.",
+     "După ce Licits răspunde asistentului tău, datele ajung la compania care operează asistentul, de exemplu OpenAI sau Anthropic, conform propriilor termeni și politici de confidențialitate. Nu este persoana noastră împuternicită: tu l-ai ales, iar noi nu controlăm ce face cu datele. Verifică setările lui, mai ales dacă conversațiile sunt folosite pentru antrenarea modelelor.",
      "Titlurile și textele licitațiilor provin de la terți și pot conține instrucțiuni adresate instrumentelor AI. Licits le marchează ca simple date, dar verifică ce face asistentul tău cu ele."
     ]
    },
@@ -376,7 +376,7 @@
      "Meta Platforms: modelul AI descris mai sus.",
      "FormSubmit: transmite mesajele din formularul de contact în căsuța noastră. Browserul tău trimite mesajul către FormSubmit, care ni-l trimite prin email.",
      "Google: fontul de pictograme se încarcă din Google Fonts, deci adresa ta IP este trimisă către Google când se încarcă o pagină.",
-     "Furnizorii de asistenți AI pe care alegi să îi conectezi, precum Anthropic sau OpenAI: primesc ce citește asistentul tău din Licits, doar după ce conectezi unul.",
+     "Furnizorii de asistenți AI pe care alegi să îi conectezi, precum OpenAI sau Anthropic: primesc ce citește asistentul tău din Licits, doar după ce conectezi unul.",
      "ANAF: când introduci un CUI, acesta este trimis serviciului public al ANAF pentru a obține datele de înregistrare ale firmei.",
      "Google Analytics: statistici despre vizitatori, doar dacă accepți cookie-urile de analiză. Google acționează ca persoană împuternicită a noastră."
     ],
