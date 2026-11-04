@@ -134,7 +134,6 @@ export async function askAssistant(body: unknown): Promise<{
   highlight_selector: string | null;
   navigate_to: string | null;
   agent: string;
-  revision: { target: string; before: string; after: string } | null;
 }> {
   return post('/assistant/chat', body);
 }

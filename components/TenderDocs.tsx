@@ -13,7 +13,6 @@ import { legacyPatch } from '@/lib/legacy-profile';
 import type { BidInputs } from '@/lib/bid-inputs';
 import { useCompanyStore } from '@/stores/useCompanyStore';
 import { outputKey, useGeneratorStore, type DocType } from '@/stores/useGeneratorStore';
-import { useAssistantStore } from '@/stores/useAssistantStore';
 import { DOC_TITLES, buildDraftSections, draftFrontMatter } from '@/lib/draft-template';
 import { runBidAgent } from '@/lib/api';
 import { agentSummary, type AgentOutputs } from '@/lib/agents';
@@ -75,9 +74,7 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
   const generating = useGeneratorStore((s) => s.generating);
   const setDoc = useGeneratorStore((s) => s.setDoc);
   const updateDocContent = useGeneratorStore((s) => s.updateDocContent);
-  const setDocEditTarget = useGeneratorStore((s) => s.setDocEditTarget);
   const setGenerating = useGeneratorStore((s) => s.setGenerating);
-  const openAssistant = useAssistantStore((s) => s.setOpen);
 
   const [docSel, setDocSel] = useState<Record<DocType, boolean>>(() => suggestDocTypes(tender));
   const [selectedEvidence, setSelectedEvidence] = useState<string[] | null>(null);
@@ -187,7 +184,6 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
         attribution: sections.map((s) => ({ head: s.title, agent: s.agent })),
         updatedAt: now,
         edited: false,
-        aiRevised: false,
       });
     }
     setOpenKey(outputKey(tender.external_id, enabledDocs[0]));
@@ -321,12 +317,6 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
     } finally {
       setPacking('idle');
     }
-  };
-
-  const askAi = () => {
-    if (!openDoc) return;
-    setDocEditTarget(openDoc.key);
-    openAssistant(true);
   };
 
   const authors =
@@ -520,7 +510,6 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
                 authors={authors}
                 onCopy={copy}
                 onDownloadPdf={downloadPdf}
-                onAskAi={askAi}
               />
             ) : (
               <div className="flex min-h-[320px] flex-1 flex-col items-center justify-center gap-space-sm rounded-lg border border-dashed border-outline-variant px-space-md text-center">
@@ -553,7 +542,6 @@ function OpenDocEditor({
   authors,
   onCopy,
   onDownloadPdf,
-  onAskAi,
 }: {
   view: 'edit' | 'pdf';
   onView: (v: 'edit' | 'pdf') => void;
@@ -566,7 +554,6 @@ function OpenDocEditor({
   authors: AgentId[];
   onCopy: () => void;
   onDownloadPdf: () => void;
-  onAskAi: () => void;
 }) {
   const doc = useGeneratorStore((s) => s.docs[docKey]);
   const contentVersion = useGeneratorStore((s) => s.contentVersion[docKey] ?? 0);
@@ -618,11 +605,9 @@ function OpenDocEditor({
       storeContent={doc.content}
       authors={authors}
       edited={doc.edited}
-      aiRevised={doc.aiRevised}
       exporting={exporting}
       copied={copied}
       onContentChange={(content) => updateDocContent(doc.key, content)}
-      onAskAi={onAskAi}
       onCopy={onCopy}
       onDownloadPdf={onDownloadPdf}
     />

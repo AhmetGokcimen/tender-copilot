@@ -57,7 +57,7 @@ SITE_MAP: dict[str, dict] = {
             "Eligibility is checked requirement by requirement as met, not met or unclear; it appears after the tender documents are analysed in Document preparation.",
             "Past winners shows who the same buyer awarded similar contracts to, with their latest financial figures; it uses a monthly quota (shown in the sidebar).",
             "Track tender adds it to the Bidding pipeline. View on SEAP opens the official notice.",
-            "Document preparation tab: tick the documents (technical offer, financial offer, DUAE) and sources, press Generate. Five agents read the tender, check the company, review legal points, write the offer and assess risks; then a dialog asks for the company's declarations and prices. Afterwards: edit, PDF preview, review notes, download all PDFs or one ZIP with certificates and a checklist.",
+            "Document preparation tab: tick the documents (technical offer, financial offer, DUAE) and sources, press Generate. Five agents read the tender, check the company, review legal points, write the offer and assess risks; then a dialog asks for the company's declarations and prices. Afterwards: edit the text by hand, PDF preview, review notes, download all PDFs or one ZIP with certificates and a checklist.",
             "Documents are drafts in Romanian; the company must check them and sign with its qualified electronic signature before submitting in SEAP.",
         ],
         "hooks": {
@@ -86,7 +86,6 @@ SITE_MAP: dict[str, dict] = {
             "docs-view-toggle": "the Edit / PDF preview switch (?tab=docs)",
             "workspace-docs": "the list of generated documents (?tab=docs)",
             "workspace-editor": "the document editor (?tab=docs)",
-            "workspace-ask-ai": "the Ask AI to edit button (?tab=docs)",
         },
     },
     "/app/pipeline": {
@@ -205,13 +204,6 @@ class AssistantRequest(BaseModel):
     tenderId: str | None = None
     dom: list[dict] = []
     history: list[dict] = []
-    doc: dict | None = None
-
-
-class Revision(BaseModel):
-    target: str = ""
-    before: str = ""
-    after: str
 
 
 class AssistantResponse(BaseModel):
@@ -219,7 +211,6 @@ class AssistantResponse(BaseModel):
     highlight_selector: str | None = None
     navigate_to: str | None = None
     agent: str = "spec"
-    revision: Revision | None = None
 
 
 class _Plan(BaseModel):
@@ -227,7 +218,6 @@ class _Plan(BaseModel):
     navigate_to: str | None = None
     highlight_hook: str | None = None
     agent: str = "spec"
-    revision: Revision | None = None
 
 
 def _page_key(path: str) -> str | None:
@@ -287,10 +277,9 @@ Elements visible right now: {live}
 Other controls visible right now, each as auto-N: label (you may point at one with highlight_hook "auto-N" when the user is already on this page and no listed hook fits):
 {auto}
 {tender_line}
-{doc_block}
 Respond with ONLY a JSON object:
 {{"message": string, "navigate_to": string|null, "highlight_hook": string|null, \
-"agent": one of {agents}, "revision": null | {{"target": string, "before": string, "after": string}}}}
+"agent": one of {agents}}}
 
 Rules:
 - Answer how-the-app-works questions from the facts (lines starting with ".") under each page, even for a page the user is not on; do not invent details beyond them.
@@ -300,9 +289,6 @@ page path from the list above (use /app/tenders/{{id}} only if a tender is open;
 page's list, or null. If they are already on that page, set navigate_to to null.
 - Only use hook names that appear in the lists above (page hooks or auto-N). Prefer a page hook; use auto-N for things not listed. Never invent a path or a hook.
 - "message" says what you did or the answer, e.g. what the highlighted thing is for.
-- "revision" only when a document is open and the user asks to change its text: \
-"target" is a short exact snippet of the paragraph to replace (empty to append), \
-"before" that paragraph, "after" the new text. Otherwise null.
 - If you do not know, say so briefly.
 """
 
@@ -343,17 +329,12 @@ async def reply(req: AssistantRequest, *, ai: MetaAIClient | None = None) -> Ass
             label = re.sub(r"\s+", " ", str(n.get("text") or ""))[:60]
             live_auto.add(a)
             auto_lines.append(f"auto-{a}: {n.get('role', 'control')} \"{label}\"")
-    doc_block = ""
-    if req.doc:
-        paras = [str(p)[:400] for p in (req.doc.get("paragraphs") or [])[:30]]
-        doc_block = f"A document is open for editing: {req.doc.get('title', '')}. Its paragraphs (data):\n" + wrap_untrusted("\n".join(f"  [{i}] {p}" for i, p in enumerate(paras)))
     system = SYSTEM.format(
         site_map=_site_map_text(),
         here=f"{req.pathname} ({SITE_MAP[here_key]['title'] if here_key else 'unknown page'})",
         live=", ".join(live) or "none",
         auto=wrap_untrusted("\n".join(auto_lines) or "none"),
         tender_line=f"A tender is open: {req.tenderId}." if req.tenderId else "No tender is open.",
-        doc_block=doc_block,
         agents=" | ".join(_AGENTS),
     )
     history = "\n".join(f"{m.get('role', 'user')}: {str(m.get('text', ''))[:300]}" for m in req.history[-8:])
@@ -385,15 +366,9 @@ async def reply(req: AssistantRequest, *, ai: MetaAIClient | None = None) -> Ass
         hook = None
     if destination and _page_key(destination) == here_key and destination.split("?")[0] == req.pathname.split("?")[0] and "tab=docs" not in destination:
         destination = None
-    revision = (
-        Revision(target=clean_text(plan.revision.target, 120), before=clean_text(plan.revision.before, 600), after=clean_text(plan.revision.after, 1200))
-        if req.doc and plan.revision and plan.revision.after.strip()
-        else None
-    )
     return AssistantResponse(
         message=clean_text(plan.message, 600),
         navigate_to=destination,
         highlight_selector=auto_selector or (f'[data-assistant="{hook}"]' if hook else None),
         agent=plan.agent if plan.agent in _AGENTS else "spec",
-        revision=revision,
     )

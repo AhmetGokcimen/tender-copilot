@@ -7,7 +7,7 @@
 import { fetchTender } from './api';
 import type { TenderWithState } from './types';
 import type { DomContextNode } from './dom-context';
-import type { AssistantRequest, AssistantResponse, DocEditContext } from './assistant-api';
+import type { AssistantRequest, AssistantResponse } from './assistant-api';
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -97,113 +97,9 @@ async function loadTender(tenderId: string | null): Promise<TenderWithState | un
   }
 }
 
-const EDIT_RE =
-  /(edit|rewrite|rephrase|reword|shorten|shorter|concise|condense|expand|extend|change|replace|fix|update|improve|\badd\b)/i;
-
-/** Strip control chars + collapse whitespace; user text is rendered as text only. */
-function sanitizeSnippet(s: string, max = 200): string {
-  return s
-    .replace(/[^\u0020-\u007E\u00A0-\u024F\u1E00-\u1EFF]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, max);
-}
-
-/**
- * Document-revision intent (mock): proposes an edit to the open workspace
- * document as { target, before, after }. The revision applies only after the
- * user presses Accept — and user instruction text is only ever embedded in
- * the new-note template after sanitizing, never executed or used raw.
- */
-function docEditReply(doc: DocEditContext, question: string): AssistantResponse {
-  const q = question.toLowerCase();
-  const paras = doc.paragraphs.filter((p) => p.trim().length > 0);
-  const editor = '[data-assistant="workspace-editor"]';
-
-  // Quoted replacement: change "X" to "Y".
-  const quoted = question.match(/"([^"]{1,120})"\s*(?:with|to|into|->|→)\s*"([^"]{1,300})"/);
-  if (quoted && /(change|replace|fix|update)/.test(q)) {
-    const from = sanitizeSnippet(quoted[1]);
-    const to = sanitizeSnippet(quoted[2], 300);
-    const hit = paras.find((p) => p.includes(from));
-    if (!hit || from === '') {
-      return {
-        agent: 'writer',
-        highlight_selector: editor,
-        message: `I couldn't find that exact wording in the open ${doc.title}. Quote the text as it appears and I'll replace it.`,
-      };
-    }
-    return {
-      agent: 'writer',
-      highlight_selector: editor,
-      message: `Proposed replacement in the ${doc.title} — accept to apply it.`,
-      revision: { target: from.slice(0, 80), before: hit, after: hit.replace(from, to) },
-    };
-  }
-
-  // Shorten the longest paragraph (naive first-sentences condense).
-  if (/(shorten|shorter|concise|condense|summar)/.test(q)) {
-    const cand = [...paras].sort((a, b) => b.length - a.length)[0];
-    if (!cand || cand.length < 180) {
-      return {
-        agent: 'writer',
-        highlight_selector: editor,
-        message: `The paragraphs in the ${doc.title} are already short — nothing worth condensing.`,
-      };
-    }
-    const sentences = cand.match(/[^.!?]+[.!?]+/g) ?? [cand];
-    let after = '';
-    for (const s of sentences) {
-      if (after === '' || (after + s).trim().length <= 240) after += s;
-      else break;
-    }
-    after = after.trim();
-    if (after === cand.trim()) {
-      return {
-        agent: 'writer',
-        highlight_selector: editor,
-        message: `The longest paragraph in the ${doc.title} is a single statement — already concise.`,
-      };
-    }
-    return {
-      agent: 'writer',
-      highlight_selector: editor,
-      message: `Here's a tighter version of the longest paragraph in the ${doc.title} — accept to apply it.`,
-      revision: { target: cand.slice(0, 80), before: cand, after },
-    };
-  }
-
-  // Append a review note.
-  if (/\badd\b/.test(q)) {
-    const m = q.match(/add (?:a )?(?:note|paragraph|sentence)(?: about)? ?(.{1,120})?/);
-    const topic = sanitizeSnippet((m?.[1] ?? '').replace(/[?!.]+$/, ''), 80) || 'this offer';
-    return {
-      agent: 'writer',
-      highlight_selector: editor,
-      message: `I'll append this note to the ${doc.title} — accept to apply it.`,
-      revision: {
-        target: '',
-        before: '',
-        after: `Note on ${topic}: verified against the tender file and attached to this offer.`,
-      },
-    };
-  }
-
-  return {
-    agent: 'writer',
-    highlight_selector: editor,
-    message:
-      `To revise the ${doc.title}, tell me what to change — e.g. "shorten the longest paragraph", ` +
-      '"add a note about the warranty", or \'change "X" to "Y"\'.',
-  };
-}
-
 export async function mockAssistantReply(req: AssistantRequest): Promise<AssistantResponse> {
   await delay(900);
   const q = req.question.toLowerCase();
-  // Document revision takes priority whenever an edit instruction arrives
-  // with an open workspace document.
-  if (req.doc && EDIT_RE.test(q)) return docEditReply(req.doc, req.question);
   const tender = await loadTender(req.tenderId);
   const onTenderDetail = req.pathname.includes('/app/tenders/');
   const short = tender

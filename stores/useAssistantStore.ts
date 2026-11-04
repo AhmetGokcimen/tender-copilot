@@ -4,10 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { AgentId } from '@/lib/types';
 import { collectDomContext } from '@/lib/dom-context';
-import { postAssistant, type DocEditContext } from '@/lib/assistant-api';
-import { docHeadings, docParagraphs } from '@/lib/doc-convert';
-import { DOC_TITLES } from '@/lib/draft-template';
-import { useGeneratorStore } from './useGeneratorStore';
+import { postAssistant } from '@/lib/assistant-api';
 import {
   prefersReducedMotion,
   resolveVisibleTarget,
@@ -64,22 +61,6 @@ function clearTimers() {
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/** Bounded snapshot of the document under revision (tender detail only). */
-function collectDocContext(pathname: string): DocEditContext | null {
-  if (!pathname.includes('/app/tenders/')) return null;
-  const g = useGeneratorStore.getState();
-  const doc = g.docEditTarget ? g.docs[g.docEditTarget] : undefined;
-  if (!doc) return null;
-  return {
-    key: doc.key,
-    title: DOC_TITLES[doc.doc],
-    headings: docHeadings(doc.content).slice(0, 12),
-    paragraphs: docParagraphs(doc.content)
-      .slice(0, 40)
-      .map((p) => p.slice(0, 400)),
-  };
-}
-
 export const useAssistantStore = create<AssistantState>()(
   persist(
     (set, get) => ({
@@ -110,7 +91,6 @@ export const useAssistantStore = create<AssistantState>()(
         try {
           // Fresh DOM + document context on every question.
           const dom = collectDomContext();
-          const doc = collectDocContext(ctx.pathname);
           const history = get()
             .messages.slice(-10)
             .map((m) => ({ role: m.role, text: m.text }));
@@ -120,17 +100,7 @@ export const useAssistantStore = create<AssistantState>()(
             tenderId: ctx.tenderId,
             dom,
             history,
-            doc,
           });
-          if (res.revision && doc) {
-            useGeneratorStore.getState().setPendingRevision({
-              key: doc.key,
-              target: res.revision.target,
-              before: res.revision.before,
-              after: res.revision.after,
-              instruction: clean,
-            });
-          }
           await delay(prefersReducedMotion() ? 0 : 650);
           set((s) => ({
             messages: [

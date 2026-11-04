@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { JSONContent } from '@tiptap/react';
 import type { AgentId, DraftSection } from '@/lib/types';
-import { applyRevisionToJson, sectionsToTiptap } from '@/lib/doc-convert';
+import { sectionsToTiptap } from '@/lib/doc-convert';
 
 export type DocType = 'technical' | 'financial' | 'duae';
 
@@ -20,33 +20,15 @@ export interface WorkspaceDoc {
   updatedAt: string;
   /** User typed in the editor. */
   edited: boolean;
-  /** An AI revision was accepted. */
-  aiRevised: boolean;
-}
-
-export interface PendingRevision {
-  key: string;
-  /** Snippet identifying the paragraph to replace; '' appends a new one. */
-  target: string;
-  before: string;
-  after: string;
-  instruction: string;
 }
 
 interface GeneratorState {
   docs: Record<string, WorkspaceDoc>;
-  /** Bumped on external content changes (AI revision) so the editor reloads. */
+  /** Bumped on external content changes (regenerate) so the editor reloads. */
   contentVersion: Record<string, number>;
-  pendingRevision: PendingRevision | null;
-  /** Document key the assistant is currently revising (null = plain chat). */
-  docEditTarget: string | null;
   generating: boolean;
   setDoc: (doc: WorkspaceDoc) => void;
   updateDocContent: (key: string, content: JSONContent) => void;
-  setPendingRevision: (rev: PendingRevision | null) => void;
-  setDocEditTarget: (key: string | null) => void;
-  acceptRevision: () => void;
-  rejectRevision: () => void;
   setGenerating: (value: boolean) => void;
 }
 
@@ -57,8 +39,6 @@ export const useGeneratorStore = create<GeneratorState>()(
     (set) => ({
       docs: {},
       contentVersion: {},
-      pendingRevision: null,
-      docEditTarget: null,
       generating: false,
       setDoc: (doc) =>
         set((s) => ({
@@ -81,37 +61,6 @@ export const useGeneratorStore = create<GeneratorState>()(
                 },
               },
         ),
-      setPendingRevision: (rev) => set({ pendingRevision: rev }),
-      setDocEditTarget: (key) => set({ docEditTarget: key }),
-      acceptRevision: () =>
-        set((s) => {
-          const rev = s.pendingRevision;
-          const doc = rev ? s.docs[rev.key] : undefined;
-          if (!rev || !doc) return { pendingRevision: null };
-          const replaced = applyRevisionToJson(doc.content, rev.target, rev.after);
-          // Never lose AI work: if the target paragraph is gone (user edited
-          // meanwhile), append the revision instead of dropping it.
-          const final = replaced.applied
-            ? replaced.doc
-            : applyRevisionToJson(doc.content, '', rev.after).doc;
-          return {
-            docs: {
-              ...s.docs,
-              [rev.key]: {
-                ...doc,
-                content: final,
-                updatedAt: new Date().toISOString(),
-                aiRevised: true,
-              },
-            },
-            contentVersion: {
-              ...s.contentVersion,
-              [rev.key]: (s.contentVersion[rev.key] ?? 0) + 1,
-            },
-            pendingRevision: null,
-          };
-        }),
-      rejectRevision: () => set({ pendingRevision: null }),
       setGenerating: (generating) => set({ generating }),
     }),
     {
@@ -144,7 +93,6 @@ export const useGeneratorStore = create<GeneratorState>()(
             attribution: sections.map((s) => ({ head: s.title, agent: s.agent })),
             updatedAt: now,
             edited: p.edited?.[key] ?? false,
-            aiRevised: false,
           };
         }
         return { docs };
