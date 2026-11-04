@@ -33,7 +33,14 @@ export function HeroBackdrop() {
   return (
     <div ref={ref} aria-hidden data-glow="off" className="group/glow pointer-events-none absolute inset-0 overflow-hidden">
       {/* Soft brand light and a faint grid, like paper under the cards. */}
-      <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_20%_0%,rgb(var(--ribbon-1-rgb)/0.10),transparent_70%),radial-gradient(50%_45%_at_90%_100%,rgb(var(--ribbon-4-rgb)/0.12),transparent_70%),radial-gradient(40%_40%_at_100%_10%,rgb(var(--ribbon-2-rgb)/0.10),transparent_70%)]" />
+      {/* The light dies out toward the bottom edge instead of being cut by the section's end. */}
+      <div
+        className="absolute inset-0 bg-[radial-gradient(60%_50%_at_20%_0%,rgb(var(--ribbon-1-rgb)/0.10),transparent_70%),radial-gradient(50%_45%_at_90%_80%,rgb(var(--ribbon-4-rgb)/0.12),transparent_70%),radial-gradient(40%_40%_at_100%_10%,rgb(var(--ribbon-2-rgb)/0.10),transparent_70%)]"
+        style={{
+          maskImage: 'linear-gradient(to bottom, #000 0%, #000 45%, transparent 98%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, #000 0%, #000 45%, transparent 98%)',
+        }}
+      />
       <div
         className="absolute inset-0 opacity-[0.28]"
         style={{
