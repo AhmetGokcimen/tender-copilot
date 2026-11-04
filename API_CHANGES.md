@@ -6,6 +6,16 @@ They are merged here, history preserved below. The versioned contract is
 
 ---
 
+# MCP quota counts tool calls only; OAuth revocation (2026-11-04)
+
+- `POST /api/mcp`: only `tools/call` is charged to the daily quota. `initialize`, `tools/list`, `ping` and notifications are free and still answer when the quota is spent. REST `/api/v1/*` is unchanged (every request counts).
+- `POST /api/oauth/revoke` (RFC 7009), advertised as `revocation_endpoint` in `/.well-known/oauth-authorization-server`.
+- OAuth clients that registered but never connected are deleted after 7 days.
+- Tender `authority` in `/api/v1` and MCP results no longer carries SEAP's leading CUI ("4344570 - COMUNA X" is now "COMUNA X").
+- `SITE.email` now shows the contact address in the footer.
+
+---
+
 # Connector directory readiness (2026-11-03)
 
 Additive. Preparation for listing Licits in Claude's connectors directory: [docs/CONNECTOR_SUBMISSION.md](docs/CONNECTOR_SUBMISSION.md).

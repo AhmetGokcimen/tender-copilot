@@ -74,7 +74,16 @@ export default async function McpDocsPage({ params }: { params: Promise<{ locale
         <h2 id="connect" className={H2}>
           {t('connectTitle')}
         </h2>
-        <h3 className="text-[18px] font-medium text-ink">{t('claudeTitle')}</h3>
+        <h3 className="text-[18px] font-medium text-ink">{t('gptTitle')}</h3>
+        <ol className="grid gap-2 pl-5 [list-style:decimal]">
+          {(['gpt1', 'gpt2', 'gpt3', 'gpt4'] as const).map((k) => (
+            <li key={k} className={BODY}>
+              {t(k)}
+            </li>
+          ))}
+        </ol>
+        <p className="text-[14px] leading-[21px] text-muted">{t('gptNote')}</p>
+        <h3 className="mt-2 text-[18px] font-medium text-ink">{t('claudeTitle')}</h3>
         <ol className="grid gap-2 pl-5 [list-style:decimal]">
           {(['claude1', 'claude2', 'claude3', 'claude4'] as const).map((k) => (
             <li key={k} className={BODY}>
@@ -82,8 +91,6 @@ export default async function McpDocsPage({ params }: { params: Promise<{ locale
             </li>
           ))}
         </ol>
-        <h3 className="mt-2 text-[18px] font-medium text-ink">{t('gptTitle')}</h3>
-        <p className={BODY}>{t('gptBody')}</p>
         <h3 className="mt-2 text-[18px] font-medium text-ink">{t('keyTitle')}</h3>
         <p className={BODY}>{t('keyBody')}</p>
         <Code>{CLAUDE_CODE}</Code>

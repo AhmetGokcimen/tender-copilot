@@ -9,6 +9,7 @@ came from a third party (tender titles, descriptions, authority names) sits
 under keys the MCP layer flags as untrusted.
 """
 
+import re
 from datetime import UTC, datetime, timedelta
 from typing import Literal
 
@@ -49,6 +50,12 @@ def _cut(text: str | None, n: int) -> str | None:
     return text if len(text) <= n else text[: n - 1].rstrip() + "…"
 
 
+def _authority(name: str | None) -> str | None:
+    """SEAP prefixes the buyer's CUI ("4344570 - COMUNA SOTANGA"); an
+    assistant reads better without it."""
+    return re.sub(r"^\s*\d{2,10}\s*-\s*", "", name).strip() if name else name
+
+
 def _days_left(tender: Tender, now: datetime) -> int | None:
     deadline = _aware(tender.submission_deadline)
     return None if deadline is None else (deadline - now).days
@@ -70,7 +77,7 @@ def _item(tender: Tender, state: UserTenderState | None, now: datetime) -> dict:
         "id": tender.external_id,
         "title": tender.ai_title_simplified or tender.title,
         "original_title": tender.title if tender.ai_title_simplified else None,
-        "authority": tender.contracting_authority,
+        "authority": _authority(tender.contracting_authority),
         "county": tender.county,
         "country": tender.country_code,
         "cpv_codes": tender.cpv_codes,

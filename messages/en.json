@@ -326,16 +326,16 @@
     "footerResources": "Guides",
     "asstEyebrow": "AI assistants",
     "asstTitle": "Ask your own AI for the tender you can win.",
-    "asstSub": "Connect Claude, ChatGPT or Cursor to Licits. Your assistant reads your filters and the open SEAP notices, and answers from them. Read only, and you can disconnect it in one click.",
+    "asstSub": "Connect ChatGPT, Claude or Cursor to Licits. Your assistant reads your filters and the open SEAP notices, and answers from them. Read only, and you can disconnect it at any time.",
     "asst1Title": "Your filters, your ranking",
     "asst1Body": "It starts from the profile you set up: your trades, CPV codes, counties and exclusions. The answer is ranked for your firm, not for everyone.",
     "asst2Title": "Read only",
     "asst2Body": "It can look at tenders, deadlines and your board. It cannot change anything, send anything or see your documents.",
     "asst3Title": "Connected in a minute",
-    "asst3Body": "In Claude, add Licits as a connector and sign in. For other tools, copy a key from Settings.",
+    "asst3Body": "In ChatGPT or Claude, add Licits as a connector and sign in. For other tools, copy a key from Settings.",
     "asstLink": "How to connect it",
-    "asstWorks": "Works with Claude, ChatGPT and Cursor",
-    "asstExample": "Example",
+    "asstWorks": "Works with ChatGPT, Claude and Cursor",
+    "asstExample": "Example in ChatGPT",
     "asstUser": "Find me road works I can still prepare for. At least two weeks left.",
     "asstTool": "Used Licits: recommend_tenders",
     "asstReply": "Two open tenders fit your profile.",
@@ -346,8 +346,8 @@
     "asstMatch": "Match {score}",
     "asstClosing": "Both are open procedures. Check the official notice on SEAP before you decide.",
     "footerAssistant": "AI assistant",
-    "faq7Q": "Can I use Licits from Claude or ChatGPT?",
-    "faq7A": "Yes. In Claude, add Licits as a custom connector (Settings, Connectors) and sign in. For tools that take a key, such as Claude Code or Cursor, create one in Settings. The assistant can read your saved filters, search tenders, open a tender and list your deadlines. It is read only: it cannot change your account or submit anything, and you can disconnect it at any time."
+    "faq7Q": "Can I use Licits from ChatGPT or Claude?",
+    "faq7A": "Yes. In ChatGPT or Claude, add Licits as a custom connector and sign in with your Licits account. For tools that take a key, such as Cursor or Claude Code, create one in Settings. The assistant can read your saved filters, search tenders, open a tender and list your deadlines. It is read only: it cannot change your account or submit anything, and you can disconnect it at any time. Which ChatGPT plans can add a custom connector is decided by OpenAI."
   },
   "about": {
     "eyebrow": "About Licits",
@@ -438,9 +438,9 @@
     "fApi100": "AI assistant and API, 100 calls a day",
     "fApi1000": "AI assistant and API, 1,000 calls a day",
     "fApi5000": "AI assistant and API, 5,000 calls a day",
-    "tip_fApi100": "Connect Claude, ChatGPT or Cursor to your tenders. Your assistant reads your filters and the open notices, and answers from them. Read only. 100 calls a day, shared by all your keys.",
-    "tip_fApi1000": "Connect Claude, ChatGPT or Cursor to your tenders. Your assistant reads your filters and the open notices, and answers from them. Read only. 1,000 calls a day, shared by all your keys.",
-    "tip_fApi5000": "Connect Claude, ChatGPT or Cursor to your tenders. Your assistant reads your filters and the open notices, and answers from them. Read only. 5,000 calls a day, shared by all your keys."
+    "tip_fApi100": "Connect ChatGPT, Claude or Cursor to your tenders. Your assistant reads your filters and the open notices, and answers from them. Read only. 100 calls a day, shared by all your keys.",
+    "tip_fApi1000": "Connect ChatGPT, Claude or Cursor to your tenders. Your assistant reads your filters and the open notices, and answers from them. Read only. 1,000 calls a day, shared by all your keys.",
+    "tip_fApi5000": "Connect ChatGPT, Claude or Cursor to your tenders. Your assistant reads your filters and the open notices, and answers from them. Read only. 5,000 calls a day, shared by all your keys."
   },
   "contact": {
     "title": "Contact us",
@@ -1175,13 +1175,13 @@
   },
   "apiAccess": {
     "title": "AI assistant & API",
-    "subtitle": "Connect Claude, ChatGPT or Cursor to your tenders, ranked by the filters in your profile. Read-only.",
+    "subtitle": "Connect ChatGPT, Claude or Cursor to your tenders, ranked by the filters in your profile. Read-only.",
     "mockNote": "Demo mode: keys made here are not real. Sign in to create working keys.",
     "usage": "{used} of {limit} calls used today",
     "keysTitle": "Your keys",
     "none": "No keys yet.",
     "name": "Key name",
-    "namePlaceholder": "e.g. Claude on my laptop",
+    "namePlaceholder": "e.g. Cursor on my laptop",
     "expiry": "Expires",
     "never": "Never",
     "days30": "In 30 days",
@@ -1209,8 +1209,8 @@
     "yourKey": "YOUR_API_KEY",
     "toolsTitle": "What the assistant can do",
     "tools": "Read your saved filters, recommend the best open tenders, search by county, CPV code, value or deadline, open a tender's details, and list your deadlines and board. It cannot change anything in your account.",
-    "tabWeb": "Claude.ai / ChatGPT",
-    "webSteps": "In Claude.ai: Settings → Connectors → Add custom connector, paste the address below and connect. You sign in to Licits and allow access, no key needed. ChatGPT: Settings → Connectors → add a custom MCP connector with the same address.",
+    "tabWeb": "ChatGPT / Claude.ai",
+    "webSteps": "ChatGPT (on the web): open Plugins, add a custom MCP server, paste the address below and choose OAuth. Claude.ai: Settings → Connectors → Add custom connector, paste the address and connect. Either way you sign in to Licits and allow access, no key needed. Menu names change, so look for the custom MCP server or connector option.",
     "connectedApp": "Connected app",
     "disconnect": "Disconnect",
     "confirmDisconnect": "Disconnect for good?"
@@ -1234,7 +1234,7 @@
   "mcpDocs": {
     "eyebrow": "Docs",
     "title": "Connect your AI assistant to Licits",
-    "lead": "Licits has an MCP server and a read-only API. Connect Claude, ChatGPT, Cursor or your own script and ask for the tenders that fit your firm. Answers come from your saved filters and the open SEAP notices.",
+    "lead": "Licits has an MCP server and a read-only API. Connect ChatGPT, Claude, Cursor or your own script and ask for the tenders that fit your firm. Answers come from your saved filters and the open SEAP notices.",
     "address": "Server address",
     "connectTitle": "Connect",
     "claudeTitle": "Claude (claude.ai and the desktop app)",
@@ -1243,8 +1243,7 @@
     "claude3": "Click Connect. Sign in to Licits and press Allow.",
     "claude4": "Start a chat and ask, for example: Find me the best open tenders for my company.",
     "gptTitle": "ChatGPT",
-    "gptBody": "Open Settings, then Connectors, and add a custom MCP connector with the same address. Sign in to Licits when asked. Availability depends on your ChatGPT plan.",
-    "keyTitle": "Claude Code, Cursor and other tools",
+    "keyTitle": "Cursor, Claude Code and other tools",
     "keyBody": "These send a key instead of signing in. Create one in Settings, under AI assistant and API. It is shown once, so copy it then.",
     "toolsTitle": "What the assistant can do",
     "toolName": "Tool",
@@ -1261,7 +1260,7 @@
     "prompt3": "What am I preparing, and what closes this week?",
     "prompt4": "Open tender 123456 and tell me what we are missing to bid.",
     "limitsTitle": "Limits",
-    "limitsBody": "Each plan has a daily call limit, shared by all your keys and connected apps. It resets at 00:00 UTC. An answer holds at most 25 tenders, and you can hold up to 5 keys.",
+    "limitsBody": "Each plan has a daily call limit, shared by all your keys and connected apps. It resets at 00:00 UTC. An answer holds at most 25 tenders, and you can hold up to 5 keys. In the assistant, only tool calls count, not the connection handshake.",
     "planCol": "Plan",
     "callsCol": "Calls a day",
     "safetyTitle": "Safety and privacy",
@@ -1274,6 +1273,11 @@
     "apiBody": "The same data over plain HTTP, for scripts. Send your key in the Authorization header. Endpoints: /api/v1/me, /profile, /tenders, /tenders/{id}, /deadlines and /pipeline.",
     "supportTitle": "Support",
     "supportBody": "A question, or a problem connecting? Write to us and a person replies.",
-    "supportLink": "Contact"
+    "supportLink": "Contact",
+    "gpt1": "On the web, open Plugins and choose to add a custom MCP server.",
+    "gpt2": "Name it Licits, paste the server address above and set authentication to OAuth.",
+    "gpt3": "Accept the warning about custom servers, then sign in to Licits and press Allow.",
+    "gpt4": "Start a chat and ask, for example: Find me the best open tenders for my company.",
+    "gptNote": "Which plans can add a custom MCP server is decided by OpenAI and changes, so check your plan on their help page. Licits only reads, so it works with read-only access."
   }
 }

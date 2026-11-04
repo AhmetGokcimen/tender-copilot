@@ -1,6 +1,6 @@
 # API keys, REST API and MCP server
 
-Users can let their own AI assistant (Claude, ChatGPT, Cursor, ...) or a script read their tenders. The data is the same as in the web app and is ranked for the user's saved profile (CPV codes, keywords, exclusions, capacity, certifications), so "find me something good" means good *for this company*.
+Users can let their own AI assistant (ChatGPT, Claude, Cursor, ...) or a script read their tenders. The data is the same as in the web app and is ranked for the user's saved profile (CPV codes, keywords, exclusions, capacity, certifications), so "find me something good" means good *for this company*.
 
 Everything exposed here is **read-only**. A leaked key can read tenders; it cannot change an account, create keys or send anything.
 
@@ -21,13 +21,13 @@ Example prompts once connected:
 | `/api/api-keys` | creating, listing, revoking keys (web app only) | the normal session JWT |
 | `/api/v1/*` | read-only REST | `Authorization: Bearer ofk_…` |
 | `/api/mcp` | MCP server | `Authorization: Bearer ofk_…` **or** an OAuth access token `ofo_…` |
-| `/api/oauth/*`, `/.well-known/*` | letting claude.ai / ChatGPT sign the user in | none (public endpoints, see below) |
+| `/api/oauth/*`, `/.well-known/*` | letting ChatGPT / claude.ai sign the user in | none (public endpoints, see below) |
 
 A key cannot create keys, and a session JWT is not accepted on `/api/v1` or `/api/mcp`. Keys are `ofk_` + 43 random URL-safe characters; only their SHA-256 is stored. Unknown, revoked and expired keys all return the same `401`.
 
 ## Limits
 
-- **Daily quota per user** (all keys together, UTC day): start 100, growth 1000, pro 5000 calls (`backend/core/plans.py`, `API_DAILY_CALLS`). Beyond it: `429` with `Retry-After` until 00:00 UTC. Every request counts, including MCP `initialize`/`tools/list`.
+- **Daily quota per user** (all keys together, UTC day): start 100, growth 1000, pro 5000 calls (`backend/core/plans.py`, `API_DAILY_CALLS`). Beyond it: `429` with `Retry-After` until 00:00 UTC. Every REST request counts. On MCP only `tools/call` counts: the handshake (`initialize`, `tools/list`, `ping`) is free and keeps working when the quota is spent.
 - **Burst**: 60 calls per minute per key, kept in memory per serverless instance (best effort).
 - **Page size**: at most 25 tenders per call.
 - At most 5 active keys per user.
@@ -50,7 +50,7 @@ curl -H "Authorization: Bearer $LICITS_KEY" \
   "https://licits.com/api/v1/tenders?cpv=45&min_days_left=14&min_score=60&limit=5"
 ```
 
-Interactive, always-current reference: `/docs` (FastAPI). The static `backend/openapi.json` snapshot is regenerated separately and has not been refreshed for these endpoints.
+Interactive, always-current reference: `/docs` (FastAPI). The static `backend/openapi.json` snapshot is regenerated with the command in [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ## MCP: `/api/mcp`
 
@@ -97,7 +97,7 @@ Claude Desktop (through `mcp-remote`):
 }
 ```
 
-## Connecting claude.ai and ChatGPT (OAuth)
+## Connecting ChatGPT and claude.ai (OAuth)
 
 These connectors cannot send a custom header, so the MCP server is also an OAuth 2.1 authorization server. The user adds the address `https://<site>/api/mcp` as a custom connector, signs in to Licits, clicks **Allow**, and is connected. No key to copy.
 
@@ -112,6 +112,7 @@ What happens:
 Rules enforced (`backend/core/oauth.py`):
 
 - PKCE `S256` is mandatory; codes live 5 minutes and work once. A reused code disconnects the app.
+- `POST /api/oauth/revoke` (RFC 7009) disconnects an app from its access or refresh token. Apps that registered but never connected are purged after 7 days.
 - Redirect addresses are exact-match against what the app registered (loopback addresses match on any port). `javascript:`, `data:`, plain `http://` to non-loopback hosts and fragments are refused at registration. An unregistered address gets a plain `400`, never a redirect.
 - Refresh tokens rotate; presenting an old one disconnects the app.
 - One read-only scope, `tenders.read`, the same reach as an API key. Registration is limited to 10 per client IP per hour.
@@ -140,7 +141,7 @@ Listing in Claude's connectors directory is prepared in [CONNECTOR_SUBMISSION.md
 | `backend/api/key_routes.py` | `/api/api-keys` (session JWT) |
 | `backend/api/v1_routes.py` | `/api/v1` |
 | `backend/api/mcp_routes.py` | `/api/mcp` |
-| `backend/core/oauth.py`, `backend/api/oauth_routes.py`, `backend/models/oauth.py` | OAuth server for claude.ai / ChatGPT |
+| `backend/core/oauth.py`, `backend/api/oauth_routes.py`, `backend/models/oauth.py` | OAuth server for ChatGPT / claude.ai |
 | `app/[locale]/auth/authorize/page.tsx` | consent page |
 | `components/ApiAccessSection.tsx` | Settings screen |
 | `backend/tests/test_api_access.py` | tests for all of the above |

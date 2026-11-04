@@ -9,7 +9,7 @@ import { INPUT } from '@/components/ui/form';
 
 type Tab = 'web' | 'claudeCode' | 'desktop' | 'cursor' | 'rest';
 
-const TABS: Tab[] = ['web', 'claudeCode', 'desktop', 'cursor', 'rest'];
+const TABS: Tab[] = ['web', 'cursor', 'claudeCode', 'desktop', 'rest'];
 const TAB_KEY: Record<Tab, 'tabWeb' | 'tabClaudeCode' | 'tabDesktop' | 'tabCursor' | 'tabRest'> = {
   web: 'tabWeb',
   claudeCode: 'tabClaudeCode',

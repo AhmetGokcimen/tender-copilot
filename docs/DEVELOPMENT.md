@@ -338,7 +338,7 @@ Actions sync workflow), `FRONTEND_URL` + `BACKEND_URL` (both = the deployed
 origin, e.g. `https://ofera.vercel.app`), `NEXT_PUBLIC_USE_MOCK=false`.
 Optional: `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` (Google login; without
 them only demo login works), `META_API_BASE_URL`/`META_MODEL` (gateway
-override), `ALLOWED_ORIGINS` (same-origin production never triggers CORS;
+override), `MCP_ALLOWED_ORIGINS` (extra browser hosts allowed to call `/api/mcp`, see [API_AND_MCP.md](API_AND_MCP.md)), `ALLOWED_ORIGINS` (same-origin production never triggers CORS;
 harmless to set to the deployed origin).
 
 Still open / next steps (not part of this restructure):

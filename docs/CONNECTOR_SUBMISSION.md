@@ -14,7 +14,8 @@ Anthropic's guide: https://claude.com/docs/connectors/building/submission (check
 | Public documentation | Done: https://licits.com/docs/mcp (EN) and https://licits.com/ro/docs/mcp (RO). |
 | Privacy policy covering the connector | Done: https://licits.com/privacy#connectors. |
 | Terms covering the connector | Done: https://licits.com/terms (section "Connecting your own AI assistant or scripts"). |
-| Support channel | Contact page https://licits.com/contact. **Needs your decision:** the form may want a support email address; `SITE.email` in `lib/site.ts` is still empty. |
+| Support channel | Contact page https://licits.com/contact, and the address shown in the footer and legal notices (`CONTACT_EMAIL` in `lib/contact-config.ts`, override with `NEXT_PUBLIC_CONTACT_EMAIL`). |
+| Controller named in the privacy notice | **Needs you.** `SITE.legal` in `lib/site.ts` (company name, registration number, address) is empty, so "Who is responsible" names nobody. Fill it in before submitting. |
 | Test account for reviewers | **Needs you.** See below. |
 | Production deployment, tested | Verify after merge: `curl https://licits.com/.well-known/oauth-authorization-server`, then connect once from claude.ai yourself. |
 

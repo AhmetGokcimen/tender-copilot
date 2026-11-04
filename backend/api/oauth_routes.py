@@ -14,7 +14,8 @@ document, registers itself, sends the user's browser to the consent page
 it for tokens. See core/oauth.py for the rules each step enforces.
 """
 
-from urllib.parse import parse_qs
+import base64
+from urllib.parse import parse_qs, unquote
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
@@ -65,6 +66,7 @@ def authorization_server(request: Request, issuer_path: str = "") -> JSONRespons
             "issuer": origin,
             "authorization_endpoint": f"{origin}/en/auth/authorize",
             "token_endpoint": f"{origin}/api/oauth/token",
+            "revocation_endpoint": f"{origin}/api/oauth/revoke",
             "registration_endpoint": f"{origin}/api/oauth/register",
             "response_types_supported": ["code"],
             "grant_types_supported": ["authorization_code", "refresh_token"],
@@ -80,6 +82,18 @@ def authorization_server(request: Request, issuer_path: str = "") -> JSONRespons
 
 def _error(e: oauth.OAuthError) -> JSONResponse:
     return _json({"error": e.error, "error_description": e.description}, e.status)
+
+
+def _basic_client_id(request: Request) -> str:
+    """client_id from an `Authorization: Basic` header, for clients that send it
+    that way instead of in the form (the secret, if any, is not used)."""
+    header = request.headers.get("authorization", "")
+    if header[:6].lower() != "basic ":
+        return ""
+    try:
+        return unquote(base64.b64decode(header[6:]).decode().split(":", 1)[0])
+    except (ValueError, UnicodeDecodeError):
+        return ""
 
 
 def _client_ip(request: Request) -> str:
@@ -166,6 +180,7 @@ def authorize(
 async def token(request: Request) -> JSONResponse:
     raw = (await request.body()).decode("utf-8", "replace")
     form = {k: v[0] for k, v in parse_qs(raw, keep_blank_values=True).items()}
+    form.setdefault("client_id", _basic_client_id(request))
     grant = form.get("grant_type", "")
 
     def run() -> dict:
@@ -185,6 +200,19 @@ async def token(request: Request) -> JSONResponse:
         return _json(await run_in_threadpool(run))
     except oauth.OAuthError as e:
         return _error(e)
+
+
+@router.post("/revoke")
+async def revoke(request: Request) -> JSONResponse:
+    raw = (await request.body()).decode("utf-8", "replace")
+    form = {k: v[0] for k, v in parse_qs(raw, keep_blank_values=True).items()}
+
+    def run() -> None:
+        with Session(engine) as session:
+            oauth.revoke(session, token=form.get("token", ""), client_id=form.get("client_id", ""))
+
+    await run_in_threadpool(run)
+    return _json({})
 
 
 @router.get("/token")

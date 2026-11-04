@@ -191,12 +191,27 @@ class ApiPrincipal:
     def company(self, session: Session) -> CompanyProfile | None:
         return resolve_user_company(session, self.user, self.key.company_id)
 
+    def charge(self, session: Session) -> None:
+        """Spends one call of today's quota; 429 when it is used up. The quota
+        is per user, not per key, so extra keys do not buy extra calls."""
+        if daily_usage(session, self.user.id) >= self.limit:
+            raise HTTPException(
+                status_code=429,
+                detail=f"Daily API limit of {self.limit} calls reached — it resets at 00:00 UTC",
+                headers={"Retry-After": str(_seconds_to_midnight())},
+            )
+        _count_call(session, self.key)
+        self.used = daily_usage(session, self.user.id)
 
-def authenticate(
+
+def identify(
     request: Request,
     creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
     session: Session = Depends(get_session),
 ) -> ApiPrincipal:
+    """Who is calling, with the burst limit applied but nothing charged to the
+    daily quota yet. Used directly by the MCP endpoint, where only tool calls
+    cost a call, not the handshake (initialize, tools/list, ping)."""
     raw = creds.credentials if creds and creds.scheme.lower() == "bearer" else None
     if not raw or not raw.startswith((KEY_PREFIX, ACCESS_PREFIX)):
         raise _unauthorized(request)
@@ -213,21 +228,19 @@ def authenticate(
         raise _unauthorized(request)
 
     _check_burst(key.id)
-    limit = api_daily_limit(user_plan(user))
-    # The quota is per user, not per key, so extra keys do not buy extra calls.
-    if daily_usage(session, user.id) >= limit:
-        raise HTTPException(
-            status_code=429,
-            detail=f"Daily API limit of {limit} calls reached — it resets at 00:00 UTC",
-            headers={"Retry-After": str(_seconds_to_midnight())},
-        )
-    _count_call(session, key)
-    used = daily_usage(session, user.id)
     key.last_used_at = _utcnow()
     session.add(key)
     session.commit()
     request.state.api_key_id = key.id
-    return ApiPrincipal(user, key, used, limit)
+    return ApiPrincipal(user, key, daily_usage(session, user.id), api_daily_limit(user_plan(user)))
+
+
+def authenticate(
+    principal: ApiPrincipal = Depends(identify), session: Session = Depends(get_session)
+) -> ApiPrincipal:
+    """REST: every request is one call of the daily quota."""
+    principal.charge(session)
+    return principal
 
 
 def _connection_for_access_token(session: Session, raw: str) -> ApiKey | None:

@@ -107,6 +107,11 @@ def _mcp(app, access, method="ping"):
     )
 
 
+def _tool_call(app, access):
+    body = {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "get_my_filters", "arguments": {}}}
+    return app.post("/api/mcp", json=body, headers={"Authorization": f"Bearer {access}"})
+
+
 # --- discovery -------------------------------------------------------------------------------
 
 
@@ -160,7 +165,6 @@ def test_register_returns_a_public_client(app):
         {"redirect_uris": ["https://ok.example/cb#frag"]},
         {"redirect_uris": []},
         {"redirect_uris": ["https://a.example/1"] * 6},
-        {"redirect_uris": [REDIRECT], "token_endpoint_auth_method": "client_secret_post"},
         {"redirect_uris": [REDIRECT], "grant_types": ["password"]},
         {},
     ],
@@ -420,12 +424,74 @@ def test_oauth_calls_count_against_the_daily_quota(app, monkeypatch):
 
     monkeypatch.setitem(plans.API_DAILY_CALLS, "pro", 2)
     tokens = _connect(app)
-    assert _mcp(app, tokens["access_token"]).status_code == 200
-    assert _mcp(app, tokens["access_token"]).status_code == 200
-    assert _mcp(app, tokens["access_token"]).status_code == 429
+    for _ in range(2):
+        assert _tool_call(app, tokens["access_token"]).status_code == 200
+    assert _tool_call(app, tokens["access_token"]).status_code == 429
 
 
 def test_a_refresh_token_or_made_up_token_is_not_an_access_token(app):
     tokens = _connect(app)
     assert _mcp(app, tokens["refresh_token"]).status_code == 401
     assert _mcp(app, "ofo_" + secrets.token_urlsafe(32)).status_code == 401
+
+
+def test_revocation_endpoint_disconnects_the_app(app):
+    meta = app.get("/.well-known/oauth-authorization-server").json()
+    assert meta["revocation_endpoint"] == "http://testserver/api/oauth/revoke"
+
+    tokens = _connect(app)
+    cid = tokens["client_id"]
+    # Another client cannot revoke it, and unknown tokens are accepted silently.
+    other = _register(app)
+    assert app.post("/api/oauth/revoke", data={"token": tokens["access_token"], "client_id": other}).status_code == 200
+    assert app.post("/api/oauth/revoke", data={"token": "ofo_unknown", "client_id": cid}).status_code == 200
+    assert app.post("/api/oauth/revoke", data={}).status_code == 200
+    assert _mcp(app, tokens["access_token"]).status_code == 200
+
+    res = app.post("/api/oauth/revoke", data={"token": tokens["refresh_token"], "client_id": cid})
+    assert res.status_code == 200 and res.headers["cache-control"] == "no-store"
+    assert _mcp(app, tokens["access_token"]).status_code == 401
+    refresh = _token(app, grant_type="refresh_token", refresh_token=tokens["refresh_token"], client_id=cid)
+    assert refresh.json()["error"] == "invalid_grant"
+
+
+def test_unused_clients_are_purged_but_used_ones_stay(app):
+    from backend.db import engine
+    from backend.models.oauth import OAuthClient
+
+    used = _connect(app)["client_id"]
+    idle = _register(app)
+    with Session(engine) as s:
+        for cid in (used, idle):
+            row = s.get(OAuthClient, cid)
+            row.created_at = datetime.now(UTC) - timedelta(days=8)
+            s.add(row)
+        s.commit()
+    fresh = _register(app)
+    with Session(engine) as s:
+        ids = {c.id for c in s.exec(select(OAuthClient)).all()}
+    assert ids == {used, fresh}
+
+
+def test_a_client_asking_for_a_secret_gets_a_public_client(app):
+    res = app.post(
+        "/api/oauth/register",
+        json={"redirect_uris": [REDIRECT], "token_endpoint_auth_method": "client_secret_post", "grant_types": ["authorization_code", "refresh_token", "implicit"]},
+    )
+    assert res.status_code == 201
+    body = res.json()
+    assert body["token_endpoint_auth_method"] == "none" and "client_secret" not in body
+    assert body["grant_types"] == ["authorization_code", "refresh_token"]
+
+
+def test_client_id_can_come_from_a_basic_auth_header(app):
+    client_id = _register(app)
+    verifier, challenge = _pkce()
+    code = _query(_approve(app, client_id, challenge))["code"]
+    basic = base64.b64encode(f"{client_id}:ignored".encode()).decode()
+    res = app.post(
+        "/api/oauth/token",
+        data={"grant_type": "authorization_code", "code": code, "redirect_uri": REDIRECT, "code_verifier": verifier},
+        headers={"Authorization": f"Basic {basic}"},
+    )
+    assert res.status_code == 200 and res.json()["access_token"].startswith("ofo_")
