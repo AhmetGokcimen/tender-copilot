@@ -1,4 +1,5 @@
 import { SITE_URL, pageUrl, type Lang } from '@/lib/seo';
+import { SITE } from '@/lib/site';
 import type { Article } from '@/lib/resources';
 
 const ORG_ID = `${SITE_URL}/#organization`;
@@ -21,6 +22,7 @@ export function siteGraph(lang: Lang) {
         alternateName: 'Licits.com',
         url: `${SITE_URL}/`,
         logo: `${SITE_URL}/icon.svg`,
+        sameAs: [SITE.social.instagram, SITE.social.linkedin],
         description: DESCRIPTION[lang],
         areaServed: { '@type': 'Country', name: 'Romania' },
         knowsAbout: [
