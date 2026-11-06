@@ -95,19 +95,19 @@ Prices are in RON per month, excluding VAT. New users get the first two weeks fr
 |---|:---:|:---:|:---:|:---:|
 | SEAP feed with plain titles and summaries | ✓ | ✓ | ✓ | ✓ |
 | All filters | ✓ | ✓ | ✓ | ✓ |
-| Eligibility checks per month | 3 tenders | 30 | 100 | unlimited |
+| Go/No-Go verdicts per month | 3 | 100 | 300 | 600 |
 | Scanned PDF reading | | unlimited | unlimited | unlimited |
-| Offer and DUAE drafts per month | 1 in total | 2 | 10 | unlimited |
+| Offer and DUAE drafts per month | 1 in total | 3 | 10 | 30 |
 | Past-winner lookups per month | 3 | 5 | 25 | 100 |
-| AI assistant messages | 10 a month | | | |
-| AI assistant and API calls per day (read only) | | 100 | 1,000 | 5,000 |
+| AI assistant messages | 10 a month | 15 a day | 40 a day | 100 a day |
+| API and MCP calls per day (read only) | | 100 | 1,000 | 5,000 |
 | Document vault with downloads | | ✓ | ✓ | ✓ |
 | Renewal detection | | | ✓ | ✓ |
 | E-mail alerts for renewing buyers | | | ✓ *(coming soon)* | ✓ *(coming soon)* |
 | Past price range on renewing work | | | | ✓ |
 | Users | 1 | 1 | 3 | 5 |
 
-The Free plan is enforced by the backend once `DEFAULT_PLAN=free` (or a user's own plan is set); until billing exists the deployment default stays `pro`.
+Caps are enforced by the backend for the plan a user is on (`DEFAULT_PLAN`, or the user's own plan); until billing exists the deployment default stays `pro`. Scanned-PDF reading and the past-winner quota on paid plans are not capped by plan yet.
 
 Growth is the plan most small contractors need. Each line carries a **?** with a plain-language explanation on the pricing page.
 

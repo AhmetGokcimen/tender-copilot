@@ -1,8 +1,8 @@
 """Metered use of the features that cost real money (model calls).
 
 One FeatureUse row per (user, feature, period, subject). A repeat on the same
-subject (the same tender, say) finds the row and costs nothing. Plans that do
-not cap a feature skip all of it, so paid behaviour is unchanged.
+subject (the same tender, say) finds the row and costs nothing. A plan that does
+not cap a feature skips all of it.
 
 Use `check` before the expensive work and `record` after it succeeded, so a
 failed model call never spends a unit.
@@ -22,7 +22,9 @@ LIFETIME = "lifetime"
 
 
 def period(kind: str, now: datetime | None = None) -> str:
-    return LIFETIME if kind == LIFETIME else (now or datetime.now(UTC)).strftime("%Y-%m")
+    if kind == LIFETIME:
+        return LIFETIME
+    return (now or datetime.now(UTC)).strftime("%Y-%m-%d" if kind == "day" else "%Y-%m")
 
 
 def used(session: Session, user_id: int, feature: str, kind: str) -> int:
@@ -60,7 +62,7 @@ def check(session: Session, user: User, feature: str, subject: str) -> None:
     if _seen(session, user.id, feature, kind, subject):  # type: ignore[arg-type]
         return
     if used(session, user.id, feature, kind) >= limit:  # type: ignore[arg-type]
-        raise HTTPException(status_code=429, detail=f"Free plan limit reached for {feature}")
+        raise HTTPException(status_code=429, detail=f"Plan limit reached for {feature}")
 
 
 def record(session: Session, user: User, feature: str, subject: str) -> None:
