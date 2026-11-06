@@ -6,16 +6,6 @@ They are merged here, history preserved below. The versioned contract is
 
 ---
 
-# Plan caps on every plan (2026-11-06)
-
-Takes effect with the next deploy: the deployment default is `pro`, so the Pro caps now apply to everyone until billing assigns plans.
-
-- Go/No-Go (`spec`, `eligibility` agents) per month: Start 100, Growth 300, Pro 600. Bid files (`legal`, `writer`, `risk`) per month: Start 3, Growth 10, Pro 30. Assistant messages per day: Start 15, Growth 40, Pro 100 (Free: 10 a month). Over the cap: `429`.
-- The in-app assistant no longer shares the daily API/MCP call quota; that quota is for keys and connected apps only.
-- `GET /api/usage` now lists these caps for paid plans too (`period` is `day`, `month` or `lifetime`). Past winners on paid plans still follow `PAST_WINNERS_MONTHLY_LIMIT`.
-
----
-
 # Free plan and `GET /api/usage` (2026-11-06)
 
 Additive. Nothing changes until `DEFAULT_PLAN=free` is set (or a user's own `plan` is set); the deployment default stays `pro` until billing exists.

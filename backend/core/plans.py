@@ -26,21 +26,14 @@ API_MAX_KEYS = 5
 
 # Metered features and what each costs us per use (measured, USD): a Go/No-Go
 # look at a tender ~0.05 (spec shared, eligibility agent), a bid file ~0.32
-# (legal, writer, risk), an assistant message ~0.02. Every plan is capped so a
-# heavy user cannot cost more than the plan earns; even all caps full stay
-# under the monthly price. value = (period, limit): "day" and "month" reset on
-# the calendar, "lifetime" never. Past winners on paid plans keep the
-# deployment setting (PAST_WINNERS_MONTHLY_LIMIT) until billing sets them.
-PLAN_LIMITS: dict[str, dict[str, tuple[str, int]]] = {
-    "free": {
-        "gonogo": ("month", 3),  # distinct tenders given a Go/No-Go verdict
-        "bid_pack": ("lifetime", 1),  # one free bid file, to see the result once
-        "past_winners": ("month", 3),  # distinct tenders opened in the rival report
-        "assistant": ("month", 10),  # assistant messages
-    },
-    "start": {"gonogo": ("month", 100), "bid_pack": ("month", 3), "assistant": ("day", 15)},
-    "growth": {"gonogo": ("month", 300), "bid_pack": ("month", 10), "assistant": ("day", 40)},
-    "pro": {"gonogo": ("month", 600), "bid_pack": ("month", 30), "assistant": ("day", 100)},
+# (legal, writer, risk), an assistant message ~0.02. The Free plan is capped so
+# a signup costs cents, not dollars. Paid plans are not capped here yet.
+# value = (period, limit): "month" resets each calendar month, "lifetime" never.
+FREE_LIMITS: dict[str, tuple[str, int]] = {
+    "gonogo": ("month", 3),  # distinct tenders given a Go/No-Go verdict
+    "bid_pack": ("lifetime", 1),  # one free bid file, to see the result once
+    "past_winners": ("month", 3),  # distinct tenders opened in the rival report
+    "assistant": ("month", 10),  # assistant messages
 }
 
 # Which metered feature each bid agent belongs to. `spec` and `eligibility`
@@ -71,4 +64,4 @@ def allows(plan: str, feature: str) -> bool:
 
 def limit_for(plan: str, feature: str) -> tuple[str, int] | None:
     """(period kind, limit) when this plan caps the feature, else None."""
-    return PLAN_LIMITS.get(plan, {}).get(feature)
+    return FREE_LIMITS.get(feature) if plan == "free" else None

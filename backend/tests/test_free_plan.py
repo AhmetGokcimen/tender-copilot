@@ -1,4 +1,4 @@
-"""Plan caps on the model-backed features: Free is tight, paid plans have a ceiling."""
+"""The Free plan: capped model-backed features, paid behaviour unchanged."""
 
 import json as _json
 
@@ -95,38 +95,12 @@ def test_free_has_no_api_keys(free: TestClient) -> None:
     assert free.get("/api/api-keys", headers=_auth()).json()["daily_limit"] == 0
 
 
-def test_paid_plans_have_their_own_caps(seed: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:  # noqa: F811
+def test_paid_plans_are_not_capped(seed: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:  # noqa: F811
     from backend.core.config import settings
 
     monkeypatch.setattr(settings, "default_plan", "growth")
     usage = seed.get("/api/usage", headers=_auth()).json()
-    assert usage["plan"] == "growth"
-    assert usage["limits"]["gonogo"] == {"used": 0, "limit": 300, "period": "month"}
-    assert usage["limits"]["bid_pack"]["limit"] == 10
-    assert usage["limits"]["assistant"] == {"used": 0, "limit": 40, "period": "day"}
-    assert "past_winners" not in usage["limits"]  # paid plans keep the deployment setting for now
-
-
-def test_paid_assistant_cap_is_per_day(free: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
-    from backend.core import plans
-
-    monkeypatch.setitem(plans.PLAN_LIMITS, "growth", {"assistant": ("day", 2)})
-    monkeypatch.setattr("backend.core.config.settings.default_plan", "growth")
-    body = {"question": "hi", "pathname": "/app", "tenderId": None, "dom": [], "history": []}
-    assert free.post("/api/assistant/chat", json=body, headers=_auth()).status_code == 200
-    assert free.post("/api/assistant/chat", json=body, headers=_auth()).status_code == 200
-    assert free.post("/api/assistant/chat", json=body, headers=_auth()).status_code == 429
-
-
-def test_a_plan_without_a_cap_is_unlimited(free: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
-    from backend.core import plans
-
-    monkeypatch.setitem(plans.PLAN_LIMITS, "growth", {})
-    monkeypatch.setattr("backend.core.config.settings.default_plan", "growth")
-    for tender in ("1001", "1002", "1003"):
-        for _ in range(2):
-            assert _agent(free, tender, "writer").status_code == 200
-    assert free.get("/api/usage", headers=_auth()).json()["limits"] == {}
+    assert usage == {"plan": "growth", "limits": {}}
 
 
 def test_a_users_own_plan_beats_the_default(free: TestClient) -> None:
@@ -141,4 +115,4 @@ def test_a_users_own_plan_beats_the_default(free: TestClient) -> None:
             session.add(user)
         session.commit()
     usage = free.get("/api/usage", headers=_auth()).json()
-    assert usage["plan"] == "pro" and usage["limits"]["gonogo"]["limit"] == 600
+    assert usage["plan"] == "pro" and usage["limits"] == {}

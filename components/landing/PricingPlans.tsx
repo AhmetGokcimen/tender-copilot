@@ -21,19 +21,19 @@ const TIERS: Tier[] = [
   {
     id: 'start',
     price: 199,
-    has: ['fFeed', 'fFilters', 'fGo100', 'fOcrUnl', 'fDrafts3', 'fLookups5', 'fAsst15', 'fApi100', 'fVault', 'fUsers1'],
+    has: ['fFeed', 'fFilters', 'fElig30', 'fOcrUnl', 'fDrafts2', 'fLookups5', 'fApi100', 'fVault', 'fUsers1'],
     lacks: ['fRenewal'],
   },
   {
     id: 'growth',
     price: 349,
-    has: ['fFeed', 'fFilters', 'fGo300', 'fOcrUnl', 'fDrafts10', 'fLookups25', 'fAsst40', 'fApi1000', 'fVault', 'fRenewal', 'fRenewalAlerts', 'fUsers3'],
+    has: ['fFeed', 'fFilters', 'fElig100', 'fOcrUnl', 'fDrafts10', 'fLookups25', 'fApi1000', 'fVault', 'fRenewal', 'fRenewalAlerts', 'fUsers3'],
     lacks: ['fRenewalPrice'],
   },
   {
     id: 'pro',
     price: 499,
-    has: ['fFeed', 'fFilters', 'fGo600', 'fOcrUnl', 'fDrafts30', 'fLookups100', 'fAsst100', 'fApi5000', 'fVault', 'fRenewal', 'fRenewalAlerts', 'fRenewalPrice', 'fUsers5'],
+    has: ['fFeed', 'fFilters', 'fEligUnl', 'fOcrUnl', 'fDraftsUnl', 'fLookups100', 'fApi5000', 'fVault', 'fRenewal', 'fRenewalAlerts', 'fRenewalPrice', 'fUsers5'],
     lacks: [],
   },
 ];
