@@ -16,6 +16,31 @@ Licits watches Romania's public procurement system (SEAP / SICAP), tells small a
 
 ---
 
+## Try it (for reviewers)
+
+Licits is invite-only, so sign-up needs the invite link below. It is open for the review period.
+
+**1. Create an account:** [English](https://licits.com/en/auth/signup?invite=ltc3HP8NPVzwERgxVJz7nlY4) · [Română](https://licits.com/ro/auth/signup?invite=ltc3HP8NPVzwERgxVJz7nlY4)
+
+The form asks for your name, a work e-mail, a password (at least 8 characters) and a company name. There is no e-mail confirmation step: you are signed in straight away and sent to onboarding. Use any e-mail address you can type; it is only used to sign in.
+
+**2. Onboarding (seven short steps).** Enter a CUI and Licits fills the company from ANAF (name, address, CAEN codes, VAT status, last years' turnover) and from SEAP (contracts the firm already won), then reads the website. You confirm or correct each step. Two real Romanian firms, checked against ANAF, work well as test data:
+
+| | Solar / electrical | Roads / civil works |
+|---|---|---|
+| Name | ENERGYFIX S.R.L. | VIAROM CONSTRUCT SRL |
+| CUI | `38389879` | `13743074` |
+| Website | https://energyfix.ro | https://viarom.ro |
+| Main CAEN | 4321 (electrical installations) | 4211 (roads and motorways) |
+| Works to pick (CPV) | 09331200-0 solar PV panels, 45261215-4 roof solar panels, 45310000-3 electrical installation | 45233120-6 road construction, 45233139-3 motorway works, 45233221-4 road resurfacing |
+| Counties | București, Ilfov, Prahova, Dâmbovița | București, Ilfov, Giurgiu, Teleorman, Călărași |
+
+Name, CUI, address and CAEN come from the public ANAF register. The works, counties, certificates and sizes are only suggestions to fill the form; they are not facts about these firms. If you are asked for certificates, ISO 9001, ISO 14001 and ISO 45001 are fine to enter as test values, or skip them.
+
+**3. What to try.** Open the dashboard and a tender, read the plain-language summary and the detailed brief, then **Generate documents** on a tender to run the five bid agents and download the offer and DUAE as PDFs. The **Past winners** button on a tender shows who the buyer awarded similar contracts to. The assistant bubble knows which screen you are on.
+
+---
+
 ## The problem
 
 Every day hundreds of public tenders are published in Romania. For a small contractor the work is not winning them, it is **finding the few that fit, working out whether the company is even allowed to bid, and then assembling a pile of documents** (offer, DUAE, certificates, references) before a hard deadline. Most firms do this by hand, in Romanian, from a portal that was not built for searching.
