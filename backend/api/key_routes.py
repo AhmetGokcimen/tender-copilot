@@ -6,7 +6,7 @@ keys). The raw key appears only in the create response.
 
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from sqlmodel import Session
 
@@ -74,8 +74,6 @@ def create_key(
     session: Session = Depends(get_session),
     user: User = Depends(get_request_user),
 ) -> ApiKeyCreated:
-    if api_daily_limit(user_plan(user)) <= 0:
-        raise HTTPException(status_code=403, detail="API keys are part of the paid plans")
     key, raw = api_keys.create_key(
         session, user, name=body.name, company_id=body.company_id, expires_in_days=body.expires_in_days
     )

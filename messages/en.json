@@ -89,7 +89,6 @@
     "send": "Send",
     "thinking": "Thinking…",
     "error": "Sorry, something went wrong. Please try again.",
-    "limit": "You have used this month's assistant messages on the Free plan. See the plans to ask more.",
     "guideCaption": "AI guide",
     "contextTender": "Context",
     "greeting": "Hi! I can explain any screen, check eligibility for the tender you're viewing, or point you to the right action. What do you need?",
@@ -432,19 +431,7 @@
     "fApi5000": "AI assistant and API, 5,000 calls a day",
     "tip_fApi100": "Connect ChatGPT, Claude or Cursor to your tenders. Your assistant reads your filters and the open notices, and answers from them. Read only. 100 calls a day, shared by all your keys.",
     "tip_fApi1000": "Connect ChatGPT, Claude or Cursor to your tenders. Your assistant reads your filters and the open notices, and answers from them. Read only. 1,000 calls a day, shared by all your keys.",
-    "tip_fApi5000": "Connect ChatGPT, Claude or Cursor to your tenders. Your assistant reads your filters and the open notices, and answers from them. Read only. 5,000 calls a day, shared by all your keys.",
-    "freeName": "Free",
-    "freeFor": "For looking around before you pay",
-    "fGoNoGo3": "3 Go/No-Go verdicts a month",
-    "fPack1": "1 free bid file, to see the result",
-    "fWinners3": "3 rival reports a month",
-    "fAssistant10": "10 assistant messages a month",
-    "fApiKeys": "API and MCP access",
-    "tip_fGoNoGo3": "For a tender, reads what it asks for, compares it with your company profile and tells you, requirement by requirement, whether you meet it. Opening the same tender again is free.",
-    "tip_fPack1": "One full bid file made for you: the offer documents and the DUAE, drafted from your profile and the tender. Made once on the Free plan; you can rebuild that same tender later.",
-    "tip_fWinners3": "On a tender, see who the buyer awarded its last contracts to, how much it awarded overall, and each winner’s latest turnover, profit and headcount from ANAF. Opening the same tender again is free.",
-    "tip_fAssistant10": "Ask Licits where things are, what a requirement means or what to do next. Ten messages a month on the Free plan.",
-    "tip_fApiKeys": "Connect ChatGPT, Claude or Cursor to your tenders with a key. Part of the paid plans."
+    "tip_fApi5000": "Connect ChatGPT, Claude or Cursor to your tenders. Your assistant reads your filters and the open notices, and answers from them. Read only. 5,000 calls a day, shared by all your keys."
   },
   "contact": {
     "title": "Contact us",
@@ -607,8 +594,6 @@
     "remove": "Remove from pipeline"
   },
   "generator": {
-    "limitReached": "You have reached the Free plan's limit for this. Go/No-Go verdicts are 3 tenders a month and the bid file is one in total.",
-    "seePlans": "See the plans",
     "title": "Offer & DUAE draft generator",
     "subtitle": "AI assembles a first draft from the tender file and your company archive. You review, edit and export.",
     "tender": "Tender",

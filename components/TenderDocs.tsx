@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { clsx } from 'clsx';
-import { Link } from '@/i18n/routing';
 import { pdf } from '@react-pdf/renderer';
 import { FALLBACK_VAT, useCompanyData, useEvidence, useVat } from '@/lib/queries';
 import { BidInputsDialog } from './BidInputsDialog';
@@ -94,7 +93,6 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
   const [pdfError, setPdfError] = useState(false);
   const [packing, setPacking] = useState<'idle' | 'all' | 'zip'>('idle');
   const [packError, setPackError] = useState(false);
-  const [limitHit, setLimitHit] = useState(false);
   const vatRate = vat?.rate ?? FALLBACK_VAT;
   const [ask, setAsk] = useState<{ items: NonNullable<AgentOutputs['writer']>['price_items']; notes: string[]; done: (v: BidInputs | null) => void } | null>(null);
   const tAgents = useTranslations('agents');
@@ -136,7 +134,6 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
     const run = ++runRef.current;
     setGenerating(true);
     setCopied(false);
-    setLimitHit(false);
     setAgentStates({ ...IDLE_AGENTS });
     setAgentLog([]);
     setReview(null);
@@ -152,17 +149,7 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
         const context: Record<string, unknown> = {};
         for (const k of ['eligibility', 'legal', 'writer'] as const) if (outputs[k]) context[k] = outputs[k];
         output = (await runBidAgent(tender.external_id, agent, { evidence: evidenceNames, context, language })).output;
-      } catch (e) {
-        // 429 = the Free plan's allowance is spent: say so and stop, instead of drafting from nothing.
-        if (e instanceof Error && e.message.includes(' 429')) {
-          if (runRef.current === run) {
-            setAgentStates({ ...IDLE_AGENTS });
-            setAgentLog([]);
-            setLimitHit(true);
-            setGenerating(false);
-          }
-          return;
-        }
+      } catch {
         output = null;
       }
       if (runRef.current !== run) return;
@@ -446,14 +433,6 @@ export function TenderDocs({ tender }: { tender: TenderWithState }) {
             />
             {generating ? t('generating') : tenderDocs.length > 0 ? t('regenerate') : t('generate')}
           </button>
-          {limitHit && (
-            <p role="alert" className="flex flex-wrap items-center gap-space-sm rounded-md border border-outline-variant bg-surface-container-lowest px-space-sm py-space-xs font-body-sm text-body-sm text-on-surface">
-              {t('limitReached')}
-              <Link href="/pricing" className="font-semibold text-indigo underline">
-                {t('seePlans')}
-              </Link>
-            </p>
-          )}
           {tenderDocs.length > 0 && !generating && (
             <div data-assistant="docs-download" className="flex flex-wrap items-center gap-space-sm rounded-lg border border-outline-variant bg-surface-container-lowest px-space-md py-space-sm">
               <span className="font-label-md text-label-md font-semibold text-on-surface">{t('downloadTitle')}</span>

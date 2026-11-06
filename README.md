@@ -91,23 +91,20 @@ Progress is saved after every step. The same profile powers matching, eligibilit
 
 Prices are in RON per month, excluding VAT. New users get the first two weeks free.
 
-| | **Free** · 0 | **Start** · 199 | **Growth** · 349 | **Pro** · 499 |
-|---|:---:|:---:|:---:|:---:|
-| SEAP feed with plain titles and summaries | ✓ | ✓ | ✓ | ✓ |
-| All filters | ✓ | ✓ | ✓ | ✓ |
-| Eligibility checks per month | 3 tenders | 30 | 100 | unlimited |
-| Scanned PDF reading | | unlimited | unlimited | unlimited |
-| Offer and DUAE drafts per month | 1 in total | 2 | 10 | unlimited |
-| Past-winner lookups per month | 3 | 5 | 25 | 100 |
-| AI assistant messages | 10 a month | | | |
-| AI assistant and API calls per day (read only) | | 100 | 1,000 | 5,000 |
-| Document vault with downloads | | ✓ | ✓ | ✓ |
-| Renewal detection | | | ✓ | ✓ |
-| E-mail alerts for renewing buyers | | | ✓ *(coming soon)* | ✓ *(coming soon)* |
-| Past price range on renewing work | | | | ✓ |
-| Users | 1 | 1 | 3 | 5 |
-
-The Free plan is enforced by the backend once `DEFAULT_PLAN=free` (or a user's own plan is set); until billing exists the deployment default stays `pro`.
+| | **Start** · 199 | **Growth** · 349 | **Pro** · 499 |
+|---|:---:|:---:|:---:|
+| SEAP feed with plain titles and summaries | ✓ | ✓ | ✓ |
+| All filters | ✓ | ✓ | ✓ |
+| Eligibility checks per month | 30 | 100 | unlimited |
+| Scanned PDF reading | unlimited | unlimited | unlimited |
+| Offer and DUAE drafts per month | 2 | 10 | unlimited |
+| Past-winner lookups per month | 5 | 25 | 100 |
+| AI assistant and API calls per day (read only) | 100 | 1,000 | 5,000 |
+| Document vault with downloads | ✓ | ✓ | ✓ |
+| Renewal detection | | ✓ | ✓ |
+| E-mail alerts for renewing buyers | | ✓ *(coming soon)* | ✓ *(coming soon)* |
+| Past price range on renewing work | | | ✓ |
+| Users | 1 | 3 | 5 |
 
 Growth is the plan most small contractors need. Each line carries a **?** with a plain-language explanation on the pricing page.
 

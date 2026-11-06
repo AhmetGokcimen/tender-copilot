@@ -34,8 +34,7 @@ def _period(now: datetime | None = None) -> str:
     return (now or datetime.now(UTC)).strftime("%Y-%m")
 
 
-def quota(session: Session, user_id: int, limit: int | None = None) -> dict:
-    """Used and allowed lookups this month. `limit` overrides the deployment default (the Free plan's)."""
+def quota(session: Session, user_id: int) -> dict:
     used = len(
         session.exec(
             select(FeatureUse.id).where(
@@ -43,7 +42,7 @@ def quota(session: Session, user_id: int, limit: int | None = None) -> dict:
             )
         ).all()
     )
-    return {"used": used, "limit": settings.past_winners_monthly_limit if limit is None else limit}
+    return {"used": used, "limit": settings.past_winners_monthly_limit}
 
 
 def already_used(session: Session, user_id: int, subject: str) -> bool:

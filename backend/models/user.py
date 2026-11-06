@@ -25,7 +25,4 @@ class User(SQLModel, table=True):
     name: str
     provider: str  # "google" | "demo"
 
-    # None = the deployment default (settings.default_plan); set once billing assigns plans.
-    plan: str | None = None
-
     created_at: datetime = Field(default_factory=_utcnow)

@@ -43,7 +43,7 @@ interface AssistantState {
   seedGreeting: (text: string) => void;
   send: (
     text: string,
-    ctx: { pathname: string; tenderId: string | null; errorText: string; limitText?: string; navigate: (path: string) => void },
+    ctx: { pathname: string; tenderId: string | null; errorText: string; navigate: (path: string) => void },
   ) => Promise<void>;
   /** Appends a local AI note (revision confirmations) without a round-trip. */
   appendAi: (text: string) => void;
@@ -125,11 +125,9 @@ export const useAssistantStore = create<AssistantState>()(
               );
             }
           }
-        } catch (e) {
-          // 429 = the Free plan's monthly allowance is spent, not a fault.
-          const spent = ctx.limitText && e instanceof Error && e.message.includes(' 429');
+        } catch {
           set((s) => ({
-            messages: [...s.messages, { id: `${id}-e`, role: 'ai', text: spent ? ctx.limitText! : ctx.errorText }],
+            messages: [...s.messages, { id: `${id}-e`, role: 'ai', text: ctx.errorText }],
             sending: false,
           }));
         }
