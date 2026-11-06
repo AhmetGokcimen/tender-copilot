@@ -4,7 +4,7 @@ import { buttonClass } from '../ui/Button';
 import { InfoTip } from './InfoTip';
 
 type Tier = {
-  id: 'start' | 'growth' | 'pro';
+  id: 'free' | 'start' | 'growth' | 'pro';
   price: number;
   /** Message keys for included lines, then the ones this tier lacks. */
   has: string[];
@@ -12,6 +12,12 @@ type Tier = {
 };
 
 const TIERS: Tier[] = [
+  {
+    id: 'free',
+    price: 0,
+    has: ['fFeed', 'fFilters', 'fGoNoGo3', 'fPack1', 'fWinners3', 'fAssistant10', 'fUsers1'],
+    lacks: ['fApiKeys', 'fRenewal'],
+  },
   {
     id: 'start',
     price: 199,
@@ -36,8 +42,9 @@ const TIERS: Tier[] = [
 const SOON = new Set(['fRenewalAlerts']);
 
 /**
- * Three plans priced by the value each delivers. Growth covers what most
- * SMEs need and carries the highlighted card; prices exclude VAT (TVA).
+ * A Free plan to look around, then three plans priced by the value each
+ * delivers. Growth covers what most SMEs need and carries the highlighted
+ * card; prices exclude VAT (TVA).
  */
 export function PricingPlans({ heading = true }: { heading?: boolean }) {
   const t = useTranslations('pricing');
@@ -51,7 +58,7 @@ export function PricingPlans({ heading = true }: { heading?: boolean }) {
       <p className="mt-4 inline-flex rounded-pill bg-indigo-soft px-3 py-1 text-[13px] font-medium text-indigo-text">
         {t('plansTrial')}
       </p>
-      <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.08fr_1fr] lg:items-stretch">
+      <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1fr_1.08fr_1fr] lg:items-stretch">
         {TIERS.map((tier) => {
           const featured = tier.id === 'growth';
           return (

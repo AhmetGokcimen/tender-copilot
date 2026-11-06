@@ -113,7 +113,7 @@ export function AssistantPanel() {
   const submit = (text: string) => {
     if (!text.trim() || sending) return;
     setDraft('');
-    void send(text, { pathname, tenderId, errorText: t('error'), navigate: (p) => router.push(p) });
+    void send(text, { pathname, tenderId, errorText: t('error'), limitText: t('limit'), navigate: (p) => router.push(p) });
   };
 
   const clamp = (x: number, y: number) => ({
