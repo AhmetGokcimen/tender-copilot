@@ -6,6 +6,17 @@ They are merged here, history preserved below. The versioned contract is
 
 ---
 
+# Free plan and `GET /api/usage` (2026-11-06)
+
+Additive. Nothing changes until `DEFAULT_PLAN=free` is set (or a user's own `plan` is set); the deployment default stays `pro` until billing exists.
+
+- New `GET /api/usage` returns `{plan, limits}`: for each capped feature `{used, limit, period}` (`month` or `lifetime`). Uncapped plans return `limits: {}`.
+- Free plan caps, enforced with `429`: Go/No-Go (agents `spec` and `eligibility`) on 3 distinct tenders a month; one bid file in total (agents `legal`, `writer`, `risk`, on one tender); past winners on 3 tenders a month (`/api/usage/past-winners` shows `limit: 3`); assistant `POST /api/assistant/chat` 10 messages a month. A repeat on a tender already counted is free; a failed model call spends nothing.
+- `POST /api/api-keys` returns `403` on the Free plan (`daily_limit` is 0).
+- New nullable `app_user.plan` column (added on start-up).
+
+---
+
 # MCP quota counts tool calls only; OAuth revocation (2026-11-04)
 
 - `POST /api/mcp`: only `tools/call` is charged to the daily quota. `initialize`, `tools/list`, `ping` and notifications are free and still answer when the quota is spent. REST `/api/v1/*` is unchanged (every request counts).

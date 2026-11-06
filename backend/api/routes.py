@@ -1,6 +1,7 @@
 from typing import Literal
 
 from datetime import datetime
+from uuid import uuid4
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Response
 from pydantic import BaseModel
@@ -57,7 +58,8 @@ from backend.core.country_requirements import get_country_requirements
 from backend.core.eligibility import run_numeric_checks
 from backend.core import winners as winners_core
 from backend.core.history import authority_history, market_price_range, price_range, renewal_pattern
-from backend.core.plans import allows, user_plan
+from backend.core import metering
+from backend.core.plans import allows, limit_for, user_plan
 from backend.core.lookups import (
     COUNTRIES,
     INDUSTRIES,
@@ -253,6 +255,9 @@ async def run_bid_agent(
     if not tender:
         raise HTTPException(status_code=404, detail="Tender not found")
     company = _resolve_company(session, user, body.company_id)
+    feature = metering.agent_feature(agent)
+    if feature:
+        metering.check(session, user, feature, external_id)  # Free plan: 429 when used up
     output = await agents_core.run_agent(
         session,
         agent,
@@ -262,16 +267,29 @@ async def run_bid_agent(
         context=body.context,
         language=body.language,
     )
+    if feature:
+        metering.record(session, user, feature, external_id)
     return {"agent": agent, "output": output}
+
+
+@router.get("/usage", tags=["usage"])
+def usage(session: Session = Depends(get_session), user: User = Depends(get_request_user)) -> dict:
+    """The caller's plan and where they stand on every capped feature (empty on uncapped plans)."""
+    return metering.snapshot(session, user)
 
 
 @router.post("/assistant/chat", response_model=assistant_core.AssistantResponse, tags=["assistant"])
 async def assistant_chat(
     body: assistant_core.AssistantRequest,
-    user: User = Depends(get_request_user),  # noqa: ARG001 - signed-in users only
+    session: Session = Depends(get_session),
+    user: User = Depends(get_request_user),
 ) -> assistant_core.AssistantResponse:
     """The in-app assistant: an answer, optionally a page to open and an element to point at."""
-    return await assistant_core.reply(body)
+    message_id = uuid4().hex  # every message is its own unit of the Free plan's allowance
+    metering.check(session, user, "assistant", message_id)
+    answer = await assistant_core.reply(body)
+    metering.record(session, user, "assistant", message_id)
+    return answer
 
 
 @router.post("/tenders/{external_id}/brief", response_model=TenderFeedItem, tags=["tenders"])
@@ -446,7 +464,13 @@ def past_winners_quota(
     session: Session = Depends(get_session),
     user: User = Depends(get_request_user),
 ) -> Quota:
-    return Quota(**winners_core.quota(session, user.id))  # type: ignore[arg-type]
+    return Quota(**winners_core.quota(session, user.id, _winners_limit(user)))  # type: ignore[arg-type]
+
+
+def _winners_limit(user: User) -> int | None:
+    """The Free plan's monthly allowance; None keeps the deployment default."""
+    cap = limit_for(user_plan(user), "past_winners")
+    return cap[1] if cap else None
 
 
 @router.post("/tenders/{external_id}/past-winners", response_model=PastWinners, tags=["tenders"])
@@ -465,12 +489,13 @@ def past_winners(
     uid = user.id  # type: ignore[assignment]
     awards = winners_core.past_awards(session, tender)
     paid = winners_core.already_used(session, uid, external_id)
-    state = winners_core.quota(session, uid)
+    cap = _winners_limit(user)
+    state = winners_core.quota(session, uid, cap)
     if awards and not paid and state["used"] >= state["limit"]:
         raise HTTPException(status_code=429, detail="Monthly past-winners limit reached")
     if awards and not paid:
         winners_core.charge(session, uid, external_id)
-        state = winners_core.quota(session, uid)
+        state = winners_core.quota(session, uid, cap)
     items: list[PastWinner] = []
     seen: dict[int, dict | None] = {}
     for a in awards:

@@ -89,6 +89,7 @@
     "send": "Trimite",
     "thinking": "Mă gândesc…",
     "error": "Ne pare rău, ceva nu a mers bine. Încearcă din nou.",
+    "limit": "Ai folosit mesajele către asistent din această lună în planul gratuit. Vezi planurile ca să poți întreba mai mult.",
     "guideCaption": "Ghid AI",
     "contextTender": "Context",
     "greeting": "Salut! Pot explica orice ecran, pot verifica eligibilitatea pentru licitația pe care o vezi sau te pot îndruma spre acțiunea potrivită. Cu ce te ajut?",
@@ -431,7 +432,19 @@
     "fApi5000": "Asistent AI și API, 5.000 de apeluri pe zi",
     "tip_fApi100": "Conectează ChatGPT, Claude sau Cursor la licitațiile tale. Asistentul îți citește filtrele și anunțurile deschise și răspunde pe baza lor. Doar citire. 100 de apeluri pe zi, comune tuturor cheilor tale.",
     "tip_fApi1000": "Conectează ChatGPT, Claude sau Cursor la licitațiile tale. Asistentul îți citește filtrele și anunțurile deschise și răspunde pe baza lor. Doar citire. 1.000 de apeluri pe zi, comune tuturor cheilor tale.",
-    "tip_fApi5000": "Conectează ChatGPT, Claude sau Cursor la licitațiile tale. Asistentul îți citește filtrele și anunțurile deschise și răspunde pe baza lor. Doar citire. 5.000 de apeluri pe zi, comune tuturor cheilor tale."
+    "tip_fApi5000": "Conectează ChatGPT, Claude sau Cursor la licitațiile tale. Asistentul îți citește filtrele și anunțurile deschise și răspunde pe baza lor. Doar citire. 5.000 de apeluri pe zi, comune tuturor cheilor tale.",
+    "freeName": "Gratuit",
+    "freeFor": "Ca să arunci o privire înainte să plătești",
+    "fGoNoGo3": "3 verdicte Go/No-Go pe lună",
+    "fPack1": "1 dosar de ofertă gratuit, ca să vezi rezultatul",
+    "fWinners3": "3 rapoarte despre concurenți pe lună",
+    "fAssistant10": "10 mesaje către asistent pe lună",
+    "fApiKeys": "Acces API și MCP",
+    "tip_fGoNoGo3": "Pentru o licitație, citește ce cere, compară cu profilul firmei tale și îți spune, cerință cu cerință, dacă o îndeplinești. Redeschiderea aceleiași licitații este gratuită.",
+    "tip_fPack1": "Un dosar de ofertă complet, pregătit pentru tine: documentele ofertei și DUAE, redactate pornind de la profilul tău și de la licitație. Se face o singură dată în planul gratuit; poți reface aceeași licitație mai târziu.",
+    "tip_fWinners3": "La o licitație vezi cui a atribuit autoritatea ultimele contracte, cât a atribuit în total și, pentru fiecare câștigător, ultima cifră de afaceri, profitul și numărul de angajați de la ANAF. Redeschiderea aceleiași licitații este gratuită.",
+    "tip_fAssistant10": "Întreabă Licits unde găsești ceva, ce înseamnă o cerință sau ce faci mai departe. Zece mesaje pe lună în planul gratuit.",
+    "tip_fApiKeys": "Conectează ChatGPT, Claude sau Cursor la licitațiile tale cu o cheie. Face parte din planurile plătite."
   },
   "contact": {
     "title": "Contactează-ne",
@@ -594,6 +607,8 @@
     "remove": "Elimină din pipeline"
   },
   "generator": {
+    "limitReached": "Ai atins limita planului gratuit pentru această acțiune. Verdictele Go/No-Go sunt 3 licitații pe lună, iar dosarul de ofertă este unul în total.",
+    "seePlans": "Vezi planurile",
     "title": "Generator de drafturi pentru ofertă și DUAE",
     "subtitle": "AI-ul pregătește un prim draft din documentația licitației și arhiva companiei tale. Tu verifici, editezi și exporți.",
     "tender": "Licitație",
